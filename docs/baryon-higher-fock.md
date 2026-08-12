@@ -534,6 +534,65 @@ every printed digit, so it is not a porting error. `refs/thesis_fig18b.csv`
 records the measurement with its provenance and the test tracks the ratio
 rather than asserting agreement.
 
+## The author's own caveat about these curves
+
+The thesis says, of exactly these panels:
+
+> The connecting curves are simply cubic spline fits: the resolution is in some
+> cases not good enough for these to accurately depict the actual structure.
+
+That disposes of the "node that does not move". The apparent node at x ≈ 0.26
+is **spline undershoot between the two smallest markers**, which in every one of
+these panels are the ones at k = 5 and k = 7. It is not a feature of the data,
+and the earlier reading of it as a state- and coupling-independent physical
+signature was over-reading the plot.
+
+The markers themselves are real: at 3× magnification Fig. 12(a) plainly carries
+a marker at k = 5 (≈1.14) and another at k = 7 (≈1.71), with the spline dipping
+to 0.31 between them. So the comparison is marker to marker, and it stands:
+
+| k | 1 | 3 | 5 | 7 | 9 | 11 | sum |
+|---|---|---|---|---|---|---|---|
+| published | 8.56 | 7.95 | 1.14 | 1.71 | 4.99 | 0.54 | 24.89 |
+| ours | 6.30 | 5.67 | 3.86 | 4.77 | 3.48 | 1.14 | 25.22 |
+
+Right total, wrong distribution — and no K reproduces it either: interpolating
+our curve from 2K = 11 through 25 onto the 21-lattice tops out at correlation
+0.81 with a 50% rms.
+
+## A candidate that fits every observation: the code postdates the figures
+
+`fortran/qcdf.f` carries its own revision history:
+
+```
+**** 6/24/88 MODIFIED QCD2A2 SO THAT COLOR ****
+**** SUMS ARE PERFORMED DIAGRAMMATICALLY   ****
+**** RATHER THAN ITERATIVELY               ****
+
+**** 5/8/90 modified qcdf to include arbitrary number of quark flavors ****
+
+(C) Kent Hornbostel 1993.  All Rights Reserved.
+```
+
+The thesis is 1988 and the article 1990. **The code we have is a 1993 snapshot,
+with the colour sums rewritten in June 1988 and a further rewrite for flavour in
+1990** — the latter still carrying `????` debug markers the author intended to
+remove "after convinced program is working".
+
+The colour sums are precisely what sets the higher-Fock weighting: they build
+the norm matrix, and the structure function's per-configuration attribution is
+c·(Nc). A change there would move higher-Fock *distributions* while leaving
+alone everything that agrees:
+
+* masses — dominated by the valence sector;
+* valence structure functions — normalized by the sum rule;
+* higher-Fock *totals* — protected by cᵀNc = 1.
+
+That is the exact pattern observed. This is a candidate, not a demonstration:
+the pre-1988 code path no longer exists in the file, so it cannot be run and
+compared. It is recorded because it is supported by the artifact's own history
+and because it is the only hypothesis so far that accounts for every symptom.
+
 ## Status
 
 **Open.** Two disagreements remain, both real:
@@ -543,10 +602,16 @@ rather than asserting agreement.
   or two couplings.
 * Thesis Fig. 18(b)'s seven-quark curve at 2K = 15 — uniformly 17.5% high.
 
-Neither is explained by basis dependence, by numerical conditioning (every Gram
-block has condition number below 42 and minimum eigenvalue 6.0), by Fock level
-(B=2's 10-parton sector is stable to 0.14% and reproduces Fig. 6(d) to 0.8%),
-or by any of the causes listed below.
+Neither is explained by basis dependence, by numerical conditioning (the basis
+is non-orthogonal only within a momentum configuration, and every one of those
+Gram blocks has condition number below 42 with smallest eigenvalue 6.0), by Fock
+level as such (B=2's 10-parton sector — the highest in any run here — is stable
+to 0.14% and reproduces Fig. 6(d) to 0.8%, while B=1's *five*-parton sector at
+2K=21 is the problem case), by the choice of K, or by any of the causes listed
+below.
+
+The leading candidate is that the published figures predate the code: see the
+revision history above.
 
 The superseded "resolution" is kept above as a caution.
 
