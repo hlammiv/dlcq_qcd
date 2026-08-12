@@ -1,0 +1,13 @@
+{
+    "ihfile": 0,
+    "N": 3,
+    "NF": 1,
+    "B": 0,
+    "rlamb": 0.3325,
+    "K": 24,
+    "cutoff": -1.0,
+    "LPN": 0,
+    "rmq": [1.0],
+    "iflv": [0],
+    "_comment": "Matches original Fortran test: N=3, NF=1, B=0, K=24, lambda=0.3325. Original produced 1003 states before weeding, 818 after."
+}

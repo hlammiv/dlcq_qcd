@@ -1,0 +1,41 @@
+# ── Copyrighted material — NOT redistributed ────────────────────────────────
+# The APS article is under copyright; see CITATION.md for the reference.
+literature/*.pdf
+
+# ── Solver outputs (regenerable, ~70 MB) ────────────────────────────────────
+*.out
+*.ham
+*.pkl
+result
+cache/
+runs/
+
+# Generated figures
+figures/
+*_comparison.pdf
+
+# ── Build artifacts ─────────────────────────────────────────────────────────
+fortran/qcdf
+*.o
+*.mod
+
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.nbc
+*.nbi
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# ── Editor / OS cruft ───────────────────────────────────────────────────────
+*.swp
+*.swo
+*~
+*.bak
+.DS_Store
+
+# ── Scratch ─────────────────────────────────────────────────────────────────
+scratch/
+tmp/

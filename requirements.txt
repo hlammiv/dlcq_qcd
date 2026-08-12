@@ -1,0 +1,18 @@
+# Core solver
+numpy>=1.24
+scipy>=1.10
+
+# qcdf_opt.py JIT micro-kernels (hard requirement of the optimized solver)
+numba>=0.58
+
+# Figure generation
+matplotlib>=3.7
+
+# DLCQResult serialization (the Fortran/Python data contract)
+h5py>=3.8
+
+# Figure digitization from the scanned paper (tools/)
+pillow>=10.0
+
+# Test suite
+pytest>=7.4
