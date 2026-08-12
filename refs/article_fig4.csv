@@ -1,0 +1,30 @@
+# ARTICLE Fig. 4 -- the paper's dedicated higher-Fock figure, measured directly
+# from a 600 dpi render by column-probing each panel's own lattice.
+#
+# This figure had never been compared against our solvers.  It matters because
+# it plots the baryon five-quark sector at 2K=15 INDEPENDENTLY of Fig. 6, which
+# plots it at 2K=21 and is the one panel set that disagrees.
+#
+# Frame tops are NOT the last labelled tick in (b) and (c) -- the same trap as
+# Figs. 3(b), 5(b) and 6.  Read from the y-label positions:
+#   (a) "21"    at height fraction 1.000 -> top 21.00
+#   (b) "22.5"  at height fraction 0.859 -> top 26.19
+#   (c) "11.25" at height fraction 0.891 -> top 12.63
+# Reading (b) as 22.5 makes every value 16% low, which reads as a discrepancy.
+#
+# Only the m/g=1.6 series are recorded.  Each panel also draws m/g=0.1, whose
+# multipliers are not reliably legible and which no round power of ten
+# reconciles (see docs/baryon-higher-fock.md).
+#
+# panel,sector,K_code,k,multiplier,q
+fig4a,4,14,1,1e4,17.599
+fig4a,4,14,3,1e4,10.147
+fig4a,4,14,5,1e4,2.342
+fig4a,4,14,7,1e4,3.754
+fig4b,5,15,1,1e3,8.094
+fig4b,5,15,3,1e3,5.047
+fig4b,5,15,5,1e3,6.489
+fig4b,5,15,7,1e3,2.442
+fig4c,7,15,1,1e7,5.993
+fig4c,7,15,3,1e7,5.616
+fig4c,7,15,5,1e7,2.863

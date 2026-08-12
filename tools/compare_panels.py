@@ -56,6 +56,21 @@ PANEL_PHYSICS = {
     "fig3b": dict(B=1, K=15, state=0,
                   series=[(3, 1.0, True, "qqq, $m/g=1.6$"),
                           (3, 1.0, False, "qqq, $m/g=0.1$", 0.1)]),
+    # FIG. 4 -- the paper's dedicated higher-Fock figure, and the one panel set
+    # that had never been compared.  (a) meson one extra pair; (b) baryon one
+    # extra pair with q AND qbar; (c) baryon two extra pairs.  Each panel draws
+    # both couplings.  The m/g=0.1 series are omitted: no round multiplier
+    # reconciles them with the published curves (see docs/baryon-higher-fock.md),
+    # so including them would compare against an unreadable legend.
+    "fig4a": dict(B=0, K=14, state=0,
+                  series=[(4, 1e4, True, r"$q\bar qq\bar q$, $m/g{=}1.6$ $(\times10^4)$")], no_valence=True),
+    "fig4b": dict(B=1, K=15, state=0,
+                  series=[(5, 1e3, True, r"$q(x)$, $m/g{=}1.6$ $(\times10^3)$"),
+                          (-5, 1e3, False, r"$\bar q(x)$, $m/g{=}1.6$ $(\times10^3)$")], no_valence=True),
+    # Legend reads x10^4 here but x10^7 in the thesis twin (Fig. 18(b)); 10^7 is
+    # the one consistent with the plotted values, so the article's is a misprint.
+    "fig4c": dict(B=1, K=15, state=0,
+                  series=[(7, 1e7, True, r"$qqqq\bar qq\bar q$, $m/g{=}1.6$ $(\times10^7)$")], no_valence=True),
     "fig5a": dict(B=0, K=24, state=0,
                   series=[(2, 1.0, True, r"$q\bar q$"),
                           (4, 1e3, False, r"$q\bar qq\bar q\ (\times10^3)$")]),
@@ -81,6 +96,32 @@ PANEL_PHYSICS = {
     # lattice measurement in tools/digitize.py.  The legend's three entries are
     # the 6-parton valence, and the 8-parton sector's quark AND antiquark
     # distributions -- three curves from two Fock sectors.
+    # THESIS Fig. 18 -- the same two sectors as Fig. 4(b)/(c) but plotted alone,
+    # with no valence curve to cross.  These are the cleanest baryon
+    # higher-Fock targets in either document.
+    "t18a": dict(B=1, K=15, state=0,
+                 series=[(5, 1e3, True, r"$q(x)\ (\times10^3)$"),
+                         (-5, 1e3, False, r"$\bar q(x)\ (\times10^3)$")], no_valence=True),
+    "t18b": dict(B=1, K=15, state=0,
+                 series=[(7, 1e7, True, r"$q(x)\ (\times10^7)$")], no_valence=True),
+    # THESIS Fig. 12 -- the thesis print of the article's Fig. 6(a)-(c), on its
+    # own y scale (0..15.0 rather than the article's 14.63).  Worth generating
+    # separately: the two prints are independent scans of the same computation,
+    # so agreeing with one and not the other would signal a tracing problem.
+    "t12a": dict(B=1, K=21, state=0,
+                 series=[(3, 1.0, True, "qqq"),
+                         (5, 1e3, False, r"$qqqq\bar q\ (\times10^3)$")]),
+    "t12b": dict(B=1, K=21, state=1,
+                 series=[(3, 1.0, True, "qqq"),
+                         (5, 1e2, False, r"$qqqq\bar q\ (\times10^2)$")]),
+    "t12c": dict(B=1, K=21, state=2,
+                 series=[(3, 1.0, True, "qqq"),
+                         (5, 1e2, False, r"$qqqq\bar q\ (\times10^2)$")]),
+    # THESIS Fig. 13(a): the article's Fig. 6(d) on the thesis's own y scale.
+    "t13a": dict(B=2, K=24, state=0,
+                 series=[(6, 1.0, True, "6q"),
+                         (8, 5e2, False, r"$6qq\bar q\ (\times5\!\times\!10^2)$"),
+                         (-8, 1e3, False, r"$6qq\bar q\ \bar q(x)\ (\times10^3)$")]),
     "fig6d": dict(B=2, K=24, state=0,
                   series=[(6, 1.0, True, "6q"),
                           (8, 5e2, False, r"$6qq\bar q\ (\times5\!\times\!10^2)$"),
@@ -97,14 +138,19 @@ def paper_crop(panel, dpi=600, pages_dir=None, margin=0.012):
     readable beside the computed ones without touching what gets digitized.
     """
     from PIL import Image
-    from render_pages import DEFAULT_OUT, PDF, render
+    from render_pages import DEFAULT_OUT, SOURCES, render
 
+    # Panels are traced from either document; crop from whichever this one
+    # names, and use the matching page-cache prefix so the two never collide.
+    src = getattr(panel, "source", "article")
+    pdf = SOURCES.get(src, SOURCES["article"])
+    prefix = "p" if src == "article" else "t"
     pages_dir = Path(pages_dir or DEFAULT_OUT)
-    hits = sorted(pages_dir.glob(f"p{panel.page:02d}_{dpi}dpi*.png"))
+    hits = sorted(pages_dir.glob(f"{prefix}{panel.page:02d}_{dpi}dpi*.png"))
     if not hits:
-        if not PDF.exists():
+        if not pdf.exists():
             return None
-        hits = [render(PDF, panel.page, dpi, pages_dir)]
+        hits = [render(pdf, panel.page, dpi, pages_dir, prefix=prefix)]
     img = Image.open(hits[0]).convert("L")
     w, h = img.size
     l, t, r, b = panel.bbox

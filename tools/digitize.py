@@ -109,13 +109,17 @@ PANELS = {
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 4(a) meson, one extra qqbar pair (x10^4/10^2)",
                    B=0, N=3, sector="higher-fock"),
+    # Frame top 26.2, not the labelled 22.5: the "22.5" label sits at height
+    # fraction 0.859 of the frame, so the top is 22.5/0.859.  Same trap as
+    # Figs. 3(b) and 6.  With 22.5 every value comes out 16% low.
     "fig4b": Panel(name="fig4b", page=4, bbox=(0.7304, 0.0961, 0.8929, 0.1911),
-                   xlim=(0.0, 1.0), ylim=(0.0, 22.5),
+                   xlim=(0.0, 1.0), ylim=(0.0, 26.19),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 4(b) baryon, one extra pair, incl. antiquarks",
                    B=1, N=3, sector="higher-fock"),
+    # Frame top 12.63, not the labelled 11.25, which sits at fraction 0.891.
     "fig4c": Panel(name="fig4c", page=4, bbox=(0.5372, 0.1811, 0.6994, 0.2765),
-                   xlim=(0.0, 1.0), ylim=(0.0, 11.25),
+                   xlim=(0.0, 1.0), ylim=(0.0, 12.63),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 4(c) baryon, two extra pairs",
                    B=1, N=3, sector="higher-fock"),
@@ -288,6 +292,20 @@ PANELS = {
                   xlim=(0.0, 1.0), ylim=(0.0, 25.0),
                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                   description="THESIS Fig 18(a) = article Fig 4(b): five-quark "
+                              "contribution to the lightest N=3 baryon, 2K=15",
+                  expected_K=15, B=1, N=3, sector="higher-fock"),
+
+    # THESIS Fig 18(b): the SEVEN-quark contribution to the lightest N=3
+    # baryon, 2K=15 -- the article's Fig. 4(c).  Legend: x m/g=1.6 (x10^7),
+    # o m/g=.1 (x10^4), read at 4x magnification.  y axis 0..12, confirmed by
+    # seven evenly spaced major ticks.  Measured values are in
+    # refs/thesis_fig18b.csv; this Panel exists so the comparison image can be
+    # generated alongside the others.
+    "t18b": Panel(name="t18b", page=89, source="thesis",
+                  bbox=(0.210, 0.425, 0.780, 0.757),
+                  xlim=(0.0, 1.0), ylim=(0.0, 12.0),
+                  xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                  description="THESIS Fig 18(b) = article Fig 4(c): seven-quark "
                               "contribution to the lightest N=3 baryon, 2K=15",
                   expected_K=15, B=1, N=3, sector="higher-fock"),
 

@@ -34,6 +34,49 @@ of the non-orthogonal basis, while every mass and valence curve is stable to
 one part in 10⁴. See `docs/baryon-higher-fock.md`. The same sector at 2K = 15
 reproduces the thesis's uncluttered plot of it (Fig. 18(a)) to 1%.
 
+## Every published higher-Fock curve, and how well we do
+
+Fig. 4 is the paper's dedicated higher-Fock figure — the sectors plotted alone,
+with no valence curve crossing them — and it had never been compared. Adding it
+answers the question the rest of this document kept circling: **is the baryon
+higher-Fock wrong in general, or only in particular places?**
+
+Only in particular places.
+
+| figure | sector | 2K | agreement |
+|---|---|---|---|
+| Fig. 4(a) | meson qq̄qq̄ | 14 | **0.6, 0.9, 0.7, 2.5%** |
+| Fig. 5(a)–(d) | meson qq̄qq̄ | 24 | **1.4–2.0%** |
+| Fig. 4(b) | baryon qqqqq̄ | 15 | **2.0, 1.5, 4.0%** (11.6% in the tail) |
+| thesis Fig. 18(a) | baryon qqqqq̄ | 15 | **0.4%** |
+| Fig. 6(d) | two-baryon 6q+qq̄ | 24 | **0.8%** |
+| Fig. 4(c) | baryon +2 pairs | 15 | 3.8, 16.9, 8.1% |
+| thesis Fig. 18(b) | baryon +2 pairs | 15 | 17.5% |
+| Figs. 6(a)–(c) | baryon qqqqq̄ | **21** | **~40%** |
+
+The baryon five-quark sector — the very sector Figs. 6(a)–(c) plot — is
+reproduced to 1.5–4% at 2K = 15, by two independent published panels. So the
+disagreement is not "baryon higher-Fock"; it is specific to 2K = 21, plus the
+two-extra-pair sector.
+
+## Five frame tops that were not the last labelled tick
+
+Worth stating on its own, because it is the single most common way these
+comparisons went wrong. In **five** panels the frame top is not the last
+labelled value, and in every case reading it naively produced what looked
+exactly like a physics discrepancy:
+
+| panel | labelled | actual top | effect if misread |
+|---|---|---|---|
+| Fig. 3(b) | 11.25 | 13.5 | 20% low |
+| Fig. 4(b) | 22.5 | 26.19 | 16% low |
+| Fig. 4(c) | 11.25 | 12.63 | 11% low |
+| Fig. 5(b) | (right axis) | 3.6 not 12.0 | 233% high |
+| Fig. 6(a)–(c) | 10.5 | 14.63 | 44% low |
+
+The reliable method is to locate the y-label *positions* and fit, rather than
+assume the top tick is the top of the frame.
+
 ## Correction: the basis spread was not real
 
 An earlier revision of this document claimed that a "basis-treatment spread"

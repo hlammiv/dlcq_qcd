@@ -48,9 +48,11 @@ def series_for(provider, phys):
             raise IndexError(f"state {phys['state']} absent")
         x, q, qbar = structure_function(r, int(idx[phys["state"]]),
                                         nparton=abs(npart))
-        # The first series of a panel is its valence curve; Fig. 3 is the
-        # exception, where both series are valence at different couplings.
-        valence = n == 0 or len(entry) > 4
+        # The first series of a panel is normally its valence curve.  Two
+        # exceptions: Fig. 3 draws two valence curves at different couplings,
+        # and Figs. 4 and 18 draw NO valence curve at all -- they are dedicated
+        # higher-Fock plots, so every series there is higher-Fock.
+        valence = (not phys.get("no_valence")) and (n == 0 or len(entry) > 4)
         out.append((x, (qbar if npart < 0 else q) * scale, label, valence))
     return out
 

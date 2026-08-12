@@ -1,0 +1,111 @@
+{
+  "panel": "t18b",
+  "description": "THESIS Fig 18(b) = article Fig 4(c): seven-quark contribution to the lightest N=3 baryon, 2K=15",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 89,
+  "dpi": 600,
+  "page_size_px": [
+    3950,
+    5365
+  ],
+  "crop_box_px": [
+    829,
+    2280,
+    3081,
+    4061
+  ],
+  "bbox_fraction": [
+    0.21,
+    0.425,
+    0.78,
+    0.757
+  ],
+  "frame_px": [
+    68,
+    2186,
+    62,
+    1723
+  ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 0,
+  "axis_dot_n": 1,
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    12.0
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    76.5,
+    159.5,
+    244.5,
+    329.5,
+    413.5,
+    497.5,
+    582.5,
+    666.5,
+    752.5,
+    837.5,
+    921.5,
+    1006.5,
+    1090.5,
+    1173.5,
+    1257.5,
+    1340.5,
+    1426.5,
+    1511.5,
+    1594.5,
+    1677.5,
+    1764.5,
+    1850.5,
+    1934.5,
+    2019.0,
+    2104.5,
+    2186.0
+  ],
+  "x_fit": {
+    "slope": 0.00047214353163361664,
+    "intercept": -0.032105760151085974,
+    "max_residual": 1.1102230246251565e-16
+  },
+  "y_fit": {
+    "slope": -0.007224563515954246,
+    "intercept": 12.447922937989166,
+    "max_residual": 1.7763568394002505e-15
+  },
+  "n_markers": 20,
+  "n_legend_suppressed": 16,
+  "notes": [
+    "x ticks: found 26, expected 6 (calibration still from frame edges)",
+    "suppressed 16 in-plot legend/text blobs"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "blob (probe found too few)",
+  "check": {
+    "K_inferred": 15,
+    "K_code": 15,
+    "inlier_fraction": 0.8,
+    "median_grid_residual": 0.003922118639855962,
+    "max_grid_residual": 0.12842702253774296,
+    "consistent": true,
+    "K_from_x_min": 159.55771567436307,
+    "K_from_spacing": 15.847048984253455,
+    "n_points": 20,
+    "K_expected": 15,
+    "ok": true
+  },
+  "K_used": 15,
+  "K_source": "stated in paper",
+  "n_on_lattice": 16,
+  "n_dropped_off_lattice": 4
+}

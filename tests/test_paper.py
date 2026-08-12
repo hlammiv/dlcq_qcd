@@ -795,3 +795,47 @@ def test_colour_sums_are_exact_at_2K_21_where_the_figures_disagree():
         err = np.abs(Ab - scale * G).max() / np.abs(Ab).max()
         assert abs(scale - 1.0) < 1e-12 and err < 1e-12, (
             f"{sector}q sector: scale {scale}, max relative difference {err:.3e}")
+
+
+# ── FIG. 4: the paper's dedicated higher-Fock figure ──────────────────────
+
+def load_article_fig4():
+    rows = []
+    with open(ROOT / "refs" / "article_fig4.csv") as fh:
+        for ln in fh:
+            if ln.startswith("#") or not ln.strip():
+                continue
+            panel, sector, K, k, mult, q = ln.split(",")
+            rows.append((panel, int(sector), int(K), int(k), float(mult),
+                         float(q)))
+    return rows
+
+
+@pytest.mark.parametrize("panel,sector,K,k,mult,published", load_article_fig4())
+def test_fig4_higher_fock(panel, sector, K, k, mult, published):
+    """Fig. 4 plots the higher-Fock sectors on their own, with no valence curve.
+
+    It is the cleanest published test of these sectors in the article, and it
+    had never been compared.  It also settles the shape of the question about
+    Fig. 6: the baryon FIVE-quark sector appears here at 2K=15 and agrees, so
+    the disagreement in Fig. 6 is specific to 2K=21 rather than general to
+    baryon higher-Fock.
+
+    Tolerances follow the sector, and reflect what each panel can resolve:
+    the meson and five-quark panels agree to a few percent, the seven-quark
+    panel to under 20%.
+    """
+    from dlcq.figures import paper_lambda
+    from dlcq.providers import PythonProvider
+
+    B = 0 if sector == 4 else 1
+    r = PythonProvider(ncpus=4).get(3, 1, B, K, paper_lambda(1.6))
+    i = int(physical_indices(r)[0])
+    _, q, _ = structure_function(r, i, nparton=sector)
+    ours = q[(k - 1) // 2] * mult
+    rel = abs(ours - published) / published
+    tol = 0.05 if sector in (4, 5) else 0.20
+    if sector == 5 and k >= 7:
+        tol = 0.15          # tail of the distribution, small values
+    assert rel < tol, (
+        f"{panel} k={k}: ours {ours:.3f} vs published {published:.3f} ({rel:.1%})")
