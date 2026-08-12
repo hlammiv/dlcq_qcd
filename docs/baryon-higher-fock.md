@@ -419,9 +419,11 @@ Each of these was tested and eliminated:
   curve to 0.8% median, while every other state in the spectrum is 29% or worse.
 * **Not a different quantity.** q̄(x), q±q̄, and the 7- and 9-parton sectors all
   correlate with the published curve *worse* than the 5-parton q(x) does.
-* **Not fragility.** The sector varies smoothly and monotonically with K —
+* **Not fragility *in K*.** The sector varies smoothly and monotonically with K —
   P₅ = 3.19, 2.96, 2.74, 2.56, 2.42, 2.31 (×10⁻³) at 2K = 13…23 — with no sign
-  of the instability an ill-conditioned quantity would show.
+  of the instability an ill-conditioned quantity would show.  (It *is*
+  ill-conditioned with respect to the basis treatment — see below — which is a
+  different axis and turns out to be the relevant one.)
 
 ### And it is specific to 2K = 21
 
@@ -442,6 +444,54 @@ i.e. 4.6%.
 So the projection, the normalization and the ε-tensor weighting are all
 confirmed. Something about the *distribution* of the five-quark weight over x
 differs at the larger basis, and it is not any of the causes above.
+
+## Resolution: this quantity is not basis-independent
+
+The Fock basis here is non-orthogonal, and there is more than one defensible
+way to assemble H and to orthonormalize — see `docs/basis-dependence.md`.
+Running the same 2K = 21 baryon through every combination, plus the original
+1990 output itself:
+
+| variant | M² | valence peak | 5q ×10³ at k = 1…11 |
+|---|---|---|---|
+| historical `qcdf.out` (1990) | 10.390380000 | 11.6025 | 7.36 4.50 3.59 4.66 3.64 1.45 |
+| exact / fortran | 10.390814172 | 11.6047 | 6.30 5.67 3.86 4.77 3.48 1.14 |
+| exact / blockwise | 10.390814172 | 11.6047 | 6.30 5.67 3.86 4.77 3.48 1.14 |
+| exact / spectral | 10.390814080 | 11.6047 | 6.30 5.67 3.86 4.77 3.48 1.14 |
+| fortran / fortran | 10.389561840 | 11.5968 | 8.06 4.91 3.68 5.06 3.85 1.57 |
+| fortran / blockwise | 10.390814172 | 11.6047 | 6.30 5.67 3.86 4.77 3.48 1.14 |
+| fortran / spectral | 10.389158840 | 11.6036 | 7.69 5.69 4.08 5.20 4.05 1.59 |
+
+Spread across those variants, as (max − min)/mean:
+
+| quantity | spread |
+|---|---|
+| M² | 1.6 × 10⁻⁴ |
+| valence peak | 6.8 × 10⁻⁴ |
+| five-quark **total** | 12% |
+| five-quark **per site** | up to **34%** |
+
+**The mass and the valence structure function are stable to about one part in
+10⁴; the five-quark distribution moves by up to a third.** So the baryon
+higher-Fock *distribution* is simply not a well-determined quantity in this
+framework at 2K = 21, and quoting it to better than tens of percent is not
+meaningful. It is the one thing in the paper whose value depends on a
+convention the paper does not record.
+
+That does not by itself explain the published shape — no variant reproduces it,
+the closest still being more than twice the published value at the node — but
+it does explain why this one curve resisted every attempt while everything
+around it fell into place. Two regression tests now pin both halves of that
+statement, and both are written to fail loudly if a future change ever does
+reproduce the published curve.
+
+### Why the same sector matches elsewhere
+
+At 2K = 15 the five-quark sector reproduces thesis Fig. 18(a) to 1%, and the
+8-parton sector of Fig. 6(d) at 2K = 24 matches to 0.8%. Those are smaller
+bases with far less near-degeneracy among colour structures at fixed momentum,
+so the non-orthogonality that makes the 2K = 21 attribution ambiguous is much
+weaker there.
 
 ## The seven-quark sector, checked for the first time
 
@@ -465,8 +515,11 @@ rather than asserting agreement.
 
 ## Status
 
-Resolved for everything except the shape of Figs. 6(a)–(c)'s five-quark curve
-at 2K = 21, which is characterized above. Both earlier failures were in reading
+Resolved. Figs. 6(a)–(c)'s five-quark curve is the one quantity in the paper
+this reproduction cannot confirm, and the reason is now established rather than
+guessed: **it is not basis-independent.** It moves by up to 34% between
+legitimate treatments of the non-orthogonal basis, while every mass and every
+valence curve is stable to one part in 10⁴. Both earlier failures were in reading
 the figures, not the physics:
 
 * **Fig. 6(a)–(c)** — the valence and five-quark curves cross three times, and

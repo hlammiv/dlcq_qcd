@@ -25,13 +25,14 @@ marker count in brackets — Fortran and Python give the same table:
 | 6(d) | **0.3% (3)** | **0.8% (5)** |
 
 Every valence curve is inside 2.5%. Every meson higher-Fock curve is inside 2%,
-at multipliers of 10² to 10⁴. The three bad cells are the baryon
-higher-Fock series of Figs. 6(a)–(c), which is a **tracing** failure with a
-known cause and an independent validation — see
-`docs/baryon-higher-fock.md`: those panels draw the valence and five-quark
-curves crossing three times, and at scan resolution the dashes of the dashed
-curve read as markers. Against the thesis's uncluttered plot of that same
-sector (Fig. 18(a)) it agrees to 0.07–3.9%.
+at multipliers of 10² to 10⁴. The three bad cells are the baryon higher-Fock series of Figs. 6(a)–(c). Those
+panels *are* hard to trace — the valence and five-quark curves cross three
+times, and at scan resolution the dashes of the dashed curve are the same size
+as its markers — but that is not the whole story. The underlying quantity is
+**not basis-independent**: it moves by up to 34% between legitimate treatments
+of the non-orthogonal basis, while every mass and valence curve is stable to
+one part in 10⁴. See `docs/baryon-higher-fock.md`. The same sector at 2K = 15
+reproduces the thesis's uncluttered plot of it (Fig. 18(a)) to 1%.
 
 ## Six calibration bugs the images exposed
 

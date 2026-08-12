@@ -568,3 +568,76 @@ def test_fig6a_five_quark_total_agrees_even_though_the_shape_does_not(
     assert abs(ours.sum() - published.sum()) / published.sum() < 0.05
     # and the shape genuinely differs -- this is the open item, kept visible
     assert abs(ours[2] - published[2]) / published[2] > 1.0
+
+
+# ── how well determined is the baryon five-quark structure function? ───────
+
+BASIS_VARIANTS = [("exact", "fortran"), ("exact", "blockwise"),
+                  ("exact", "spectral"), ("fortran", "fortran"),
+                  ("fortran", "blockwise"), ("fortran", "spectral")]
+
+
+def _five_quark_across_variants():
+    from dlcq.figures import paper_lambda
+    from dlcq.providers import PythonProvider
+
+    out = []
+    for assembly, policy in BASIS_VARIANTS:
+        p = PythonProvider(ncpus=4, assembly=assembly, policy=policy)
+        r = p.get(3, 1, 1, 21, paper_lambda(1.6))
+        i = int(physical_indices(r)[0])
+        _, q3, _ = structure_function(r, i, nparton=3)
+        _, q5, _ = structure_function(r, i, nparton=5)
+        out.append((r.eigenvalues[i], float(q3.max()),
+                    np.array([q5[j] * 1e3 for j in range(6)])))
+    return out
+
+
+@pytest.mark.slow
+def test_masses_are_basis_independent_but_the_five_quark_shape_is_not():
+    """The central caveat on Figs. 6(a)-(c), stated quantitatively.
+
+    The Fock basis is non-orthogonal, and there is more than one defensible way
+    to assemble H and to orthonormalize (see docs/basis-dependence.md).  Across
+    those choices the mass and the valence structure function are stable to
+    about one part in 10^4 -- but the five-quark structure function moves by up
+    to a third, site by site, and its total by 12%.
+
+    So the baryon higher-Fock *distribution* is not a well-determined quantity
+    in this framework at 2K=21, and quoting it to better than tens of percent
+    is not meaningful.  That is the honest resolution of why Figs. 6(a)-(c)'s
+    dashed curves resisted: they are the one thing in the paper whose value
+    depends on a convention the paper does not record.
+
+    The valence curves, every mass, Table I, and the meson higher-Fock sectors
+    are all unaffected.
+    """
+    got = _five_quark_across_variants()
+    M = np.array([g[0] for g in got])
+    V = np.array([g[1] for g in got])
+    Q = np.array([g[2] for g in got])
+
+    assert (M.max() - M.min()) / M.mean() < 1e-3, "mass should be robust"
+    assert (V.max() - V.min()) / V.mean() < 1e-3, "valence should be robust"
+
+    spread = (Q.max(axis=0) - Q.min(axis=0)) / Q.mean(axis=0)
+    assert spread.max() > 0.15, (
+        f"five-quark shape looks basis-independent now ({spread.max():.2%}); "
+        "if that is a real improvement, update docs/baryon-higher-fock.md")
+
+
+@pytest.mark.slow
+def test_no_basis_variant_reproduces_the_published_five_quark_curve():
+    """None of the variants produces the published shape, either.
+
+    The published curve has a node reaching essentially zero at x ~ 0.26; the
+    closest variant is still more than twice the published value there.  This
+    test records that, so that if a future change ever does reproduce it the
+    failure is loud.
+    """
+    published = np.array([8.53, 8.03, 1.06, 1.71, 5.04, 0.48])
+    got = _five_quark_across_variants()
+    closest = min(abs(q[2] - published[2]) / published[2] for _, _, q in got)
+    assert closest > 1.0, (
+        f"a basis variant now reproduces the node to {closest:.0%} -- "
+        "this would resolve docs/baryon-higher-fock.md; update it")
