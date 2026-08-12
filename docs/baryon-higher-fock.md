@@ -560,6 +560,42 @@ Right total, wrong distribution — and no K reproduces it either: interpolating
 our curve from 2K = 11 through 25 onto the 21-lattice tops out at correlation
 0.81 with a 50% rms.
 
+## Numerical damage cannot produce it either
+
+A fair suspicion: the 1988/1990 runs may have suffered numerical damage the
+current code does not. `qcdf.f` is genuinely vulnerable to array overflow — it
+dimensions `IDELT` with 25 colour slots while an element between L-parton states
+needs 2L+4, so runs reaching 12 partons really are corrupted (see
+`docs/fortran-color-overflow.md`) — and part of it was single precision before
+the `**** modified for double precision ****` change.
+
+The constraints make this testable rather than speculative. Whatever moved the
+five-quark distribution by ~40% at 2K = 21 left M² at 10⁻⁶, the valence under
+1%, and **the sector total within 1.5%**. `tools/robustness.py` perturbs each
+stage of the solve and reports all four:
+
+| probe | M² | valence pk | 5q total | 5q distribution |
+|---|---|---|---|---|
+| arithmetic in float32 | exact | exact | exact | **0.00%** |
+| arithmetic in float16 | 3×10⁻⁴ | 0.02% | 0.05% | **<0.9%** |
+| weeding eps 10⁻² … 10⁻¹⁰ (189–193 states survive) | exact | exact | exact | **0.00%** |
+| L ≥ 7 elements zeroed / doubled / sign-flipped | <10⁻⁶ | <0.01% | <0.06% | **<0.2%** |
+| L ≥ 9 elements zeroed / doubled / sign-flipped | exact | exact | exact | **0.00%** |
+| L ≥ 5 elements zeroed | 0.2% | 0.4% | **25.2 → 0.0** | — |
+| L ≥ 5 elements doubled | 0.2% | 0.3% | **25.2 → 19.0** | — |
+| L ≥ 5 elements sign-flipped | 0.3% | 0.7% | **25.2 → 9.6** | — |
+
+The pattern is the whole answer. **Every perturbation that leaves the sector
+total intact also leaves the distribution intact; the only ones that move the
+distribution destroy the total.** The published curve has the *right* total to
+1.5%. So no damage of this kind produced it.
+
+The robustness itself is worth stating plainly: at half precision — three
+decimal digits — the five-quark distribution moves by under 1%, and the weeding
+threshold can range over eight orders of magnitude, changing which 189 to 193
+of the 502 states survive, without moving it at all. It is not a fragile
+quantity.
+
 ## The colour sums are exact — tested, not assumed
 
 The revision history below made the colour sums the leading suspect, since they

@@ -839,3 +839,73 @@ def test_fig4_higher_fock(panel, sector, K, k, mult, published):
         tol = 0.15          # tail of the distribution, small values
     assert rel < tol, (
         f"{panel} k={k}: ours {ours:.3f} vs published {published:.3f} ({rel:.1%})")
+
+
+@pytest.mark.slow
+def test_no_numerical_damage_reproduces_the_published_five_quark_curve():
+    """Degraded arithmetic cannot produce the Fig. 6(a)-(c) curve.
+
+    The suspicion is reasonable -- the 1988/1990 runs may have suffered damage
+    the current code does not, and qcdf.f is genuinely vulnerable to array
+    overflow (it dimensions IDELT with 25 colour slots while an element between
+    L-parton states needs 2L+4, so runs reaching 12 partons are corrupted).
+
+    But the constraints are tight.  Whatever moved the five-quark distribution
+    by ~40% at 2K=21 left M^2 at 1e-6, the valence under 1%, and the sector
+    TOTAL within 1.5%.  That last one is decisive: across every mechanism tried,
+    anything that moves the distribution also destroys the total.
+
+        float32 arithmetic                distribution   0.00%
+        float16 arithmetic                              <0.9%
+        weeding eps 1e-2 .. 1e-10                        0.00%   (189-193 states)
+        L>=7 elements zeroed/doubled/flipped            <0.2%
+        L>=9 elements zeroed/doubled/flipped             0.00%
+        L>=5 elements corrupted            total 25.2 -> 0.0, 19.0, 9.6
+
+    This test pins the two ends of that: the distribution is invariant under
+    perturbations that preserve the total, and the perturbations that do move it
+    wreck the total.  See tools/robustness.py.
+    """
+    import sys
+
+    sys.path.insert(0, str(ROOT / "tools"))
+    from robustness import build, sectors, solve
+
+    from dlcq.figures import paper_lambda
+
+    lam = paper_lambda(1.6)
+    p, st, A, mst, n, H0, H = build(1, 21, lam, ncpus=4)
+    L = np.array([int(mst[s, 1]) for s in range(n)])
+
+    def five_q(H0x, Hx, dtype=np.float64):
+        ev, c = solve(p, A, n, H0x, Hx, dtype=dtype)
+        s = sectors(st, mst, n, 21, c, A, (3, 5))
+        return ev, s[3].max(), s[5][:6] * 1e3
+
+    ev0, val0, ref = five_q(H0, H)
+    published = np.array([8.56, 7.95, 1.14, 1.71, 4.99, 0.54])
+    assert np.median(np.abs(ref - published) / published) > 0.3
+
+    # (a) perturbations that preserve the total leave the distribution alone
+    benign = [("float32", H0, H, np.float32), ("float16", H0, H, np.float16)]
+    for thresh in (7, 9):
+        m = (L[:, None] >= thresh) | (L[None, :] >= thresh)
+        for f in (0.0, 2.0, -1.0):
+            Hc, H0c = H.copy(), H0.copy()
+            Hc[m] *= f
+            H0c[m] *= f
+            benign.append((f"L>={thresh} x{f}", H0c, Hc, np.float64))
+    for label, H0x, Hx, dt in benign:
+        _, _, got = five_q(H0x, Hx, dtype=dt)
+        assert abs(got.sum() - ref.sum()) / ref.sum() < 0.01, label
+        assert np.max(np.abs(got - ref) / ref) < 0.01, (
+            f"{label} moved the distribution: {got} vs {ref}")
+
+    # (b) the perturbation that does move it destroys the total
+    m5 = (L[:, None] >= 5) | (L[None, :] >= 5)
+    Hc, H0c = H.copy(), H0.copy()
+    Hc[m5] *= 2.0
+    H0c[m5] *= 2.0
+    _, _, wrecked = five_q(H0c, Hc)
+    assert abs(wrecked.sum() - ref.sum()) / ref.sum() > 0.2, (
+        "corrupting the five-quark block no longer changes its total")
