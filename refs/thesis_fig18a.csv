@@ -1,0 +1,19 @@
+# THESIS Fig 18(a): five-quark contribution to the lightest N=3 baryon structure
+# function, m/g = 1.6, 2K = 15.  K. Hornbostel, SLAC-333 (1988), p. 77.
+# The article's Fig. 4(b) is the same plot.
+#
+# Digitized with tools/digitize.py (panel t18a).  This panel is the reliable
+# baryon higher-Fock reference: it shows ONE sector with q and qbar separated
+# and no curve crossings.  Fig 12(a) / article Fig 6(a) overlay the valence
+# curve on the higher-Fock one, the two cross three times, and at scan
+# resolution the dashes of the dashed curve read as markers -- which is what
+# made the baryon higher-Fock look irreproducible.
+#
+# Values are q(x) x 10^3 as plotted.
+quantity,x,value
+q,0.0667,7.960
+q,0.2000,4.788
+q,0.4667,2.766
+q,0.6000,0.278
+qbar,0.0667,4.863
+qbar,0.2000,0.955

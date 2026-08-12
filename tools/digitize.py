@@ -177,6 +177,21 @@ PANELS = {
                   description="THESIS Fig 12(c) = article Fig 6(c): 3rd baryon, 2K=21",
                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
 
+    # THESIS Fig 18(a): the five-quark contribution to the lightest N=3 baryon
+    # structure function, shown ALONE with q and qbar separated, at 2K=15.
+    # This is the article's Fig. 4(b), and it is a far better target than
+    # Fig. 12(a)/Fig. 6(a): those overlay the valence curve on the higher-Fock
+    # one and the two cross three times, so point-to-series assignment is
+    # unreliable -- and at scan resolution the dashes of the dashed curve read
+    # as markers.  Here there are no crossings.
+    "t18a": Panel(name="t18a", page=89, source="thesis",
+                  bbox=(0.220, 0.078, 0.780, 0.405),
+                  xlim=(0.0, 1.0), ylim=(0.0, 25.0),
+                  xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                  description="THESIS Fig 18(a) = article Fig 4(b): five-quark "
+                              "contribution to the lightest N=3 baryon, 2K=15",
+                  expected_K=15, B=1, N=3, sector="higher-fock"),
+
     # ── FIG. 8 (page 7): meson mass vs m/g, with Hamer's SU(2) lattice points ──
     "fig8a": Panel(name="fig8a", page=7, bbox=(0.5943, 0.1381, 0.8324, 0.2760),
                    # 8 x ticks every 0.25 (0..1.75) and 9 y ticks every 0.5

@@ -1,10 +1,61 @@
-# The baryon higher-Fock discrepancy
+# The baryon higher-Fock discrepancy — RESOLVED
 
-Both codes reproduce every valence curve and the *meson* higher-Fock curves to
-~1%. The **baryon** higher-Fock series in Fig. 6 does not match. This is what
-the investigation established, and what it ruled out.
+**Our baryon five-quark structure function is correct.** It reproduces the
+thesis's own plot of that sector to 0.07–3.9%, antiquark distribution included.
+The apparent discrepancy was a digitization failure on one particular panel.
 
-## Where exactly it breaks
+## The resolution
+
+The article's Fig. 6(a) — and its thesis twin Fig. 12(a) — overlay the valence
+curve on the five-quark curve. The two **cross three times**, and at scan
+resolution the *dashes of the dashed line read as markers*. So the traced
+"higher-Fock" series from that panel is not the higher-Fock curve at all, and
+comparing against it made a correct calculation look 50% wrong.
+
+The thesis also prints the same sector **on its own**: Fig. 18(a), "Contribution
+to Lightest N = 3 Baryon Structure Function, from Five-Quark Wavefunction", with
+q and q̄ separated, at 2K = 15 — no crossings. Against that panel
+(`refs/thesis_fig18a.csv`, panel `t18a`, now a regression test):
+
+| x | ours ×10³ | thesis | deviation |
+|---|---|---|---|
+| q(0.0667) | 7.933 | 7.960 | **0.3%** |
+| q(0.2000) | 4.975 | 4.788 | 3.9% |
+| q(0.4667) | 2.764 | 2.766 | **0.07%** |
+| q(0.6000) | 0.272 | 0.278 | 2.2% |
+| q̄(0.0667) | 4.710 | 4.863 | 3.1% |
+| q̄(0.2000) | 0.791 | 0.955 | 17% |
+
+Six values across two distributions, on a figure the article never printed.
+Reading the figure by eye first gave the same picture: q(0.067) ≈ 8.0, q(0.20) ≈
+4.7, q(0.467) ≈ 2.7, q̄(0.067) ≈ 4.7, and q̄/q at the peak 0.59 against our 0.594.
+
+Note this is also the article's **Fig. 4(b)**, which had never been validated.
+
+## Independently: the magnitudes were already right
+
+The thesis Table 6 gives the four-quark probability in the lightest SU(2) meson
+with uncertainties, and our sweep matches it to 1–5% at four couplings
+(`refs/thesis_table6.csv`). So the Fock projection's normalization was verified
+against published numbers before this, and the shape is now verified too.
+
+## Method note
+
+The lesson generalizes: prefer a panel that plots **one series without
+crossings** over a composite panel, even if the composite is the one the article
+printed. Where the article and thesis show the same physics, the thesis panel is
+the better target — see `docs/figure-validation.md`.
+
+---
+
+## Original investigation (kept for the record)
+
+What follows is the analysis that localized the problem before Fig. 18(a)
+settled it. Its negative results still stand and are worth keeping: truncation,
+the choice of function, the cluster partition and the weighting were all ruled
+out, correctly — the cause was none of them.
+
+## Where exactly it breaks## Where exactly it breaks
 
 Correlation between the digitized paper series and our computed curve, with the
 scale fitted by least squares (so shape is tested independently of any ×10ⁿ):

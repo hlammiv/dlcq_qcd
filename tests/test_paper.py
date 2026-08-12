@@ -352,3 +352,44 @@ def test_higher_fock_magnitude_matches_the_thesis():
         )
         checked += 1
     assert checked >= 3, f"only {checked} couplings compared"
+
+
+def load_thesis_fig18a():
+    """Digitized five-quark baryon structure function, thesis Fig 18(a)."""
+    path = ROOT / "refs" / "thesis_fig18a.csv"
+    rows = []
+    with open(path) as fh:
+        for row in csv.DictReader(l for l in fh if not l.startswith("#")):
+            rows.append((row["quantity"], float(row["x"]), float(row["value"])))
+    return rows
+
+
+@pytest.mark.fortran
+def test_baryon_five_quark_matches_the_thesis():
+    """The baryon higher-Fock sector against thesis Fig 18(a), 2K=15.
+
+    This is the panel that settles it.  The article's Fig. 6(a) overlays the
+    valence and five-quark curves, which cross three times, and at scan
+    resolution the dashes of the dashed curve read as markers -- so the traced
+    "higher-Fock" series there is unreliable and made this sector look wrong.
+    Fig 18(a) shows the sector alone with q and qbar separated and no crossings.
+    """
+    from dlcq.read_fortran import read_out
+
+    path = ROOT / "runs" / "K15_B1" / "qcdf.out"
+    if not path.exists():
+        pytest.skip("no 2K=15 B=1 run; see fortran/run_case.sh")
+    r = read_out(path)
+    idx = physical_indices(r)
+    x, q, qbar = structure_function(r, int(idx[0]), nparton=5)
+
+    worst = 0.0
+    for quantity, xp, val in load_thesis_fig18a():
+        i = int(np.argmin(np.abs(x - xp)))
+        ours = (q[i] if quantity == "q" else qbar[i]) * 1e3
+        rel = abs(val - ours) / val
+        worst = max(worst, rel)
+        assert rel < 0.20, (
+            f"{quantity}(x={xp}): ours {ours:.3f}, thesis {val:.3f} ({rel:.1%})"
+        )
+    assert worst < 0.20

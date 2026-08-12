@@ -1,0 +1,110 @@
+{
+  "panel": "t18a",
+  "description": "THESIS Fig 18(a) = article Fig 4(b): five-quark contribution to the lightest N=3 baryon, 2K=15",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 89,
+  "dpi": 600,
+  "page_size_px": [
+    3950,
+    5365
+  ],
+  "crop_box_px": [
+    869,
+    418,
+    3081,
+    2172
+  ],
+  "bbox_fraction": [
+    0.22,
+    0.078,
+    0.78,
+    0.405
+  ],
+  "frame_px": [
+    45,
+    2164,
+    50,
+    1713
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    25.0
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    55.5,
+    140.0,
+    224.5,
+    309.5,
+    393.5,
+    477.5,
+    561.5,
+    647.5,
+    731.5,
+    815.5,
+    899.5,
+    984.0,
+    1067.5,
+    1148.5,
+    1235.5,
+    1316.5,
+    1400.5,
+    1485.5,
+    1570.5,
+    1656.5,
+    1741.0,
+    1824.5,
+    1909.5,
+    1994.5,
+    2080.5,
+    2163.5
+  ],
+  "x_fit": {
+    "slope": 0.00047192071731949023,
+    "intercept": -0.021236432279377337,
+    "max_residual": 5.551115123125783e-16
+  },
+  "y_fit": {
+    "slope": -0.015033072760072158,
+    "intercept": 25.751653638003614,
+    "max_residual": 7.105427357601002e-15
+  },
+  "n_markers": 28,
+  "n_legend_suppressed": 62,
+  "notes": [
+    "x ticks: found 26, expected 6 (calibration still from frame edges)",
+    "suppressed 54 in-plot legend/text blobs",
+    "column probe at 2K=15: 15 markers (8 filled, 7 open)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 15,
+  "check": {
+    "K_inferred": 15,
+    "K_code": 15,
+    "inlier_fraction": 0.75,
+    "median_grid_residual": 0.0047342438627176325,
+    "max_grid_residual": 0.12699875608572786,
+    "consistent": true,
+    "K_from_x_min": 159.04404494382717,
+    "K_from_spacing": 104.36869769268162,
+    "n_points": 28,
+    "K_expected": 15,
+    "ok": true
+  },
+  "K_used": 15,
+  "K_source": "stated in paper",
+  "n_on_lattice": 15,
+  "n_dropped_off_lattice": 0
+}
