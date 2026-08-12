@@ -18,8 +18,15 @@
 # No M_bar column exists for N=2: the paper states M_mes/M_bar = 1 is an exact
 # result at N=2, for every m/g and K.
 #
+# UNITS: the tabulated values are M^2/(m^2 + g^2/pi) -- the y-axis of Fig. 2 and
+# the code's raw eigenvalue -- NOT M/g as the printed column headers say. This
+# was established by comparison with a full DLCQ sweep: at m/g = 1.6 four of the
+# five columns agree to better than 0.1% in these units, whereas the M/g reading
+# gives ratios scattered over 0.55-4.8. See docs/table1-units.md.
+# Convert with:  M/g = sqrt(value / (pi * lambda^2)).
+#
 # quantity: mes | bar
-# value, last_term: M/g and the magnitude of the last Richardson term
+# value, last_term: M^2/(m^2+g^2/pi) and the magnitude of the last Richardson term
 # reliable: the paper's m/g >~ 0.2 caveat
 quantity,N,mg,value,last_term,reliable
 mes,2,1.60,4.314,0.004,1

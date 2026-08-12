@@ -87,21 +87,20 @@ def test_table1_is_monotone_in_coupling():
                 f"{quantity} N={N} not monotone: {vals}"
 
 
-@pytest.mark.xfail(reason="Table I disagrees with the paper's own Fig. 8(a): its "
-                          "m/g=1.6 entries exceed that figure's y-axis maximum "
-                          "of 4.0, while our sweep matches Hamer's independent "
-                          "lattice data there to 0.1%. See "
-                          "docs/table1-discrepancy.md", strict=False)
 def test_bosonization_ratio_against_table1():
-    """M_mes/M_bar at strong coupling vs 2 sin[pi/(2(2N-1))], to the paper's ~10%."""
+    """M_mes/M_bar at strong coupling vs 2 sin[pi/(2(2N-1))], to the paper's ~10%.
+
+    Table I is in M^2 units (docs/table1-units.md), so the mass ratio needs a
+    square root -- and the m^2+g^2/pi denominator cancels between the two.
+    """
     rows = {(r["quantity"], r["N"], r["mg"]): r for r in load_table1()}
-    # Smallest coupling with reliable entries.
     for N in (3, 4):
         mes = rows[("mes", N, 0.05)]["value"]
         bar = rows[("bar", N, 0.05)]["value"]
+        ratio = np.sqrt(mes / bar)
         predicted = meson_baryon_ratio_bosonization(N)
-        assert mes / bar == pytest.approx(predicted, rel=0.6), (
-            f"N={N}: table gives {mes/bar:.3f}, bosonization {predicted:.3f}"
+        assert ratio == pytest.approx(predicted, rel=0.35), (
+            f"N={N}: table gives {ratio:.3f}, bosonization {predicted:.3f}"
         )
 
 
@@ -194,13 +193,42 @@ def test_hamer_lattice_points_are_in_range():
         assert 0.0 < Mg < 4.0        # Fig. 8(a)'s y-axis maximum
 
 
-def test_table1_exceeds_its_own_figure_axis():
-    """Documents the inconsistency rather than asserting the table is usable.
+def test_table1_is_in_msquared_units_not_M_over_g():
+    """Table I tabulates M^2/(m^2+g^2/pi) despite its M/g headers.
 
-    Fig. 8(a) plots M/g on an axis running to 4.0 (9 ticks every 0.5), yet every
-    Table I meson entry at m/g = 1.6 lies above it.  See
-    docs/table1-discrepancy.md.
+    Two independent consequences pin this down, neither needing a solver:
+
+    1. Fig. 8(a) plots M/g on an axis running to 4.0 (9 ticks every 0.5), yet
+       every Table I meson entry at m/g = 1.6 exceeds it.  The table cannot be
+       in the units of the figure it summarizes.
+    2. Converting Table I to M/g via M/g = sqrt(value / (pi lambda^2)) puts the
+       m/g = 1.6 mesons back inside that axis.
+
+    See docs/table1-units.md.
     """
+    from dlcq.units import mg_to_lambda
+
     rows = {(r["quantity"], r["N"], r["mg"]): r for r in load_table1()}
+    lam = float(mg_to_lambda(1.6))
     for N in (2, 3, 4):
-        assert rows[("mes", N, 1.6)]["value"] > 4.0
+        raw = rows[("mes", N, 1.6)]["value"]
+        assert raw > 4.0                       # impossible as M/g
+        as_mass = np.sqrt(raw / (np.pi * lam ** 2))
+        assert 3.0 < as_mass < 4.0             # sits on Fig. 8(a)'s axis
+
+
+def test_table1_reproduces_hamer_after_unit_conversion():
+    """Converted to M/g, Table I's SU(2) entry matches Hamer's lattice point.
+
+    Hamer's value is external data (Nucl. Phys. B195, 503) digitized from
+    Fig. 8(a), so this ties the table to a wholly independent calculation.
+    """
+    from dlcq.units import mg_to_lambda
+
+    rows = {(r["quantity"], r["N"], r["mg"]): r for r in load_table1()}
+    lam = float(mg_to_lambda(1.6))
+    as_mass = np.sqrt(rows[("mes", 2, 1.6)]["value"] / (np.pi * lam ** 2))
+    hamer = 3.5187
+    assert as_mass == pytest.approx(hamer, rel=0.02), (
+        f"Table I -> M/g gives {as_mass:.4f}, Hamer {hamer:.4f}"
+    )

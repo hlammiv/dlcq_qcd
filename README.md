@@ -136,7 +136,7 @@ produced the paper. The corrected physics lives in the Python path, where
 | 6 | **reproduced, both** | 2K=21; 1.1–1.7% (panel (d) low confidence) |
 | 7 | swept | Richardson over 2K = 16–24, N = 2,3,4, both sectors |
 | 8 | **validated** | matches Hamer's SU(2) lattice data to 0.1–2.2% |
-| Table I | transcribed, disputed | see `docs/table1-discrepancy.md` |
+| Table I | **reproduced** | once read in M² units — see `docs/table1-units.md` |
 
 The paper never states `K` for Figs. 3 and 4; it was **recovered from the plots
 themselves** as 2K = 14 (meson) and 15 (baryon). Momenta are odd, so markers lie
@@ -145,11 +145,19 @@ Figs. 5 and 6 before being trusted where K is unknown. Every meson panel
 returned an even K and every baryon panel an odd one — the parity each sector
 requires, which the fit knows nothing about. See `docs/inferred-K.md`.
 
-## A third discrepancy: Table I vs the paper's own Fig. 8(a)
+## Table I is in M² units, not M/g
 
-Our sweep matches **Hamer's independent SU(2) lattice data** (plotted in
-Fig. 8(a)) to 0.1–2.2%, and reproduces the paper's figures at 1–3%. It does not
-match Table I, whose m/g = 1.6 entries exceed the y-axis maximum of the very
-figure they summarize. `refs/table1.csv` transcribes the table exactly as
-printed; the comparison is reported, not reconciled. See
-`docs/table1-discrepancy.md`.
+Table I tabulates `M²/(m² + g²/π)` — the y-axis of **Fig. 2**, and the code's
+raw eigenvalue — despite its column headers reading `M_mes/g` and `M_bar/g`.
+Read that way our sweep reproduces it; read as `M/g` nothing matches.
+
+At the best-converged coupling, m/g = 1.6, four of the five columns agree to
+better than **0.1%**, and 17 of the 30 non-trivial entries fall within the
+paper's own quoted uncertainty. The `M/g` reading gives ratios scattered over
+0.55–4.8.
+
+Three things corroborate it. Figs. 7 and 8(a) *are* `M/g` — their axes run 0–4
+and 0–8, and our values sit inside while Table I's would not. **Hamer's
+independent lattice data** matches our `M/g` to 0.1% at m/g = 1.6. And Table I's
+apparent "unphysical saturation" is required in M² units, since numerator and
+denominator both grow like m². See `docs/table1-units.md`.
