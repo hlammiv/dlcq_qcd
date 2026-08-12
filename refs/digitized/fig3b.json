@@ -57,6 +57,7 @@
     "max_residual": 3.552713678800501e-15
   },
   "n_markers": 18,
+  "n_legend_suppressed": 0,
   "notes": [
     "x ticks: found 2, expected 6 (calibration still from frame edges)"
   ],
@@ -74,6 +75,8 @@
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
+  "K_used": 15,
+  "K_source": "inferred",
   "sum_rule_scale": 1.1724799630975171,
   "sum_rule_quark_number": 3.0,
   "n_on_lattice": 18,

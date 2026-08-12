@@ -56,24 +56,28 @@
     "intercept": 23.769841269841272,
     "max_residual": 3.552713678800501e-15
   },
-  "n_markers": 37,
+  "n_markers": 23,
+  "n_legend_suppressed": 14,
   "notes": [
-    "x ticks: found 2, expected 6 (calibration still from frame edges)"
+    "x ticks: found 2, expected 6 (calibration still from frame edges)",
+    "suppressed 14 in-plot legend/text blobs"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "check": {
     "K_inferred": 15,
     "K_code": 15,
-    "inlier_fraction": 0.6756756756756757,
-    "median_grid_residual": 0.014456476714598265,
+    "inlier_fraction": 0.7391304347826086,
+    "median_grid_residual": 0.010655960921476776,
     "max_grid_residual": 0.051905293862098745,
     "consistent": true,
     "K_from_x_min": 29.851996867658347,
-    "K_from_spacing": 99.15909990999145,
-    "n_points": 37,
+    "K_from_spacing": 67.10005197505221,
+    "n_points": 23,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "n_on_lattice": 25,
-  "n_dropped_off_lattice": 12
+  "K_used": 15,
+  "K_source": "inferred",
+  "n_on_lattice": 17,
+  "n_dropped_off_lattice": 6
 }

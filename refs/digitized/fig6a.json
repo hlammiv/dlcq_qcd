@@ -60,26 +60,30 @@
     "intercept": 15.718532110091743,
     "max_residual": 0.0
   },
-  "n_markers": 25,
+  "n_markers": 14,
+  "n_legend_suppressed": 11,
   "notes": [
-    "x ticks agree to 0.0055"
+    "x ticks agree to 0.0055",
+    "suppressed 11 in-plot legend/text blobs"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "check": {
     "K_inferred": 21,
     "K_code": 21,
-    "inlier_fraction": 0.68,
-    "median_grid_residual": 0.00547112273995326,
-    "max_grid_residual": 0.04649733156044522,
+    "inlier_fraction": 1.0,
+    "median_grid_residual": 0.002267644213390485,
+    "max_grid_residual": 0.006792656780511885,
     "consistent": true,
     "K_from_x_min": 20.93364281813223,
-    "K_from_spacing": 40.87871238091828,
-    "n_points": 25,
+    "K_from_spacing": 22.10911350119058,
+    "n_points": 14,
     "K_expected": 21,
     "ok": true
   },
+  "K_used": 21,
+  "K_source": "stated in paper",
   "sum_rule_scale": 0.9816102158794654,
   "sum_rule_quark_number": 3.0,
-  "n_on_lattice": 17,
-  "n_dropped_off_lattice": 8
+  "n_on_lattice": 14,
+  "n_dropped_off_lattice": 0
 }

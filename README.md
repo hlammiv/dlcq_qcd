@@ -130,16 +130,21 @@ produced the paper. The corrected physics lives in the Python path, where
 |---|---|---|
 | 1 | schematic | interaction vertices; nothing to validate |
 | 2 | **both** | λ sweep at 2K = 10/13/22, 21 couplings each |
-| 3 | **reproduced, both** | 2.6% / 1.9%; K recovered as 2K = 14 / 15 (never stated) |
-| 4 | reproduced, both | higher-Fock sectors at the same recovered K |
-| 5 | **reproduced, both** | 2K=24; 1.2–1.8%; matches the paper's text anchors |
-| 6 | **reproduced, both** | 2K=21; 1.1–1.7% (panel (d) low confidence) |
+| 3 | **agrees, 2.6% / 1.9%** | K recovered as 2K = 14 / 15 (never stated) |
+| 4 | produced; not verified | trace too poor on (b),(c) to conclude |
+| 5 | **agrees, 1.2–1.4%** | incl. the ×10³ and ×10² rescaled series, to 1–2% |
+| 6 | **(a) agrees, 1.1%** | (b),(c),(d) trace too poor to conclude |
 | 7 | **both** | Richardson over 2K = 16–24, N = 2,3,4, both sectors |
 | 8 | **both** | incl. the 't Hooft large-N curve; matches Hamer's lattice data to 0.1–2.2% |
 | Table I | **both** | reproduced once read in M² units — see `docs/table1-units.md` |
 
 Every figure is generated from **both** solvers; `figures/` carries a
-`_fortran` and a `_python` copy of each.
+`_fortran` and a `_python` copy of each. Producing a figure is not the same as
+agreeing with the published one — see
+[docs/figure-validation.md](docs/figure-validation.md) for the per-curve
+accounting, including the series the paper rescales by powers of ten. Fortran
+and Python agree with each other to within 0.1 percentage point on every curve
+compared.
 
 Cross-checked over the whole 174-configuration sweep, the two codes agree on
 the lightest M² to a **median of 3.9×10⁻⁶** (max 4.0×10⁻³, which is the

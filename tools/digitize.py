@@ -350,6 +350,9 @@ def digitize(panel: Panel, dpi=600, pages_dir=None):
                      "(calibration still from frame edges)")
 
     markers = detect_markers(ink, frame)
+    markers, legend_hits = suppress_legend(markers, frame)
+    if legend_hits:
+        notes.append(f"suppressed {len(legend_hits)} in-plot legend/text blobs")
     records = []
     for m in markers:
         records.append(dict(x=xs * m["px"] + xi, y=ys * m["py"] + yi,
@@ -366,10 +369,60 @@ def digitize(panel: Panel, dpi=600, pages_dir=None):
         xtick_values=list(panel.xticks), xtick_pixels=list(xt),
         x_fit=dict(slope=xs, intercept=xi, max_residual=xres),
         y_fit=dict(slope=ys, intercept=yi, max_residual=yres),
-        n_markers=len(records), notes=notes,
+        n_markers=len(records), n_legend_suppressed=len(legend_hits),
+        notes=notes,
         method="tools/digitize.py connected-component marker tracing",
     )
     return records, provenance
+
+
+def suppress_legend(markers, frame, y_tol=0.015, min_row=3, x_span=0.15,
+                    y_min=0.55):
+    """Drop markers belonging to an in-plot legend.
+
+    These panels put their legends *inside* the axes, and two things there get
+    mistaken for data:
+
+    * the legend's own sample markers;
+    * the enclosed counters of letters like q, b, o, d, which the hole channel
+      sees as open circles.
+
+    Neither is separable by size -- measured on Fig. 6(a), legend blobs span
+    124-416 px and data blobs 164-458 px, overlapping.  Nor by position alone,
+    since the valence peak reaches 79% of the frame height.
+
+    What does separate them is *shape of the arrangement*: a legend is a
+    horizontal row.  Three or more markers sharing a y to within ``y_tol`` of
+    the frame height and spanning ``x_span`` of its width cannot be a peaked
+    structure function, which is single-valued and falls away from its maximum.
+    Restricting to the upper part of the frame (``y_min``) keeps a genuine flat
+    tail near zero safe.
+
+    Returns ``(kept, dropped)``.
+    """
+    left, right, top, bottom = frame
+    fw, fh = float(right - left), float(bottom - top)
+    if fw <= 0 or fh <= 0 or not markers:
+        return markers, []
+
+    enriched = [(m, (m["px"] - left) / fw, (bottom - m["py"]) / fh)
+                for m in markers]
+    dropped_ids = set()
+
+    for i, (_, _, fy) in enumerate(enriched):
+        if fy < y_min:
+            continue
+        row = [j for j, (_, _, fy2) in enumerate(enriched)
+               if abs(fy2 - fy) <= y_tol and enriched[j][2] >= y_min]
+        if len(row) < min_row:
+            continue
+        xs = [enriched[j][1] for j in row]
+        if max(xs) - min(xs) >= x_span:
+            dropped_ids.update(row)
+
+    kept = [m for i, (m, _, _) in enumerate(enriched) if i not in dropped_ids]
+    dropped = [m for i, (m, _, _) in enumerate(enriched) if i in dropped_ids]
+    return kept, dropped
 
 
 def snap_to_lattice(records, K, atol=0.02):
@@ -449,7 +502,15 @@ def main(argv=None):
               f"(expected {verdict.get('K_expected', 'not stated')}) "
               f"inliers {verdict['inlier_fraction']:.2f}")
 
-    K = verdict["K_inferred"]
+    # Snap to the K the paper STATES when it states one.  The inference exists
+    # to validate the trace and to settle Figs. 3 and 4, where K is unstated --
+    # it must not override a published fact.  With few surviving points a
+    # coarser lattice can fit as well as the true one (fig6b/c returned 20
+    # instead of 21 after legend suppression thinned them), and silently
+    # adopting that would corrupt every x.
+    K = panel.expected_K if panel.expected_K else verdict["K_inferred"]
+    provenance["K_used"] = K
+    provenance["K_source"] = "stated in paper" if panel.expected_K else "inferred"
     records, dropped = snap_to_lattice(records, K)
 
     # Sum-rule calibration of the vertical scale.  int q dx is exactly the
