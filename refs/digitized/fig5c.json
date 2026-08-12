@@ -65,7 +65,8 @@
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
     "suppressed 6 in-plot legend/text blobs",
     "declared legend box removed 1 probe markers",
-    "column probe at 2K=24: 16 markers (7 filled, 9 open)"
+    "column probe at 2K=24: 16 markers (7 filled, 9 open)",
+    "sum rule check: int q dx wants 1.036x from a trace covering 7/12 lattice sites.  Not applied -- the frame calibration is the primary one.  A value far from 1 means the trace is missing real weight."
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
@@ -85,8 +86,7 @@
   },
   "K_used": 24,
   "K_source": "stated in paper",
-  "sum_rule_scale": 1.035791757049892,
-  "sum_rule_quark_number": 1.0,
+  "sum_rule_rejected_scale": 1.035791757049892,
   "n_on_lattice": 16,
   "n_dropped_off_lattice": 0
 }

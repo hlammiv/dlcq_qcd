@@ -56,7 +56,7 @@
   "n_legend_suppressed": 0,
   "notes": [
     "x ticks: found 2, expected 0 (calibration still from frame edges)",
-    "column probe at 2K=33: 55 markers (1 filled, 54 open)"
+    "column probe at 2K=33: 55 markers (7 filled, 48 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",

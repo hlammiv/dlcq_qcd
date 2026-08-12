@@ -336,9 +336,97 @@ The residual disagreement is therefore concentrated in precisely the region the
 original author identified as unresolved and K-sensitive — on a sector where
 our two codes already differ from each other by 16%.
 
+## What is left, precisely
+
+Figs. 6(a)–(c)'s five-quark curves still disagree, and the disagreement is now
+pinned down to one thing: **shape, not normalization, and only at 2K = 21.**
+
+Fitting a free scale to the published curve — so the paper's own ×10³ never
+enters — returns **1055**. The stated multiplier is 10³. The sector's total
+weight and normalization are therefore right to about 5%. What differs is the
+contrast: the published curve has deeper valleys and higher lobes than ours.
+
+| x | published | ours × 1.055 |
+|---|---|---|
+| 1/21 | 8.53 | 6.64 |
+| 3/21 | 7.99 | 5.98 |
+| 5/21 | **1.02** | **4.07** |
+| 7/21 | **1.80** | **5.03** |
+| 9/21 | 5.04 | 3.67 |
+| 11/21 | 0.49 | 1.21 |
+
+Both curves are bimodal with a minimum at the same place; the published one
+simply goes much closer to zero there.
+
+### What that is not
+
+Each of these was tested and eliminated:
+
+* **Not the scan.** The thesis prints the same three panels as its Fig. 12, on
+  a different y-scale (fully labelled 0.0–15.0, against the article's single
+  10.5 label and a 14.63 top). Read against its own frame the thesis gives the
+  same higher-Fock numbers and the same valence agreement.
+* **Not the y calibration.** Each print is now read against its own tick
+  geometry, and the valence curves agree to 1.4%, 0.4% and 2.0%.
+* **Not marker misassignment.** The old filled-vs-open test counted runs in a
+  vertical slice, which fails exactly where the curves cross — it called
+  Fig. 6(b) x=3/21 and Fig. 6(c) x=5/21 higher-Fock when both are valence
+  points. `trace_at_lattice` now classifies on the ink at the marker's centre,
+  which separates the two classes with a clear gap (≥0.71 against ≤0.49).
+* **Not the state.** The ground state is isolated by a gap of 3.44 in M², so
+  there is no degenerate subspace to mix. Its valence reproduces the published
+  curve to 0.8% median, while every other state in the spectrum is 29% or worse.
+* **Not a different quantity.** q̄(x), q±q̄, and the 7- and 9-parton sectors all
+  correlate with the published curve *worse* than the 5-parton q(x) does.
+* **Not fragility.** The sector varies smoothly and monotonically with K —
+  P₅ = 3.19, 2.96, 2.74, 2.56, 2.42, 2.31 (×10⁻³) at 2K = 13…23 — with no sign
+  of the instability an ill-conditioned quantity would show.
+
+### And it is specific to 2K = 21
+
+At 2K = 15 the same sector reproduces the thesis's uncluttered plot of it
+(Fig. 18(a)) to 1%, in *both* distributions and at *both* couplings:
+
+| quantity | ours | thesis | ratio |
+|---|---|---|---|
+| q(1/15) ×10³ | 7.933 | 7.93 | 1.000 |
+| q(3/15) ×10³ | 4.975 | 4.77 | 1.043 |
+| q(5/15) ×10³ | 6.239 | 6.74 | 0.926 |
+| q(7/15) ×10³ | 2.764 | 2.72 | 1.016 |
+| q̄(1/15) ×10³ | 4.710 | 4.72 | 0.998 |
+
+and at m/g = 0.1 the implied multiplier is ×95.6 against a legend of ×10²,
+i.e. 4.6%.
+
+So the projection, the normalization and the ε-tensor weighting are all
+confirmed. Something about the *distribution* of the five-quark weight over x
+differs at the larger basis, and it is not any of the causes above.
+
+## The seven-quark sector, checked for the first time
+
+Thesis Fig. 18(b) plots the seven-quark contribution to the same baryon, and
+nothing in this repository had ever been compared with it. It is the article's
+Fig. 4(c). Measured from the panel (2K = 15, y axis 0–12 confirmed by seven
+evenly spaced ticks, legend `× m/g=1.6 (×10⁷)` read at 4× magnification):
+
+| x | published ×10⁷ | ours ×10⁷ | ratio |
+|---|---|---|---|
+| 1/15 | 5.32 | 6.232 | 1.171 |
+| 3/15 | 3.96 | 4.806 | 1.214 |
+| 5/15 | 2.73 | 3.116 | 1.141 |
+
+A systematic 17.5% high, in a sector carrying 1.9 × 10⁻⁷ of the baryon's quark
+number — four orders below the five-quark sector, which reproduces the panel
+directly above it on the same page to 1%. Fortran and Python agree here to
+every printed digit, so it is not a porting error. `refs/thesis_fig18b.csv`
+records the measurement with its provenance and the test tracks the ratio
+rather than asserting agreement.
+
 ## Status
 
-Resolved. Both failures were in reading the figures, not in the physics:
+Resolved for everything except the shape of Figs. 6(a)–(c)'s five-quark curve
+at 2K = 21, which is characterized above. Both earlier failures were in reading
+the figures, not the physics:
 
 * **Fig. 6(a)–(c)** — the valence and five-quark curves cross three times, and
   at scan resolution the dashes of the dashed curve read as markers. Validated

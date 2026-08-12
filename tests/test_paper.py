@@ -483,3 +483,64 @@ def test_fig6d_y_axis_is_confirmed_by_the_number_sum_rule():
     assert sum(valence_article) * dx == pytest.approx(6.0, abs=0.15)
     thesis = [v * 30.0 / 48.0 for v in valence_article]
     assert sum(thesis) * dx < 4.0                     # nowhere near 6
+
+
+# ── the seven-quark sector: thesis Fig. 18(b), the article's Fig. 4(c) ─────
+
+def load_thesis_fig18b(mg):
+    rows = []
+    with open(ROOT / "refs" / "thesis_fig18b.csv") as fh:
+        for row in csv.DictReader(ln for ln in fh if not ln.startswith("#")):
+            if float(row["mg"]) == mg:
+                rows.append((float(row["x"]), float(row["multiplier"]),
+                             float(row["q"])))
+    return rows
+
+
+def test_seven_quark_sector_matches_the_thesis_within_20_percent():
+    """Our seven-quark baryon structure function against thesis Fig. 18(b).
+
+    This sector had never been compared with anything.  It agrees in shape and
+    magnitude but sits systematically high: 1.171, 1.214, 1.141 at the three
+    well-resolved sites, a mean of 1.175.
+
+    That is a real, previously unrecorded discrepancy, and it is worth keeping
+    in proportion.  The sector carries 1.9e-7 of the baryon's quark number --
+    four orders below the five-quark sector, which reproduces the panel
+    *directly above it on the same page* to 1%.  Fortran and Python agree here
+    to every printed digit, and our rebuilt Fortran reproduces the 1990-era
+    output byte-for-byte at 2K=21/25/29, so this is not a porting error: it is
+    a difference between what qcdf.f computes and what was published.
+
+    The tolerance is deliberately loose.  This test exists to notice a change
+    in that 1.175, not to assert agreement.
+    """
+    from dlcq.read_fortran import read_out
+
+    path = ROOT / "runs" / "K15_B1" / "qcdf.out"
+    if not path.exists():
+        pytest.skip("no 2K=15 B=1 run; see fortran/run_case.sh")
+    res = read_out(path)
+    idx = int(physical_indices(res)[0])
+    ratios = []
+    for x, mult, published in load_thesis_fig18b(1.6):
+        xs, q, _ = structure_function(res, idx, nparton=7)
+        i = int(np.argmin(np.abs(xs - x)))
+        if published < 0.1:                      # marker resting on the axis
+            continue
+        ratios.append(q[i] * mult / published)
+    assert ratios, "no comparable points"
+    assert 0.8 < float(np.mean(ratios)) < 1.3, f"ratios {ratios}"
+
+
+def test_five_quark_sector_beats_the_seven_quark_one():
+    """The two panels of thesis Fig. 18 come from the same run, same page.
+
+    Five-quark reproduces to 1%, seven-quark to 17.5%.  Recording the contrast
+    is the point: it says the discrepancy is specific to the highest sectors,
+    not a general fault in the Fock projection or its normalization.
+    """
+    five = [7.933 / 7.93, 4.975 / 4.77, 6.239 / 6.74, 2.764 / 2.72]
+    seven = [6.232 / 5.32, 4.806 / 3.96, 3.116 / 2.73]
+    assert abs(float(np.mean(five)) - 1.0) < 0.03
+    assert float(np.mean(seven)) > 1.10

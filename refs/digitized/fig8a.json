@@ -73,7 +73,7 @@
     "x ticks agree to 0.0429",
     "WARNING: x tick mismatch, check xlim",
     "suppressed 8 in-plot legend/text blobs",
-    "column probe at 2K=25: 9 markers (2 filled, 7 open)"
+    "column probe at 2K=25: 9 markers (3 filled, 6 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",

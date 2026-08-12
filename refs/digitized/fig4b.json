@@ -65,7 +65,7 @@
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
     "axis-dot lattice: inconclusive (7/9 dots matched; needs >=7 and >=80%)",
     "suppressed 14 in-plot legend/text blobs",
-    "column probe at 2K=15: 12 markers (0 filled, 12 open)"
+    "column probe at 2K=15: 12 markers (4 filled, 8 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",

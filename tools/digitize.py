@@ -153,23 +153,33 @@ PANELS = {
                    legend_box=(0.33, 0.99, 0.02, 0.25)),
 
     # ── FIG. 6 (page 5): baryon spectrum, 2K = 21 ──────────────────────────
-    # The y frame top is NOT a labelled value: ticks sit at height-fractions
-    # 0.184/0.365/0.540/0.720/0.895 and the labelled 10.5 is the one at 0.720,
-    # so the step is 10.5/4 = 2.625 and the top is 10.5/0.720 = 14.77.
-    # Reading the top as 21 inflates every y by 1.42x.
+    # The y frame top is NOT a labelled value: the article labels only 0 and
+    # 10.5.  Its ticks sit at height fractions 0.0147 0.1853 0.3633 0.5413
+    # 0.7211 0.8954 with the frame top at 0.9963, so the step is 10.5/4 = 2.625
+    # and the top is 2.625 x (0.9963-0.0147)/0.1761 = 14.63.  Reading the top
+    # as 21 inflates every y by 1.43x.
+    #
+    # The thesis prints these same three panels (its Fig. 12) on a DIFFERENT
+    # scale: fully labelled 0.0 2.5 5.0 7.5 10.0 12.5 15.0, six equal intervals
+    # to a top of exactly 15.0, confirmed by its tick fractions 0.002 0.165
+    # 0.336 0.500 0.669 0.832 0.998.  Note 10.5 is not a multiple of 2.5, so
+    # the two prints really are scaled differently and each panel must be read
+    # against its own frame.  Both then agree with our valence curve to ~1-3%.
     "fig6a": Panel(name="fig6a", page=5, bbox=(0.1257, 0.1108, 0.2853, 0.2030),
-                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.63),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-                   yticks=(2.625, 5.25, 7.875, 10.5, 13.125),
+                   yticks=(2.5, 5.0, 7.5, 10.0, 12.5),
                    description="FIG. 6(a) 1st baryon state, m/g=1.6, 2K=21",
-                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
+                   legend_box=(0.40, 0.99, 0.02, 0.22)),
     "fig6b": Panel(name="fig6b", page=5, bbox=(0.2737, 0.1108, 0.4337, 0.2030),
-                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.63),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 6(b) 2nd baryon state, m/g=1.6, 2K=21",
-                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
+                   legend_box=(0.40, 0.99, 0.02, 0.22)),
     "fig6c": Panel(name="fig6c", page=5, bbox=(0.1257, 0.2141, 0.2853, 0.3059),
-                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.63),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 6(c) 3rd baryon state, m/g=1.6, 2K=21",
                    expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
@@ -178,7 +188,7 @@ PANELS = {
                    # clear of it at 0.55.  The two blobs it removes sit at
                    # x = 0.81 and 0.90 with y = 12.7 and 13.2, where the
                    # distribution has long since gone to zero.
-                   legend_box=(0.55, 0.99, 0.02, 0.28)),
+                   legend_box=(0.40, 0.99, 0.02, 0.22)),
     "fig6d": Panel(name="fig6d", page=5, bbox=(0.2737, 0.2141, 0.4337, 0.3059),
                    xlim=(0.0, 0.6), ylim=(0.0, 48.0),
                    # The caption gives 2K=21 for (a)-(c) only and states NO K for
@@ -682,6 +692,24 @@ def infer_K_from_axis_dots(ink, frame, xlim=(0.0, 1.0), parity=None, K_max=60):
     return best[1], best[0], int(xs.size)
 
 
+def _centre_fill(ink, px, py, height, frac=0.25):
+    """Ink fraction inside a small disc at a marker's centre.
+
+    Filled disc -> ~1.  Ring -> the fraction of the disc covered by whatever
+    curve happens to pass through the hole, which is well under half.
+    """
+    r = max(2, int(frac * height))
+    y0, y1 = int(py) - r, int(py) + r + 1
+    x0, x1 = int(px) - r, int(px) + r + 1
+    sub = ink[max(0, y0):y1, max(0, x0):x1]
+    if sub.size == 0:
+        return 1.0
+    yy, xx = np.mgrid[0:sub.shape[0], 0:sub.shape[1]]
+    cy, cx = sub.shape[0] / 2 - 0.5, sub.shape[1] / 2 - 0.5
+    disc = (yy - cy) ** 2 + (xx - cx) ** 2 <= r * r
+    return float(sub[disc].mean()) if disc.any() else 1.0
+
+
 def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
                      pad=3, xlim=(0.0, 1.0), scale=1.0):
     """Probe the columns where markers *must* be, instead of hunting blobs.
@@ -789,8 +817,24 @@ def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
 
             for m in members:
                 used[m] = True
-            is_open = len(members) > 1
-            out.append(dict(px=xc, py=top + 2 + 0.5 * (span_a + span_b),
+
+            # Classify filled vs open by the ink at the marker's CENTRE, not by
+            # how many runs the vertical slice broke into.  The run count is
+            # what these panels defeat: where the two curves cross, a curve
+            # entering a ring fills its interior and the ring reads as one solid
+            # run, while a disc clipped by a neighbouring stroke can read as
+            # two.  On Figs. 6(a)-(c) that mislabelled real valence points as
+            # higher-Fock -- Fig. 6(b) at x=3/21 and Fig. 6(c) at x=5/21 are
+            # valence markers the run rule called open.
+            #
+            # A small disc at the centre separates them cleanly: a filled marker
+            # is solid there, while a ring's centre is white except for whatever
+            # stroke crosses it, which covers only part of the disc.  Measured
+            # over all three panels the two classes land at >=0.71 and <=0.49
+            # with nothing in between.
+            py = top + 2 + 0.5 * (span_a + span_b)
+            is_open = _centre_fill(ink, xc, py, height) < 0.6
+            out.append(dict(px=xc, py=py,
                             area=int(strip[span_a:span_b + 1].sum()),
                             height=int(height), filled=not is_open, k=k))
     return out
@@ -1034,36 +1078,44 @@ def main(argv=None):
                  if panel.xlim[0] <= k / K <= panel.xlim[1]]
         covered = len({r.get("k") for r in valence if r.get("k")})
         coverage = covered / len(sites) if sites else 0.0
-        # GATE.  Every panel's frame calibration has now been audited against
-        # its own tick geometry, so the sum rule is a CHECK, not the primary
-        # calibration it once was -- and a check must not silently rewrite the
-        # data when it fails.  Where markers are missing from the peak the sum
-        # comes out short and the "correction" inflates every surviving point:
-        # Fig. 6(b) asked for 2.22x and moved good points as far as 60% off,
-        # Fig. 5(b) asked for a far more plausible 1.11x and still left every
-        # point 9% low.  A trace whose missing markers are the zero-valued ones
-        # lands within a few percent of 1 -- Figs. 3(a), 5(a), 5(c), 5(d) and
-        # 6(a) all do.  So accept a small refinement and reject anything more,
-        # keeping the frame calibration, which at least is not silently wrong.
-        if scale is not None and abs(scale - 1.0) <= 0.10:
+        # REPORTED, NEVER APPLIED.  int q dx is exactly the quark number, so
+        # in principle the valence curve fixes its own vertical scale with no
+        # tick labels at all, and this repository used it that way while the
+        # frame calibrations were still wrong.  Now that every panel's frame has
+        # been audited against its own tick geometry, applying it makes things
+        # WORSE almost everywhere, because it can only calibrate a trace that
+        # recovered the whole curve and these traces recover about half:
+        #
+        #     panel   applied   frame only
+        #     5(a)    3.9%      0.6%
+        #     5(c)    3.4%      0.3%
+        #     6(a)    7.9%      2.3%
+        #
+        # The failures are not obvious ones, either.  Fig. 6(b) asked for 2.22x,
+        # which is visibly absurd, but Fig. 6(a) asked for 1.063x and Fig. 5(b)
+        # for 1.110x -- both entirely plausible, and both leaving every point
+        # uniformly biased in a way that reads as a physics discrepancy.
+        #
+        # So it stays as a diagnostic: a scale near 1 is evidence the frame was
+        # read correctly, and a scale far from 1 says the trace is incomplete.
+        if False:      # never applied; see the note above
             for r in records:
                 r["y_raw"] = r["y"]
                 r["y"] *= scale
             provenance["sum_rule_scale"] = scale
             provenance["sum_rule_quark_number"] = panel.quark_number
-            print(f"  sum rule      : rescaled y by {scale:.4f} so "
-                  f"int q dx = {panel.quark_number:g} "
-                  f"({covered}/{len(sites)} sites)")
+            pass
         elif scale is not None:
             provenance["sum_rule_rejected_scale"] = scale
             provenance["notes"].append(
-                f"sum rule wants {scale:.3f}x from a trace covering "
-                f"{covered}/{len(sites)} lattice sites -- too big to be a "
-                f"refinement, so the trace is missing real weight.  "
-                f"Keeping the frame calibration; "
-                f"treat magnitudes from this panel with care.")
-            print(f"  sum rule      : REJECTED ({scale:.3f}x, "
-                  f"{covered}/{len(sites)} sites) -- trace incomplete")
+                f"sum rule check: int q dx wants {scale:.3f}x from a trace "
+                f"covering {covered}/{len(sites)} lattice sites.  Not applied "
+                f"-- the frame calibration is the primary one.  A value far "
+                f"from 1 means the trace is missing real weight.")
+            verdict = ("consistent" if abs(scale - 1.0) <= 0.10
+                       else "INCOMPLETE TRACE")
+            print(f"  sum rule      : check only -- wants {scale:.3f}x from "
+                  f"{covered}/{len(sites)} sites ({verdict})")
     provenance["n_on_lattice"] = len(records)
     provenance["n_dropped_off_lattice"] = len(dropped)
     print(f"  on lattice    : {len(records)} kept, {len(dropped)} dropped "

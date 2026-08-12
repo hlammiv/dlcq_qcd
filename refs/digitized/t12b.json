@@ -85,7 +85,7 @@
   "notes": [
     "x ticks: found 23, expected 6 (calibration still from frame edges)",
     "suppressed 20 in-plot legend/text blobs",
-    "sum rule wants 0.523x from a trace covering 9/10 lattice sites -- too big to be a refinement, so the trace is missing real weight.  Keeping the frame calibration; treat magnitudes from this panel with care."
+    "sum rule check: int q dx wants 0.523x from a trace covering 9/10 lattice sites.  Not applied -- the frame calibration is the primary one.  A value far from 1 means the trace is missing real weight."
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "blob (probe found too few)",

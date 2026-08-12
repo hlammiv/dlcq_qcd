@@ -13,19 +13,19 @@ marker count in brackets — Fortran and Python give the same table:
 
 | panel | valence | higher-Fock |
 |---|---|---|
-| 3(a) | 1.3% (12) | — |
+| 3(a) | 1.9% (12) | — |
 | 3(b) | 1.4% (9) | — |
-| 5(a) | 3.9% (8) | 4.1% (10) |
+| 5(a) | 0.6% (8) | 1.4% (10) |
 | 5(b) | 0.8% (8) | 2.0% (7) |
-| 5(c) | 3.4% (7) | 4.8% (9) |
-| 5(d) | 2.7% (6) | 1.7% (1) |
-| 6(a) | 7.9% (7) | 34.5% (5) |
-| 6(b) | 1.3% (5) | 16.3% (2) |
-| 6(c) | 2.9% (4) | 348.5% (3) |
+| 5(c) | 0.3% (7) | 1.4% (9) |
+| 5(d) | 2.5% (6) | 0.9% (1) |
+| 6(a) | 1.4% (7) | 29.7% (5) |
+| 6(b) | 0.4% (5) | 16.4% (2) |
+| 6(c) | 2.0% (4) | 352.8% (3) |
 | 6(d) | **0.3% (3)** | **0.8% (5)** |
 
-Every valence curve is inside 8%, most inside 4%. Every meson higher-Fock curve
-is inside 5%, at multipliers of 10² to 10⁴. The three bad cells are the baryon
+Every valence curve is inside 2.5%. Every meson higher-Fock curve is inside 2%,
+at multipliers of 10² to 10⁴. The three bad cells are the baryon
 higher-Fock series of Figs. 6(a)–(c), which is a **tracing** failure with a
 known cause and an independent validation — see
 `docs/baryon-higher-fock.md`: those panels draw the valence and five-quark
@@ -33,9 +33,9 @@ curves crossing three times, and at scan resolution the dashes of the dashed
 curve read as markers. Against the thesis's uncluttered plot of that same
 sector (Fig. 18(a)) it agrees to 0.07–3.9%.
 
-## Four calibration bugs the images exposed
+## Six calibration bugs the images exposed
 
-Getting there meant fixing four ways of mis-reading a published axis. All four
+Getting there meant fixing six ways of mis-reading a published figure. All
 were found by auditing tick *geometry* against tick *labels*, and none of them
 was visible in the numbers alone.
 
@@ -61,6 +61,19 @@ Fig. 3(a) from 61% to 1.3% and Fig. 3(b) from 97% to 1.4%.
 **A K the caption never states.** Fig. 6(d) is 2K = 24, not the 22 we assumed.
 See `docs/inferred-K.md` for how the panel itself says so, and
 `docs/baryon-higher-fock.md` for the result.
+
+**Two prints of one figure, on two scales.** The article's Fig. 6 labels only 0
+and 10.5, giving a frame top of 2.625 × 5.573 = 14.63; the thesis prints the
+same three panels fully labelled 0.0 … 15.0. Since 10.5 is not a multiple of
+2.5 these really are different scalings, and each panel must be read against its
+own frame. Doing so took Fig. 6's valence curves to 1.4%, 0.4% and 2.0%.
+
+**A marker classifier that fails where curves cross.** Filled-vs-open was
+decided by how many runs a vertical slice broke into, which is exactly what a
+crossing defeats: a curve entering a ring fills its interior. It called
+Fig. 6(b) x=3/21 and Fig. 6(c) x=5/21 higher-Fock when both are valence points.
+Classifying on the ink at the marker's *centre* separates the classes with a
+clear gap — ≥0.71 for filled against ≤0.49 for open, nothing in between.
 
 ## The sum rule is a check, not a calibration
 

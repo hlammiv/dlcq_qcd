@@ -69,7 +69,7 @@
     "suppressed 12 in-plot legend/text blobs",
     "declared legend box removed 1 blobs",
     "declared legend box removed 3 probe markers",
-    "column probe at 2K=24: 8 markers (2 filled, 6 open)"
+    "column probe at 2K=24: 8 markers (3 filled, 5 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
