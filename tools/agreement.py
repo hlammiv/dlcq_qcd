@@ -107,15 +107,21 @@ def main(argv=None):
             if args.verbose:
                 print(f"  {name} x={xd:.4f}  paper {yd:9.3f}  ours "
                       f"{best[1]:9.3f}  {100 * best[0]:6.1f}%  {best[2]}")
-        rows.append((name, val, high))
+        rows.append((name, val, high, bool(phys.get("partial"))))
 
     def med(v):
         return f"{100 * float(np.median(v)):.1f}% ({len(v)})" if v else "--"
 
     print(f"\nmedian |deviation| vs the published panel  [{args.source}]\n")
     print(f"{'panel':<8}{'valence':>16}{'higher-Fock':>18}")
-    for name, val, high in rows:
-        print(f"{name:<8}{med(val):>16}{med(high):>18}")
+    for name, val, high, partial in rows:
+        mark = "  (partial: a published series is not computed)" if partial else ""
+        print(f"{name:<8}{med(val):>16}{med(high):>18}{mark}")
+    if any(r[3] for r in rows):
+        print("\nPartial panels draw a second coupling on the same lattice "
+              "sites, so their\nmarkers cannot be attributed by a column probe. "
+              "Those panels are measured\nby hand instead -- see "
+              "refs/article_fig4.csv and refs/thesis_fig18*.csv.")
     return 0
 
 

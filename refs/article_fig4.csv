@@ -7,24 +7,28 @@
 #
 # Frame tops are NOT the last labelled tick in (b) and (c) -- the same trap as
 # Figs. 3(b), 5(b) and 6.  Read from the y-label positions:
-#   (a) "21"    at height fraction 1.000 -> top 21.00
-#   (b) "22.5"  at height fraction 0.859 -> top 26.19
-#   (c) "11.25" at height fraction 0.891 -> top 12.63
 # Reading (b) as 22.5 makes every value 16% low, which reads as a discrepancy.
 #
 # Only the m/g=1.6 series are recorded.  Each panel also draws m/g=0.1, whose
 # multipliers are not reliably legible and which no round power of ten
 # reconciles (see docs/baryon-higher-fock.md).
 #
+# The k=7 point of (c) is omitted: there the distribution is ~0 and the marker
+# rests on the axis, so its centre reads 0.19 against a true value of 0.045 --
+# a marker-radius offset, not a measurement of anything.
+#
+# Frame tops are FITTED by tools/pin_axes.py from the y-label positions:
+#   (a) 20.81   (b) 26.17   (c) 12.62
+#
 # panel,sector,K_code,k,multiplier,q
-fig4a,4,14,1,1e4,17.599
-fig4a,4,14,3,1e4,10.147
-fig4a,4,14,5,1e4,2.342
-fig4a,4,14,7,1e4,3.754
-fig4b,5,15,1,1e3,8.094
-fig4b,5,15,3,1e3,5.047
-fig4b,5,15,5,1e3,6.489
-fig4b,5,15,7,1e3,2.442
-fig4c,7,15,1,1e7,5.993
-fig4c,7,15,3,1e7,5.616
-fig4c,7,15,5,1e7,2.863
+fig4a,4,14,1,1e+04,17.440
+fig4a,4,14,3,1e+04,10.055
+fig4a,4,14,5,1e+04,2.320
+fig4a,4,14,7,1e+04,3.720
+fig4b,5,15,1,1e+03,8.088
+fig4b,5,15,3,1e+03,5.043
+fig4b,5,15,5,1e+03,6.484
+fig4b,5,15,7,1e+03,2.440
+fig4c,7,15,1,1e+07,5.988
+fig4c,7,15,3,1e+07,5.611
+fig4c,7,15,5,1e+07,2.861

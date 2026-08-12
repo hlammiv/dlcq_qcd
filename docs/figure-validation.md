@@ -59,23 +59,50 @@ reproduced to 1.5–4% at 2K = 15, by two independent published panels. So the
 disagreement is not "baryon higher-Fock"; it is specific to 2K = 21, plus the
 two-extra-pair sector.
 
-## Five frame tops that were not the last labelled tick
+## The axes, pinned
 
-Worth stating on its own, because it is the single most common way these
-comparisons went wrong. In **five** panels the frame top is not the last
-labelled value, and in every case reading it naively produced what looked
-exactly like a physics discrepancy:
+Misreading a vertical scale was by far the most common way these comparisons
+went wrong, so the scales are no longer read by hand or inferred from tick
+spacing. `tools/pin_axes.py` locates the y-axis **labels**, fits the
+height-fraction → value map through them, and reads the frame top off the fit.
+Each panel records the label values it carries in `Panel.ylabels`, so the fit
+is reproducible and the assumption is visible.
 
-| panel | labelled | actual top | effect if misread |
-|---|---|---|---|
-| Fig. 3(b) | 11.25 | 13.5 | 20% low |
-| Fig. 4(b) | 22.5 | 26.19 | 16% low |
-| Fig. 4(c) | 11.25 | 12.63 | 11% low |
-| Fig. 5(b) | (right axis) | 3.6 not 12.0 | 233% high |
-| Fig. 6(a)–(c) | 10.5 | 14.63 | 44% low |
+Two things make it trustworthy. The fit is over-determined wherever a panel
+carries three or more labels, so the residual is a real check — it comes out
+at 0.01 to 0.22 in data units. And every one of these axes starts at zero, so
+the fitted value at the frame *bottom* is an independent test that was never
+used in the fit: it lands between −0.14 and +0.01 on all fifteen panels. That
+constraint also rejects bad fits automatically — on Fig. 4(b) the unconstrained
+best fit puts the bottom at −18.4 and the top at 39.
 
-The reliable method is to locate the y-label *positions* and fit, rather than
-assume the top tick is the top of the frame.
+| panel | highest label | fitted top | value at bottom | rms |
+|---|---|---|---|---|
+| 3(a) | 3.5 | 3.588 | −0.047 | 0.049 |
+| 3(b) | 11.25 | **13.67** | −0.056 | 0.106 |
+| 4(a) | 21 | 20.81 | −0.139 | 0.032 |
+| 4(b) | 22.5 | **26.17** | −0.572 | 0.222 |
+| 4(c) | 11.25 | **12.62** | −0.051 | 0.092 |
+| 5(a) | 3.6 | 3.656 | −0.039 | 0.027 |
+| 5(c) | 3.6 | 3.601 | −0.023 | 0.036 |
+| 6(a) | 10.5 | **14.77** | −0.068 | 0.000 |
+| 6(c) | 10.5 | **14.55** | +0.013 | 0.000 |
+| t12(a)–(c) | 15.0 | 15.12 / 15.07 / 15.10 | −0.03 … +0.01 | ≤0.045 |
+| t13(a) | 30 | 30.17 | −0.138 | 0.035 |
+| t18(a) | 25 | 25.07 | −0.043 | 0.026 |
+| t18(b) | 12 | 12.08 | +0.001 | 0.011 |
+
+Five tops sit well above the highest printed label, and Fig. 5(b) uses its
+neighbour's axis entirely. Read naively those give apparent discrepancies of
+16% (4(b)), 20% (3(b)), 44% (6) and 233% (5(b)) — every one of which looks like
+a physics result.
+
+**What pinning them settles.** Fig. 4(a) now reproduces to 0.0–1.6% and
+Fig. 4(b) to 1.4–3.9%. And Fig. 6 is *not* an axis artifact: its top is 14.77
+against the 14.63 previously inferred from tick spacing, a 1% shift that leaves
+the higher-Fock disagreement untouched. Nor do its two curves sit on different
+scales — the panel row was checked to its margins and carries no right-hand
+axis, so valence and higher-Fock share the one axis the labels fix.
 
 ## Correction: the basis spread was not real
 

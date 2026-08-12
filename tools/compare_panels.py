@@ -62,14 +62,14 @@ PANEL_PHYSICS = {
     # both couplings.  The m/g=0.1 series are omitted: no round multiplier
     # reconciles them with the published curves (see docs/baryon-higher-fock.md),
     # so including them would compare against an unreadable legend.
-    "fig4a": dict(B=0, K=14, state=0,
+    "fig4a": dict(partial=True, B=0, K=14, state=0,
                   series=[(4, 1e4, True, r"$q\bar qq\bar q$, $m/g{=}1.6$ $(\times10^4)$")], no_valence=True),
-    "fig4b": dict(B=1, K=15, state=0,
+    "fig4b": dict(partial=True, B=1, K=15, state=0,
                   series=[(5, 1e3, True, r"$q(x)$, $m/g{=}1.6$ $(\times10^3)$"),
                           (-5, 1e3, False, r"$\bar q(x)$, $m/g{=}1.6$ $(\times10^3)$")], no_valence=True),
     # Legend reads x10^4 here but x10^7 in the thesis twin (Fig. 18(b)); 10^7 is
     # the one consistent with the plotted values, so the article's is a misprint.
-    "fig4c": dict(B=1, K=15, state=0,
+    "fig4c": dict(partial=True, B=1, K=15, state=0,
                   series=[(7, 1e7, True, r"$qqqq\bar qq\bar q$, $m/g{=}1.6$ $(\times10^7)$")], no_valence=True),
     "fig5a": dict(B=0, K=24, state=0,
                   series=[(2, 1.0, True, r"$q\bar q$"),
@@ -99,10 +99,10 @@ PANEL_PHYSICS = {
     # THESIS Fig. 18 -- the same two sectors as Fig. 4(b)/(c) but plotted alone,
     # with no valence curve to cross.  These are the cleanest baryon
     # higher-Fock targets in either document.
-    "t18a": dict(B=1, K=15, state=0,
+    "t18a": dict(partial=True, B=1, K=15, state=0,
                  series=[(5, 1e3, True, r"$q(x)\ (\times10^3)$"),
                          (-5, 1e3, False, r"$\bar q(x)\ (\times10^3)$")], no_valence=True),
-    "t18b": dict(B=1, K=15, state=0,
+    "t18b": dict(partial=True, B=1, K=15, state=0,
                  series=[(7, 1e7, True, r"$q(x)\ (\times10^7)$")], no_valence=True),
     # THESIS Fig. 12 -- the thesis print of the article's Fig. 6(a)-(c), on its
     # own y scale (0..15.0 rather than the article's 14.63).  Worth generating

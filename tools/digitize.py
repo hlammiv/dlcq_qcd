@@ -54,6 +54,12 @@ class Panel:
     ``xticks``/``yticks`` are the tick *values* printed on the axes, ascending.
     """
 
+    #
+    # ``ylim`` upper bounds are FITTED, not assumed: tools/pin_axes.py locates
+    # the y-axis labels and fits the height-fraction -> value map, then reads
+    # off the frame top.  Rerun it after changing any bbox.  Five panels here
+    # have a frame top above their highest printed label, and assuming
+    # otherwise produced apparent discrepancies of 16-233%.
     name: str
     page: int                      # PDF page (1-based)
     bbox: tuple                    # fractional (l, t, r, b)
@@ -72,6 +78,12 @@ class Panel:
     # distribution, N*B for a baryon's.
     quark_number: float | None = None
     sector: str = ""
+    # The y-axis label VALUES printed on this panel, highest first.  Used by
+    # tools/pin_axes.py to fit the frame top from where the labels sit, which is
+    # the only reliable way to read these axes: five panels here have a frame
+    # top above their highest label, and tick spacing is contaminated by curve
+    # ink.  Leave empty if the panel is unlabelled or shares a neighbour's axis.
+    ylabels: tuple = ()
     # Fractional (x0, x1, ytop, ybot) box inside the frame occupied by the
     # in-plot legend, measured from the render.  The generic row rule handles
     # small legends, but Fig. 6(d)'s covers half the panel with three lines of
@@ -88,49 +100,55 @@ class Panel:
 PANELS = {
     # ── FIG. 3 (page 4): valence structure functions, K NOT stated ──────────
     "fig3a": Panel(name="fig3a", page=4, bbox=(0.1149, 0.7900, 0.2765, 0.8813),
-                   xlim=(0.0, 1.0), ylim=(0.0, 3.5),
+                   xlim=(0.0, 1.0), ylim=(0.0, 3.588),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 3(a) SU(3) meson valence; K not stated",
-                   B=0, N=3, quark_number=1.0, sector="valence"),
+                   B=0, N=3, quark_number=1.0, sector="valence",
+                   ylabels=(3.5, 2.8, 2.1, 1.4, 0.7, 0.0)),
     # The frame top is NOT the last labelled tick.  Ticks sit at height
     # fractions 0.147 0.288 0.560 0.696 0.833 0.998, and the labelled 11.25 is
     # the one at 0.833, so the top is 11.25/0.833 = 13.5.  Reading it as 11.25
     # shrinks every y by 1.20x.
     "fig3b": Panel(name="fig3b", page=4, bbox=(0.3061, 0.7906, 0.4677, 0.8818),
-                   xlim=(0.0, 1.0), ylim=(0.0, 13.5),
+                   xlim=(0.0, 1.0), ylim=(0.0, 13.67),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 3(b) SU(3) baryon valence; K not stated",
                    B=1, N=3, quark_number=3.0, sector="valence",
-                   legend_box=(0.50, 0.99, 0.02, 0.40)),
+                   legend_box=(0.50, 0.99, 0.02, 0.40),
+                   ylabels=(11.25, 7.5, 3.75, 0.0)),
 
     # ── FIG. 4 (page 4): higher-Fock sectors, scaled by 10^n ────────────────
     "fig4a": Panel(name="fig4a", page=4, bbox=(0.5376, 0.0949, 0.6999, 0.1902),
-                   xlim=(0.0, 1.0), ylim=(0.0, 21.0),
+                   xlim=(0.0, 1.0), ylim=(0.0, 20.81),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 4(a) meson, one extra qqbar pair (x10^4/10^2)",
-                   B=0, N=3, sector="higher-fock"),
+                   B=0, N=3, sector="higher-fock",
+                   ylabels=(21, 14, 7, 0)),
     # Frame top 26.2, not the labelled 22.5: the "22.5" label sits at height
     # fraction 0.859 of the frame, so the top is 22.5/0.859.  Same trap as
     # Figs. 3(b) and 6.  With 22.5 every value comes out 16% low.
     "fig4b": Panel(name="fig4b", page=4, bbox=(0.7304, 0.0961, 0.8929, 0.1911),
-                   xlim=(0.0, 1.0), ylim=(0.0, 26.19),
+                   xlim=(0.0, 1.0), ylim=(0.0, 26.17),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 4(b) baryon, one extra pair, incl. antiquarks",
-                   B=1, N=3, sector="higher-fock"),
+                   B=1, N=3, sector="higher-fock",
+                   ylabels=(22.5, 15.0, 7.5, 0.0)),
     # Frame top 12.63, not the labelled 11.25, which sits at fraction 0.891.
     "fig4c": Panel(name="fig4c", page=4, bbox=(0.5372, 0.1811, 0.6994, 0.2765),
-                   xlim=(0.0, 1.0), ylim=(0.0, 12.63),
+                   xlim=(0.0, 1.0), ylim=(0.0, 12.62),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 4(c) baryon, two extra pairs",
-                   B=1, N=3, sector="higher-fock"),
+                   B=1, N=3, sector="higher-fock",
+                   ylabels=(11.25, 7.5, 3.75, 0.0)),
 
     # ── FIG. 5 (page 4): meson spectrum, 2K = 24 ───────────────────────────
     "fig5a": Panel(name="fig5a", page=4, bbox=(0.5478, 0.7005, 0.7149, 0.7973),
-                   xlim=(0.0, 1.0), ylim=(0.0, 3.6),
+                   xlim=(0.0, 1.0), ylim=(0.0, 3.656),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 5(a) 1st meson state, m/g=1.6, 2K=24",
                    expected_K=24, B=0, N=3, quark_number=1.0, sector="valence",
-                   legend_box=(0.05, 0.99, 0.02, 0.25)),
+                   legend_box=(0.05, 0.99, 0.02, 0.25),
+                   ylabels=(3.6, 2.4, 1.2, 0.0)),
     # ylim 3.6, not 12.0.  Fig. 5's right-hand axis (0 2.4 4.8 7.2 9.6 12.0)
     # spans panel (d) only -- it starts at the (b)/(d) boundary and runs down.
     # Panel (b) shares the LEFT axis with (a), which the tick geometry confirms:
@@ -144,11 +162,12 @@ PANELS = {
                    expected_K=24, B=0, N=3, quark_number=1.0, sector="valence",
                    legend_box=(0.05, 0.99, 0.02, 0.25)),
     "fig5c": Panel(name="fig5c", page=4, bbox=(0.5478, 0.7873, 0.7106, 0.8836),
-                   xlim=(0.0, 1.0), ylim=(0.0, 3.6),
+                   xlim=(0.0, 1.0), ylim=(0.0, 3.601),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 5(c) 3rd meson state, m/g=1.6, 2K=24",
                    expected_K=24, B=0, N=3, quark_number=1.0, sector="valence",
-                   legend_box=(0.05, 0.99, 0.02, 0.25)),
+                   legend_box=(0.05, 0.99, 0.02, 0.25),
+                   ylabels=(3.6, 2.4, 1.2, 0.0)),
     "fig5d": Panel(name="fig5d", page=4, bbox=(0.6994, 0.7873, 0.8665, 0.8836),
                    xlim=(0.0, 1.0), ylim=(0.0, 12.0),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
@@ -170,20 +189,21 @@ PANELS = {
     # the two prints really are scaled differently and each panel must be read
     # against its own frame.  Both then agree with our valence curve to ~1-3%.
     "fig6a": Panel(name="fig6a", page=5, bbox=(0.1257, 0.1108, 0.2853, 0.2030),
-                   xlim=(0.0, 1.0), ylim=(0.0, 14.63),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    yticks=(2.5, 5.0, 7.5, 10.0, 12.5),
                    description="FIG. 6(a) 1st baryon state, m/g=1.6, 2K=21",
                    expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
-                   legend_box=(0.40, 0.99, 0.02, 0.22)),
+                   legend_box=(0.40, 0.99, 0.02, 0.22),
+                   ylabels=(10.5, 0.0)),
     "fig6b": Panel(name="fig6b", page=5, bbox=(0.2737, 0.1108, 0.4337, 0.2030),
-                   xlim=(0.0, 1.0), ylim=(0.0, 14.63),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 6(b) 2nd baryon state, m/g=1.6, 2K=21",
                    expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
                    legend_box=(0.40, 0.99, 0.02, 0.22)),
     "fig6c": Panel(name="fig6c", page=5, bbox=(0.1257, 0.2141, 0.2853, 0.3059),
-                   xlim=(0.0, 1.0), ylim=(0.0, 14.63),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.55),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 6(c) 3rd baryon state, m/g=1.6, 2K=21",
                    expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
@@ -192,7 +212,8 @@ PANELS = {
                    # clear of it at 0.55.  The two blobs it removes sit at
                    # x = 0.81 and 0.90 with y = 12.7 and 13.2, where the
                    # distribution has long since gone to zero.
-                   legend_box=(0.40, 0.99, 0.02, 0.22)),
+                   legend_box=(0.40, 0.99, 0.02, 0.22),
+                   ylabels=(10.5, 0.0)),
     "fig6d": Panel(name="fig6d", page=5, bbox=(0.2737, 0.2141, 0.4337, 0.3059),
                    xlim=(0.0, 0.6), ylim=(0.0, 48.0),
                    # The caption gives 2K=21 for (a)-(c) only and states NO K for
@@ -214,22 +235,25 @@ PANELS = {
     # and 6, but far more legibly printed.  These are the preferred targets.
     "t12a": Panel(name="t12a", page=82, source="thesis",
                   bbox=(0.330, 0.089, 0.690, 0.300),
-                  xlim=(0.0, 1.0), ylim=(0.0, 15.0),
+                  xlim=(0.0, 1.0), ylim=(0.0, 15.12),
                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                   description="THESIS Fig 12(a) = article Fig 6(a): 1st baryon, 2K=21",
-                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
+                   ylabels=(15.0, 12.5, 10.0, 7.5, 5.0, 2.5, 0.0)),
     "t12b": Panel(name="t12b", page=82, source="thesis",
                   bbox=(0.330, 0.313, 0.690, 0.523),
-                  xlim=(0.0, 1.0), ylim=(0.0, 15.0),
+                  xlim=(0.0, 1.0), ylim=(0.0, 15.07),
                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                   description="THESIS Fig 12(b) = article Fig 6(b): 2nd baryon, 2K=21",
-                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
+                   ylabels=(15.0, 12.5, 10.0, 7.5, 5.0, 2.5, 0.0)),
     "t12c": Panel(name="t12c", page=82, source="thesis",
                   bbox=(0.330, 0.540, 0.690, 0.750),
-                  xlim=(0.0, 1.0), ylim=(0.0, 15.0),
+                  xlim=(0.0, 1.0), ylim=(0.0, 15.1),
                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                   description="THESIS Fig 12(c) = article Fig 6(c): 3rd baryon, 2K=21",
-                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
+                   ylabels=(15.0, 12.5, 10.0, 7.5, 5.0, 2.5, 0.0)),
 
     # THESIS Fig 13(a): the article's Fig 6(d).  Three curves from TWO Fock
     # sectors -- 6q valence, and the 8-parton sector's q and qbar.  There is no
@@ -254,11 +278,12 @@ PANELS = {
     # 0.1364 0.2273 ..., which they are not.
     "t13a": Panel(name="t13a", page=83, source="thesis",
                   bbox=(0.125, 0.108, 0.485, 0.322),
-                  xlim=(0.0, 0.6), ylim=(0.0, 30.0),
+                  xlim=(0.0, 0.6), ylim=(0.0, 30.17),
                   xticks=(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6),
                   description="THESIS Fig 13(a) = article Fig 6(d): lightest "
                               "B=2 state, 2K=24",
-                  expected_K=24, B=2, N=3, sector="two-baryon"),
+                  expected_K=24, B=2, N=3, sector="two-baryon",
+                   ylabels=(30, 20, 10, 0)),
     # NOTE: t13(b)-(e) are the 2nd-5th B=2 states, available as further
     # regression targets for the same 2K=24 run.
 
@@ -289,11 +314,12 @@ PANELS = {
     # as markers.  Here there are no crossings.
     "t18a": Panel(name="t18a", page=89, source="thesis",
                   bbox=(0.220, 0.078, 0.780, 0.405),
-                  xlim=(0.0, 1.0), ylim=(0.0, 25.0),
+                  xlim=(0.0, 1.0), ylim=(0.0, 25.07),
                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                   description="THESIS Fig 18(a) = article Fig 4(b): five-quark "
                               "contribution to the lightest N=3 baryon, 2K=15",
-                  expected_K=15, B=1, N=3, sector="higher-fock"),
+                  expected_K=15, B=1, N=3, sector="higher-fock",
+                   ylabels=(25, 20, 15, 10, 5, 0)),
 
     # THESIS Fig 18(b): the SEVEN-quark contribution to the lightest N=3
     # baryon, 2K=15 -- the article's Fig. 4(c).  Legend: x m/g=1.6 (x10^7),
@@ -303,11 +329,12 @@ PANELS = {
     # generated alongside the others.
     "t18b": Panel(name="t18b", page=89, source="thesis",
                   bbox=(0.210, 0.425, 0.780, 0.757),
-                  xlim=(0.0, 1.0), ylim=(0.0, 12.0),
+                  xlim=(0.0, 1.0), ylim=(0.0, 12.08),
                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                   description="THESIS Fig 18(b) = article Fig 4(c): seven-quark "
                               "contribution to the lightest N=3 baryon, 2K=15",
-                  expected_K=15, B=1, N=3, sector="higher-fock"),
+                  expected_K=15, B=1, N=3, sector="higher-fock",
+                   ylabels=(12, 10, 8, 6, 4, 2, 0)),
 
     # ── FIG. 8 (page 7): meson mass vs m/g, with Hamer's SU(2) lattice points ──
     "fig8a": Panel(name="fig8a", page=7, bbox=(0.5943, 0.1381, 0.8324, 0.2760),

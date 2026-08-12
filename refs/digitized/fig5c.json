@@ -35,7 +35,7 @@
   ],
   "ylim": [
     0.0,
-    3.6
+    3.601
   ],
   "xtick_values": [
     0.0,
@@ -55,9 +55,9 @@
     "max_residual": 2.220446049250313e-16
   },
   "y_fit": {
-    "slope": -0.006282722513089004,
-    "intercept": 3.78219895287958,
-    "max_residual": 1.3322676295501878e-15
+    "slope": -0.006284467713787084,
+    "intercept": 3.783249563699825,
+    "max_residual": 4.440892098500626e-16
   },
   "n_markers": 22,
   "n_legend_suppressed": 7,
@@ -86,7 +86,7 @@
   },
   "K_used": 24,
   "K_source": "stated in paper",
-  "sum_rule_rejected_scale": 1.035791757049892,
+  "sum_rule_rejected_scale": 1.0355041170173866,
   "n_on_lattice": 16,
   "n_dropped_off_lattice": 0
 }
