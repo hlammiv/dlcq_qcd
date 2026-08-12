@@ -544,3 +544,27 @@ def test_five_quark_sector_beats_the_seven_quark_one():
     seven = [6.232 / 5.32, 4.806 / 3.96, 3.116 / 2.73]
     assert abs(float(np.mean(five)) - 1.0) < 0.03
     assert float(np.mean(seven)) > 1.10
+
+
+def test_fig6a_five_quark_total_agrees_even_though_the_shape_does_not(
+        fortran_K21):
+    """The one thing that does agree about Fig. 6(a)'s five-quark curve.
+
+    Integrating the published curve over the 2K=21 lattice gives a five-quark
+    quark number of 2.37e-3 against our 2.40e-3.  The sector's total weight is
+    right to 1.5%; only its distribution over x differs.  That is the constraint
+    any explanation has to satisfy, and it is why the non-orthogonal weighting
+    was the leading suspect -- c^T N c = 1 protects the total but not the
+    per-configuration attribution.  (It was tested and is not the cause.)
+
+    See docs/baryon-higher-fock.md and refs/thesis_fig12a_fivequark.csv.
+    """
+    published = np.array([8.53, 8.03, 1.06, 1.71, 5.04, 0.48])   # x10^3, k=1..11
+    res = fortran_K21
+    idx = int(physical_indices(res)[0])
+    x, q, _ = structure_function(res, idx, nparton=5)
+    # q comes back on the odd-momentum grid, so site k is index (k-1)/2
+    ours = np.array([q[(k - 1) // 2] * 1e3 for k in range(1, 13, 2)])
+    assert abs(ours.sum() - published.sum()) / published.sum() < 0.05
+    # and the shape genuinely differs -- this is the open item, kept visible
+    assert abs(ours[2] - published[2]) / published[2] > 1.0

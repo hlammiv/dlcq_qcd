@@ -358,6 +358,47 @@ contrast: the published curve has deeper valleys and higher lobes than ours.
 Both curves are bimodal with a minimum at the same place; the published one
 simply goes much closer to zero there.
 
+### The published curve, extracted
+
+The panel draws this series *dashed*, and at scan resolution its dashes are the
+same size as its markers — which is what made every earlier marker-based trace
+of it unreliable. Extracting it column by column instead, and removing at each
+column the ink run nearest our valence curve (which reproduces the published
+one to 1.4%), gives the whole curve rather than six points.
+`refs/thesis_fig12a_fivequark.csv` records 89 columns of it. It has:
+
+* a first lobe peaking at **10.71 at x ≈ 0.083**,
+* a **node, essentially reaching zero (0.31), at x ≈ 0.265**,
+* a second lobe peaking at **5.04 at x ≈ 0.432**,
+* nothing beyond x ≈ 0.55.
+
+Ours over the same range runs 6.30, 5.67, 3.86, 4.77, 3.48, 1.14 — the same
+total, spread smoothly, with no node.
+
+### The node does not move
+
+This is the most informative thing found. Thesis Fig. 15 is the strong-coupling
+twin of Fig. 12 — the same three baryon states at m/g = 1 instead of 1.6 — and
+every one of its five-quark curves has the same signature: a first lobe near
+x ≈ 0.08, a node near x ≈ 0.27, a second lobe near x ≈ 0.43. Measuring the node
+in Fig. 12's three panels gives x = 0.273, 0.235, 0.264.
+
+So across **six published panels — three states, two couplings —** the node sits
+at x ≈ 0.26 and the second lobe at x ≈ 0.43, essentially unmoved.
+
+Our three states are nothing like each other over that range:
+
+| state | 5q ×10³ at k = 1, 3, 5, 7, 9 |
+|---|---|
+| 0 | 6.30 5.67 3.86 4.77 3.48 |
+| 1 | 19.82 13.17 19.29 23.90 6.25 |
+| 2 | 29.59 21.01 26.45 34.43 15.40 |
+
+A structure function's node structure is a property of the state, so it should
+move between states and with the coupling. In the published curves it does not.
+That is hard to reconcile with all six being the quantity our code computes,
+though it does not by itself say what they are instead.
+
 ### What that is not
 
 Each of these was tested and eliminated:
