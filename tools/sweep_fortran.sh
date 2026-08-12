@@ -28,8 +28,11 @@ mkdir -p "$OUT"
 
 # m/g -> lambda = 1/sqrt(1 + pi (m/g)^2).  m/g = 0 is exactly massless by
 # Eq. (16) and needs no run.
-declare -A LAM=( [1.6]=0.33254949 [0.8]=0.57633109 [0.4]=0.81577472
-                 [0.2]=0.94253081 [0.1]=0.98465268 [0.05]=0.99609604 )
+# Full precision: an 8-digit lambda differs from mg_to_lambda(m/g) by ~5e-8,
+# which is harmless physically but has to be inside the provider's matching
+# tolerance for the figures to find these runs.
+declare -A LAM=( [1.6]=0.3325494918 [0.8]=0.5763310922 [0.4]=0.8157747155
+                 [0.2]=0.9425308117 [0.1]=0.9846526771 [0.05]=0.9960959907 )
 
 launch () {   # N B LPN K mg
     local N=$1 B=$2 LPN=$3 K=$4 mg=$5

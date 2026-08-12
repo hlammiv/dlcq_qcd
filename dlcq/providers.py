@@ -79,9 +79,21 @@ class FortranProvider(Provider):
 
     name = "fortran"
 
-    def __init__(self, run_root=None, allow_run=True, extra_search=()):
+    # Tolerance on matching lambda to a stored run.  It has to thread a needle:
+    #   * loose enough for the 8-digit lambda a sweep driver writes into the
+    #     Fortran input (0.99609604 vs mg_to_lambda(0.05) = 0.9960959907,
+    #     a 5e-8 difference that is physically irrelevant);
+    #   * tight enough to keep 0.3325 and mg_to_lambda(1.6) = 0.33254949
+    #     distinct -- they differ by 1.5e-5 and DO give different eigenvalues,
+    #     which is the whole reason paper_lambda exists.
+    # 1e-6 sits between them by two orders of magnitude on each side.
+    LAMBDA_ATOL = 1e-6
+
+    def __init__(self, run_root=None, allow_run=True, extra_search=(),
+                 lam_atol=None):
         self.run_root = Path(run_root or _ROOT / "runs")
         self.allow_run = allow_run
+        self.lam_atol = self.LAMBDA_ATOL if lam_atol is None else lam_atol
         # Historical outputs preserved in python/ carry K-tagged names.
         self.extra_search = [Path(p) for p in extra_search]
 
@@ -95,10 +107,11 @@ class FortranProvider(Provider):
     def _is_fortran_output(text: str) -> bool:
         return all(m in text for m in FortranProvider._FORTRAN_MARKERS)
 
-    def _find_existing(self, N, NF, B, K_code, rlamb) -> Path | None:
+    def _find_existing(self, N, NF, B, K_code, rlamb, LPN=None) -> Path | None:
         from .read_fortran import _parse_header
 
-        candidates = list(self.run_root.glob("*/qcdf.out"))
+        # rglob, not glob: sweep runs live at runs/sweep/<tag>/qcdf.out
+        candidates = list(self.run_root.rglob("qcdf.out"))
         for extra in self.extra_search:
             # Exclude *_py.out explicitly as well as by content.
             candidates.extend(sorted(p for p in extra.glob("qcdf*.out")
@@ -117,14 +130,15 @@ class FortranProvider(Provider):
                 continue
             if (meta["N"] == N and meta["NF"] == NF and meta["B"] == B
                     and meta["K_code"] == K_code
-                    and abs(meta["rlamb"] - rlamb) < 1e-12):
+                    and abs(meta["rlamb"] - rlamb) < self.lam_atol
+                    and (LPN is None or meta["LPN"] == LPN)):
                 return path
         return None
 
     def get(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0) -> DLCQResult:
         from .read_fortran import read_out
 
-        path = self._find_existing(N, NF, B, K_code, rlamb)
+        path = self._find_existing(N, NF, B, K_code, rlamb, LPN)
         if path is None:
             if not self.allow_run:
                 raise FileNotFoundError(

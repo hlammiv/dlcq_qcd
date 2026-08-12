@@ -129,14 +129,29 @@ produced the paper. The corrected physics lives in the Python path, where
 | Fig | status | notes |
 |---|---|---|
 | 1 | schematic | interaction vertices; nothing to validate |
-| 2 | pipeline ready | λ sweep at 2K = 10/13/22 |
+| 2 | **both** | λ sweep at 2K = 10/13/22, 21 couplings each |
 | 3 | **reproduced, both** | 2.6% / 1.9%; K recovered as 2K = 14 / 15 (never stated) |
 | 4 | reproduced, both | higher-Fock sectors at the same recovered K |
 | 5 | **reproduced, both** | 2K=24; 1.2–1.8%; matches the paper's text anchors |
 | 6 | **reproduced, both** | 2K=21; 1.1–1.7% (panel (d) low confidence) |
-| 7 | swept | Richardson over 2K = 16–24, N = 2,3,4, both sectors |
-| 8 | **validated** | matches Hamer's SU(2) lattice data to 0.1–2.2% |
-| Table I | **reproduced** | once read in M² units — see `docs/table1-units.md` |
+| 7 | **both** | Richardson over 2K = 16–24, N = 2,3,4, both sectors |
+| 8 | **both** | incl. the 't Hooft large-N curve; matches Hamer's lattice data to 0.1–2.2% |
+| Table I | **both** | reproduced once read in M² units — see `docs/table1-units.md` |
+
+Every figure is generated from **both** solvers; `figures/` carries a
+`_fortran` and a `_python` copy of each.
+
+Cross-checked over the whole 174-configuration sweep, the two codes agree on
+the lightest M² to a **median of 3.9×10⁻⁶** (max 4.0×10⁻³, which is the
+basis-dependence floor). After Richardson extrapolation the meson Table I
+columns agree exactly; the baryon columns differ by up to 2.5%, since
+extrapolation amplifies the per-K spread — and there the Python value is the
+one closer to the paper.
+
+`dlcq/thooft.py` solves Eq. (24) for Fig. 8's large-N curve. It reproduces the
+classic chiral-limit eigenvalues 0, 5.88, 14.1 in the paper's own coupling
+normalization, and agrees with the finite-N DLCQ sweep to 0.07% at m/g = 1.6 —
+an independent equation, discretization and code path.
 
 The paper never states `K` for Figs. 3 and 4; it was **recovered from the plots
 themselves** as 2K = 14 (meson) and 15 (baryon). Momenta are odd, so markers lie

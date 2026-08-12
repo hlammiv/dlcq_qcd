@@ -123,9 +123,11 @@ def figure1(provider=None, source="schematic"):
 def figure2(provider, source, lambdas=None, ncurves=30):
     """Fig. 2 -- full spectra vs coupling for B = 0, 1, 2 at fixed K."""
     if lambdas is None:
-        lambdas = np.concatenate([np.arange(0.05, 0.50, 0.05),
-                                  np.arange(0.50, 0.95, 0.05),
-                                  [0.95, 0.97, 0.99]])
+        # Explicit rather than arange: these must match the swept runs exactly,
+        # and arange's 0.15000000000000002 is a needless risk.
+        lambdas = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50,
+                   0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95,
+                   0.97, 0.99]
     panels = [(0, 10, 50), (1, 13, 60), (2, 22, 100)]
     fig, axes = plt.subplots(1, 3, figsize=(14, 5))
 
@@ -275,25 +277,50 @@ def figure6(provider, source):
 MG_TABLE = [1.6, 0.8, 0.4, 0.2, 0.1, 0.05, 0.0]
 
 
-def _extrapolated_mass(provider, N, B, mg, K_codes):
-    """Lightest M/g extrapolated to the continuum via Eq. (27)."""
+def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False):
+    """Lightest state extrapolated to the continuum via Eq. (27).
+
+    ``msq_units=False`` returns M/g, the quantity Figs. 7 and 8 plot.
+    ``msq_units=True`` returns M^2/(m^2+g^2/pi), the quantity **Table I**
+    tabulates despite its M/g headers -- see docs/table1-units.md.
+    """
     if mg == 0.0:
         # Exact: the lightest state is massless for any N, B, K (Eq. 16).
         return 0.0, 0.0
-    lam = paper_lambda(mg)
+    # Sweeps use the exact coupling.  paper_lambda's rounded 0.3325 exists only
+    # to match the preserved Fig. 5/6 runs; using it here would miss every
+    # swept run and silently return "no data".
+    lam = float(mg_to_lambda(mg))
     Ks, masses = [], []
     for K in K_codes:
-        r = provider.get(N, 1, B, K, lam)
+        r = provider.get(N, 1, B, K, lam, -1.0, sweep_lpn(N, B))
         if r.n_eigenvalues == 0:
             continue
         phys = physical_indices(r)
         if phys.size == 0:
             continue
         Ks.append(K)
-        masses.append(code_to_M_over_g(r.eigenvalues[phys[0]], lam))
+        ev = float(r.eigenvalues[phys[0]])
+        masses.append(ev if msq_units else code_to_M_over_g(ev, lam))
     if len(Ks) < 3:
         return None, None
-    return richardson_extrapolate(Ks, masses, mg, N)
+    return richardson_extrapolate(Ks, masses, mg, N, n_terms=2)
+
+
+def sweep_lpn(N, B):
+    """Particle-number truncation used by the Figs. 7/8 and Table I sweeps.
+
+    Valence plus one extra qqbar pair, capped at 10 partons.  The cap keeps
+    every run inside qcdf.f's 25-slot colour array (a matrix element needs
+    2L+4 slots), and the truncation is converged to ~1e-5 at weak coupling.
+
+    Both providers must be handed the SAME value.  The Fortran provider used to
+    match a stored run on (N, NF, B, K, lambda) alone, so it happily returned a
+    truncated sweep run for a request that left LPN at its default 0 -- meaning
+    the "Fortran vs Python" comparison was between different physics.
+    """
+    valence = 2 if B == 0 else N * abs(B)
+    return min(valence + 2, 10)
 
 
 def _K_grid(B, N, lo=16, hi=24):
@@ -347,6 +374,19 @@ def figure8(provider, source, N_values=(2, 3, 4)):
         ax2.plot(np.array(xs) * s, np.array(ys) * s, "o" + styles[N],
                  lw=1.2, markersize=4, label=f"SU({N})")
 
+    # The paper overlays 't Hooft's N -> infinity solution of Eq. (24).  It is
+    # not a DLCQ result, so it comes from dlcq.thooft; that solver reproduces
+    # the classic chiral-limit eigenvalues 5.88 and 14.1 as a benchmark.
+    try:
+        from .thooft import thooft_mass
+        mgs = np.linspace(0.05, 1.6, 12)
+        large_N = [thooft_mass(float(t), 200) for t in mgs]
+        ax1.plot(mgs, large_N, "k-", lw=1.5, label="large N ('t Hooft)")
+        ax2.plot(mgs * thooft_rescale(200), np.array(large_N) * thooft_rescale(200),
+                 "k-", lw=1.5, label="large N")
+    except Exception as exc:                       # never let this kill the figure
+        print(f"    large-N curve unavailable: {exc}")
+
     ax1.set_xlabel("m/g"); ax1.set_ylabel("M/g")
     ax1.set_title("(a) meson mass"); ax1.legend()
     ax2.set_xlabel(r"$(2\pi/N)^{1/2}\, m/g$")
@@ -359,36 +399,88 @@ def figure8(provider, source, N_values=(2, 3, 4)):
 
 
 def table1(provider, source, N_values=(2, 3, 4)):
-    """Table I -- N dependence of meson and baryon mass, with Richardson errors."""
+    """Table I -- N dependence of meson and baryon mass.
+
+    Reported in **both** conventions, because the paper's table and its figures
+    use different ones: Table I tabulates ``M^2/(m^2 + g^2/pi)`` -- the y-axis
+    of Fig. 2 -- despite column headers reading ``M_mes/g``, while Figs. 7 and 8
+    plot ``M/g``.  See docs/table1-units.md.
+    """
+    paper = _load_paper_table1()
     rows = []
     for mg in MG_TABLE:
         row = {"mg": mg}
         for N in N_values:
-            M0, err = _extrapolated_mass(provider, N, 0, mg, _K_grid(0, N))
-            row[f"mes_N{N}"] = (M0, err)
+            row[f"mes_N{N}"] = (
+                _extrapolated_mass(provider, N, 0, mg, _K_grid(0, N), msq_units=True),
+                _extrapolated_mass(provider, N, 0, mg, _K_grid(0, N)))
         for N in (3, 4):
-            M0, err = _extrapolated_mass(provider, N, 1, mg, _K_grid(1, N))
-            row[f"bar_N{N}"] = (M0, err)
+            row[f"bar_N{N}"] = (
+                _extrapolated_mass(provider, N, 1, mg, _K_grid(1, N), msq_units=True),
+                _extrapolated_mass(provider, N, 1, mg, _K_grid(1, N)))
         rows.append(row)
 
     FIGDIR.mkdir(parents=True, exist_ok=True)
     out = FIGDIR / f"table1_{source}.txt"
+    cols = [(f"mes_N{N}", "mes", N) for N in N_values] + \
+           [(f"bar_N{N}", "bar", N) for N in (3, 4)]
+
     with open(out, "w") as fh:
         fh.write("TABLE I.  N dependence of meson and baryon mass.\n")
-        fh.write(f"Reproduced with the {source} solver.\n")
-        fh.write("Parenthesized value = magnitude of the last Richardson term,\n")
-        fh.write("matching the paper's convention (not a statistical error).\n\n")
-        hdr = f"{'m/g':>6}" + "".join(f"{'mes N='+str(N):>16}" for N in N_values)
-        hdr += "".join(f"{'bar N='+str(N):>16}" for N in (3, 4))
+        fh.write(f"Reproduced with the {source} solver, Richardson-extrapolated\n")
+        fh.write("over 2K = 16-24 using Eq. (27).\n\n")
+        fh.write("UNITS: M^2/(m^2 + g^2/pi), matching what Table I actually\n")
+        fh.write("tabulates (see docs/table1-units.md).  'paper' is the printed\n")
+        fh.write("value; 'pull' is |paper-ours| over the paper's own quoted\n")
+        fh.write("last-Richardson-term uncertainty.\n\n")
+
+        hdr = f"{'m/g':>6}" + "".join(f"{c[1]+' N='+str(c[2]):>22}" for c in cols)
         fh.write(hdr + "\n" + "-" * len(hdr) + "\n")
         for row in rows:
             line = f"{row['mg']:6.2f}"
-            for key in [f"mes_N{N}" for N in N_values] + [f"bar_N{N}" for N in (3, 4)]:
-                M0, err = row.get(key, (None, None))
-                line += f"{'---':>16}" if M0 is None else f"{M0:>11.3f}({err:.2g})".rjust(16)
+            for key, q, N in cols:
+                (m0, _), _ = row[key]
+                ref = paper.get((q, N, row["mg"]))
+                if m0 is None:
+                    line += f"{'---':>22}"
+                elif ref is None:
+                    line += f"{m0:>22.4f}"
+                else:
+                    val, unc = ref
+                    if unc > 0:
+                        line += (f"{m0:>9.4f}/{val:<7.3f}"
+                                 f"p{abs(val - m0) / unc:>3.1f}")
+                    else:
+                        # m/g = 0 is exact by Eq. (16), not an extrapolation.
+                        line += f"{m0:>9.4f}/{val:<7.3f}{'exact':>5}"
             fh.write(line + "\n")
+
+        fh.write("\n\nSame results as M/g -- the quantity Figs. 7 and 8 plot:\n\n")
+        fh.write(hdr + "\n" + "-" * len(hdr) + "\n")
+        for row in rows:
+            line = f"{row['mg']:6.2f}"
+            for key, q, N in cols:
+                _, (g0, gerr) = row[key]
+                line += f"{'---':>22}" if g0 is None else f"{g0:>16.4f}({gerr:.2g})"
+            fh.write(line + "\n")
+
     print(f"  saved {out}")
     return rows
+
+
+def _load_paper_table1():
+    """Table I as printed, keyed by (quantity, N, m/g) -> (value, last_term)."""
+    import csv
+
+    path = _ROOT / "refs" / "table1.csv"
+    if not path.exists():
+        return {}
+    out = {}
+    with open(path) as fh:
+        for row in csv.DictReader(l for l in fh if not l.startswith("#")):
+            out[(row["quantity"], int(row["N"]), float(row["mg"]))] = (
+                float(row["value"]), float(row["last_term"]))
+    return out
 
 
 FIGURES = {1: figure1, 2: figure2, 3: figure3, 4: figure4,

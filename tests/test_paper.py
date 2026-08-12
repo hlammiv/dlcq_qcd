@@ -232,3 +232,42 @@ def test_table1_reproduces_hamer_after_unit_conversion():
     assert as_mass == pytest.approx(hamer, rel=0.02), (
         f"Table I -> M/g gives {as_mass:.4f}, Hamer {hamer:.4f}"
     )
+
+
+# ── the large-N limit plotted in Fig. 8 ──────────────────────────────────
+
+def test_thooft_chiral_limit_reproduces_the_classic_eigenvalues():
+    """Eq. (24) at m = 0, large N: mu^2 = 0, 5.88, 14.1, ...
+
+    An external benchmark for the Fig. 8 large-N curve, independent of the DLCQ
+    codes entirely.  Note the values come out in the paper's own coupling
+    normalization with no conversion factor.
+    """
+    from dlcq.thooft import thooft_coupling, thooft_spectrum
+
+    N = 1000
+    mu2 = thooft_spectrum(0.0, N, n=800, k=3) / thooft_coupling(N)
+    assert abs(mu2[0]) < 1e-6                      # exactly massless
+    assert mu2[1] == pytest.approx(5.88, rel=0.01)
+    assert mu2[2] == pytest.approx(14.1, rel=0.01)
+
+
+def test_thooft_agrees_with_dlcq_at_weak_coupling():
+    """At m/g = 1.6 the qqbar sector dominates, so Eq. (24) and DLCQ must agree.
+
+    Independent equation, independent discretization, independent code path --
+    so this cross-checks the swept DLCQ masses without reusing any of that
+    machinery.  Values are the Richardson-extrapolated sweep results.
+    """
+    from dlcq.thooft import thooft_mass
+
+    dlcq = {2: 3.5234, 3: 3.6446, 4: 3.7340}
+    for N, expected in dlcq.items():
+        assert thooft_mass(1.6, N) == pytest.approx(expected, rel=0.01), N
+
+
+def test_thooft_mass_grows_with_quark_mass():
+    from dlcq.thooft import thooft_mass
+
+    vals = [thooft_mass(t, 3) for t in (0.1, 0.4, 0.8, 1.6)]
+    assert all(b > a for a, b in zip(vals, vals[1:]))
