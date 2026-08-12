@@ -1,0 +1,83 @@
+{
+  "panel": "fig6a",
+  "description": "FIG. 6(a) first baryon, SU(3), m/g=1.6, 2K=21",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 5,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    637,
+    726,
+    1463,
+    1346
+  ],
+  "bbox_fraction": [
+    0.125,
+    0.11,
+    0.287,
+    0.204
+  ],
+  "frame_px": [
+    34,
+    793,
+    40,
+    585
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    14.77
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    35.5,
+    183.0,
+    335.5,
+    486.0,
+    637.0,
+    790.5
+  ],
+  "x_fit": {
+    "slope": 0.001317523056653492,
+    "intercept": -0.044795783926218705,
+    "max_residual": 4.440892098500626e-16
+  },
+  "y_fit": {
+    "slope": -0.02710091743119266,
+    "intercept": 15.854036697247704,
+    "max_residual": 1.7763568394002505e-15
+  },
+  "n_markers": 25,
+  "notes": [
+    "x ticks agree to 0.0055"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 21,
+    "K_code": 21,
+    "inlier_fraction": 0.68,
+    "median_grid_residual": 0.005471122739952983,
+    "max_grid_residual": 0.04649733156044489,
+    "consistent": true,
+    "K_from_x_min": 20.93364281813215,
+    "K_from_spacing": 40.87871238091828,
+    "n_points": 25,
+    "K_expected": 21,
+    "ok": true
+  },
+  "n_on_lattice": 17,
+  "n_dropped_off_lattice": 8
+}

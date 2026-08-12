@@ -133,7 +133,7 @@ def allowed_x(K_code, B=0, N=3):
     return allowed_momenta(K_code, B=B, N=N) / float(K_code)
 
 
-def infer_K_from_x_grid(x_values, atol=0.02):
+def infer_K_from_x_grid(x_values, atol=0.02, K_max=60, min_inliers=0.6):
     """Recover K_code from the x-positions of plotted structure-function points.
 
     Because momenta are odd integers, ``x = k/K_code`` for k = 1, 3, 5, ...
@@ -147,38 +147,63 @@ def infer_K_from_x_grid(x_values, atol=0.02):
     and 2K = 21), so run this on them first to validate the digitization before
     trusting it where K is unknown.
 
-    Returns ``(K_code, diagnostics)``.  ``diagnostics`` reports both estimates
-    and their consistency so a caller can reject a bad trace instead of
-    silently adopting a wrong K.
+    Method: fit the lattice rather than trust a single spacing.  For each
+    candidate K, score how well the observed x sit on ``{k/K : k odd}`` and take
+    the **smallest** K that fits within ``atol``.  Smallest matters -- a finer
+    lattice always fits at least as well (K=41 contains K=21's points), so
+    minimising residual alone would run away to large K.
+
+    Digitized traces are messy: markers can be missed where curves cross, and
+    spurious blobs appear at intersections.  Scoring each point against its
+    nearest lattice site tolerates both, where a median-spacing estimate does
+    not.
+
+    Returns ``(K_code, diagnostics)``.
     """
     x = np.sort(np.asarray(x_values, dtype=float))
     if x.size == 0:
         raise ValueError("no x values supplied")
 
-    K_from_min = 1.0 / x[0]
+    # A point at x = 0 is a plotted endpoint, not a momentum site (k >= 1).
+    x = x[x > 1e-9]
+    if x.size == 0:
+        raise ValueError("no positive x values supplied")
 
-    if x.size >= 2:
-        spacings = np.diff(x)
-        # Use the median so a single missed or doubled marker cannot dominate.
-        K_from_spacing = 2.0 / float(np.median(spacings))
-    else:
-        K_from_spacing = np.nan
+    def score_for(K):
+        """(inlier fraction, median residual) of the observed x against K's lattice."""
+        grid = np.arange(1, K, 2) / float(K)
+        if grid.size == 0:
+            return 0.0, np.inf
+        dist = np.array([np.min(np.abs(grid - xi)) for xi in x])
+        return float(np.mean(dist <= atol)), float(np.median(dist))
 
-    candidates = [K_from_min] + ([K_from_spacing] if np.isfinite(K_from_spacing) else [])
-    K_est = float(np.mean(candidates))
-    K_code = int(round(K_est))
+    scores = {K: score_for(K) for K in range(4, K_max + 1)}
 
-    # Consistency: how far are the observed x from the exact grid this K implies?
+    # Smallest K that explains most of the points.  Max-residual scoring would
+    # be defeated by a single spurious blob; requiring only a majority of
+    # inliers tolerates the intersection artifacts a real trace contains.
+    fitting = [K for K in sorted(scores) if scores[K][0] >= min_inliers]
+    K_code = (fitting[0] if fitting
+              else max(scores, key=lambda K: (scores[K][0], -scores[K][1])))
+
+    inlier_frac, median_res = scores[K_code]
     grid = np.arange(1, K_code, 2) / float(K_code)
-    residual = float(np.max([np.min(np.abs(grid - xi)) for xi in x])) if grid.size else np.inf
+    max_res = float(np.max([np.min(np.abs(grid - xi)) for xi in x]))
+
+    # Diagnostics that do not drive the choice but help judge a bad trace.
+    K_from_min = 1.0 / x[0]
+    spacings = np.diff(x)
+    big = spacings[spacings > 0.5 * np.median(spacings)] if spacings.size else spacings
+    K_from_spacing = 2.0 / float(np.median(big)) if big.size else np.nan
 
     diagnostics = {
+        "K_code": K_code,
+        "inlier_fraction": inlier_frac,
+        "median_grid_residual": median_res,
+        "max_grid_residual": max_res,
+        "consistent": bool(inlier_frac >= min_inliers),
         "K_from_x_min": K_from_min,
         "K_from_spacing": K_from_spacing,
-        "K_estimate": K_est,
-        "K_code": K_code,
-        "max_grid_residual": residual,
-        "consistent": bool(residual <= atol),
         "n_points": int(x.size),
     }
     return K_code, diagnostics

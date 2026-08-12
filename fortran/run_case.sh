@@ -24,7 +24,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-QCDF="$SCRIPT_DIR/qcdf"
+# QCDF_BIN lets callers select the widened variant (see widen.py).
+QCDF="${QCDF_BIN:-$SCRIPT_DIR/qcdf}"
 
 if [ ! -x "$QCDF" ]; then
     echo "error: $QCDF not built. Run 'make -C $SCRIPT_DIR' first." >&2
