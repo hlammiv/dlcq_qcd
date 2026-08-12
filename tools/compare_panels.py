@@ -192,6 +192,64 @@ def make_figure(name, outdir, dpi=600, pages_dir=None):
     return path
 
 
+# Figures that cannot be compared marker-by-marker -- dense level bundles
+# (Fig. 2) or vertically offset families (Figs. 7, 8(b)).  For these we place
+# the scanned original beside our two generated figures so the shapes can be
+# judged directly.  Page/crop is the article; the thesis twin is noted.
+WHOLE_FIGURE = {
+    "fig2": dict(page=3, bbox=(0.58, 0.08, 0.86, 0.49), stem="fig2_spectra",
+                 title="FIG. 2  spectra vs coupling, B = 0, 1, 2 "
+                       "(thesis Fig. 4 confirms 2K = 10, 13, 22)"),
+    "fig7": dict(page=7, bbox=(0.06, 0.06, 0.50, 0.34), stem="fig7_masses",
+                 title="FIG. 7  extrapolated masses, N = 2, 3, 4"),
+    "fig8": dict(page=7, bbox=(0.55, 0.05, 0.97, 0.46), stem="fig8_large_N",
+                 title="FIG. 8  comparison with large N "
+                       "(thesis Fig. 7 is the same plot)"),
+}
+
+
+def make_whole_figure(key, outdir, dpi=600, pages_dir=None):
+    """Scanned figure beside our fortran and python versions of it."""
+    from PIL import Image
+    from render_pages import DEFAULT_OUT, PDF, render
+
+    spec = WHOLE_FIGURE[key]
+    pages_dir = Path(pages_dir or DEFAULT_OUT)
+    hits = sorted(pages_dir.glob(f"p{spec['page']:02d}_{dpi}dpi*.png"))
+    if not hits:
+        if not PDF.exists():
+            return None
+        hits = [render(PDF, spec["page"], dpi, pages_dir)]
+    img = Image.open(hits[0]).convert("L")
+    w, h = img.size
+    l, t, r, b = spec["bbox"]
+    crop = np.asarray(img.crop((int(l * w), int(t * h), int(r * w), int(b * h))))
+
+    figdir = ROOT / "figures"
+    panels = [("paper (as published)", crop)]
+    for src in ("fortran", "python"):
+        png = figdir / f"{spec['stem']}_{src}.png"
+        panels.append((src, np.asarray(Image.open(png)) if png.exists() else None))
+
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5.2))
+    for ax, (label, arr) in zip(axes, panels):
+        if arr is None:
+            ax.text(0.5, 0.5, "not generated\n(run dlcq.figures)", ha="center",
+                    va="center", transform=ax.transAxes)
+        else:
+            ax.imshow(arr, cmap="gray" if arr.ndim == 2 else None, aspect="auto")
+        ax.set_xticks([]); ax.set_yticks([])
+        ax.set_title(label, fontsize=11)
+    fig.suptitle(spec["title"] + "   —   these three should show the same physics",
+                 fontsize=12)
+    fig.tight_layout()
+    outdir.mkdir(parents=True, exist_ok=True)
+    path = outdir / f"compare_{key}.png"
+    fig.savefig(path, dpi=120)
+    plt.close(fig)
+    return path
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -199,12 +257,20 @@ def main(argv=None):
     ap.add_argument("--outdir", type=Path, default=ROOT / "figures" / "compare")
     ap.add_argument("--dpi", type=int, default=600)
     ap.add_argument("--pages-dir", type=Path, default=None)
+    ap.add_argument("--whole", action="store_true",
+                    help="also emit whole-figure comparisons for Figs 2, 7, 8")
     args = ap.parse_args(argv)
 
     for name in args.panel:
         path = make_figure(name, args.outdir, dpi=args.dpi,
                            pages_dir=args.pages_dir)
         print(f"  {name}: {path}" if path else f"  {name}: skipped")
+
+    if args.whole:
+        for key in WHOLE_FIGURE:
+            path = make_whole_figure(key, args.outdir, dpi=args.dpi,
+                                     pages_dir=args.pages_dir)
+            print(f"  {key}: {path}" if path else f"  {key}: skipped")
     return 0
 
 

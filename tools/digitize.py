@@ -177,6 +177,24 @@ PANELS = {
                   description="THESIS Fig 12(c) = article Fig 6(c): 3rd baryon, 2K=21",
                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
 
+    # THESIS Fig 4: the article's Fig. 2, and it states the K on each panel
+    # ("K = 10/2", "13/2", "22/2"), confirming 2K = 10, 13, 22.
+    "t4a": Panel(name="t4a", page=64, source="thesis",
+                 bbox=(0.325, 0.083, 0.690, 0.240),
+                 xlim=(0.0, 1.0), ylim=(0.0, 55.0),
+                 description="THESIS Fig 4(a) = article Fig 2(a): SU(3) B=0, 2K=10",
+                 B=0, N=3, sector="spectrum"),
+    "t4b": Panel(name="t4b", page=64, source="thesis",
+                 bbox=(0.325, 0.243, 0.690, 0.395),
+                 xlim=(0.0, 1.0), ylim=(0.0, 70.0),
+                 description="THESIS Fig 4(b) = article Fig 2(b): SU(3) B=1, 2K=13",
+                 B=1, N=3, sector="spectrum"),
+    "t4c": Panel(name="t4c", page=64, source="thesis",
+                 bbox=(0.325, 0.398, 0.690, 0.556),
+                 xlim=(0.0, 1.0), ylim=(0.0, 125.0),
+                 description="THESIS Fig 4(c) = article Fig 2(c): SU(3) B=2, 2K=22",
+                 B=2, N=3, sector="spectrum"),
+
     # THESIS Fig 18(a): the five-quark contribution to the lightest N=3 baryon
     # structure function, shown ALONE with q and qbar separated, at 2K=15.
     # This is the article's Fig. 4(b), and it is a far better target than
@@ -598,6 +616,59 @@ def drop_in_box(markers, frame, box):
         fy = (bottom - m["py"]) / fh
         (cut if (x0 <= fx <= x1 and y0 <= fy <= y1) else keep).append(m)
     return keep, cut
+
+
+def trace_spectrum(ink, frame, x_fracs, min_gap=3):
+    """Read a dense level-trajectory plot column by column.
+
+    Figs. 2 / thesis Fig. 4 show the whole eigenvalue spectrum as ~25-40
+    trajectories against the coupling.  Individual curves cannot be followed
+    through the crossings, and there are no markers to find -- but the thing we
+    actually want is the *set* of eigenvalues at a given coupling, which is
+    exactly what one column contains.
+
+    So we scan the requested columns and return the centre of every ink run.
+    Runs closer than ``min_gap`` are merged, since two trajectories that touch
+    at this resolution cannot be separated.  That merging is the honest
+    limitation: a traced level is a lower bound on the number of levels there.
+
+    Returns ``{x_frac: [y_frac_from_bottom, ...]}`` with y ascending.
+    """
+    left, right, top, bottom = frame
+    fw, fh = float(right - left), float(bottom - top)
+    out = {}
+
+    for xf in x_fracs:
+        col = int(round(left + xf * fw))
+        if not (left < col < right):
+            continue
+        # Stay clear of the frame lines themselves, and take ANY ink in the
+        # column: a trajectory is a thin stroke, so requiring most of a
+        # multi-pixel strip to be dark loses it.
+        pad = max(4, int(0.012 * fh))
+        strip = ink[top + pad:bottom - pad, max(col - 1, left + 1):min(col + 2, right)]
+        dark = strip.any(axis=1)
+
+        runs, start = [], None
+        for i, v in enumerate(dark):
+            if v and start is None:
+                start = i
+            elif not v and start is not None:
+                runs.append((start, i - 1))
+                start = None
+        if start is not None:
+            runs.append((start, len(dark) - 1))
+
+        merged = []
+        for a, b in runs:
+            if merged and a - merged[-1][1] <= min_gap:
+                merged[-1] = (merged[-1][0], b)
+            else:
+                merged.append((a, b))
+
+        ys = [1.0 - (0.5 * (a + b) + pad) / fh for a, b in merged]
+        out[xf] = sorted(y for y in ys if 0.0 <= y <= 1.0)
+    return out
 
 
 def suppress_legend(markers, frame, y_tol=0.015, min_row=3, x_span=0.15,

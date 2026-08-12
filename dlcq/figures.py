@@ -89,6 +89,9 @@ def _finish(fig, name, source):
     path = _outfile(name, source)
     fig.tight_layout()
     fig.savefig(path, dpi=150)
+    # A PNG alongside, so tools/compare_panels.py can place our figure next to
+    # the scanned original without rasterizing the PDF.
+    fig.savefig(path.with_suffix(".png"), dpi=130)
     plt.close(fig)
     print(f"  saved {path}")
     return path
@@ -377,13 +380,23 @@ def figure8(provider, source, N_values=(2, 3, 4)):
     # The paper overlays 't Hooft's N -> infinity solution of Eq. (24).  It is
     # not a DLCQ result, so it comes from dlcq.thooft; that solver reproduces
     # the classic chiral-limit eigenvalues 5.88 and 14.1 as a benchmark.
+    # The paper overlays 't Hooft's solution of Eq. (24).  It is NOT obtained by
+    # evaluating at some huge N: this paper's coupling (N^2-1)/2N pi grows with
+    # N, so on the unrescaled M/g axis of panel (a) that diverges.  Panel (a)
+    # shows the limit of the SU(N) sequence -- the leading-order Casimir
+    # N/2 in place of (N^2-1)/2N -- at the largest N compared, which is why the
+    # published curve sits just above SU(4).  Panel (b)'s (2pi/N)^(1/2)
+    # rescaling is what makes the N -> infinity limit finite.
     try:
         from .thooft import thooft_mass
+        N_ref = max(N_values)
         mgs = np.linspace(0.05, 1.6, 12)
-        large_N = [thooft_mass(float(t), 200) for t in mgs]
-        ax1.plot(mgs, large_N, "k-", lw=1.5, label="large N ('t Hooft)")
-        ax2.plot(mgs * thooft_rescale(200), np.array(large_N) * thooft_rescale(200),
-                 "k-", lw=1.5, label="large N")
+        large_N = np.array([thooft_mass(float(t), N_ref, large_n=True)
+                            for t in mgs])
+        ax1.plot(mgs, large_N, "k-", lw=1.5,
+                 label=f"large N ('t Hooft, N={N_ref})")
+        s = thooft_rescale(N_ref)
+        ax2.plot(mgs * s, large_N * s, "k-", lw=1.5, label="large N")
     except Exception as exc:                       # never let this kill the figure
         print(f"    large-N curve unavailable: {exc}")
 

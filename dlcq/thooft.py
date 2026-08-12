@@ -54,21 +54,28 @@ __all__ = ["thooft_coupling", "thooft_matrix", "thooft_spectrum",
            "thooft_mass"]
 
 
-def thooft_coupling(N):
-    """``c = (N^2 - 1) / (2 N pi)``, the paper's combination in units of g^2.
+def thooft_coupling(N, large_n=False):
+    """The paper's coupling combination, in units of g^2.
 
-    ``N=None`` (or ``np.inf``) gives the strict large-N limit ``N/(2pi)``, which
-    is only meaningful once N is factored out; use a large finite N instead.
+    ``c = (N^2 - 1) / (2 N pi)`` exactly, or its leading large-N form
+    ``N / (2 pi)`` when ``large_n=True`` -- that is, the Casimir
+    ``(N^2-1)/2N -> N/2``.
+
+    Note this GROWS with N, so "the large-N curve" is not obtained by evaluating
+    at some huge N: on an unrescaled ``M/g`` axis that diverges.  Fig. 8(a)
+    plots the limit of the SU(N) *sequence*, which is the leading-order coupling
+    at the N being compared; Fig. 8(b) rescales both axes by ``(2 pi / N)^(1/2)``
+    precisely so the N -> infinity limit is finite there.
     """
-    return (N ** 2 - 1.0) / (2.0 * N * np.pi)
+    return N / (2.0 * np.pi) if large_n else (N ** 2 - 1.0) / (2.0 * N * np.pi)
 
 
-def thooft_matrix(t, N, n=400):
+def thooft_matrix(t, N, n=400, large_n=False):
     """Discretized Eq. (24) on ``n`` interior points.  Returns a symmetric matrix.
 
     ``t = m/g``.  Eigenvalues of the result are ``(M/g)^2``.
     """
-    c = thooft_coupling(N)
+    c = thooft_coupling(N, large_n)
     h = 1.0 / n
     x = (np.arange(n) + 0.5) * h                    # cell centres, avoids x=0,1
 
@@ -91,23 +98,24 @@ def thooft_matrix(t, N, n=400):
     return 0.5 * (H + H.T)                          # symmetrize against roundoff
 
 
-def thooft_spectrum(t, N, n=400, k=4):
+def thooft_spectrum(t, N, n=400, k=4, large_n=False):
     """Lowest ``k`` values of ``(M/g)^2`` at one grid size."""
     from scipy.linalg import eigh
 
-    H = thooft_matrix(t, N, n)
+    H = thooft_matrix(t, N, n, large_n)
     w = eigh(H, eigvals_only=True)
     return np.sort(w)[:k]
 
 
-def thooft_mass(t, N, grids=(200, 300, 400, 600), state=0):
+def thooft_mass(t, N, grids=(200, 300, 400, 600), state=0, large_n=False):
     """``M/g`` for one state, Richardson-extrapolated in the grid spacing.
 
     The endpoint exponent of Eq. (26) is non-analytic, so a single grid
     converges slowly; extrapolating in ``1/n`` recovers most of it.
     """
     grids = np.asarray(grids, dtype=float)
-    vals = np.array([thooft_spectrum(t, N, int(g), k=state + 1)[state]
+    vals = np.array([thooft_spectrum(t, N, int(g), k=state + 1,
+                                     large_n=large_n)[state]
                      for g in grids])
     # Fit vals = a0 + a1/n + a2/n^2 and take a0.
     A = np.vstack([np.ones_like(grids), 1.0 / grids, 1.0 / grids ** 2]).T
