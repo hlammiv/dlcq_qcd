@@ -682,3 +682,116 @@ def test_the_ill_posed_assembly_is_what_moves_the_higher_fock_sectors():
     _, qb, _ = structure_function(rb, ib, nparton=5)
     assert abs(rg.eigenvalues[ig] - rb.eigenvalues[ib]) / rg.eigenvalues[ig] < 1e-3
     assert abs(qb[0] - qg[0]) / qg[0] > 0.15
+
+
+# ── the colour sums, checked against explicit enumeration ─────────────────
+
+def _build_states(N, NF, B, K, rlamb, ncpus=4):
+    """States and norm matrix straight from the solver, before weeding."""
+    import contextlib
+    import io
+    import sys
+
+    sys.path.insert(0, str(ROOT / "python"))
+    import qcdf as base
+
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = N, NF, B, K, rlamb
+    p.cutoff, p.LPN = -1.0, 0
+    p.iflv[0] = N * B
+    st, pm, fl = base.StateData(), base.PermTables(), base.FlavorTables()
+    se = base.compute_selfen(p)
+    with contextlib.redirect_stdout(io.StringIO()):
+        base.qcdsta(p, st, pm, fl)
+        if st.numsta == 0:
+            return st, None
+        _, _, hn = base.clrdis(0, p, st, se, ncpus=ncpus)
+    return st, np.asarray(hn)[:st.numsta, :st.numsta]
+
+
+@pytest.mark.parametrize("B,K", [(0, 8), (1, 11), (1, 13)])
+def test_colour_sums_match_explicit_enumeration(B, K):
+    """The diagrammatic colour sums reproduce a brute-force sum over colours.
+
+    qcdf.f's own header records that this was rewritten mid-thesis::
+
+        **** 6/24/88 MODIFIED QCD2A2 SO THAT COLOR ****
+        **** SUMS ARE PERFORMED DIAGRAMMATICALLY   ****
+        **** RATHER THAN ITERATIVELY               ****
+
+    which made it a candidate for the Fig. 6(a)-(c) disagreement, since the
+    colour sums are exactly what sets the higher-Fock weighting.  It is not:
+    for N=3 the sum is small enough to do by explicit enumeration, and the
+    diagrammatic result agrees to the last bit.
+
+    `tools/colour_norm.py` expands each basis state over the
+    (type, momentum, flavour, colour) Fock basis -- N! signed terms per epsilon
+    cluster, N per delta cluster -- and takes inner products.  That is the
+    definition of the norm, not a reimplementation of the code's method.
+    """
+    import sys
+
+    sys.path.insert(0, str(ROOT / "tools"))
+    from colour_norm import norm_bruteforce
+
+    from dlcq.figures import paper_lambda
+
+    st, A = _build_states(3, 1, B, K, paper_lambda(1.6))
+    if A is None:
+        pytest.skip("no states")
+    G = norm_bruteforce(st, st.numsta, 3)
+    assert np.abs(G).max() > 0
+    # one overall convention factor is allowed; every element must then agree
+    scale = float((A * G).sum() / (G * G).sum())
+    err = np.abs(A - scale * G).max() / np.abs(A).max()
+    assert err < 1e-12, f"B={B} 2K={K}: max relative difference {err:.3e}"
+
+
+@pytest.mark.slow
+def test_colour_sums_are_exact_at_2K_21_where_the_figures_disagree():
+    """And specifically in the sector Figs. 6(a)-(c) plot.
+
+    All four sectors at 2K=21 -- including the 133-state five-quark block --
+    reproduce the explicit enumeration exactly, with an overall factor of 1.
+
+    Together with two other facts this makes our five-quark structure function
+    correct by construction rather than by convention:
+
+      * the norm couples only states sharing a momentum configuration, which is
+        the condition making q(k) = K sum_s n_k(s) c_s (Nc)_s the exact
+        expectation value;
+      * the eigenvector is determined to 1e-12 across well-posed treatments.
+
+    So the published curve is not reproducible by a correct calculation.
+    """
+    import sys
+
+    sys.path.insert(0, str(ROOT / "tools"))
+    from colour_norm import state_expansion
+
+    from dlcq.figures import paper_lambda
+
+    st, A = _build_states(3, 1, 1, 21, paper_lambda(1.6), ncpus=8)
+    lengths = np.array([st.mstinf[s, 1] for s in range(st.numsta)])
+    for sector in sorted(set(lengths.tolist())):
+        idx = [s for s in range(st.numsta) if lengths[s] == sector]
+        exps = []
+        for s in idx:
+            loc, L = st.mstinf[s, 0] - 1, st.mstinf[s, 1]
+            exps.append(state_expansion(
+                st.mstate[loc, :L], st.mstate[loc + 2, :L],
+                st.mstate[loc + 3, :L],
+                st.mstinf[s, 3], st.mstinf[s, 4], st.mstinf[s, 2], 3))
+        m = len(idx)
+        G = np.zeros((m, m))
+        for i in range(m):
+            for j in range(i, m):
+                a, b = exps[i], exps[j]
+                if len(b) < len(a):
+                    a, b = b, a
+                G[i, j] = G[j, i] = sum(v * b.get(k, 0.0) for k, v in a.items())
+        Ab = A[np.ix_(idx, idx)]
+        scale = float((Ab * G).sum() / (G * G).sum())
+        err = np.abs(Ab - scale * G).max() / np.abs(Ab).max()
+        assert abs(scale - 1.0) < 1e-12 and err < 1e-12, (
+            f"{sector}q sector: scale {scale}, max relative difference {err:.3e}")

@@ -560,7 +560,44 @@ Right total, wrong distribution — and no K reproduces it either: interpolating
 our curve from 2K = 11 through 25 onto the 21-lattice tops out at correlation
 0.81 with a 50% rms.
 
-## A candidate that fits every observation: the code postdates the figures
+## The colour sums are exact — tested, not assumed
+
+The revision history below made the colour sums the leading suspect, since they
+are exactly what sets the higher-Fock weighting. **They are correct.**
+
+For N = 3 the colour sum is small enough to do by brute force, so it does not
+have to be taken on trust. `tools/colour_norm.py` expands each basis state over
+the (type, momentum, flavour, colour) Fock basis directly from its definition —
+N! signed terms per ε-contracted cluster, N per δ-contracted meson, with the
+fermionic sign of sorting each term into canonical order — and takes inner
+products. That is the *definition* of the norm, not a reimplementation of the
+code's method.
+
+It reproduces the solver's norm matrix **exactly**, at every K tested, with an
+overall factor of 1 and a maximum relative difference of 0:
+
+| run | sector | states | scale | max rel. diff. |
+|---|---|---|---|---|
+| B=1 2K=21 | 3q | 12 | 1.000000 | 0 |
+| B=1 2K=21 | **5q** | **133** | **1.000000** | **0** |
+| B=1 2K=21 | 7q | 248 | 1.000000 | 0 |
+| B=1 2K=21 | 9q | 109 | 1.000000 | 0 |
+
+Put beside the two earlier results, this closes the argument:
+
+1. the norm equals the exact Gram matrix of the colour-singlet cluster basis;
+2. the norm couples only states sharing a momentum configuration, which is
+   precisely the condition making q(k) = K Σₛ nₖ(s) cₛ(Nc)ₛ the exact
+   expectation value;
+3. the eigenvector is determined to 10⁻¹² across well-posed treatments.
+
+**Our five-quark structure function is therefore correct by construction, not by
+convention, and the published curve is not reproducible by a correct
+calculation.** Whatever produced it — an earlier code path, a different
+definition, or an error — it is not what `qcdf.f` computes and not what the
+theory prescribes.
+
+## Superseded candidate: the code postdates the figures
 
 `fortran/qcdf.f` carries its own revision history:
 
@@ -595,7 +632,9 @@ and because it is the only hypothesis so far that accounts for every symptom.
 
 ## Status
 
-**Open.** Two disagreements remain, both real:
+**Closed on our side.** Two published curves disagree with ours, and our side
+of both is now verified from first principles rather than merely cross-checked
+between solvers:
 
 * Figs. 6(a)–(c)'s five-quark curve at 2K = 21 — right total (1.5%), wrong
   distribution, with a node at x ≈ 0.26 that does not move across three states
@@ -610,8 +649,13 @@ to 0.14% and reproduces Fig. 6(d) to 0.8%, while B=1's *five*-parton sector at
 2K=21 is the problem case), by the choice of K, or by any of the causes listed
 below.
 
-The leading candidate is that the published figures predate the code: see the
-revision history above.
+And the colour sums — the one mechanism that could have redistributed
+higher-Fock weight while leaving masses, valence curves and sector totals
+intact — are exact to the last bit, verified against explicit enumeration.
+
+What remains is a statement about the figures, not about the code: these two
+published curves are not reproducible by a correct calculation of the quantity
+their captions name.
 
 The superseded "resolution" is kept above as a caution.
 
