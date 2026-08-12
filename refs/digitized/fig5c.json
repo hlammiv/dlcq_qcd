@@ -12,7 +12,7 @@
     2793,
     5196,
     3624,
-    5831
+    5864
   ],
   "bbox_fraction": [
     0.5478,
@@ -32,7 +32,7 @@
   ],
   "ylim": [
     0.0,
-    3.6
+    3.62
   ],
   "xtick_values": [
     0.0,
@@ -52,20 +52,44 @@
     "max_residual": 2.220446049250313e-16
   },
   "y_fit": {
-    "slope": -0.006282722513089004,
-    "intercept": 3.78219895287958,
-    "max_residual": 1.3322676295501878e-15
+    "slope": -0.006374048583662324,
+    "intercept": 3.8186716264546057,
+    "max_residual": 0.011685755736715153,
+    "source": "y ticks",
+    "frame_top": 3.633824217528398,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        1.2
+      ],
+      [
+        4,
+        2.4
+      ]
+    ]
   },
   "n_markers": 22,
-  "n_legend_suppressed": 9,
+  "n_legend_suppressed": 6,
   "notes": [
+    "y calibrated from y ticks; frame top = 3.634",
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
     "suppressed 6 in-plot legend/text blobs",
-    "column probe at 2K=24: 17 markers (9 filled, 8 open)"
+    "column probe at 2K=24: 24 markers over 12 momentum sites (12 filled, 12 open)",
+    "series buried under another at k = 17, 23 (recorded with conf=coincident)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
   "K_probe": 24,
+  "sites": 12,
+  "sites_incomplete": [],
+  "sites_coincident": [
+    17,
+    23
+  ],
   "check": {
     "K_inferred": 24,
     "K_code": 24,
@@ -81,8 +105,8 @@
   },
   "K_used": 24,
   "K_source": "stated in paper",
-  "sum_rule_scale": 0.9932397295891843,
+  "sum_rule_scale": 0.9997202672270719,
   "sum_rule_quark_number": 1.0,
-  "n_on_lattice": 17,
+  "n_on_lattice": 24,
   "n_dropped_off_lattice": 0
 }

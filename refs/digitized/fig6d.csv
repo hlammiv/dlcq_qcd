@@ -1,12 +1,27 @@
-# FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=22
+# FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=24 (inferred)
 # digitized from Phys. Rev. D 41, 3814 (1990), PDF page 5 at 600 dpi
 # see the companion .json for full calibration provenance
-x,y,filled,k,x_raw
-0.045455,12.992126,0,1,0.027273
-0.045455,10.713507,1,1,0.027273
-0.136364,24.984858,0,3,0.136364
-0.136364,1.119322,0,3,0.136364
-0.227273,17.789219,0,5,0.245455
-0.227273,14.631133,1,5,0.245455
-0.318182,39.615990,1,7,0.300000
-0.318182,1.039370,1,7,0.300000
+# conf=probe: traced from the marker's own ink.  conf=coincident: this series' marker is buried under
+# another series' at the same site, so the value is that marker's, good to about a marker radius.
+x,y,filled,kind,conf,k,x_raw
+0.041667,0.204125,1,filled,probe,1,0.041667
+0.041667,16.234987,0,triangle,probe,1,0.044605
+0.041667,18.398933,0,open,probe,1,0.044825
+0.125000,35.798822,1,filled,probe,3,0.125789
+0.125000,19.547149,0,open,probe,3,0.126579
+0.125000,2.235584,0,triangle,probe,3,0.129474
+0.208333,35.533849,1,filled,probe,5,0.209123
+0.208333,0.115801,0,triangle,probe,5,0.210395
+0.208333,26.171472,0,open,probe,5,0.215439
+0.291667,-0.149172,0,triangle,probe,7,0.291711
+0.291667,0.910720,1,filled,probe,7,0.293246
+0.291667,0.027477,0,open,probe,7,0.293246
+0.375000,-0.458307,0,triangle,probe,9,0.375789
+0.375000,-0.149172,0,open,probe,9,0.376579
+0.375000,-0.149172,1,filled,coincident,9,0.376579
+0.458333,-0.281659,0,triangle,probe,11,0.456711
+0.458333,-0.060848,0,open,probe,11,0.456754
+0.458333,-0.060848,1,filled,coincident,11,0.456754
+0.541667,-0.414145,0,triangle,probe,13,0.542368
+0.541667,-0.237496,0,open,probe,13,0.542456
+0.541667,-0.237496,1,filled,coincident,13,0.542456

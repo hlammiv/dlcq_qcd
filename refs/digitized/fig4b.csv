@@ -1,22 +1,33 @@
-# FIG. 4(b) baryon, one extra pair, incl. antiquarks
+# FIG. 4(b) baryon, one extra pair: q(x) at m/g=1.6 (filled, x10^3) and 0.1 (open, x10^2), qbar(x) at 1.6 (down triangle) and 0.1 (up)
 # digitized from Phys. Rev. D 41, 3814 (1990), PDF page 4 at 600 dpi
 # see the companion .json for full calibration provenance
-x,y,filled,k,x_raw
-0.066667,19.424603,0,1,0.066667
-0.066667,6.726190,0,1,0.066667
-0.066667,4.067460,0,1,0.066667
-0.200000,9.424603,0,3,0.200000
-0.200000,4.265873,0,3,0.200000
-0.200000,3.035714,1,3,0.200000
-0.200000,0.575397,0,3,0.200000
-0.333333,5.535714,0,5,0.333333
-0.333333,0.773810,0,5,0.333333
-0.466667,4.365079,0,7,0.466667
-0.466667,2.222222,1,7,0.466667
-0.466667,0.674603,0,7,0.466667
-0.600000,20.019841,0,9,0.600000
-0.600000,9.781746,0,9,0.600000
-0.600000,2.460317,0,9,0.600000
-0.600000,0.456349,0,9,0.600000
-0.733333,20.178571,0,11,0.733333
-0.733333,0.892857,0,11,0.733333
+# conf=probe: traced from the marker's own ink.  conf=coincident: this series' marker is buried under
+# another series' at the same site, so the value is that marker's, good to about a marker radius.
+x,y,filled,kind,conf,k,x_raw
+0.066667,8.243545,1,filled,probe,1,0.062850
+0.066667,4.812073,0,triangle_down,probe,1,0.063613
+0.066667,7.303415,0,open,probe,1,0.064122
+0.066667,7.279912,0,triangle,probe,1,0.066158
+0.200000,5.329144,1,filled,probe,3,0.191094
+0.200000,0.675504,0,open,probe,3,0.201272
+0.200000,4.530034,0,triangle,probe,3,0.201654
+0.333333,0.628497,0,open,probe,5,0.310433
+0.333333,0.064420,0,triangle_down,probe,5,0.328880
+0.333333,0.064420,1,filled,coincident,5,0.328880
+0.333333,0.064420,0,triangle,coincident,5,0.328880
+0.466667,0.064420,0,open,probe,7,0.461578
+0.466667,0.064420,1,filled,coincident,7,0.461578
+0.466667,0.064420,0,triangle,coincident,7,0.461578
+0.466667,0.064420,0,triangle_down,coincident,7,0.461578
+0.600000,-0.076600,1,filled,probe,9,0.591094
+0.600000,-0.076600,0,open,coincident,9,0.591094
+0.600000,-0.076600,0,triangle,coincident,9,0.591094
+0.600000,-0.076600,0,triangle_down,coincident,9,0.591094
+0.733333,0.205439,0,triangle_down,probe,11,0.728372
+0.733333,0.205439,0,open,probe,11,0.729517
+0.733333,-0.170613,1,filled,probe,11,0.730789
+0.733333,-0.170613,0,triangle,coincident,11,0.730789
+0.866667,-0.217619,1,filled,probe,13,0.861578
+0.866667,-0.217619,0,triangle,coincident,13,0.861578
+0.866667,0.017413,0,open,probe,13,0.862850
+0.866667,0.064420,0,triangle_down,probe,13,0.863232

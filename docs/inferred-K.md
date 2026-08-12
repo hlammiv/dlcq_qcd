@@ -1,7 +1,9 @@
-# Recovering the unstated K of Figs. 3 and 4
+# Recovering the unstated K of Figs. 3, 4 and 6(d)
 
-The paper gives K for Figs. 5 (2K = 24) and 6 (2K = 21) but never for Figs. 3
-and 4. It can be read off the published plots.
+The paper gives K for Fig. 5 (2K = 24) and for Fig. 6(a)–(c) (2K = 21) but
+never for Figs. 3 and 4, and — read the caption carefully — never for
+Fig. 6(d) either: it says only "(d) First B = 2 state". It can be read off the
+published plots.
 
 ## Why the plot knows
 
@@ -30,7 +32,27 @@ Run the procedure on the panels whose K the paper *does* state:
 |---|---|---|
 | fig5a, fig5b, fig5c | 2K = 24 | **24** |
 | fig6a, fig6b, fig6c | 2K = 21 | **21** |
-| fig6d (B=2) | not stated | 22 |
+
+## Fig. 6(d): 2K = 24, not 22
+
+This panel was long assumed to inherit the 2K = 22 of Fig. 2(c), the paper's
+other B = 2 plot. It does not, and the plot says so three separate ways:
+
+| test | at 2K = 22 | at 2K = 24 | exact |
+|---|---|---|---|
+| marker positions off their lattice | 23 px | **2 px** | 0 |
+| `int q dx` over the valence series | 6.48 | **6.03** | 6 |
+| mean momentum `<x>` of that series | 0.1810 | **0.1677** | 1/6 = 0.1667 |
+
+Only the first of the three uses the x calibration at all; the other two are
+identities that hold whatever the axes are doing. 24 is also even, as a state
+of six odd momenta requires.
+
+The consequence is not cosmetic. Compared at 2K = 22 the panel's higher-Fock
+series looks like nothing we compute; at 2K = 24 all three of its series —
+valence, `6q qq̄` quark, and `6q qq̄` antiquark — land within ~1%, and the
+fitted multiplier on the open series is 505 against the paper's stated
+5 × 10². See `docs/baryon-higher-fock.md`.
 
 ## Result
 

@@ -1,10 +1,16 @@
 # FIG. 2(c) SU(3) B=2, 2K=22
 # digitized from Phys. Rev. D 41, 3814 (1990), PDF page 3 at 600 dpi
 # see the companion .json for full calibration provenance
-x,y,filled,k,x_raw
-0.250000,39.669624,1,7,0.259506
-0.535714,37.697423,1,15,0.522926
-0.678571,44.613562,1,19,0.673283
-0.750000,89.341089,1,21,0.748283
-0.821429,35.619408,1,23,0.827366
-0.964286,38.633380,1,27,0.962908
+# conf=probe: traced from the marker's own ink.  conf=coincident: this series' marker is buried under
+# another series' at the same site, so the value is that marker's, good to about a marker radius.
+x,y,filled,kind,conf,k,x_raw
+0.009010,78.248805,1,filled,blob,,0.009010
+0.009094,40.714075,1,filled,blob,,0.009094
+0.259506,39.669624,1,filled,blob,,0.259506
+0.296207,50.017270,1,filled,blob,,0.296207
+0.522926,37.697423,1,filled,blob,,0.522926
+0.673283,44.613562,1,filled,blob,,0.673283
+0.748283,89.341089,1,filled,blob,,0.748283
+0.827366,35.619408,1,filled,blob,,0.827366
+0.962908,38.633380,1,filled,blob,,0.962908
+0.988458,18.504955,0,open,blob,,0.988458

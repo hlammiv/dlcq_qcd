@@ -12,7 +12,7 @@
     3052,
     607,
     4285,
-    1485
+    1518
   ],
   "bbox_fraction": [
     0.5985,
@@ -56,13 +56,19 @@
   "y_fit": {
     "slope": -0.05938242280285031,
     "intercept": 51.06888361045129,
-    "max_residual": 2.1316282072803006e-14
+    "max_residual": 2.1316282072803006e-14,
+    "source": "frame edges",
+    "frame_top": 50.0,
+    "anchors": []
   },
   "n_markers": 9,
+  "n_legend_suppressed": 0,
   "notes": [
+    "y calibrated from frame edges; frame top = 50.000",
     "x ticks: found 11, expected 0 (calibration still from frame edges)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "blob",
   "check": {
     "K_inferred": 24,
     "K_code": 24,
@@ -76,6 +82,8 @@
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "n_on_lattice": 7,
-  "n_dropped_off_lattice": 2
+  "K_used": 24,
+  "K_source": "inferred (not applied: no momentum lattice here)",
+  "n_on_lattice": 9,
+  "n_dropped_off_lattice": 0
 }

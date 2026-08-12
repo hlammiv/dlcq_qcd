@@ -12,7 +12,7 @@
     3030,
     911,
     4245,
-    1821
+    1854
   ],
   "bbox_fraction": [
     0.5943,
@@ -60,29 +60,59 @@
     "max_residual": 5.551115123125783e-16
   },
   "y_fit": {
-    "slope": -0.0047971360381861596,
-    "intercept": 4.149522673031027,
-    "max_residual": 1.7763568394002505e-15
+    "slope": -0.004783005310611635,
+    "intercept": 4.115044948352466,
+    "max_residual": 0.02212823487770743,
+    "source": "y ticks",
+    "frame_top": 3.985903804965952,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        1.0
+      ],
+      [
+        4,
+        2.0
+      ],
+      [
+        6,
+        3.0
+      ],
+      [
+        8,
+        4.0
+      ]
+    ]
   },
-  "n_markers": 15,
+  "n_markers": 7,
+  "n_legend_suppressed": 8,
   "notes": [
+    "y calibrated from y ticks; frame top = 3.986",
     "x ticks agree to 0.0429",
-    "WARNING: x tick mismatch, check xlim"
+    "WARNING: x tick mismatch, check xlim",
+    "suppressed 8 in-plot legend/text blobs"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "blob",
   "check": {
-    "K_inferred": 23,
-    "K_code": 23,
-    "inlier_fraction": 0.6,
-    "median_grid_residual": 0.017835390773522197,
-    "max_grid_residual": 0.7334073420677546,
+    "K_inferred": 25,
+    "K_code": 25,
+    "inlier_fraction": 0.7142857142857143,
+    "median_grid_residual": 0.016666345578617903,
+    "max_grid_residual": 0.7264508203286241,
     "consistent": true,
     "K_from_x_min": 49.20020949147973,
-    "K_from_spacing": 28.17448552045651,
-    "n_points": 15,
+    "K_from_spacing": 18.52082842748197,
+    "n_points": 7,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "n_on_lattice": 9,
-  "n_dropped_off_lattice": 6
+  "K_used": 25,
+  "K_source": "inferred (not applied: no momentum lattice here)",
+  "n_on_lattice": 7,
+  "n_dropped_off_lattice": 0
 }

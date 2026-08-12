@@ -130,10 +130,10 @@ produced the paper. The corrected physics lives in the Python path, where
 |---|---|---|
 | 1 | schematic | interaction vertices; nothing to validate |
 | 2 | **both** | λ sweep at 2K = 10/13/22, 21 couplings each |
-| 3 | **agrees, 2.6% / 1.9%** | K recovered as 2K = 14 / 15 (never stated) |
-| 4 | produced; not verified | trace too poor on (b),(c) to conclude |
-| 5 | **agrees, 1.2–1.4%** | incl. the ×10³ and ×10² rescaled series, to 1–2% |
-| 6 | **(a) agrees, 1.1%** | (b),(c),(d) trace too poor to conclude |
+| 3 | **agrees, 0.4–2.2%** | both masses; K recovered as 2K = 14 / 15 (never stated) |
+| 4 | **(a),(b) agree at m/g=1.6** | shapes agree at m/g=0.1, scales do not |
+| 5 | **agrees, 0.5–2.9%** | (a),(b),(c) incl. the ×10³ and ×10² rescaled series; (d) does not match |
+| 6 | **(a),(b),(c) valence 0.5–1.0%; (d) all three series ~1%** | (a),(b),(c) higher-Fock does not match — see `docs/baryon-higher-fock.md` |
 | 7 | **both** | Richardson over 2K = 16–24, N = 2,3,4, both sectors |
 | 8 | **both** | incl. the 't Hooft large-N curve; matches Hamer's lattice data to 0.1–2.2% |
 | Table I | **both** | reproduced once read in M² units — see `docs/table1-units.md` |
@@ -158,12 +158,16 @@ classic chiral-limit eigenvalues 0, 5.88, 14.1 in the paper's own coupling
 normalization, and agrees with the finite-N DLCQ sweep to 0.07% at m/g = 1.6 —
 an independent equation, discretization and code path.
 
-The paper never states `K` for Figs. 3 and 4; it was **recovered from the plots
-themselves** as 2K = 14 (meson) and 15 (baryon). Momenta are odd, so markers lie
-on `x = k/K`, and fitting that lattice reproduces the stated 2K = 24 and 21 of
-Figs. 5 and 6 before being trusted where K is unknown. Every meson panel
-returned an even K and every baryon panel an odd one — the parity each sector
-requires, which the fit knows nothing about. See `docs/inferred-K.md`.
+The paper never states `K` for Figs. 3 and 4, nor for Fig. 6(d); it was
+**recovered from the plots themselves** as 2K = 14 (meson), 15 (baryon) and 24
+for Fig. 6(d). Momenta are odd, so markers lie on `x = k/K`, and fitting that
+lattice reproduces the stated 2K = 24 and 21 of Figs. 5 and 6(a–c) before being
+trusted where K is unknown. Every meson panel returned an even K and every
+baryon panel an odd one — the parity each sector requires, which the fit knows
+nothing about. Fig. 6(d) had been assumed to inherit the 2K = 22 of Fig. 2(c);
+at 24 its valence series integrates to 6.03 against the exact quark number 6
+and carries mean momentum 0.1677 against the exact 1/6, and all three of its
+plotted series then match ours to ~1%. See `docs/inferred-K.md`.
 
 ## Table I is in M² units, not M/g
 

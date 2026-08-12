@@ -1,6 +1,6 @@
 {
   "panel": "fig4c",
-  "description": "FIG. 4(c) baryon, two extra pairs",
+  "description": "FIG. 4(c) baryon, two extra pairs, at m/g=1.6 (filled, x10^4) and 0.1 (open, x10^7)",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 4,
   "dpi": 600,
@@ -12,7 +12,7 @@
     2739,
     1195,
     3566,
-    1824
+    1857
   ],
   "bbox_fraction": [
     0.5372,
@@ -32,7 +32,7 @@
   ],
   "ylim": [
     0.0,
-    11.25
+    12.7
   ],
   "xtick_values": [
     0.0,
@@ -52,20 +52,49 @@
     "max_residual": 1.6653345369377348e-16
   },
   "y_fit": {
-    "slope": -0.01973684210526315,
-    "intercept": 11.7828947368421,
-    "max_residual": 3.552713678800501e-15
+    "slope": -0.02231929343493925,
+    "intercept": 13.258198354749226,
+    "max_residual": 0.05561888212224808,
+    "source": "y ticks",
+    "frame_top": 12.655577432005867,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        3.75
+      ],
+      [
+        4,
+        7.5
+      ],
+      [
+        6,
+        11.25
+      ]
+    ]
   },
   "n_markers": 10,
-  "n_legend_suppressed": 11,
+  "n_legend_suppressed": 7,
   "notes": [
+    "y calibrated from y ticks; frame top = 12.656",
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
     "suppressed 7 in-plot legend/text blobs",
-    "column probe at 2K=15: 9 markers (3 filled, 6 open)"
+    "column probe at 2K=15: 14 markers over 7 momentum sites (7 filled, 7 open)",
+    "series buried under another at k = 9, 11, 13 (recorded with conf=coincident)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
   "K_probe": 15,
+  "sites": 7,
+  "sites_incomplete": [],
+  "sites_coincident": [
+    9,
+    11,
+    13
+  ],
   "check": {
     "K_inferred": 15,
     "K_code": 15,
@@ -81,6 +110,6 @@
   },
   "K_used": 15,
   "K_source": "inferred",
-  "n_on_lattice": 9,
+  "n_on_lattice": 14,
   "n_dropped_off_lattice": 0
 }

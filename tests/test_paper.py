@@ -181,7 +181,15 @@ def test_chiral_baryon_structure_function_shape():
 
 # ── the paper's figures, and the independent lattice data in Fig. 8(a) ────
 
-HAMER_SU2 = [   # digitized from Fig. 8(a); C. J. Hamer, Nucl. Phys. B195, 503
+# Digitized from Fig. 8(a); C. J. Hamer, Nucl. Phys. B195, 503.
+#
+# Deliberately *not* read from refs/digitized/fig8a.csv.  That panel overlays
+# Hamer's points on the paper's own N = 2, 3, 4 curves, and it has no momentum
+# lattice to probe, so the trace there is loose blob detection over all of them
+# at once -- its m/g = 0.29 marker, for one, belongs to a curve and not to
+# Hamer.  Which markers are Hamer's was decided by eye, and these four are the
+# result; the CSV is not a substitute for that.
+HAMER_SU2 = [
     (0.2047, 0.6590), (0.4091, 1.1109), (0.8233, 1.9749), (1.6465, 3.5187),
 ]
 
@@ -228,7 +236,7 @@ def test_table1_reproduces_hamer_after_unit_conversion():
     rows = {(r["quantity"], r["N"], r["mg"]): r for r in load_table1()}
     lam = float(mg_to_lambda(1.6))
     as_mass = np.sqrt(rows[("mes", 2, 1.6)]["value"] / (np.pi * lam ** 2))
-    hamer = 3.5187
+    hamer = HAMER_SU2[-1][1]
     assert as_mass == pytest.approx(hamer, rel=0.02), (
         f"Table I -> M/g gives {as_mass:.4f}, Hamer {hamer:.4f}"
     )

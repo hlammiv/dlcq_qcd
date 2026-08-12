@@ -1,6 +1,6 @@
 {
   "panel": "fig4a",
-  "description": "FIG. 4(a) meson, one extra qqbar pair (x10^4/10^2)",
+  "description": "FIG. 4(a) meson, one extra qqbar pair, at m/g=1.6 (filled) and 0.1 (open), both x10^4",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 4,
   "dpi": 600,
@@ -12,7 +12,7 @@
     2741,
     626,
     3569,
-    1255
+    1288
   ],
   "bbox_fraction": [
     0.5376,
@@ -61,20 +61,50 @@
     "max_residual": 4.440892098500626e-16
   },
   "y_fit": {
-    "slope": -0.03697183098591548,
-    "intercept": 22.183098591549296,
-    "max_residual": 1.0658141036401503e-14
+    "slope": -0.03720024417912073,
+    "intercept": 22.157626519631958,
+    "max_residual": 0.12872787126718244,
+    "source": "y ticks",
+    "frame_top": 20.967218705900095,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        7.0
+      ],
+      [
+        4,
+        14.0
+      ],
+      [
+        6,
+        21.0
+      ]
+    ]
   },
   "n_markers": 14,
-  "n_legend_suppressed": 11,
+  "n_legend_suppressed": 7,
   "notes": [
+    "y calibrated from y ticks; frame top = 20.967",
     "x ticks: found 11, expected 6 (calibration still from frame edges)",
     "suppressed 7 in-plot legend/text blobs",
-    "column probe at 2K=14: 13 markers (5 filled, 8 open)"
+    "column probe at 2K=14: 13 markers over 7 momentum sites (6 filled, 7 open)",
+    "series buried under another at k = 13 (recorded with conf=coincident)",
+    "sites still missing a series: k = 11"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
   "K_probe": 14,
+  "sites": 7,
+  "sites_incomplete": [
+    11
+  ],
+  "sites_coincident": [
+    13
+  ],
   "check": {
     "K_inferred": 14,
     "K_code": 14,

@@ -1,6 +1,6 @@
 {
   "panel": "fig3a",
-  "description": "FIG. 3(a) SU(3) meson valence; K not stated",
+  "description": "FIG. 3(a) SU(3) meson valence at m/g=1.6 (filled) and 0.1 (open); K not stated",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 4,
   "dpi": 600,
@@ -12,7 +12,7 @@
     585,
     5214,
     1410,
-    5816
+    5849
   ],
   "bbox_fraction": [
     0.1149,
@@ -61,19 +61,51 @@
     "max_residual": 2.8102520310824275e-16
   },
   "y_fit": {
-    "slope": -0.006205673758865252,
-    "intercept": 3.611702127659574,
-    "max_residual": 2.220446049250313e-15
+    "slope": -0.0062554844774670324,
+    "intercept": 3.6261240528669885,
+    "max_residual": 0.009169067081232996,
+    "source": "y ticks",
+    "frame_top": 3.513525332272582,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        0.7
+      ],
+      [
+        4,
+        1.4
+      ],
+      [
+        6,
+        2.1
+      ],
+      [
+        8,
+        2.8
+      ],
+      [
+        10,
+        3.5
+      ]
+    ]
   },
   "n_markers": 15,
   "n_legend_suppressed": 0,
   "notes": [
+    "y calibrated from y ticks; frame top = 3.514",
     "x ticks: found 11, expected 6 (calibration still from frame edges)",
-    "column probe at 2K=14: 15 markers (7 filled, 8 open)"
+    "column probe at 2K=14: 14 markers over 7 momentum sites (7 filled, 7 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
   "K_probe": 14,
+  "sites": 7,
+  "sites_incomplete": [],
+  "sites_coincident": [],
   "check": {
     "K_inferred": 14,
     "K_code": 14,
@@ -89,8 +121,8 @@
   },
   "K_used": 14,
   "K_source": "inferred",
-  "sum_rule_scale": 0.9964664310954082,
+  "sum_rule_scale": 1.00567970776022,
   "sum_rule_quark_number": 1.0,
-  "n_on_lattice": 15,
+  "n_on_lattice": 14,
   "n_dropped_off_lattice": 0
 }

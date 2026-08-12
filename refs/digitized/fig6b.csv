@@ -1,13 +1,26 @@
 # FIG. 6(b) 2nd baryon state, m/g=1.6, 2K=21
 # digitized from Phys. Rev. D 41, 3814 (1990), PDF page 5 at 600 dpi
 # see the companion .json for full calibration provenance
-x,y,filled,k,x_raw
-0.047619,5.946729,0,1,0.047619
-0.047619,0.500467,1,1,0.047619
-0.142857,8.007477,0,3,0.142857
-0.238095,17.722430,1,5,0.238095
-0.428571,3.974299,0,9,0.428571
-0.428571,1.295327,0,9,0.428571
-0.523810,8.625701,1,11,0.523810
-0.619048,4.651402,1,13,0.619048
-0.904762,28.938785,0,19,0.904762
+# conf=probe: traced from the marker's own ink.  conf=coincident: this series' marker is buried under
+# another series' at the same site, so the value is that marker's, good to about a marker radius.
+x,y,filled,kind,conf,k,x_raw
+0.047619,2.676558,0,open,probe,1,0.048938
+0.047619,0.094150,1,filled,probe,1,0.048938
+0.142857,3.322161,0,open,probe,3,0.146815
+0.142857,3.913962,1,filled,probe,3,0.148134
+0.238095,8.029675,1,filled,probe,5,0.236776
+0.238095,0.121050,0,open,probe,5,0.242053
+0.333333,12.441289,1,filled,probe,7,0.329376
+0.333333,0.174851,0,open,probe,7,0.333333
+0.428571,0.793553,1,filled,probe,9,0.427252
+0.428571,1.788856,0,open,probe,9,0.431210
+0.523810,3.887062,1,filled,probe,11,0.525129
+0.523810,0.121050,0,open,probe,11,0.525129
+0.619048,2.084757,1,filled,probe,13,0.616409
+0.619048,0.040350,0,open,probe,13,0.617728
+0.714286,0.228651,0,open,probe,15,0.714286
+0.714286,0.228651,1,filled,coincident,15,0.714286
+0.809524,0.013450,0,open,probe,17,0.808205
+0.809524,0.013450,1,filled,coincident,17,0.808205
+0.904762,0.013450,0,open,probe,19,0.904762
+0.904762,0.013450,1,filled,coincident,19,0.904762

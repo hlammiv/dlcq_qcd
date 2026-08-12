@@ -1,16 +1,20 @@
-# FIG. 3(b) SU(3) baryon valence; K not stated
+# FIG. 3(b) SU(3) baryon valence at m/g=1.6 (filled) and 0.1 (open); K not stated
 # digitized from Phys. Rev. D 41, 3814 (1990), PDF page 4 at 600 dpi
 # see the companion .json for full calibration provenance
-x,y,filled,k,x_raw
-0.066667,4.765416,0,1,0.066667
-0.066667,0.301609,1,1,0.066667
-0.333333,12.040214,1,5,0.333333
-0.333333,4.572386,0,5,0.333333
-0.466667,3.703753,0,7,0.466667
-0.600000,2.400804,0,9,0.600000
-0.600000,0.386059,1,9,0.600000
-0.733333,1.315013,0,11,0.733333
-0.733333,0.205094,1,11,0.733333
-0.866667,11.449062,0,13,0.866667
-0.866667,9.567024,1,13,0.866667
-0.866667,0.386059,0,13,0.866667
+# conf=probe: traced from the marker's own ink.  conf=coincident: this series' marker is buried under
+# another series' at the same site, so the value is that marker's, good to about a marker radius.
+x,y,filled,kind,conf,k,x_raw
+0.066667,0.211788,1,filled,probe,1,0.064122
+0.066667,4.684616,0,open,probe,1,0.073028
+0.200000,5.406040,1,filled,probe,3,0.205089
+0.200000,4.901043,0,open,probe,3,0.210178
+0.333333,4.492237,0,open,probe,5,0.330789
+0.333333,11.922903,1,filled,probe,5,0.334606
+0.466667,4.564379,1,filled,probe,7,0.465394
+0.466667,3.602480,0,open,probe,7,0.465394
+0.600000,2.303917,0,open,probe,9,0.596183
+0.600000,0.380120,1,filled,probe,9,0.597455
+0.733333,1.221782,0,open,probe,11,0.729517
+0.733333,0.019409,1,filled,probe,11,0.729517
+0.866667,-0.004639,1,filled,probe,13,0.865394
+0.866667,0.380120,0,open,probe,13,0.866667

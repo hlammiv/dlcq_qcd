@@ -1,6 +1,6 @@
 {
   "panel": "fig4b",
-  "description": "FIG. 4(b) baryon, one extra pair, incl. antiquarks",
+  "description": "FIG. 4(b) baryon, one extra pair: q(x) at m/g=1.6 (filled, x10^3) and 0.1 (open, x10^2), qbar(x) at 1.6 (down triangle) and 0.1 (up)",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 4,
   "dpi": 600,
@@ -12,7 +12,7 @@
     3725,
     634,
     4553,
-    1261
+    1294
   ],
   "bbox_fraction": [
     0.7304,
@@ -32,7 +32,7 @@
   ],
   "ylim": [
     0.0,
-    22.5
+    26.6
   ],
   "xtick_values": [
     0.0,
@@ -52,20 +52,54 @@
     "max_residual": 2.636779683484747e-16
   },
   "y_fit": {
-    "slope": -0.039682539682539694,
-    "intercept": 23.769841269841272,
-    "max_residual": 3.552713678800501e-15
+    "slope": -0.04700646606929923,
+    "intercept": 28.033266989492724,
+    "max_residual": 0.034530577772462934,
+    "source": "y ticks",
+    "frame_top": 26.529060075275147,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        7.5
+      ],
+      [
+        4,
+        15.0
+      ],
+      [
+        6,
+        22.5
+      ]
+    ]
   },
   "n_markers": 23,
-  "n_legend_suppressed": 19,
+  "n_legend_suppressed": 14,
   "notes": [
+    "y calibrated from y ticks; frame top = 26.529",
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
     "suppressed 14 in-plot legend/text blobs",
-    "column probe at 2K=15: 18 markers (2 filled, 16 open)"
+    "column probe at 2K=15: 27 markers over 7 momentum sites (7 filled, 7 open, 7 triangle, 6 triangle_down)",
+    "series buried under another at k = 5, 7, 9, 11, 13 (recorded with conf=coincident)",
+    "sites still missing a series: k = 3"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
   "K_probe": 15,
+  "sites": 7,
+  "sites_incomplete": [
+    3
+  ],
+  "sites_coincident": [
+    5,
+    7,
+    9,
+    11,
+    13
+  ],
   "check": {
     "K_inferred": 15,
     "K_code": 15,
@@ -81,6 +115,6 @@
   },
   "K_used": 15,
   "K_source": "inferred",
-  "n_on_lattice": 18,
+  "n_on_lattice": 27,
   "n_dropped_off_lattice": 0
 }

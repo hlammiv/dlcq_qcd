@@ -66,6 +66,14 @@ K_MESON, K_BARYON = 24, 21
 K_FIG3_MESON, K_FIG3_BARYON = 14, 15
 K_FIG4_MESON, K_FIG4_BARYON = 14, 15
 
+# Nor for Fig. 6(d): the caption gives 2K = 21 for (a)-(c) and says only
+# "(d) First B = 2 state".  Recovered the same way, and confirmed twice over by
+# identities that do not use the axes at all -- at 2K = 24 the panel's valence
+# series integrates to 6.03 against the exact quark number 6, and carries mean
+# momentum 0.1677 against the exact 1/6.  At the 22 of Fig. 2(c) those read
+# 6.48 and 0.1810.  See docs/inferred-K.md.
+K_FIG6D = 24
+
 # The m/g = 1.6 runs behind Figs. 5 and 6 used the *rounded* coupling 0.3325 --
 # it is the value in every input_*.txt / input_*.json in this repo and in the
 # preserved Fortran outputs.  mg_to_lambda(1.6) is 0.33254949, and that 1.5e-5
@@ -216,10 +224,11 @@ def _wavefunction_panel(ax, r, idx, sectors, title):
         ax.set_title(title, fontsize=10)
         return
     Mg = code_to_M_over_g(r.eigenvalues[idx], r.rlamb)
-    for npart, style, lab in sectors:
+    for npart, style, lab, *which in sectors:
         x, q, qbar = structure_function(r, idx, nparton=npart)
-        if np.max(np.abs(q)) > 1e-18:
-            ax.plot(x, q, style, markersize=3, lw=1, label=lab)
+        y = qbar if which and which[0] == "qbar" else q
+        if np.max(np.abs(y)) > 1e-18:
+            ax.plot(x, y, style, markersize=3, lw=1, label=lab)
     ax.set_title(f"{title}   M/g = {Mg:.3f}", fontsize=10)
     ax.set_xlabel("x = k/K"); ax.set_ylabel("q(x)")
     ax.set_xlim(0, 1); ax.legend(fontsize=7)
@@ -257,10 +266,14 @@ def figure6(provider, source):
 
     ax = axes.flat[3]
     try:
-        r2 = provider.get(3, 1, 2, 22, lam)
+        r2 = provider.get(3, 1, 2, K_FIG6D, lam)
+        # The paper draws this panel's antiquark distribution too, as open
+        # triangles; it is the third series and it matches to 2%.
         _wavefunction_panel(ax, r2, 0, [(6, "k-o", "6q"),
-                                        (8, "r-s", r"$6qq\bar q$")],
-                            "(d) 1st B=2, 2K=22")
+                                        (8, "r-s", r"$6qq\bar q$"),
+                                        (8, "b-^", r"$6qq\bar q$, $\bar q(x)$",
+                                         "qbar")],
+                            f"(d) 1st B=2, 2K={K_FIG6D}")
     except Exception as exc:                       # provider may lack the run
         ax.text(0.5, 0.5, f"B=2 unavailable:\n{exc}", ha="center", va="center",
                 transform=ax.transAxes, fontsize=7)

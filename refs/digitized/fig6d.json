@@ -1,6 +1,6 @@
 {
   "panel": "fig6d",
-  "description": "FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=22",
+  "description": "FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=24 (inferred)",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 5,
   "dpi": 600,
@@ -12,7 +12,7 @@
     1395,
     1413,
     2211,
-    2018
+    2051
   ],
   "bbox_fraction": [
     0.2737,
@@ -32,7 +32,7 @@
   ],
   "ylim": [
     0.0,
-    48.0
+    47.9
   ],
   "xtick_values": [],
   "xtick_pixels": [
@@ -54,20 +54,53 @@
     "max_residual": 1.1102230246251565e-16
   },
   "y_fit": {
-    "slope": -0.08743169398907105,
-    "intercept": 50.71038251366121,
-    "max_residual": 7.105427357601002e-15
+    "slope": -0.08752381342510594,
+    "intercept": 50.61599166257472,
+    "max_residual": 0.17456244743223692,
+    "source": "y ticks",
+    "frame_top": 47.90275344639644,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        12.0
+      ],
+      [
+        4,
+        24.0
+      ],
+      [
+        6,
+        36.0
+      ],
+      [
+        8,
+        48.0
+      ]
+    ]
   },
   "n_markers": 15,
-  "n_legend_suppressed": 18,
+  "n_legend_suppressed": 12,
   "notes": [
+    "y calibrated from y ticks; frame top = 47.903",
     "x ticks: found 11, expected 0 (calibration still from frame edges)",
     "suppressed 12 in-plot legend/text blobs",
-    "column probe at 2K=22: 10 markers (4 filled, 6 open)"
+    "column probe at 2K=24: 21 markers over 7 momentum sites (7 filled, 7 open, 7 triangle)",
+    "series buried under another at k = 9, 11, 13 (recorded with conf=coincident)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
-  "K_probe": 22,
+  "K_probe": 24,
+  "sites": 7,
+  "sites_incomplete": [],
+  "sites_coincident": [
+    9,
+    11,
+    13
+  ],
   "check": {
     "K_inferred": 21,
     "K_code": 21,
@@ -78,13 +111,13 @@
     "K_from_x_min": 23.014392630972957,
     "K_from_spacing": 79.71848065111367,
     "n_points": 15,
-    "K_expected": 22,
+    "K_expected": 24,
     "ok": false
   },
-  "K_used": 22,
+  "K_used": 24,
   "K_source": "stated in paper",
-  "sum_rule_scale": 0.9144457904300423,
+  "sum_rule_scale": 1.0091460471175715,
   "sum_rule_quark_number": 6.0,
-  "n_on_lattice": 8,
-  "n_dropped_off_lattice": 2
+  "n_on_lattice": 21,
+  "n_dropped_off_lattice": 0
 }

@@ -1,6 +1,6 @@
 {
   "panel": "fig3b",
-  "description": "FIG. 3(b) SU(3) baryon valence; K not stated",
+  "description": "FIG. 3(b) SU(3) baryon valence at m/g=1.6 (filled) and 0.1 (open); K not stated",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 4,
   "dpi": 600,
@@ -12,7 +12,7 @@
     1561,
     5217,
     2385,
-    5819
+    5852
   ],
   "bbox_fraction": [
     0.3061,
@@ -32,7 +32,7 @@
   ],
   "ylim": [
     0.0,
-    11.25
+    13.5
   ],
   "xtick_values": [
     0.0,
@@ -52,19 +52,43 @@
     "max_residual": 2.498001805406602e-16
   },
   "y_fit": {
-    "slope": -0.019982238010657204,
-    "intercept": 11.629662522202489,
-    "max_residual": 3.552713678800501e-15
+    "slope": -0.024122778658569703,
+    "intercept": 13.962435373868152,
+    "max_residual": 0.03371486135932589,
+    "source": "y ticks",
+    "frame_top": 13.504102579355328,
+    "anchors": [
+      [
+        0,
+        0.0
+      ],
+      [
+        2,
+        3.75
+      ],
+      [
+        4,
+        7.5
+      ],
+      [
+        6,
+        11.25
+      ]
+    ]
   },
   "n_markers": 18,
   "n_legend_suppressed": 0,
   "notes": [
+    "y calibrated from y ticks; frame top = 13.504",
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
-    "column probe at 2K=15: 12 markers (5 filled, 7 open)"
+    "column probe at 2K=15: 14 markers over 7 momentum sites (7 filled, 7 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
   "K_probe": 15,
+  "sites": 7,
+  "sites_incomplete": [],
+  "sites_coincident": [],
   "check": {
     "K_inferred": 15,
     "K_code": 15,
@@ -80,8 +104,8 @@
   },
   "K_used": 15,
   "K_source": "inferred",
-  "sum_rule_scale": 1.2075067024128692,
+  "sum_rule_scale": 0.9968778089642616,
   "sum_rule_quark_number": 3.0,
-  "n_on_lattice": 12,
+  "n_on_lattice": 14,
   "n_dropped_off_lattice": 0
 }
