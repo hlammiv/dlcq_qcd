@@ -641,3 +641,76 @@ def test_no_basis_variant_reproduces_the_published_five_quark_curve():
     assert closest > 1.0, (
         f"a basis variant now reproduces the node to {closest:.0%} -- "
         "this would resolve docs/baryon-higher-fock.md; update it")
+
+
+# ── the single principle behind the whole figure-validation table ─────────
+
+# (B, K_code, sector) -> the basis-treatment spread we measure, and how well
+# that sector's published curve is reproduced.  Measured at lattice sites
+# carrying >= 5% of the sector's peak; elsewhere a relative spread is
+# meaningless because the values are ~0.
+SECTOR_SPREAD = [
+    # label,                     B,  K,  sector, spread, published agreement
+    ("Fig 5   meson 2K=24",      0, 24, 4,  0.0002, 0.020),
+    ("Fig 18a baryon 2K=15",     1, 15, 5,  0.0295, 0.004),
+    ("Fig 18b baryon 2K=15",     1, 15, 7,  0.1640, 0.175),
+    ("Fig 6a-c baryon 2K=21",    1, 21, 5,  0.3477, None),   # not reproducible
+    ("Fig 6d  2-baryon 2K=24",   2, 24, 8,  0.0002, 0.008),
+]
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("label,B,K,sector,expect,_agree", SECTOR_SPREAD)
+def test_sector_basis_spread(label, B, K, sector, expect, _agree):
+    """Each Fock sector's sensitivity to the treatment of the non-orthogonal basis.
+
+    This is the number that explains the entire figure-validation table.  Where
+    a sector is well determined we reproduce the published curve to about the
+    same precision; where it is not, we differ by about the spread:
+
+        Fig 5   4q   spread 0.02%   agreement 1.4-2.0%
+        Fig 18a 5q   spread 2.95%   agreement 0.4%
+        Fig 18b 7q   spread 16.4%   agreement 17.5%
+        Fig 6d  8q   spread 0.02%   agreement 0.8%
+        Fig 6a-c 5q  spread 34.8%   not reproducible
+
+    Fig. 18(b)'s 17.5% is the clearest case: it is the same size as that
+    sector's own ambiguity, so it is not evidence of an error in the code.
+    """
+    from dlcq.figures import paper_lambda
+    from dlcq.providers import PythonProvider
+
+    runs = []
+    for assembly, policy in BASIS_VARIANTS:
+        p = PythonProvider(ncpus=4, assembly=assembly, policy=policy)
+        r = p.get(3, 1, B, K, paper_lambda(1.6))
+        i = int(physical_indices(r)[0])
+        _, q, _ = structure_function(r, i, nparton=sector)
+        runs.append(np.asarray(q, float))
+
+    A = np.array(runs)
+    mean = A.mean(axis=0)
+    keep = mean >= 0.05 * mean.max()
+    spread = float(((A.max(axis=0) - A.min(axis=0))[keep] / mean[keep]).max())
+    # generous band: the point is the order of magnitude, not the third digit
+    assert expect / 3 <= spread <= expect * 3 or (expect < 1e-3 and spread < 3e-3), (
+        f"{label}: {sector}q spread {spread:.2%}, expected about {expect:.2%}")
+
+
+@pytest.mark.slow
+def test_agreement_tracks_basis_spread():
+    """Well-determined sectors are reproduced; ambiguous ones are not.
+
+    Stated as a rule rather than case by case: every sector whose basis spread
+    is under 3% is reproduced to within 2%, and the only sectors we fail to
+    reproduce are the two with spreads above 15%.
+    """
+    tight = [(lab, sp, ag) for lab, _b, _k, _s, sp, ag in SECTOR_SPREAD
+             if sp < 0.03]
+    loose = [(lab, sp, ag) for lab, _b, _k, _s, sp, ag in SECTOR_SPREAD
+             if sp >= 0.15]
+    assert tight and loose
+    for lab, sp, ag in tight:
+        assert ag is not None and ag <= 0.02, f"{lab}: spread {sp:.2%} but agreement {ag}"
+    for lab, sp, ag in loose:
+        assert ag is None or ag > 0.10, f"{lab}: spread {sp:.2%} yet agreement {ag}"

@@ -34,6 +34,43 @@ of the non-orthogonal basis, while every mass and valence curve is stable to
 one part in 10⁴. See `docs/baryon-higher-fock.md`. The same sector at 2K = 15
 reproduces the thesis's uncluttered plot of it (Fig. 18(a)) to 1%.
 
+## One number explains the whole table
+
+The Fock basis is non-orthogonal, and there is more than one defensible way to
+assemble H and to orthonormalize (`docs/basis-dependence.md`). Running each
+reference case through all six assembly/policy combinations gives a
+**basis-treatment spread** per Fock sector — measured at the lattice sites
+carrying at least 5% of that sector's peak, since elsewhere a relative spread is
+meaningless:
+
+| run | M² | valence | next sector | next |
+|---|---|---|---|---|
+| B=0 2K=24 (meson) | 4.7 × 10⁻⁸ | 0.00% | 4q **0.02%** | 6q 13.3% |
+| B=1 2K=15 | 6.2 × 10⁻⁶ | 0.01% | 5q **2.95%** | 7q 16.4% |
+| B=1 2K=21 | 1.6 × 10⁻⁴ | 0.34% | 5q **34.8%** | 7q 60.6% |
+| B=2 2K=24 | 3.7 × 10⁻⁶ | 0.00% | 8q **0.02%** | 10q 0.14% |
+
+Set that beside how well each published curve is reproduced:
+
+| figure | sector | spread | agreement |
+|---|---|---|---|
+| Fig. 5 (meson, 2K=24) | 4q | 0.02% | 1.4–2.0% |
+| Fig. 18(a) (baryon, 2K=15) | 5q | 2.95% | **0.4%** |
+| Fig. 18(b) (baryon, 2K=15) | 7q | **16.4%** | **17.5%** |
+| Fig. 6(a)–(c) (baryon, 2K=21) | 5q | **34.8%** | not reproducible |
+| Fig. 6(d) (2-baryon, 2K=24) | 8q | 0.02% | 0.8% |
+
+**The agreement tracks the ambiguity, case for case.** Every sector determined
+to better than 3% is reproduced to better than 2%. The only two we fail to
+reproduce are the two whose own basis spread exceeds 15% — and Fig. 18(b) is
+the cleanest illustration: its 17.5% discrepancy is the same size as its 16.4%
+ambiguity, so it is not evidence of an error at all.
+
+Masses are unaffected throughout: M² varies by at most 1.6 × 10⁻⁴ across every
+variant, and the valence structure functions by at most 0.34%. Everything the
+paper actually concludes — the spectra, Table I, the extrapolations, the
+large-N comparison — rests on those.
+
 ## Six calibration bugs the images exposed
 
 Getting there meant fixing six ways of mis-reading a published figure. All

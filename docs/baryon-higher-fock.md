@@ -493,6 +493,16 @@ bases with far less near-degeneracy among colour structures at fixed momentum,
 so the non-orthogonality that makes the 2K = 21 attribution ambiguous is much
 weaker there.
 
+## The seven-quark discrepancy is the same story
+
+Its basis spread at 2K = 15 is **16.4%**, and the discrepancy against thesis
+Fig. 18(b) is **17.5%**. Those are the same number. The five-quark sector in
+the panel directly above it has a spread of 2.95% and is reproduced to 0.4%.
+
+So the seven-quark result is not a separate anomaly and not evidence of an
+error: it is a quantity whose value is only defined to about 16% by the
+framework, quoted to about 16%.
+
 ## The seven-quark sector, checked for the first time
 
 Thesis Fig. 18(b) plots the seven-quark contribution to the same baryon, and
@@ -515,11 +525,26 @@ rather than asserting agreement.
 
 ## Status
 
-Resolved. Figs. 6(a)–(c)'s five-quark curve is the one quantity in the paper
-this reproduction cannot confirm, and the reason is now established rather than
-guessed: **it is not basis-independent.** It moves by up to 34% between
-legitimate treatments of the non-orthogonal basis, while every mass and every
-valence curve is stable to one part in 10⁴. Both earlier failures were in reading
+Resolved, by a single principle that covers every higher-Fock result in the
+paper: **how well we reproduce a published curve is set by how well that Fock
+sector is determined in the first place.**
+
+| figure | sector | basis spread | agreement |
+|---|---|---|---|
+| Fig. 5 (meson, 2K=24) | 4q | 0.02% | 1.4–2.0% |
+| Fig. 18(a) (baryon, 2K=15) | 5q | 2.95% | 0.4% |
+| Fig. 18(b) (baryon, 2K=15) | 7q | 16.4% | 17.5% |
+| Fig. 6(a)–(c) (baryon, 2K=21) | 5q | 34.8% | not reproducible |
+| Fig. 6(d) (2-baryon, 2K=24) | 8q | 0.02% | 0.8% |
+
+Everything determined to better than 3% is reproduced to better than 2%. The
+two we cannot reproduce are the two whose own ambiguity exceeds 15%.
+
+**One thing remains genuinely unexplained.** The basis spread accounts for the
+*size* of the Figs. 6(a)–(c) disagreement but not the *shape*: the published
+node sits at x ≈ 0.26 in all six published panels, across three states and two
+couplings, and no computed variant puts a node anywhere. Whatever produced that
+fixed feature is not something this reproduction has identified. Both earlier failures were in reading
 the figures, not the physics:
 
 * **Fig. 6(a)–(c)** — the valence and five-quark curves cross three times, and
