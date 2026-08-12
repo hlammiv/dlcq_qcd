@@ -14,12 +14,22 @@
 FC      = gfortran
 FFLAGS  = -mcmodel=medium
 
-.PHONY: all clean
+.PHONY: all clean wide
 
 all: qcdf
 
 qcdf: qcdf.f
 	$(FC) $(FFLAGS) -o $@ $<
 
+# Variant with the colour-array caps raised so high Fock sectors are not
+# corrupted; see docs/fortran-color-overflow.md. Generated, never edited.
+wide: qcdf_wide
+
+qcdf_wide.f: qcdf.f widen.py
+	python3 widen.py
+
+qcdf_wide: qcdf_wide.f
+	$(FC) $(FFLAGS) -o $@ $<
+
 clean:
-	rm -f qcdf
+	rm -f qcdf qcdf_wide qcdf_wide.f

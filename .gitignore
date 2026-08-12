@@ -16,6 +16,9 @@ figures/
 
 # ── Build artifacts ─────────────────────────────────────────────────────────
 fortran/qcdf
+fortran/qcdf_wide
+# generated from qcdf.f by fortran/widen.py; regenerate rather than commit
+fortran/qcdf_wide.f
 *.o
 *.mod
 
