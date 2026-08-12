@@ -68,7 +68,62 @@ landing on lattice sites surviving the lattice filter. Fixing them moved the
 correlation from −0.056 to 0.773. What remains was checked by eye against a
 magnified crop and is genuinely what the paper prints.
 
-## The remaining hypothesis
+## Resolved: higher-Fock components are numerically fragile
+
+Comparing our **two codes against each other** at 2K=21, B=1 — they agree on
+the eigenvalue to 4.2e-5 and on the valence curve to 5.6e-4:
+
+| sector | fraction of the norm | Fortran peak | Python peak | rel diff |
+|---|---|---|---|---|
+| 3-parton (valence) | 99.94% | 11.6025 | 11.6047 | **5.6e-4** |
+| 5-parton | 0.06% | 0.0073581 | 0.0062959 | **1.6e-1** |
+| 7-parton | ~0% | 6.5e-7 | 9.1e-7 | **4.0e-1** |
+
+The basis-dependence artifact of `docs/basis-dependence.md` is amplified roughly
+**300x** going from the valence sector to the 5-parton one, and ~700x to the
+7-parton one. That is expected: these components are ~10^-3 of the wave
+function, so the same absolute perturbation of the eigenvector is a far larger
+relative change there.
+
+Two codes that agree to 5.6e-4 on the valence differ by **16%** on the 5-parton
+sector. Neither can then be expected to match a third, 1988 computation — on
+different hardware, a different compiler and a different eigensolver — to better
+than that. The observed gap to the published curve (~50%) is about three times
+the spread between our own two codes, on a quantity where the two codes already
+disagree by 16%.
+
+So the baryon higher-Fock curves are **not a reproducibility target at the
+precision the valence curves are**. They are dominated by the same ill-posed
+step documented in `docs/basis-dependence.md`.
+
+## The definition is confirmed by the thesis
+
+Ref. 14 of the paper is K. Hornbostel, SLAC Report 333 (1988) — the thesis
+behind this code. It defines (Sec. 2.4):
+
+> `q_k = <phi(K)| b^dag_{k,c} b_{k,c} |phi(K)>` ... baryon-number sum rule
+> `sum_k (q_k - qbar_k)` = 0 for mesons, N for baryons; momentum sum rule
+> `sum_k k (q_k + qbar_k) = K`; in the continuum `q(x) = K q_k`.
+
+That is exactly `dlcq.observables.structure_function`, including the factor of
+K and both sum rules. The definition was never in doubt after this.
+
+Ref. 17 (Lepage & Brodsky, Phys. Rev. D **22**, 2157) gives the standard
+light-cone form `q(x) = sum_n sum_{i in n} delta(x - x_i) |psi_n|^2` — the same
+probability-weighted parton count.
+
+## The shape is confirmed independently of our tracer
+
+The thesis reproduces this panel as its own Fig. 12(a), printed far more
+legibly than the journal scan. It shows the same thing: valence peaking at
+~11.7 at x ~ 0.33 (ours: 11.60), and the five-quark curve peaking at ~10.5 at
+x ~ 0.09 with a **deep node at x ~ 0.27** and a second peak ~5.0 at x ~ 0.43.
+
+So the bimodal-with-node shape is real and our smooth curve genuinely differs —
+it is not a digitization artifact. The thesis also prints the panel on an
+explicit 0-15.0 axis, confirming the 14.77 derived here from tick spacing.
+
+## Also ruled out: the weighting itself
 
 The x-space conversion in the original work was done by a **separate program,
 `wf`/`wfbig`, which is not in this repository** — `qcdf.f` only emits
