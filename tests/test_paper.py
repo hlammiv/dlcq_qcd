@@ -572,17 +572,24 @@ def test_fig6a_five_quark_total_agrees_even_though_the_shape_does_not(
 
 # ── how well determined is the baryon five-quark structure function? ───────
 
+# The WELL-POSED treatments only.  docs/basis-dependence.md establishes that
+# the diagonal-only ("fortran") assembly is ill posed -- H0 = D*N with D
+# block-constant, so reading off only the diagonal does not determine it -- and
+# that block-wise orthonormalization repairs it.  ("fortran", "fortran") and
+# ("fortran", "spectral") are therefore wrong, not alternative conventions, and
+# including them in a "spread" measures the historical code's error rather than
+# any ambiguity in the physics.
 BASIS_VARIANTS = [("exact", "fortran"), ("exact", "blockwise"),
-                  ("exact", "spectral"), ("fortran", "fortran"),
-                  ("fortran", "blockwise"), ("fortran", "spectral")]
+                  ("exact", "spectral"), ("fortran", "blockwise")]
+ILL_POSED = [("fortran", "fortran"), ("fortran", "spectral")]
 
 
-def _five_quark_across_variants():
+def _five_quark_across_variants(variants=None):
     from dlcq.figures import paper_lambda
     from dlcq.providers import PythonProvider
 
     out = []
-    for assembly, policy in BASIS_VARIANTS:
+    for assembly, policy in (variants or BASIS_VARIANTS + ILL_POSED):
         p = PythonProvider(ncpus=4, assembly=assembly, policy=policy)
         r = p.get(3, 1, 1, 21, paper_lambda(1.6))
         i = int(physical_indices(r)[0])
@@ -591,39 +598,6 @@ def _five_quark_across_variants():
         out.append((r.eigenvalues[i], float(q3.max()),
                     np.array([q5[j] * 1e3 for j in range(6)])))
     return out
-
-
-@pytest.mark.slow
-def test_masses_are_basis_independent_but_the_five_quark_shape_is_not():
-    """The central caveat on Figs. 6(a)-(c), stated quantitatively.
-
-    The Fock basis is non-orthogonal, and there is more than one defensible way
-    to assemble H and to orthonormalize (see docs/basis-dependence.md).  Across
-    those choices the mass and the valence structure function are stable to
-    about one part in 10^4 -- but the five-quark structure function moves by up
-    to a third, site by site, and its total by 12%.
-
-    So the baryon higher-Fock *distribution* is not a well-determined quantity
-    in this framework at 2K=21, and quoting it to better than tens of percent
-    is not meaningful.  That is the honest resolution of why Figs. 6(a)-(c)'s
-    dashed curves resisted: they are the one thing in the paper whose value
-    depends on a convention the paper does not record.
-
-    The valence curves, every mass, Table I, and the meson higher-Fock sectors
-    are all unaffected.
-    """
-    got = _five_quark_across_variants()
-    M = np.array([g[0] for g in got])
-    V = np.array([g[1] for g in got])
-    Q = np.array([g[2] for g in got])
-
-    assert (M.max() - M.min()) / M.mean() < 1e-3, "mass should be robust"
-    assert (V.max() - V.min()) / V.mean() < 1e-3, "valence should be robust"
-
-    spread = (Q.max(axis=0) - Q.min(axis=0)) / Q.mean(axis=0)
-    assert spread.max() > 0.15, (
-        f"five-quark shape looks basis-independent now ({spread.max():.2%}); "
-        "if that is a real improvement, update docs/baryon-higher-fock.md")
 
 
 @pytest.mark.slow
@@ -638,6 +612,7 @@ def test_no_basis_variant_reproduces_the_published_five_quark_curve():
     published = np.array([8.53, 8.03, 1.06, 1.71, 5.04, 0.48])
     got = _five_quark_across_variants()
     closest = min(abs(q[2] - published[2]) / published[2] for _, _, q in got)
+
     assert closest > 1.0, (
         f"a basis variant now reproduces the node to {closest:.0%} -- "
         "this would resolve docs/baryon-higher-fock.md; update it")
@@ -649,68 +624,61 @@ def test_no_basis_variant_reproduces_the_published_five_quark_curve():
 # that sector's published curve is reproduced.  Measured at lattice sites
 # carrying >= 5% of the sector's peak; elsewhere a relative spread is
 # meaningless because the values are ~0.
-SECTOR_SPREAD = [
-    # label,                     B,  K,  sector, spread, published agreement
-    ("Fig 5   meson 2K=24",      0, 24, 4,  0.0002, 0.020),
-    ("Fig 18a baryon 2K=15",     1, 15, 5,  0.0295, 0.004),
-    ("Fig 18b baryon 2K=15",     1, 15, 7,  0.1640, 0.175),
-    ("Fig 6a-c baryon 2K=21",    1, 21, 5,  0.3477, None),   # not reproducible
-    ("Fig 6d  2-baryon 2K=24",   2, 24, 8,  0.0002, 0.008),
-]
-
-
 @pytest.mark.slow
-@pytest.mark.parametrize("label,B,K,sector,expect,_agree", SECTOR_SPREAD)
-def test_sector_basis_spread(label, B, K, sector, expect, _agree):
-    """Each Fock sector's sensitivity to the treatment of the non-orthogonal basis.
+def test_higher_fock_sectors_are_well_determined():
+    """Among well-posed treatments the higher-Fock sectors are NOT ambiguous.
 
-    This is the number that explains the entire figure-validation table.  Where
-    a sector is well determined we reproduce the published curve to about the
-    same precision; where it is not, we differ by about the spread:
+    This corrects an earlier claim in this file.  Measuring the "spread" over
+    all six assembly/policy combinations gave tens of percent and appeared to
+    explain why Figs. 6(a)-(c) and 18(b) resist -- but two of those six use the
+    ill-posed diagonal-only assembly without the block-wise repair, so the
+    spread was measuring the historical code's error, not an ambiguity.
 
-        Fig 5   4q   spread 0.02%   agreement 1.4-2.0%
-        Fig 18a 5q   spread 2.95%   agreement 0.4%
-        Fig 18b 7q   spread 16.4%   agreement 17.5%
-        Fig 6d  8q   spread 0.02%   agreement 0.8%
-        Fig 6a-c 5q  spread 34.8%   not reproducible
-
-    Fig. 18(b)'s 17.5% is the clearest case: it is the same size as that
-    sector's own ambiguity, so it is not evidence of an error in the code.
+    Restricted to the four well-posed variants the sectors agree to 1e-10 at
+    2K=15 and to 0.003% at 2K=21.  Our higher-Fock structure functions are
+    well determined, and the disagreements with the published figures are
+    therefore real and remain unexplained.
     """
     from dlcq.figures import paper_lambda
     from dlcq.providers import PythonProvider
 
-    runs = []
-    for assembly, policy in BASIS_VARIANTS:
-        p = PythonProvider(ncpus=4, assembly=assembly, policy=policy)
-        r = p.get(3, 1, B, K, paper_lambda(1.6))
-        i = int(physical_indices(r)[0])
-        _, q, _ = structure_function(r, i, nparton=sector)
-        runs.append(np.asarray(q, float))
-
-    A = np.array(runs)
-    mean = A.mean(axis=0)
-    keep = mean >= 0.05 * mean.max()
-    spread = float(((A.max(axis=0) - A.min(axis=0))[keep] / mean[keep]).max())
-    # generous band: the point is the order of magnitude, not the third digit
-    assert expect / 3 <= spread <= expect * 3 or (expect < 1e-3 and spread < 3e-3), (
-        f"{label}: {sector}q spread {spread:.2%}, expected about {expect:.2%}")
+    for B, K, sector, tol in ((1, 15, 5, 1e-8), (1, 15, 7, 1e-6),
+                              (1, 21, 5, 1e-3), (2, 24, 8, 1e-6)):
+        runs = []
+        for assembly, policy in BASIS_VARIANTS:
+            p = PythonProvider(ncpus=4, assembly=assembly, policy=policy)
+            r = p.get(3, 1, B, K, paper_lambda(1.6))
+            i = int(physical_indices(r)[0])
+            _, q, _ = structure_function(r, i, nparton=sector)
+            runs.append(np.asarray(q, float))
+        A = np.array(runs)
+        m = A.mean(axis=0)
+        keep = m >= 0.05 * m.max()
+        spread = float(((A.max(axis=0) - A.min(axis=0))[keep] / m[keep]).max())
+        assert spread < tol, (
+            f"B={B} 2K={K} {sector}q spread {spread:.3g} exceeds {tol:g}")
 
 
 @pytest.mark.slow
-def test_agreement_tracks_basis_spread():
-    """Well-determined sectors are reproduced; ambiguous ones are not.
+def test_the_ill_posed_assembly_is_what_moves_the_higher_fock_sectors():
+    """And it is specifically the uncorrected diagonal-only assembly that moves them.
 
-    Stated as a rule rather than case by case: every sector whose basis spread
-    is under 3% is reproduced to within 2%, and the only sectors we fail to
-    reproduce are the two with spreads above 15%.
+    Kept because it is the thing that fooled this analysis once: the ill-posed
+    variants shift the 2K=21 five-quark curve by ~30% while moving M^2 only in
+    its sixth digit, which is exactly the signature of a real physical
+    ambiguity and is not one.  (M^2 moves by 1.2e-4 relative; the
+    five-quark value at x=1/21 moves by 28%.)
     """
-    tight = [(lab, sp, ag) for lab, _b, _k, _s, sp, ag in SECTOR_SPREAD
-             if sp < 0.03]
-    loose = [(lab, sp, ag) for lab, _b, _k, _s, sp, ag in SECTOR_SPREAD
-             if sp >= 0.15]
-    assert tight and loose
-    for lab, sp, ag in tight:
-        assert ag is not None and ag <= 0.02, f"{lab}: spread {sp:.2%} but agreement {ag}"
-    for lab, sp, ag in loose:
-        assert ag is None or ag > 0.10, f"{lab}: spread {sp:.2%} yet agreement {ag}"
+    from dlcq.figures import paper_lambda
+    from dlcq.providers import PythonProvider
+
+    good = PythonProvider(ncpus=4, assembly="exact", policy="blockwise")
+    bad = PythonProvider(ncpus=4, assembly="fortran", policy="fortran")
+    rg = good.get(3, 1, 1, 21, paper_lambda(1.6))
+    rb = bad.get(3, 1, 1, 21, paper_lambda(1.6))
+    ig = int(physical_indices(rg)[0])
+    ib = int(physical_indices(rb)[0])
+    _, qg, _ = structure_function(rg, ig, nparton=5)
+    _, qb, _ = structure_function(rb, ib, nparton=5)
+    assert abs(rg.eigenvalues[ig] - rb.eigenvalues[ib]) / rg.eigenvalues[ig] < 1e-3
+    assert abs(qb[0] - qg[0]) / qg[0] > 0.15

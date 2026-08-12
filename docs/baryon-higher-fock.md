@@ -445,7 +445,21 @@ So the projection, the normalization and the ε-tensor weighting are all
 confirmed. Something about the *distribution* of the five-quark weight over x
 differs at the larger basis, and it is not any of the causes above.
 
-## Resolution: this quantity is not basis-independent
+## Withdrawn: "this quantity is not basis-independent"
+
+An earlier revision concluded that the five-quark distribution was ambiguous at
+the 34% level and that this explained the disagreement. **That conclusion was
+wrong.** The 34% came from averaging over six assembly/policy combinations,
+two of which apply the diagonal-only assembly without the block-wise repair
+that `docs/basis-dependence.md` shows is required. Among the four well-posed
+treatments the five-quark sector agrees to 0.003% at 2K = 21 and to 2 × 10⁻¹²
+at 2K = 15.
+
+So our value is well determined, the published curve is genuinely different,
+and the question is open again. The table below is kept only because the
+contrast between the well-posed and ill-posed variants is itself informative.
+
+## The ill-posed variants, for the record
 
 The Fock basis here is non-orthogonal, and there is more than one defensible
 way to assemble H and to orthonormalize — see `docs/basis-dependence.md`.
@@ -493,15 +507,12 @@ bases with far less near-degeneracy among colour structures at fixed momentum,
 so the non-orthogonality that makes the 2K = 21 attribution ambiguous is much
 weaker there.
 
-## The seven-quark discrepancy is the same story
+## The seven-quark discrepancy stands
 
-Its basis spread at 2K = 15 is **16.4%**, and the discrepancy against thesis
-Fig. 18(b) is **17.5%**. Those are the same number. The five-quark sector in
-the panel directly above it has a spread of 2.95% and is reproduced to 0.4%.
-
-So the seven-quark result is not a separate anomaly and not evidence of an
-error: it is a quantity whose value is only defined to about 16% by the
-framework, quoted to about 16%.
+An earlier revision claimed its 17.5% was covered by a 16.4% basis ambiguity.
+That ambiguity was an artifact of including ill-posed variants; among well-posed
+treatments the seven-quark sector at 2K = 15 agrees to 2 × 10⁻¹⁰. The 17.5%
+discrepancy against thesis Fig. 18(b) is real and unexplained.
 
 ## The seven-quark sector, checked for the first time
 
@@ -525,9 +536,19 @@ rather than asserting agreement.
 
 ## Status
 
-Resolved, by a single principle that covers every higher-Fock result in the
-paper: **how well we reproduce a published curve is set by how well that Fock
-sector is determined in the first place.**
+**Open.** Two disagreements remain, both real:
+
+* Figs. 6(a)–(c)'s five-quark curve at 2K = 21 — right total (1.5%), wrong
+  distribution, with a node at x ≈ 0.26 that does not move across three states
+  or two couplings.
+* Thesis Fig. 18(b)'s seven-quark curve at 2K = 15 — uniformly 17.5% high.
+
+Neither is explained by basis dependence, by numerical conditioning (every Gram
+block has condition number below 42 and minimum eigenvalue 6.0), by Fock level
+(B=2's 10-parton sector is stable to 0.14% and reproduces Fig. 6(d) to 0.8%),
+or by any of the causes listed below.
+
+The superseded "resolution" is kept above as a caution.
 
 | figure | sector | basis spread | agreement |
 |---|---|---|---|

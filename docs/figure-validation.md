@@ -34,7 +34,27 @@ of the non-orthogonal basis, while every mass and valence curve is stable to
 one part in 10⁴. See `docs/baryon-higher-fock.md`. The same sector at 2K = 15
 reproduces the thesis's uncluttered plot of it (Fig. 18(a)) to 1%.
 
-## One number explains the whole table
+## Correction: the basis spread was not real
+
+An earlier revision of this document claimed that a "basis-treatment spread"
+explained the whole table. **That was wrong and has been withdrawn.** The
+spread was measured over all six assembly/policy combinations, two of which use
+the diagonal-only assembly *without* the block-wise repair. Those two are
+ill-posed, not alternative conventions — see `docs/basis-dependence.md` — so
+the spread was measuring the historical code's error, not an ambiguity in the
+physics.
+
+Restricted to the four well-posed treatments the higher-Fock sectors agree to
+**8 × 10⁻¹³ to 2 × 10⁻¹⁰** at 2K = 15 and to **0.003%** at 2K = 21. Our
+higher-Fock structure functions are well determined. The disagreements with
+Figs. 6(a)–(c) and 18(b) are therefore real, and remain unexplained.
+
+What the ill-posed variants do show is worth keeping: they shift the 2K = 21
+five-quark curve by ~30% while moving M² only in its sixth digit. That is
+exactly what a genuine physical ambiguity would look like, and it is not one —
+which is how it fooled this analysis once.
+
+## Superseded: the spread numbers
 
 The Fock basis is non-orthogonal, and there is more than one defensible way to
 assemble H and to orthonormalize (`docs/basis-dependence.md`). Running each
