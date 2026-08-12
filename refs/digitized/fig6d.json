@@ -59,11 +59,11 @@
     "max_residual": 7.105427357601002e-15
   },
   "n_markers": 15,
-  "n_legend_suppressed": 15,
+  "n_legend_suppressed": 18,
   "notes": [
     "x ticks: found 11, expected 0 (calibration still from frame edges)",
     "suppressed 12 in-plot legend/text blobs",
-    "column probe at 2K=22: 13 markers (5 filled, 8 open)"
+    "column probe at 2K=22: 10 markers (4 filled, 6 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
@@ -83,8 +83,8 @@
   },
   "K_used": 22,
   "K_source": "stated in paper",
-  "sum_rule_scale": 0.6340823183536329,
+  "sum_rule_scale": 0.9144457904300423,
   "sum_rule_quark_number": 6.0,
-  "n_on_lattice": 11,
+  "n_on_lattice": 8,
   "n_dropped_off_lattice": 2
 }

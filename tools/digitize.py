@@ -390,6 +390,12 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
         if K_probe:
             probed = trace_at_lattice(ink, frame, K_probe)
             probed, probe_legend = suppress_legend(probed, frame)
+            # The probe samples only lattice columns, so it recovers too few
+            # legend glyphs per row for the row rule to fire.  Reuse the box
+            # the blob pass established.
+            probed, boxed = drop_in_box(probed, frame,
+                                        legend_bbox(legend_hits, frame))
+            probe_legend = list(probe_legend) + list(boxed)
             if len(probed) >= max(3, len(records) // 2):
                 provenance["probe_records"] = [
                     dict(x=xs * m["px"] + xi, y=ys * m["py"] + yi,
@@ -511,6 +517,39 @@ def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
                             area=int(strip[span_a:span_b + 1].sum()),
                             height=int(height), filled=not is_open, k=k))
     return out
+
+
+def legend_bbox(dropped, frame, margin=0.02):
+    """Bounding box (in frame fractions) of the blobs :func:`suppress_legend` cut.
+
+    The blob pass sees the whole legend -- its markers *and* the letter counters
+    of its text -- so it localizes the region reliably.  The column probe only
+    samples lattice columns and therefore finds too few legend glyphs per row
+    for the >=3-in-a-row rule to fire, so it is given this box instead.
+    """
+    if not dropped:
+        return None
+    left, right, top, bottom = frame
+    fw, fh = float(right - left), float(bottom - top)
+    xs = [(m["px"] - left) / fw for m in dropped]
+    ys = [(bottom - m["py"]) / fh for m in dropped]
+    return (min(xs) - margin, min(ys) - margin,
+            max(xs) + margin, max(ys) + margin)
+
+
+def drop_in_box(markers, frame, box):
+    """Remove markers inside a frame-fraction bounding box."""
+    if box is None:
+        return markers, []
+    left, right, top, bottom = frame
+    fw, fh = float(right - left), float(bottom - top)
+    x0, y0, x1, y1 = box
+    keep, cut = [], []
+    for m in markers:
+        fx = (m["px"] - left) / fw
+        fy = (bottom - m["py"]) / fh
+        (cut if (x0 <= fx <= x1 and y0 <= fy <= y1) else keep).append(m)
+    return keep, cut
 
 
 def suppress_legend(markers, frame, y_tol=0.015, min_row=3, x_span=0.15,

@@ -66,11 +66,11 @@
     "max_residual": 1.0658141036401503e-14
   },
   "n_markers": 14,
-  "n_legend_suppressed": 7,
+  "n_legend_suppressed": 11,
   "notes": [
     "x ticks: found 11, expected 6 (calibration still from frame edges)",
     "suppressed 7 in-plot legend/text blobs",
-    "column probe at 2K=14: 18 markers (8 filled, 10 open)"
+    "column probe at 2K=14: 13 markers (5 filled, 8 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
@@ -90,6 +90,6 @@
   },
   "K_used": 14,
   "K_source": "inferred",
-  "n_on_lattice": 18,
+  "n_on_lattice": 13,
   "n_dropped_off_lattice": 0
 }
