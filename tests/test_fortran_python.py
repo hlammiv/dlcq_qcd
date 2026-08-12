@@ -271,3 +271,49 @@ def test_python_sum_rules(python_K21):
 
     assert momentum_sum_rule(python_K21, 0) == pytest.approx(1.0, abs=1e-10)
     assert number_sum_rule(python_K21, 0) == pytest.approx(3.0, abs=1e-10)
+
+
+# ── removing the basis dependence ─────────────────────────────────────────
+
+def test_blockwise_Z_makes_the_free_part_diagonal(matched):
+    """Block-wise orthonormalization makes qcdf.f's assembly well-posed.
+
+    ``H0 = D N`` with D constant on each block of mutually overlapping states,
+    so a Z built inside blocks keeps every column in one block and ``Z^T H0 Z``
+    comes out diagonal -- which is exactly the condition the Fortran's
+    diagonal-only rule silently assumes.
+    """
+    from dlcq.read_python import orthonormalize_blockwise
+
+    Z, ncol = orthonormalize_blockwise(matched["norm"], matched["norm"].shape[0])
+    assert ncol > 0
+
+    gram = Z.T @ matched["norm"] @ Z
+    assert np.abs(gram - np.eye(ncol)).max() < 1e-9
+
+    free = Z.T @ matched["ham0"] @ Z
+    off = free - np.diag(np.diag(free))
+    assert np.abs(off).max() < 1e-9, (
+        f"Z^T H0 Z off-diagonal {np.abs(off).max():.2e}; a global Z gives ~0.8"
+    )
+
+
+def test_blockwise_Z_removes_the_assembly_ambiguity(matched):
+    """With a block-wise Z the two assemblies agree, so the answer is unique."""
+    from scipy.linalg import eigh
+
+    from dlcq.read_python import orthonormalize_blockwise
+
+    f = matched["fortran"]
+    lam2 = f.rlamb ** 2
+    Z, _ = orthonormalize_blockwise(matched["norm"], matched["norm"].shape[0])
+
+    full = lam2 * (Z.T @ matched["ham"] @ Z) + (1 - lam2) * (Z.T @ matched["ham0"] @ Z)
+    diag = lam2 * (Z.T @ matched["ham"] @ Z)
+    diag[np.diag_indices(diag.shape[0])] += (1 - lam2) * np.diag(Z.T @ matched["ham0"] @ Z)
+
+    a = f.K_code * eigh(full, eigvals_only=True) / 2.0
+    b = f.K_code * eigh(diag, eigvals_only=True) / 2.0
+    assert np.abs(a - b).max() < 1e-9, (
+        "block-wise Z should make the diagonal-only and full assemblies identical"
+    )

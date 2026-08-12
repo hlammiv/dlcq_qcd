@@ -36,7 +36,8 @@ from scipy.linalg import eigh
 
 from .dataset import DLCQResult
 
-__all__ = ["run_python", "weed_fortran", "weed_spectral"]
+__all__ = ["run_python", "weed_fortran", "weed_spectral",
+           "orthonormalize_blockwise"]
 
 _PYDIR = Path(__file__).resolve().parent.parent / "python"
 
@@ -114,6 +115,52 @@ def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000):
             numsta -= 1
 
     return hnorm, mstinf, numsta
+
+
+def orthonormalize_blockwise(hnorm, numsta, tol=1e-8):
+    """Build Z block by block, which makes the Fortran's assembly well-posed.
+
+    ``qcdf.f`` adds the free Hamiltonian to the diagonal only of ``Z^T H0 Z``,
+    which is exact only if that matrix is diagonal.  With a *global*
+    orthonormalization it is not -- the norm matrix is massively degenerate, so
+    an eigensolver may mix states from different Fock momentum classes, and the
+    discarded off-diagonal terms make the answer depend on which eigenvectors
+    came back (see docs/basis-dependence.md).
+
+    But ``H0 = D N`` with ``D`` **constant on each block** of mutually
+    overlapping states: overlapping states share their parton content, hence
+    their free energy.  Measured at N=3, B=1, 2K=21 the norm matrix splits into
+    121 blocks (largest 6) and the free energy is constant across every one.
+
+    Orthonormalizing inside each block therefore keeps every column of Z within
+    a single block, so ``Z^T H0 Z`` comes out diagonal to machine precision
+    (3.4e-14, against ~0.8 for a global Z) and the diagonal-only rule stops
+    being an approximation.  The residual freedom -- rotations *within* a block
+    -- does not matter, because D is a multiple of the identity there.
+
+    Returns ``(Z, kept_columns)``.
+    """
+    import scipy.sparse as sp
+    from scipy.sparse.csgraph import connected_components
+
+    A = sp.csr_matrix((np.abs(hnorm[:numsta, :numsta]) > 1e-9).astype(np.int8))
+    nblocks, labels = connected_components(A, directed=False)
+
+    cols = []
+    for b in range(nblocks):
+        idx = np.flatnonzero(labels == b)
+        w, v = eigh(hnorm[np.ix_(idx, idx)])
+        keep = w > tol
+        if not np.any(keep):
+            continue
+        Zb = v[:, keep] / np.sqrt(w[keep])
+        for j in range(Zb.shape[1]):
+            col = np.zeros(numsta)
+            col[idx] = Zb[:, j]
+            cols.append(col)
+
+    Z = np.column_stack(cols) if cols else np.zeros((numsta, 0))
+    return Z, Z.shape[1]
 
 
 def weed_spectral(hnorm, mstinf, numsta, threshold=0.5):
@@ -212,6 +259,9 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         hnorm_w, mstinf_w, numsta = weed_fortran(hnorm, mstinf, numsta_pre)
         w_n, z_n = eigh(hnorm_w[:numsta, :numsta])
         Z = z_n / np.sqrt(w_n)[np.newaxis, :]          # NUZ
+    elif policy == "blockwise":
+        hnorm_w, mstinf_w, numsta = weed_fortran(hnorm, mstinf, numsta_pre)
+        Z, _ = orthonormalize_blockwise(hnorm_w, numsta)
     elif policy == "spectral":
         hnorm_w, mstinf_w, numsta, Z = weed_spectral(hnorm, mstinf, numsta_pre)
     else:
