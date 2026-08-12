@@ -1,0 +1,145 @@
+# DLCQ QCD in 1+1 dimensions
+
+Validating two solvers — Kent Hornbostel's 1993 Fortran 77 code and a Python
+port of it — against **Hornbostel, Brodsky & Pauli, Phys. Rev. D 41, 3814
+(1990)**, and freezing that validation into an automated regression suite.
+
+The article PDF is not redistributed here; see [CITATION.md](CITATION.md).
+
+## Layout
+
+```
+fortran/   qcdf.f (6397 lines, F77) -- the historical code, deliberately unpatched
+python/    qcdf.py / qcdf_opt.py    -- the Python port
+dlcq/      the shared pipeline both solvers feed
+refs/      Table I transcribed from the paper
+docs/      findings that change how results must be read
+tests/     the regression suite
+```
+
+## The idea
+
+Both solvers produce the same `DLCQResult`, and the figure code reads only that.
+A figure built from Fortran output and one built from Python go through
+identical arithmetic, so any difference in the plot is a difference in physics.
+
+```
+fortran/qcdf.f ──> qcdf.out + qcdf.ham ──┐
+                                         ├──> DLCQResult ──> observables ──> figures
+python/qcdf_opt.py ──> arrays ───────────┘                                    └──> tests
+```
+
+| module | role |
+|---|---|
+| `dlcq/units.py` | λ ↔ m/g, `K_code = 2·K_paper`, `M²_code` → `M/g`, Eq. 26 exponent |
+| `dlcq/dataset.py` | `DLCQResult` + HDF5 — the data contract |
+| `dlcq/read_fortran.py` | parses `qcdf.out` / `qcdf.ham` |
+| `dlcq/read_python.py` | runs the Python solver |
+| `dlcq/providers.py` | `PythonProvider` / `FortranProvider`, both cached |
+| `dlcq/observables.py` | structure functions, sum rules, Richardson (Eq. 27) |
+| `dlcq/figures.py` | Figs. 1–8 and Table I, from `DLCQResult` only |
+
+## Quick start
+
+```bash
+pip install -r requirements.txt
+make -C fortran                                   # needs gfortran
+
+# run a case (qcdf.f hard-codes its output filenames, so runs are isolated)
+bash fortran/run_case.sh runs/K21 3 1 1 0.3325 -1.0 0 21
+
+# figures, from either solver
+python -m dlcq.figures --source fortran --fig 5 6
+python -m dlcq.figures --source python  --fig 5 6 --ncpus 8
+
+pytest                    # Tier 0-1, under a second
+pytest -m slow            # the expensive sweeps
+```
+
+## Conventions worth reading once
+
+| quantity | definition |
+|---|---|
+| `K_code` | **2×** the paper's `K = (L/2π)P⁺`. The paper's "2K = 24" is `K_code = 24` |
+| λ | `1/(1 + πm²/g²)^½`; `m/g = [(1−λ²)/(πλ²)]^½` |
+| eigenvalue | `M²_code = K_code·w/2`, in units of `m² + g²/π` |
+| `M/g` | `sqrt(M²_code/(πλ²))` |
+| structure fn | `q(x) = K_paper⟨φ\|b†_k b_k\|φ⟩`, `x = k/K_code`, `dx = 2/K_code` |
+| momenta | odd integers (antiperiodic boundary conditions) |
+
+Two traps. **λ must be passed literally**: the historical runs use `0.3325`
+while `mg_to_lambda(1.6)` is `0.33254949`, and that 1.5×10⁻⁵ swamps any tight
+tolerance. And this paper's natural unit is `g²N/2π`, not 't Hooft's `g²N/π` —
+hence the `(2π/N)^½` rescaling on Fig. 8(b).
+
+## Status
+
+Verified to machine precision, against the Fortran's own basis and its own `Z`:
+
+| quantity | agreement |
+|---|---|
+| norm matrix (189×189) | **exact**, max diff `0.0` |
+| interacting `HNU = ZᵀHZ` | `1.1e-14` |
+| free `HNU0` | `8.9e-15` |
+| `ZᵀNZ = I` | `2.7e-14` |
+| momentum sum rule `∫x[q+q̄]dx = 1` | `1.4e-14` |
+| number sum rule `∫[q−q̄]dx = N·B` | `4.0e-14` |
+
+So the state generator, the diagrammatic colour-contraction engine, all seven
+four-point vertices, both self-energies and the structure-function machinery are
+confirmed correct. The rebuilt Fortran also reproduces the preserved 1990-era
+`qcdf.out`/`qcdf.ham` **byte-for-byte** at 2K = 21 and 2K = 25.
+
+Reproduced from the paper's own text: at 2K=24 the 11th meson state has
+`M/g` ratio **1.989** against the stated "twice that of the first", and its
+qq̄qq̄ component peaks at `x = 5/24 = 0.208`, the nearest odd-momentum grid
+point to the stated `x = 1/4`.
+
+## Two defects found in `qcdf.f`
+
+Both are documented in full under `docs/`. Neither changes the paper's physics
+conclusions, but both change how its output must be read.
+
+**1. The spectrum is basis-dependent** —
+[docs/basis-dependence.md](docs/basis-dependence.md).
+`qcdf.f` adds the free Hamiltonian to the *diagonal only* of the
+orthonormal-basis matrix. `Zᵀ H₀ Z` is not diagonal, and the norm matrix has
+just 26 distinct eigenvalues among 189 states, so the result depends on which
+eigenvectors the diagonalization returns. Recompiling the **unmodified** source
+at `-O2` instead of `-O0` changes its own answer: 190 retained states instead of
+189, ground state 10.390084 instead of 10.390380. ~10⁻⁴ is the intrinsic
+reproducibility floor, for anyone. The end-to-end test derives its tolerance
+from this rather than hard-coding one.
+
+**2. A silent array-bounds overflow** —
+[docs/fortran-color-overflow.md](docs/fortran-color-overflow.md).
+A matrix element between two `L`-parton states needs `2L + 4` colour-index
+slots; `IDELT` is dimensioned with 25. Runs reaching `L ≥ 11` are corrupted, and
+the damage lands as non-positive `M²` at the **bottom** of the spectrum — where
+Figs. 7, 8 and Table I read the lightest state. At 2K=24, B=0 a naive
+`eigenvalues[0]` returns `M/g = 0` instead of 3.617.
+`dlcq.observables.physical_indices` removes these; the reader warns on load.
+
+Neither is patched in `qcdf.f`, which stays byte-faithful to the code that
+produced the paper. The corrected physics lives in the Python path, where
+`assembly="exact"` is the basis-independent reference.
+
+## Reproduction status by figure
+
+| Fig | status | notes |
+|---|---|---|
+| 1 | schematic | interaction vertices; nothing to validate |
+| 2 | pipeline ready | λ sweep at 2K = 10/13/22 |
+| 3 | pipeline ready | K not stated in the paper; adopted 2K=24/21 |
+| 4 | pipeline ready | K not stated; same adoption |
+| 5 | **reproduced** | 2K=24, m/g=1.6; matches the paper's text anchors |
+| 6 | **reproduced** | 2K=21, m/g=1.6 |
+| 7 | pipeline ready | needs the Richardson sweep, 2K = 16–24 |
+| 8 | pipeline ready | large-N curves need 't Hooft's Eq. (24) separately |
+| Table I | transcribed | `refs/table1.csv`, all 35 entries verified at 600 dpi |
+
+The paper never states `K` for Figs. 3 and 4. It can be recovered from the plots
+themselves: momenta are odd, so `x_min = 1/K` and `Δx = 2/K`, and Eq. (12)'s
+`K_paper` factor makes `Σᵢq(xᵢ)/K_paper` the quark number — two independent
+determinations. `dlcq.units.infer_K_from_x_grid` implements this and is
+validated on Figs. 5 and 6, whose `K` the paper does state.

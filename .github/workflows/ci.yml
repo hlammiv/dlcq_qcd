@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_slow:
+        description: "Also run the slow Fortran/Richardson tests"
+        type: boolean
+        default: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install gfortran
+        run: sudo apt-get update && sudo apt-get install -y gfortran
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build the Fortran solver
+        # -mcmodel=medium is mandatory: ~2.87 GB of static BSS in COMMON blocks.
+        run: make -C fortran
+
+      - name: Generate the small Fortran fixtures the reader tests need
+        run: |
+          bash fortran/run_case.sh runs/K10_B0 3 1 0 0.3325 -1.0 0 10
+          bash fortran/run_case.sh runs/K21_B1 3 1 1 0.3325 -1.0 0 21
+
+      - name: Tier 0-1 (fast)
+        run: pytest -q
+
+      - name: Tier 2-3 (slow, opt-in)
+        if: github.event_name == 'workflow_dispatch' && inputs.run_slow
+        run: pytest -q -m slow

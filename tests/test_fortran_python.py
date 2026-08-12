@@ -109,10 +109,11 @@ def test_interacting_hamiltonian_matches(matched):
     Z = f.Z
     py = Z.T @ matched["ham"] @ Z
     from dlcq.read_fortran import read_ham
-    from conftest import ROOT
+    from conftest import find_run
 
-    ham_file = ROOT / "python" / "qcdf.ham"
-    if not ham_file.exists():
+    out = find_run("K21_B1")
+    ham_file = out.with_name("qcdf.ham") if out else None
+    if ham_file is None or not ham_file.exists():
         pytest.skip("no qcdf.ham to compare against")
     _, _, fort = read_ham(ham_file)
     assert np.abs(py - fort).max() < MATRIX_ATOL
@@ -121,10 +122,11 @@ def test_interacting_hamiltonian_matches(matched):
 def test_free_hamiltonian_matches(matched):
     """HNU0: the mass term and both self-energy contributions."""
     from dlcq.read_fortran import read_ham
-    from conftest import ROOT
+    from conftest import find_run
 
-    ham_file = ROOT / "python" / "qcdf.ham"
-    if not ham_file.exists():
+    out = find_run("K21_B1")
+    ham_file = out.with_name("qcdf.ham") if out else None
+    if ham_file is None or not ham_file.exists():
         pytest.skip("no qcdf.ham to compare against")
     _, fort0, _ = read_ham(ham_file)
     Z = matched["fortran"].Z

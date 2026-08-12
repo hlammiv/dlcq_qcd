@@ -87,11 +87,14 @@ def test_fock_sectors_are_physical(fortran_K21):
 def test_ham_file_matches_out_file():
     """qcdf.ham and qcdf.out must describe the same run."""
     from dlcq.read_fortran import read_ham
-    from conftest import ROOT
+    from conftest import find_run
 
-    ham = ROOT / "python" / "qcdf.ham"
+    out = find_run("K21_B1")
+    if out is None:
+        pytest.skip("no 2K=21 run")
+    ham = out.with_name("qcdf.ham")
     if not ham.exists():
-        pytest.skip("no qcdf.ham")
+        pytest.skip("no qcdf.ham beside the qcdf.out")
     meta, hnu0, hnu = read_ham(ham)
     assert (meta["N"], meta["NF"], meta["B"], meta["K_code"]) == (3, 1, 1, 21)
     assert meta["numsta"] == 189
