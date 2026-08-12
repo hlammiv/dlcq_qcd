@@ -1,0 +1,79 @@
+{
+  "panel": "fig4b",
+  "description": "FIG. 4(b) baryon, one extra pair, incl. antiquarks",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 4,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    3725,
+    634,
+    4553,
+    1261
+  ],
+  "bbox_fraction": [
+    0.7304,
+    0.0961,
+    0.8929,
+    0.1911
+  ],
+  "frame_px": [
+    25,
+    811,
+    32,
+    599
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    22.5
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    27.0,
+    810.0
+  ],
+  "x_fit": {
+    "slope": 0.0012722646310432569,
+    "intercept": -0.03180661577608116,
+    "max_residual": 2.636779683484747e-16
+  },
+  "y_fit": {
+    "slope": -0.039682539682539694,
+    "intercept": 23.769841269841272,
+    "max_residual": 3.552713678800501e-15
+  },
+  "n_markers": 37,
+  "notes": [
+    "x ticks: found 2, expected 6 (calibration still from frame edges)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 15,
+    "K_code": 15,
+    "inlier_fraction": 0.6756756756756757,
+    "median_grid_residual": 0.014456476714598265,
+    "max_grid_residual": 0.051905293862098745,
+    "consistent": true,
+    "K_from_x_min": 29.851996867658347,
+    "K_from_spacing": 99.15909990999145,
+    "n_points": 37,
+    "ok": true,
+    "note": "paper does not state K for this panel; inferred"
+  },
+  "n_on_lattice": 25,
+  "n_dropped_off_lattice": 12
+}

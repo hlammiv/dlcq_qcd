@@ -130,16 +130,26 @@ produced the paper. The corrected physics lives in the Python path, where
 |---|---|---|
 | 1 | schematic | interaction vertices; nothing to validate |
 | 2 | pipeline ready | λ sweep at 2K = 10/13/22 |
-| 3 | pipeline ready | K not stated in the paper; adopted 2K=24/21 |
-| 4 | pipeline ready | K not stated; same adoption |
-| 5 | **reproduced** | 2K=24, m/g=1.6; matches the paper's text anchors |
-| 6 | **reproduced** | 2K=21, m/g=1.6 |
-| 7 | pipeline ready | needs the Richardson sweep, 2K = 16–24 |
-| 8 | pipeline ready | large-N curves need 't Hooft's Eq. (24) separately |
-| Table I | transcribed | `refs/table1.csv`, all 35 entries verified at 600 dpi |
+| 3 | **reproduced, both** | 2.6% / 1.9%; K recovered as 2K = 14 / 15 (never stated) |
+| 4 | reproduced, both | higher-Fock sectors at the same recovered K |
+| 5 | **reproduced, both** | 2K=24; 1.2–1.8%; matches the paper's text anchors |
+| 6 | **reproduced, both** | 2K=21; 1.1–1.7% (panel (d) low confidence) |
+| 7 | swept | Richardson over 2K = 16–24, N = 2,3,4, both sectors |
+| 8 | **validated** | matches Hamer's SU(2) lattice data to 0.1–2.2% |
+| Table I | transcribed, disputed | see `docs/table1-discrepancy.md` |
 
-The paper never states `K` for Figs. 3 and 4. It can be recovered from the plots
-themselves: momenta are odd, so `x_min = 1/K` and `Δx = 2/K`, and Eq. (12)'s
-`K_paper` factor makes `Σᵢq(xᵢ)/K_paper` the quark number — two independent
-determinations. `dlcq.units.infer_K_from_x_grid` implements this and is
-validated on Figs. 5 and 6, whose `K` the paper does state.
+The paper never states `K` for Figs. 3 and 4; it was **recovered from the plots
+themselves** as 2K = 14 (meson) and 15 (baryon). Momenta are odd, so markers lie
+on `x = k/K`, and fitting that lattice reproduces the stated 2K = 24 and 21 of
+Figs. 5 and 6 before being trusted where K is unknown. Every meson panel
+returned an even K and every baryon panel an odd one — the parity each sector
+requires, which the fit knows nothing about. See `docs/inferred-K.md`.
+
+## A third discrepancy: Table I vs the paper's own Fig. 8(a)
+
+Our sweep matches **Hamer's independent SU(2) lattice data** (plotted in
+Fig. 8(a)) to 0.1–2.2%, and reproduces the paper's figures at 1–3%. It does not
+match Table I, whose m/g = 1.6 entries exceed the y-axis maximum of the very
+figure they summarize. `refs/table1.csv` transcribes the table exactly as
+printed; the comparison is reported, not reconciled. See
+`docs/table1-discrepancy.md`.

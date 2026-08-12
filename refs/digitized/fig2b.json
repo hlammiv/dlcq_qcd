@@ -1,0 +1,72 @@
+{
+  "panel": "fig2b",
+  "description": "FIG. 2(b) SU(3) B=1, 2K=13",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 3,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    3052,
+    1444,
+    4285,
+    2317
+  ],
+  "bbox_fraction": [
+    0.5985,
+    0.2189,
+    0.8402,
+    0.3511
+  ],
+  "frame_px": [
+    37,
+    1197,
+    18,
+    857
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    60.0
+  ],
+  "xtick_values": [],
+  "xtick_pixels": [
+    42.5,
+    1195.0
+  ],
+  "x_fit": {
+    "slope": 0.0008620689655172415,
+    "intercept": -0.0318965517241379,
+    "max_residual": 2.220446049250313e-16
+  },
+  "y_fit": {
+    "slope": -0.07151370679380217,
+    "intercept": 61.28724672228844,
+    "max_residual": 2.842170943040401e-14
+  },
+  "n_markers": 7,
+  "notes": [
+    "x ticks: found 2, expected 0 (calibration still from frame edges)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 33,
+    "K_code": 33,
+    "inlier_fraction": 0.7142857142857143,
+    "median_grid_residual": 0.01747943843327593,
+    "max_grid_residual": 0.04797781097248821,
+    "consistent": true,
+    "K_from_x_min": 79.69791858537461,
+    "K_from_spacing": 8.679404787410428,
+    "n_points": 7,
+    "ok": true,
+    "note": "paper does not state K for this panel; inferred"
+  },
+  "n_on_lattice": 5,
+  "n_dropped_off_lattice": 2
+}

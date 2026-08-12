@@ -1,0 +1,81 @@
+{
+  "panel": "fig5c",
+  "description": "FIG. 5(c) 3rd meson state, m/g=1.6, 2K=24",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 4,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    2793,
+    5196,
+    3624,
+    5831
+  ],
+  "bbox_fraction": [
+    0.5478,
+    0.7873,
+    0.7106,
+    0.8836
+  ],
+  "frame_px": [
+    27,
+    824,
+    29,
+    602
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    3.6
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    28.5,
+    820.5
+  ],
+  "x_fit": {
+    "slope": 0.001254705144291092,
+    "intercept": -0.03387703889585959,
+    "max_residual": 2.220446049250313e-16
+  },
+  "y_fit": {
+    "slope": -0.006282722513089004,
+    "intercept": 3.78219895287958,
+    "max_residual": 1.3322676295501878e-15
+  },
+  "n_markers": 28,
+  "notes": [
+    "x ticks: found 2, expected 6 (calibration still from frame edges)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 24,
+    "K_code": 24,
+    "inlier_fraction": 0.6785714285714286,
+    "median_grid_residual": 0.0028415060303699363,
+    "max_grid_residual": 0.04029935977865706,
+    "consistent": true,
+    "K_from_x_min": 25.780012874155197,
+    "K_from_spacing": 49.50955690703738,
+    "n_points": 28,
+    "K_expected": 24,
+    "ok": true
+  },
+  "sum_rule_scale": 0.990683978239781,
+  "sum_rule_quark_number": 1.0,
+  "n_on_lattice": 19,
+  "n_dropped_off_lattice": 9
+}

@@ -1,6 +1,6 @@
 {
   "panel": "fig6a",
-  "description": "FIG. 6(a) first baryon, SU(3), m/g=1.6, 2K=21",
+  "description": "FIG. 6(a) 1st baryon state, m/g=1.6, 2K=21",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 5,
   "dpi": 600,
@@ -9,22 +9,22 @@
     6600
   ],
   "crop_box_px": [
-    637,
-    726,
-    1463,
-    1346
+    641,
+    731,
+    1455,
+    1339
   ],
   "bbox_fraction": [
-    0.125,
-    0.11,
-    0.287,
-    0.204
+    0.1257,
+    0.1108,
+    0.2853,
+    0.203
   ],
   "frame_px": [
-    34,
-    793,
-    40,
-    585
+    30,
+    789,
+    35,
+    580
   ],
   "xlim": [
     0.0,
@@ -43,22 +43,22 @@
     1.0
   ],
   "xtick_pixels": [
-    35.5,
-    183.0,
-    335.5,
-    486.0,
-    637.0,
-    790.5
+    31.5,
+    179.0,
+    331.5,
+    482.0,
+    633.0,
+    786.5
   ],
   "x_fit": {
-    "slope": 0.001317523056653492,
-    "intercept": -0.044795783926218705,
-    "max_residual": 4.440892098500626e-16
+    "slope": 0.0013175230566534915,
+    "intercept": -0.03952569169960489,
+    "max_residual": 1.457167719820518e-16
   },
   "y_fit": {
     "slope": -0.02710091743119266,
-    "intercept": 15.854036697247704,
-    "max_residual": 1.7763568394002505e-15
+    "intercept": 15.718532110091743,
+    "max_residual": 0.0
   },
   "n_markers": 25,
   "notes": [
@@ -69,15 +69,17 @@
     "K_inferred": 21,
     "K_code": 21,
     "inlier_fraction": 0.68,
-    "median_grid_residual": 0.005471122739952983,
-    "max_grid_residual": 0.04649733156044489,
+    "median_grid_residual": 0.00547112273995326,
+    "max_grid_residual": 0.04649733156044522,
     "consistent": true,
-    "K_from_x_min": 20.93364281813215,
+    "K_from_x_min": 20.93364281813223,
     "K_from_spacing": 40.87871238091828,
     "n_points": 25,
     "K_expected": 21,
     "ok": true
   },
+  "sum_rule_scale": 0.9816102158794654,
+  "sum_rule_quark_number": 3.0,
   "n_on_lattice": 17,
   "n_dropped_off_lattice": 8
 }

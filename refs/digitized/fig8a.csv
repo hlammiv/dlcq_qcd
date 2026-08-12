@@ -1,0 +1,13 @@
+# FIG. 8(a) meson mass M/g vs m/g; filled circles are Hamer's SU(2) lattice results (Nucl. Phys. B195, 503)
+# digitized from Phys. Rev. D 41, 3814 (1990), PDF page 7 at 600 dpi
+# see the companion .json for full calibration provenance
+x,y,filled,k,x_raw
+0.217391,0.658998,1,5,0.204661
+0.217391,3.284325,0,5,0.235531
+0.304348,0.976604,1,7,0.291659
+0.391304,3.405950,1,9,0.399117
+0.391304,1.110875,1,9,0.409140
+0.478261,3.354440,0,11,0.495459
+0.739130,3.408822,1,17,0.731007
+0.826087,1.974909,1,19,0.823334
+0.826087,3.280833,0,19,0.827152

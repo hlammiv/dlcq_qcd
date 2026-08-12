@@ -1,0 +1,88 @@
+{
+  "panel": "fig8a",
+  "description": "FIG. 8(a) meson mass M/g vs m/g; filled circles are Hamer's SU(2) lattice results (Nucl. Phys. B195, 503)",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 7,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    3030,
+    911,
+    4245,
+    1821
+  ],
+  "bbox_fraction": [
+    0.5943,
+    0.1381,
+    0.8324,
+    0.276
+  ],
+  "frame_px": [
+    29,
+    1187,
+    27,
+    865
+  ],
+  "xlim": [
+    0.0,
+    1.756
+  ],
+  "ylim": [
+    0.0,
+    4.02
+  ],
+  "xtick_values": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75
+  ],
+  "xtick_pixels": [
+    31.5,
+    201.5,
+    368.5,
+    536.5,
+    707.0,
+    878.0,
+    1046.5,
+    1184.5
+  ],
+  "x_fit": {
+    "slope": 0.001516407599309154,
+    "intercept": -0.04397582037996602,
+    "max_residual": 5.551115123125783e-16
+  },
+  "y_fit": {
+    "slope": -0.0047971360381861596,
+    "intercept": 4.149522673031027,
+    "max_residual": 1.7763568394002505e-15
+  },
+  "n_markers": 15,
+  "notes": [
+    "x ticks agree to 0.0429",
+    "WARNING: x tick mismatch, check xlim"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 23,
+    "K_code": 23,
+    "inlier_fraction": 0.6,
+    "median_grid_residual": 0.017835390773522197,
+    "max_grid_residual": 0.7334073420677546,
+    "consistent": true,
+    "K_from_x_min": 49.20020949147973,
+    "K_from_spacing": 28.17448552045651,
+    "n_points": 15,
+    "ok": true,
+    "note": "paper does not state K for this panel; inferred"
+  },
+  "n_on_lattice": 9,
+  "n_dropped_off_lattice": 6
+}

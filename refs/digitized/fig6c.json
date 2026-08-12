@@ -1,0 +1,89 @@
+{
+  "panel": "fig6c",
+  "description": "FIG. 6(c) 3rd baryon state, m/g=1.6, 2K=21",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 5,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    641,
+    1413,
+    1455,
+    2018
+  ],
+  "bbox_fraction": [
+    0.1257,
+    0.2141,
+    0.2853,
+    0.3059
+  ],
+  "frame_px": [
+    28,
+    787,
+    28,
+    579
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    14.77
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    29.5,
+    106.0,
+    181.0,
+    334.0,
+    409.0,
+    484.0,
+    561.0,
+    635.5,
+    710.0,
+    785.0
+  ],
+  "x_fit": {
+    "slope": 0.0013175230566534913,
+    "intercept": -0.03689064558629754,
+    "max_residual": 2.1510571102112408e-16
+  },
+  "y_fit": {
+    "slope": -0.02680580762250453,
+    "intercept": 15.52056261343013,
+    "max_residual": 5.329070518200751e-15
+  },
+  "n_markers": 22,
+  "notes": [
+    "x ticks: found 10, expected 6 (calibration still from frame edges)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 21,
+    "K_code": 21,
+    "inlier_fraction": 0.6818181818181818,
+    "median_grid_residual": 0.004940490549798768,
+    "max_grid_residual": 0.04663920904330132,
+    "consistent": true,
+    "K_from_x_min": 21.860087719298146,
+    "K_from_spacing": 40.86702963340166,
+    "n_points": 22,
+    "K_expected": 21,
+    "ok": true
+  },
+  "sum_rule_scale": 0.9939014251300945,
+  "sum_rule_quark_number": 3.0,
+  "n_on_lattice": 15,
+  "n_dropped_off_lattice": 7
+}

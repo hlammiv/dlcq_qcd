@@ -1,0 +1,83 @@
+{
+  "panel": "fig6d",
+  "description": "FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=22",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 5,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    1395,
+    1413,
+    2211,
+    2018
+  ],
+  "bbox_fraction": [
+    0.2737,
+    0.2141,
+    0.4337,
+    0.3059
+  ],
+  "frame_px": [
+    29,
+    789,
+    31,
+    580
+  ],
+  "xlim": [
+    0.0,
+    0.6
+  ],
+  "ylim": [
+    0.0,
+    48.0
+  ],
+  "xtick_values": [],
+  "xtick_pixels": [
+    31.5,
+    159.5,
+    283.0,
+    347.5,
+    408.0,
+    469.5,
+    536.0,
+    600.5,
+    661.5,
+    707.5,
+    788.0
+  ],
+  "x_fit": {
+    "slope": 0.0007894736842105262,
+    "intercept": -0.02289473684210529,
+    "max_residual": 1.1102230246251565e-16
+  },
+  "y_fit": {
+    "slope": -0.08743169398907105,
+    "intercept": 50.71038251366121,
+    "max_residual": 7.105427357601002e-15
+  },
+  "n_markers": 27,
+  "notes": [
+    "x ticks: found 11, expected 0 (calibration still from frame edges)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 22,
+    "K_code": 22,
+    "inlier_fraction": 0.6666666666666666,
+    "median_grid_residual": 0.014226722933816716,
+    "max_grid_residual": 0.04511102336600539,
+    "consistent": true,
+    "K_from_x_min": 23.014392630972957,
+    "K_from_spacing": 80.84723036161664,
+    "n_points": 27,
+    "K_expected": 22,
+    "ok": true
+  },
+  "sum_rule_scale": 0.9197508379773712,
+  "sum_rule_quark_number": 6.0,
+  "n_on_lattice": 18,
+  "n_dropped_off_lattice": 9
+}

@@ -87,6 +87,11 @@ def test_table1_is_monotone_in_coupling():
                 f"{quantity} N={N} not monotone: {vals}"
 
 
+@pytest.mark.xfail(reason="Table I disagrees with the paper's own Fig. 8(a): its "
+                          "m/g=1.6 entries exceed that figure's y-axis maximum "
+                          "of 4.0, while our sweep matches Hamer's independent "
+                          "lattice data there to 0.1%. See "
+                          "docs/table1-discrepancy.md", strict=False)
 def test_bosonization_ratio_against_table1():
     """M_mes/M_bar at strong coupling vs 2 sin[pi/(2(2N-1))], to the paper's ~10%."""
     rows = {(r["quantity"], r["N"], r["mg"]): r for r in load_table1()}
@@ -173,3 +178,29 @@ def test_chiral_baryon_structure_function_shape():
     assert q[0] == pytest.approx(6.0)
     assert q[-1] == pytest.approx(0.0, abs=1e-12)
     assert np.all(np.diff(q) < 0)          # strictly decreasing for N=3
+
+
+# ── the paper's figures, and the independent lattice data in Fig. 8(a) ────
+
+HAMER_SU2 = [   # digitized from Fig. 8(a); C. J. Hamer, Nucl. Phys. B195, 503
+    (0.2047, 0.6590), (0.4091, 1.1109), (0.8233, 1.9749), (1.6465, 3.5187),
+]
+
+
+def test_hamer_lattice_points_are_in_range():
+    """Sanity-check the digitized external data before anything asserts on it."""
+    for mg, Mg in HAMER_SU2:
+        assert 0.0 < mg < 1.8
+        assert 0.0 < Mg < 4.0        # Fig. 8(a)'s y-axis maximum
+
+
+def test_table1_exceeds_its_own_figure_axis():
+    """Documents the inconsistency rather than asserting the table is usable.
+
+    Fig. 8(a) plots M/g on an axis running to 4.0 (9 ticks every 0.5), yet every
+    Table I meson entry at m/g = 1.6 lies above it.  See
+    docs/table1-discrepancy.md.
+    """
+    rows = {(r["quantity"], r["N"], r["mg"]): r for r in load_table1()}
+    for N in (2, 3, 4):
+        assert rows[("mes", N, 1.6)]["value"] > 4.0

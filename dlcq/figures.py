@@ -57,6 +57,15 @@ FIGDIR = _ROOT / "figures"
 MG_STRONG, MG_WEAK = 0.1, 1.6
 K_MESON, K_BARYON = 24, 21
 
+# The paper never states K for Figs. 3 and 4.  Recovered from the published
+# plots themselves: momenta are odd integers, so the marker x-positions lie on
+# {k/K}, and tools/digitize.py fits that lattice.  Every meson panel returned an
+# even K and every baryon panel an odd K -- the parity each sector requires,
+# which is not built into the inference -- and the same procedure reproduces the
+# stated 2K = 24 and 21 of Figs. 5 and 6.  See docs/inferred-K.md.
+K_FIG3_MESON, K_FIG3_BARYON = 14, 15
+K_FIG4_MESON, K_FIG4_BARYON = 14, 15
+
 # The m/g = 1.6 runs behind Figs. 5 and 6 used the *rounded* coupling 0.3325 --
 # it is the value in every input_*.txt / input_*.json in this repo and in the
 # preserved Fortran outputs.  mg_to_lambda(1.6) is 0.33254949, and that 1.5e-5
@@ -142,7 +151,7 @@ def figure3(provider, source):
 
     for mg, marker, fill in [(MG_WEAK, "o", "full"), (MG_STRONG, "s", "none")]:
         lam = paper_lambda(mg)
-        for ax, B, K in [(ax1, 0, K_MESON), (ax2, 1, K_BARYON)]:
+        for ax, B, K in [(ax1, 0, K_FIG3_MESON), (ax2, 1, K_FIG3_BARYON)]:
             r = provider.get(3, 1, B, K, float(lam))
             if r.n_eigenvectors == 0:
                 continue
@@ -157,14 +166,14 @@ def figure3(provider, source):
     ax2.plot(xs, thooft_valence_limit(xs, 3), "k:", lw=1.2,
              label=r"$6(1-x)$  (Eq. 22, $m/g\to0$)")
 
-    ax1.set_title(f"(a) SU(3) meson,  2K={K_MESON}")
-    ax2.set_title(f"(b) SU(3) baryon,  2K={K_BARYON}")
+    ax1.set_title(f"(a) SU(3) meson,  2K={K_FIG3_MESON} (inferred)")
+    ax2.set_title(f"(b) SU(3) baryon,  2K={K_FIG3_BARYON} (inferred)")
     for ax in (ax1, ax2):
         ax.set_xlabel("x = k/K"); ax.set_ylabel("q(x)")
         ax.set_xlim(0, 1); ax.legend(fontsize=8)
 
     fig.suptitle(f"FIG. 3  Valence structure functions  [{source}]"
-                 "   (K not stated in paper; adopted from Figs. 5-6)")
+                 "   (K not stated in the paper; recovered from the plot)")
     return _finish(fig, "fig3_valence", source)
 
 
@@ -172,9 +181,9 @@ def figure4(provider, source):
     """Fig. 4 -- higher-Fock contributions."""
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.5))
     specs = [
-        (axes[0], 0, K_MESON, 4, "(a) meson: $q\\bar q q\\bar q$", False),
-        (axes[1], 1, K_BARYON, 5, "(b) baryon: $qqqq\\bar q$", True),
-        (axes[2], 1, K_BARYON, 7, "(c) baryon: two extra pairs", False),
+        (axes[0], 0, K_FIG4_MESON, 4, "(a) meson: $q\\bar q q\\bar q$", False),
+        (axes[1], 1, K_FIG4_BARYON, 5, "(b) baryon: $qqqq\\bar q$", True),
+        (axes[2], 1, K_FIG4_BARYON, 7, "(c) baryon: two extra pairs", False),
     ]
     for ax, B, K, npart, title, show_anti in specs:
         for mg, marker, fill in [(MG_WEAK, "o", "full"), (MG_STRONG, "s", "none")]:

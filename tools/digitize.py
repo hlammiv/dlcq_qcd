@@ -66,42 +66,115 @@ class Panel:
     expected_K: int | None = None
     B: int = 0
     N: int = 3
+    # If set, the vertical scale is fixed by the exact sum rule
+    # int q dx = quark_number rather than by reading tick labels.  Non-circular:
+    # it uses only an identity, never the solver.  1 for a meson's quark
+    # distribution, N*B for a baryon's.
+    quark_number: float | None = None
+    sector: str = ""
 
 
 PANELS = {
-    "fig6a": Panel(
-        name="fig6a", page=5, bbox=(0.125, 0.110, 0.287, 0.204),
-        xlim=(0.0, 1.0), ylim=(0.0, 14.77),
-        xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-        # The y frame top is NOT a labelled value. Ticks are evenly spaced at
-        # height-fractions 0.184/0.365/0.540/0.720/0.895; the labelled 10.5 is
-        # the one at 0.720, so the step is 10.5/4 = 2.625 and the frame top is
-        # 10.5/0.720 = 14.77. Reading the top as 21 inflates every y by 1.42.
-        yticks=(2.625, 5.25, 7.875, 10.5, 13.125),
-        description="FIG. 6(a) first baryon, SU(3), m/g=1.6, 2K=21",
-        expected_K=21, B=1, N=3,
-    ),
-    "fig5a": Panel(
-        name="fig5a", page=4, bbox=(0.10, 0.58, 0.52, 0.80),
-        xlim=(0.0, 1.0), ylim=(0.0, 3.6),
-        xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-        yticks=(0.0, 1.2, 2.4, 3.6),
-        description="FIG. 5(a) first meson, SU(3), m/g=1.6, 2K=24",
-        expected_K=24, B=0, N=3,
-    ),
-    "fig3a": Panel(
-        name="fig3a", page=4, bbox=(0.10, 0.09, 0.52, 0.31),
-        xlim=(0.0, 1.0), ylim=(0.0, 3.5),
-        xticks=(0.0, 0.7, 1.4, 2.1, 2.8, 3.5),
-        description="FIG. 3(a) SU(3) meson valence; K NOT stated in the paper",
-        expected_K=None, B=0, N=3,
-    ),
-    "fig3b": Panel(
-        name="fig3b", page=4, bbox=(0.55, 0.09, 0.97, 0.31),
-        xlim=(0.0, 1.0), ylim=(0.0, 11.25),
-        description="FIG. 3(b) SU(3) baryon valence; K NOT stated in the paper",
-        expected_K=None, B=1, N=3,
-    ),
+    # ── FIG. 3 (page 4): valence structure functions, K NOT stated ──────────
+    "fig3a": Panel(name="fig3a", page=4, bbox=(0.1149, 0.7900, 0.2765, 0.8813),
+                   xlim=(0.0, 1.0), ylim=(0.0, 3.5),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 3(a) SU(3) meson valence; K not stated",
+                   B=0, N=3, quark_number=1.0, sector="valence"),
+    "fig3b": Panel(name="fig3b", page=4, bbox=(0.3061, 0.7906, 0.4677, 0.8818),
+                   xlim=(0.0, 1.0), ylim=(0.0, 11.25),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 3(b) SU(3) baryon valence; K not stated",
+                   B=1, N=3, quark_number=3.0, sector="valence"),
+
+    # ── FIG. 4 (page 4): higher-Fock sectors, scaled by 10^n ────────────────
+    "fig4a": Panel(name="fig4a", page=4, bbox=(0.5376, 0.0949, 0.6999, 0.1902),
+                   xlim=(0.0, 1.0), ylim=(0.0, 21.0),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 4(a) meson, one extra qqbar pair (x10^4/10^2)",
+                   B=0, N=3, sector="higher-fock"),
+    "fig4b": Panel(name="fig4b", page=4, bbox=(0.7304, 0.0961, 0.8929, 0.1911),
+                   xlim=(0.0, 1.0), ylim=(0.0, 22.5),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 4(b) baryon, one extra pair, incl. antiquarks",
+                   B=1, N=3, sector="higher-fock"),
+    "fig4c": Panel(name="fig4c", page=4, bbox=(0.5372, 0.1811, 0.6994, 0.2765),
+                   xlim=(0.0, 1.0), ylim=(0.0, 11.25),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 4(c) baryon, two extra pairs",
+                   B=1, N=3, sector="higher-fock"),
+
+    # ── FIG. 5 (page 4): meson spectrum, 2K = 24 ───────────────────────────
+    "fig5a": Panel(name="fig5a", page=4, bbox=(0.5478, 0.7005, 0.7149, 0.7973),
+                   xlim=(0.0, 1.0), ylim=(0.0, 3.6),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 5(a) 1st meson state, m/g=1.6, 2K=24",
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+    "fig5b": Panel(name="fig5b", page=4, bbox=(0.7037, 0.7005, 0.8708, 0.7973),
+                   xlim=(0.0, 1.0), ylim=(0.0, 12.0),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 5(b) 2nd meson state, m/g=1.6, 2K=24",
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+    "fig5c": Panel(name="fig5c", page=4, bbox=(0.5478, 0.7873, 0.7106, 0.8836),
+                   xlim=(0.0, 1.0), ylim=(0.0, 3.6),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 5(c) 3rd meson state, m/g=1.6, 2K=24",
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+    "fig5d": Panel(name="fig5d", page=4, bbox=(0.6994, 0.7873, 0.8665, 0.8836),
+                   xlim=(0.0, 1.0), ylim=(0.0, 12.0),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 5(d) 11th meson state, m/g=1.6, 2K=24",
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+
+    # ── FIG. 6 (page 5): baryon spectrum, 2K = 21 ──────────────────────────
+    # The y frame top is NOT a labelled value: ticks sit at height-fractions
+    # 0.184/0.365/0.540/0.720/0.895 and the labelled 10.5 is the one at 0.720,
+    # so the step is 10.5/4 = 2.625 and the top is 10.5/0.720 = 14.77.
+    # Reading the top as 21 inflates every y by 1.42x.
+    "fig6a": Panel(name="fig6a", page=5, bbox=(0.1257, 0.1108, 0.2853, 0.2030),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   yticks=(2.625, 5.25, 7.875, 10.5, 13.125),
+                   description="FIG. 6(a) 1st baryon state, m/g=1.6, 2K=21",
+                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+    "fig6b": Panel(name="fig6b", page=5, bbox=(0.2737, 0.1108, 0.4337, 0.2030),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 6(b) 2nd baryon state, m/g=1.6, 2K=21",
+                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+    "fig6c": Panel(name="fig6c", page=5, bbox=(0.1257, 0.2141, 0.2853, 0.3059),
+                   xlim=(0.0, 1.0), ylim=(0.0, 14.77),
+                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                   description="FIG. 6(c) 3rd baryon state, m/g=1.6, 2K=21",
+                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+    "fig6d": Panel(name="fig6d", page=5, bbox=(0.2737, 0.2141, 0.4337, 0.3059),
+                   xlim=(0.0, 0.6), ylim=(0.0, 48.0),
+                   description="FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=22",
+                   expected_K=22, B=2, N=3, quark_number=6.0, sector="valence"),
+
+    # ── FIG. 8 (page 7): meson mass vs m/g, with Hamer's SU(2) lattice points ──
+    "fig8a": Panel(name="fig8a", page=7, bbox=(0.5943, 0.1381, 0.8324, 0.2760),
+                   # 8 x ticks every 0.25 (0..1.75) and 9 y ticks every 0.5
+                   # (0..4.0); the frame edges sit just beyond the last of each.
+                   xlim=(0.0, 1.756), ylim=(0.0, 4.02),
+                   xticks=(0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75),
+                   yticks=(0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0),
+                   description="FIG. 8(a) meson mass M/g vs m/g; filled circles are "
+                               "Hamer's SU(2) lattice results (Nucl. Phys. B195, 503)",
+                   B=0, N=2),
+
+    # ── FIG. 2 (page 3): eigenvalue spectra vs coupling ─────────────────────
+    # Dense level bundles rather than markers on a curve; traced as a scatter
+    # and flagged low confidence.
+    "fig2a": Panel(name="fig2a", page=3, bbox=(0.5985, 0.0921, 0.8402, 0.2250),
+                   xlim=(0.0, 1.0), ylim=(0.0, 50.0),
+                   description="FIG. 2(a) SU(3) B=0, 2K=10", B=0, N=3),
+    "fig2b": Panel(name="fig2b", page=3, bbox=(0.5985, 0.2189, 0.8402, 0.3511),
+                   xlim=(0.0, 1.0), ylim=(0.0, 60.0),
+                   description="FIG. 2(b) SU(3) B=1, 2K=13", B=1, N=3),
+    "fig2c": Panel(name="fig2c", page=3, bbox=(0.5985, 0.3451, 0.8402, 0.4783),
+                   xlim=(0.0, 1.0), ylim=(0.0, 100.0),
+                   description="FIG. 2(c) SU(3) B=2, 2K=22", B=2, N=3),
 }
 
 
@@ -378,6 +451,25 @@ def main(argv=None):
 
     K = verdict["K_inferred"]
     records, dropped = snap_to_lattice(records, K)
+
+    # Sum-rule calibration of the vertical scale.  int q dx is exactly the
+    # quark number (1 for a meson, N*B for a baryon), so the valence series
+    # fixes its own normalization -- no tick labels needed, and non-circular
+    # because it uses only that identity.  This catches the trap that the frame
+    # top is often NOT the last labelled tick: reading Fig 6's top as 21
+    # instead of 14.77 inflates every y by 1.42x, and Fig 3(b) needs 1.20x.
+    if panel.quark_number and records:
+        valence = [r for r in records if r["filled"]] or records
+        total = sum(r["y"] for r in valence) * (2.0 / K)
+        if total > 1e-9:
+            scale = panel.quark_number / total
+            for r in records:
+                r["y_raw"] = r["y"]
+                r["y"] *= scale
+            provenance["sum_rule_scale"] = scale
+            provenance["sum_rule_quark_number"] = panel.quark_number
+            print(f"  sum rule      : rescaled y by {scale:.4f} so "
+                  f"int q dx = {panel.quark_number:g}")
     provenance["n_on_lattice"] = len(records)
     provenance["n_dropped_off_lattice"] = len(dropped)
     print(f"  on lattice    : {len(records)} kept, {len(dropped)} dropped "

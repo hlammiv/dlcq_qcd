@@ -1,0 +1,90 @@
+{
+  "panel": "fig3a",
+  "description": "FIG. 3(a) SU(3) meson valence; K not stated",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 4,
+  "dpi": 600,
+  "page_size_px": [
+    5100,
+    6600
+  ],
+  "crop_box_px": [
+    585,
+    5214,
+    1410,
+    5816
+  ],
+  "bbox_fraction": [
+    0.1149,
+    0.79,
+    0.2765,
+    0.8813
+  ],
+  "frame_px": [
+    20,
+    807,
+    18,
+    582
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    3.5
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    22.0,
+    100.0,
+    177.0,
+    258.0,
+    334.5,
+    413.5,
+    490.0,
+    570.5,
+    647.5,
+    725.0,
+    805.0
+  ],
+  "x_fit": {
+    "slope": 0.001270648030495553,
+    "intercept": -0.025412960609911342,
+    "max_residual": 2.8102520310824275e-16
+  },
+  "y_fit": {
+    "slope": -0.006205673758865252,
+    "intercept": 3.611702127659574,
+    "max_residual": 2.220446049250313e-15
+  },
+  "n_markers": 15,
+  "notes": [
+    "x ticks: found 11, expected 6 (calibration still from frame edges)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "check": {
+    "K_inferred": 14,
+    "K_code": 14,
+    "inlier_fraction": 0.9333333333333333,
+    "median_grid_residual": 0.0030439700071214493,
+    "max_grid_residual": 0.06547783468948054,
+    "consistent": true,
+    "K_from_x_min": 13.965465944108013,
+    "K_from_spacing": 14.751737541348707,
+    "n_points": 15,
+    "ok": true,
+    "note": "paper does not state K for this panel; inferred"
+  },
+  "sum_rule_scale": 0.991880078458439,
+  "sum_rule_quark_number": 1.0,
+  "n_on_lattice": 14,
+  "n_dropped_off_lattice": 1
+}
