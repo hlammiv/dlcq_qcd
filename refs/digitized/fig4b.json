@@ -60,9 +60,12 @@
   "n_legend_suppressed": 14,
   "notes": [
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
-    "suppressed 14 in-plot legend/text blobs"
+    "suppressed 14 in-plot legend/text blobs",
+    "column probe at 2K=15: 25 markers (3 filled, 22 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 15,
   "check": {
     "K_inferred": 15,
     "K_code": 15,
@@ -78,6 +81,6 @@
   },
   "K_used": 15,
   "K_source": "inferred",
-  "n_on_lattice": 17,
-  "n_dropped_off_lattice": 6
+  "n_on_lattice": 25,
+  "n_dropped_off_lattice": 0
 }

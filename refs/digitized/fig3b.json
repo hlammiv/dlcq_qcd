@@ -59,9 +59,12 @@
   "n_markers": 18,
   "n_legend_suppressed": 0,
   "notes": [
-    "x ticks: found 2, expected 6 (calibration still from frame edges)"
+    "x ticks: found 2, expected 6 (calibration still from frame edges)",
+    "column probe at 2K=15: 12 markers (5 filled, 7 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 15,
   "check": {
     "K_inferred": 15,
     "K_code": 15,
@@ -77,8 +80,8 @@
   },
   "K_used": 15,
   "K_source": "inferred",
-  "sum_rule_scale": 1.1724799630975171,
+  "sum_rule_scale": 1.2075067024128692,
   "sum_rule_quark_number": 3.0,
-  "n_on_lattice": 18,
+  "n_on_lattice": 12,
   "n_dropped_off_lattice": 0
 }

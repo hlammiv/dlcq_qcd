@@ -4,6 +4,44 @@ Both codes can *produce* every figure. That is not the same as agreeing with
 the published one. This is the per-curve accounting, including the series the
 paper rescales by powers of ten.
 
+## Side-by-side images
+
+`tools/compare_panels.py` renders every reproducible panel as **paper |
+fortran | python**, with the computed panels drawn on the axis limits read off
+the paper's own frame (so a scale difference cannot hide behind autoscaling)
+and the digitized markers overlaid in grey. Output in `figures/compare/`.
+
+They make the split below visible at a glance: on Fig 5(a) the grey markers sit
+on our curves for *both* series including the x10^3; on Fig 6(a) they sit on the
+valence curve while the x10^3 series is qualitatively right but quantitatively
+off.
+
+## The tracer
+
+Two rounds of improvement, both driven by failures the images exposed.
+
+**Legend suppression.** These panels put legends inside the axes, and the
+enclosed counters of letters like q, b, o were being read as open circles.
+Separated by the shape of the arrangement -- >=3 markers sharing a y cannot be
+a peaked structure function.
+
+**Lattice column probe.** Momenta are odd, so a marker can only sit at
+``x = k/K``. Probing those known columns turns 2D blob detection into a few 1D
+problems and is immune to the merging that defeats connected components where
+curves cross. Two details matter:
+
+* an open circle's white interior masks the curve, so a vertical slice gives
+  *two* runs about a gap -- which is what distinguishes it from a filled disc,
+  more reliably than thresholding interior density (the two classes overlap in
+  size: 124-416 px vs 164-458 px on Fig 6a);
+* height alone is not enough, because a steeply climbing curve rises as far
+  across the strip as a marker is tall. Markers are also *wide*. Adding a
+  horizontal-extent test fixed a regression it had introduced: Fig 3(b) went
+  18.9% -> 0.3%, Fig 3(a) 29.5% -> 3.0%.
+
+Net effect versus blob detection: Fig 3(b) 1.9% -> 0.3%, Fig 6(b) 63% -> 18%,
+Fig 6(a) 1.1% -> 0.9%, with the clean panels unchanged.
+
 ## Summary
 
 | status | curves |

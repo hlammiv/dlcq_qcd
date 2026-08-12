@@ -64,9 +64,12 @@
   "n_legend_suppressed": 11,
   "notes": [
     "x ticks agree to 0.0055",
-    "suppressed 11 in-plot legend/text blobs"
+    "suppressed 11 in-plot legend/text blobs",
+    "column probe at 2K=21: 16 markers (7 filled, 9 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 21,
   "check": {
     "K_inferred": 21,
     "K_code": 21,
@@ -82,8 +85,8 @@
   },
   "K_used": 21,
   "K_source": "stated in paper",
-  "sum_rule_scale": 0.9816102158794654,
+  "sum_rule_scale": 0.9821058511884382,
   "sum_rule_quark_number": 3.0,
-  "n_on_lattice": 14,
+  "n_on_lattice": 16,
   "n_dropped_off_lattice": 0
 }

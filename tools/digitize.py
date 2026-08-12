@@ -323,7 +323,7 @@ def detect_markers(ink: np.ndarray, frame, stroke=5, min_area=150):
 # Driver
 # ──────────────────────────────────────────────────────────────────────────
 
-def digitize(panel: Panel, dpi=600, pages_dir=None):
+def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
     """Trace one panel.  Returns ``(records, provenance)``."""
     ink, box, page_size = load_panel_image(panel, dpi=dpi, pages_dir=pages_dir)
     frame = find_axis_frame(ink)
@@ -349,6 +349,9 @@ def digitize(panel: Panel, dpi=600, pages_dir=None):
         notes.append(f"x ticks: found {len(xt)}, expected {len(panel.xticks)} "
                      "(calibration still from frame edges)")
 
+    # Two stages.  Blob detection is general enough to establish K on a panel
+    # whose K the paper never states; the column probe then re-reads the plot
+    # at that K, which is far more robust where curves cross or markers touch.
     markers = detect_markers(ink, frame)
     markers, legend_hits = suppress_legend(markers, frame)
     if legend_hits:
@@ -373,7 +376,141 @@ def digitize(panel: Panel, dpi=600, pages_dir=None):
         notes=notes,
         method="tools/digitize.py connected-component marker tracing",
     )
+    # Second pass.  Blob detection is general enough to establish K even when
+    # the paper never states it; the column probe then re-reads the plot at that
+    # K, which is far more robust where curves cross or markers touch.
+    if use_lattice_probe:
+        K_probe = panel.expected_K
+        if not K_probe and records:
+            try:
+                from dlcq.units import infer_K_from_x_grid
+                K_probe, _ = infer_K_from_x_grid([r["x"] for r in records])
+            except Exception:
+                K_probe = None
+        if K_probe:
+            probed = trace_at_lattice(ink, frame, K_probe)
+            probed, probe_legend = suppress_legend(probed, frame)
+            if len(probed) >= max(3, len(records) // 2):
+                provenance["probe_records"] = [
+                    dict(x=xs * m["px"] + xi, y=ys * m["py"] + yi,
+                         filled=m["filled"], area=m["area"],
+                         px=m["px"], py=m["py"], k=m.get("k"))
+                    for m in probed]
+                provenance["detector"] = "lattice column probe"
+                provenance["K_probe"] = K_probe
+                provenance["n_legend_suppressed"] += len(probe_legend)
+                notes.append(
+                    f"column probe at 2K={K_probe}: {len(probed)} markers "
+                    f"({sum(m['filled'] for m in probed)} filled, "
+                    f"{sum(not m['filled'] for m in probed)} open)")
+            else:
+                provenance["detector"] = "blob (probe found too few)"
+        else:
+            provenance["detector"] = "blob (no K)"
+    else:
+        provenance["detector"] = "blob"
+
     return records, provenance
+
+
+def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
+                     pad=3):
+    """Probe the columns where markers *must* be, instead of hunting blobs.
+
+    Momenta are odd integers, so a marker can only sit at ``x = k/K``.  That
+    turns 2D detection into a handful of 1D problems and fixes the failure mode
+    of blob detection on these plots: where curves cross or markers touch,
+    connected components merge and morphology loses them.  Here a merged blob
+    is irrelevant -- we only ask what lies in a known column.
+
+    The subtlety is open circles.  They are drawn with a white interior that
+    masks the connecting curve, so a vertical slice through one hits the upper
+    arc, a gap, then the lower arc: **two** runs, not one.  A filled disc gives
+    a single solid run.  So we group runs whose combined span is marker-sized
+    and read the grouping itself:
+
+        one run, solid            -> filled marker
+        two runs around a gap     -> open marker
+
+    which also gives the fill classification for free, rather than by
+    thresholding an interior density that overlaps between the two classes.
+
+    Returns marker dicts with the same keys as :func:`detect_markers`.
+    """
+    left, right, top, bottom = frame
+    fw = float(right - left)
+    out = []
+
+    for k in range(1, K, 2):
+        xc = left + fw * (k / float(K))
+        c0, c1 = int(round(xc - pad)), int(round(xc + pad)) + 1
+        c0, c1 = max(c0, left + 1), min(c1, right)
+        if c1 <= c0:
+            continue
+
+        strip = ink[top + 2:bottom - 1, c0:c1]
+        if strip.size == 0:
+            continue
+        # A row counts as ink if most of the strip's width is dark, which keeps
+        # a steeply climbing curve from masquerading as a tall marker.
+        col = strip.mean(axis=1) > 0.5
+
+        runs, start = [], None
+        for i, v in enumerate(col):
+            if v and start is None:
+                start = i
+            elif not v and start is not None:
+                runs.append([start, i - 1])
+                start = None
+        if start is not None:
+            runs.append([start, len(col) - 1])
+
+        # Group runs that together span a marker: a ring is two arcs about a
+        # hollow centre, so allow one interior gap.
+        used = [False] * len(runs)
+        for i, (a, b) in enumerate(runs):
+            if used[i]:
+                continue
+            span_a, span_b, members = a, b, [i]
+            for j in range(i + 1, len(runs)):
+                if used[j]:
+                    continue
+                gap = runs[j][0] - span_b - 1
+                new_span = runs[j][1] - span_a + 1
+                if gap <= 0 or new_span > marker_max:
+                    break
+                # The hollow of a ring is comparable to its arcs; a gap far
+                # larger than that belongs to a different series.
+                if gap > 0.8 * new_span:
+                    break
+                span_b = runs[j][1]
+                members.append(j)
+                break                      # at most one interior gap
+            height = span_b - span_a + 1
+            if not (marker_min <= height <= marker_max):
+                continue
+
+            # Height alone is not enough: a steeply climbing curve rises as far
+            # across the strip as a marker is tall.  A marker is also WIDE --
+            # round, roughly as broad as it is high -- while a curve stroke is
+            # only ``stroke`` px across.  Measure the horizontal ink span at the
+            # run's mid-height and require it to be marker-like.
+            row = top + 2 + (span_a + span_b) // 2
+            lo = max(int(xc - marker_max), left + 1)
+            hi = min(int(xc + marker_max) + 1, right)
+            band = ink[row, lo:hi]
+            idx = np.flatnonzero(band)
+            width = (idx[-1] - idx[0] + 1) if idx.size else 0
+            if width < 0.55 * height:
+                continue
+
+            for m in members:
+                used[m] = True
+            is_open = len(members) > 1
+            out.append(dict(px=xc, py=top + 2 + 0.5 * (span_a + span_b),
+                            area=int(strip[span_a:span_b + 1].sum()),
+                            height=int(height), filled=not is_open, k=k))
+    return out
 
 
 def suppress_legend(markers, frame, y_tol=0.015, min_row=3, x_span=0.15,
@@ -511,6 +648,12 @@ def main(argv=None):
     K = panel.expected_K if panel.expected_K else verdict["K_inferred"]
     provenance["K_used"] = K
     provenance["K_source"] = "stated in paper" if panel.expected_K else "inferred"
+
+    # digitize() already re-read the plot with the column probe if it could;
+    # this just records which detector produced the records we are snapping.
+    if provenance.get("probe_records") is not None:
+        records = provenance.pop("probe_records")
+
     records, dropped = snap_to_lattice(records, K)
 
     # Sum-rule calibration of the vertical scale.  int q dx is exactly the
