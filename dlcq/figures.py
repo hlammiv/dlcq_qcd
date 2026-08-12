@@ -42,7 +42,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from .observables import (structure_function, valence_parton_count,
-                          richardson_extrapolate, thooft_valence_limit)
+                          richardson_extrapolate, thooft_valence_limit,
+                          physical_indices, spurious_zero_modes)
 from .units import (code_to_M_over_g, lambda_to_mg, mg_to_lambda,
                     thooft_rescale)
 
@@ -146,7 +147,8 @@ def figure3(provider, source):
             if r.n_eigenvectors == 0:
                 continue
             nval = valence_parton_count(3, B)
-            x, q, _ = structure_function(r, 0, nparton=nval)
+            gs = int(physical_indices(r)[0])
+            x, q, _ = structure_function(r, gs, nparton=nval)
             ax.plot(x, q, "-" + marker, fillstyle=fill, markersize=4, lw=1,
                     label=f"m/g = {mg}")
 
@@ -179,7 +181,8 @@ def figure4(provider, source):
             r = provider.get(3, 1, B, K, paper_lambda(mg))
             if r.n_eigenvectors == 0:
                 continue
-            x, q, qbar = structure_function(r, 0, nparton=npart)
+            gs = int(physical_indices(r)[0])
+            x, q, qbar = structure_function(r, gs, nparton=npart)
             if np.max(np.abs(q)) > 1e-18:
                 ax.plot(x, q, "-" + marker, fillstyle=fill, markersize=3, lw=1,
                         label=f"q, m/g={mg}")
@@ -214,10 +217,16 @@ def _wavefunction_panel(ax, r, idx, sectors, title):
 def figure5(provider, source):
     """Fig. 5 -- first three meson states plus the 11th, N=3, m/g=1.6, 2K=24."""
     r = provider.get(3, 1, 0, K_MESON, paper_lambda(MG_WEAK))
+    phys = physical_indices(r)
     fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     sectors = [(2, "k-o", r"$q\bar q$"), (4, "r-s", r"$q\bar q q\bar q$")]
-    for ax, idx, title in zip(axes.flat, [0, 1, 2, 10],
-                              ["(a) 1st", "(b) 2nd", "(c) 3rd", "(d) 11th"]):
+    # "First three states" and "eleventh state" count the PHYSICAL spectrum;
+    # see observables.spurious_zero_modes for the decoupled 12-parton mode
+    # that otherwise sits at index 0 in this configuration.
+    wanted = [0, 1, 2, 10]
+    for ax, w, title in zip(axes.flat, wanted,
+                            ["(a) 1st", "(b) 2nd", "(c) 3rd", "(d) 11th"]):
+        idx = int(phys[w]) if w < len(phys) else w
         _wavefunction_panel(ax, r, idx, sectors, title)
     fig.suptitle(f"FIG. 5  SU(3) meson, m/g={MG_WEAK}, 2K={K_MESON}  [{source}]")
     return _finish(fig, "fig5_meson_wf", source)
@@ -227,10 +236,12 @@ def figure6(provider, source):
     """Fig. 6 -- first three baryon states plus the first B=2 state, 2K=21."""
     lam = paper_lambda(MG_WEAK)
     r = provider.get(3, 1, 1, K_BARYON, lam)
+    phys = physical_indices(r)
     fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     sectors = [(3, "k-o", "qqq"), (5, "r-s", r"$qqqq\bar q$")]
-    for ax, idx, title in zip(axes.flat, [0, 1, 2],
-                              ["(a) 1st baryon", "(b) 2nd", "(c) 3rd"]):
+    for ax, w, title in zip(axes.flat, [0, 1, 2],
+                            ["(a) 1st baryon", "(b) 2nd", "(c) 3rd"]):
+        idx = int(phys[w]) if w < len(phys) else w
         _wavefunction_panel(ax, r, idx, sectors, title)
 
     ax = axes.flat[3]
@@ -266,8 +277,11 @@ def _extrapolated_mass(provider, N, B, mg, K_codes):
         r = provider.get(N, 1, B, K, lam)
         if r.n_eigenvalues == 0:
             continue
+        phys = physical_indices(r)
+        if phys.size == 0:
+            continue
         Ks.append(K)
-        masses.append(code_to_M_over_g(r.eigenvalues[0], lam))
+        masses.append(code_to_M_over_g(r.eigenvalues[phys[0]], lam))
     if len(Ks) < 3:
         return None, None
     return richardson_extrapolate(Ks, masses, mg, N)

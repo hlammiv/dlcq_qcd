@@ -27,6 +27,7 @@ produce wrong physics if mishandled:
 from __future__ import annotations
 
 import re
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -292,7 +293,7 @@ def read_out(path, with_matrices: bool = True) -> DLCQResult:
             # orthonormal basis.
             c_orig = Z @ z_eig
 
-    return DLCQResult(
+    result = DLCQResult(
         N=meta["N"], NF=meta["NF"], B=meta["B"], K_code=meta["K_code"],
         rlamb=meta["rlamb"], cutoff=meta["cutoff"], LPN=meta["LPN"],
         rmq=meta["rmq"], iflv=meta["iflv"],
@@ -304,6 +305,24 @@ def read_out(path, with_matrices: bool = True) -> DLCQResult:
         norm=norm, Z=Z, eigenvalues=eigenvalues,
         eigenvectors=z_eig, c_orig=c_orig,
     )
+
+    if state_len is not None and len(state_len):
+        from .observables import (color_slots_required, fortran_overflow_risk,
+                                  FORTRAN_COLOR_SLOTS)
+        if fortran_overflow_risk(result):
+            L = int(np.max(state_len))
+            n_bad = int(np.sum(eigenvalues <= 1e-12)) if eigenvalues is not None else 0
+            warnings.warn(
+                f"{path.name}: this run reaches {L} partons, needing "
+                f"{color_slots_required(L)} color-index slots, but qcdf.f "
+                f"dimensions IDELT with only {FORTRAN_COLOR_SLOTS}. High Fock "
+                f"sectors are corrupted; {n_bad} non-positive M^2 eigenvalue(s) "
+                f"present. Use dlcq.observables.physical_indices to skip them. "
+                f"See docs/fortran-color-overflow.md.",
+                RuntimeWarning, stacklevel=2,
+            )
+
+    return result
 
 
 def read_ham(path):

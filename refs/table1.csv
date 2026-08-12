@@ -1,0 +1,59 @@
+# TABLE I. N dependence of meson and baryon mass.
+# Hornbostel, Brodsky & Pauli, Phys. Rev. D 41, 3814 (1990), p. 3820.
+#
+# Transcribed by hand from a 600 dpi render of the scanned page.
+#
+# IMPORTANT: the parenthesized figures in the paper are NOT statistical error
+# bars. Quoting the paper: "The results quoted in Table I are extrapolations to
+# continuum results by matching to a series in 1/K for 2K in the range of
+# roughly 16-24, and the numbers in parentheses give the magnitude of the last
+# term in the series fit. For m/g >~ 0.2, these are reasonable estimates of the
+# actual error. Beyond this, the largest K employed is likely not large enough
+# for these to be more than a rough guide."
+#
+# So `last_term` below must be compared against the last retained term of a
+# Richardson fit to Eq. (27), not against a standard deviation. Rows with
+# m/g < 0.2 carry the paper's own caveat and are flagged unreliable.
+#
+# No M_bar column exists for N=2: the paper states M_mes/M_bar = 1 is an exact
+# result at N=2, for every m/g and K.
+#
+# quantity: mes | bar
+# value, last_term: M/g and the magnitude of the last Richardson term
+# reliable: the paper's m/g >~ 0.2 caveat
+quantity,N,mg,value,last_term,reliable
+mes,2,1.60,4.314,0.004,1
+mes,2,0.80,3.913,0.004,1
+mes,2,0.40,2.61,0.05,1
+mes,2,0.20,1.17,0.07,1
+mes,2,0.10,0.38,0.05,0
+mes,2,0.05,0.10,0.01,0
+mes,2,0.00,0.0,0.0,1
+mes,3,1.60,4.618,0.006,1
+mes,3,0.80,4.40,0.05,1
+mes,3,0.40,3.1,0.5,1
+mes,3,0.20,1.5,0.5,1
+mes,3,0.10,0.5,0.2,0
+mes,3,0.05,0.2,0.2,0
+mes,3,0.00,0.0,0.0,1
+mes,4,1.60,4.845,0.002,1
+mes,4,0.80,4.743,0.002,1
+mes,4,0.40,3.4,0.2,1
+mes,4,0.20,1.4,0.1,1
+mes,4,0.10,0.43,0.05,0
+mes,4,0.05,0.12,0.01,0
+mes,4,0.00,0.0,0.0,1
+bar,3,1.60,10.71,0.02,1
+bar,3,0.80,10.4,0.1,1
+bar,3,0.40,7.3,0.6,1
+bar,3,0.20,3.1,0.2,1
+bar,3,0.10,1.1,0.3,0
+bar,3,0.05,0.31,0.09,0
+bar,3,0.00,0.0,0.0,1
+bar,4,1.60,21.2,0.3,1
+bar,4,0.80,20.9,0.5,1
+bar,4,0.40,15.0,1.0,1
+bar,4,0.20,6.0,0.8,1
+bar,4,0.10,1.9,0.3,0
+bar,4,0.05,0.42,0.06,0
+bar,4,0.00,0.0,0.0,1

@@ -33,7 +33,80 @@ __all__ = [
     "valence_parton_count",
     "richardson_extrapolate",
     "thooft_valence_limit",
+    "spurious_zero_modes",
+    "physical_indices",
+    "color_slots_required",
+    "fortran_overflow_risk",
+    "FORTRAN_COLOR_SLOTS",
 ]
+
+
+def color_slots_required(max_partons):
+    """Color-index slots a matrix element needs: ``2 * max_partons + 4``.
+
+    Bra and ket each contribute their partons, plus up to four operators from a
+    four-point vertex.  ``qcdf.f`` dimensions ``IDELT(12552, 25)`` and sets
+    ``MXLNG = 25``, so any run reaching 11 partons overflows that array.
+    ``qcdf_opt.py`` uses ``MXLNG = 2*MXP + 4 = 54`` and is unaffected.
+    """
+    return 2 * int(max_partons) + 4
+
+
+FORTRAN_COLOR_SLOTS = 25
+
+
+def fortran_overflow_risk(result):
+    """Whether this configuration exceeds ``qcdf.f``'s 25-slot color array."""
+    if result.state_len is None or len(result.state_len) == 0:
+        return False
+    return color_slots_required(int(np.max(result.state_len))) > FORTRAN_COLOR_SLOTS
+
+
+def spurious_zero_modes(result, tol=1e-12):
+    """Indices of unphysical eigenstates -- non-positive M^2 at non-zero mass.
+
+    ``M^2 >= 0`` for any physical state, and the paper states that an exactly
+    massless state occurs *only* in the chiral limit: "when m/g = 0 identically,
+    the lightest state for any N or B is exactly zero, independently of K".  So
+    at m/g > 0 any eigenvalue at or below zero is an artifact.
+
+    These are not hypothetical, and they sit at the *bottom* of the spectrum --
+    precisely where Figs. 7, 8 and Table I read off the lightest state.  Their
+    cause is an array-bounds overflow in ``qcdf.f``: a matrix element between
+    two L-parton states needs ``2L + 4`` color-index slots, but ``IDELT`` is
+    dimensioned with only 25, so runs reaching L >= 11 corrupt the color
+    contraction.  Observed:
+
+    ===============  ====  ======  ==========================================
+    run              L     slots   symptom
+    ===============  ====  ======  ==========================================
+    2K=21, B=1        9     22     clean
+    2K=10, B=0        6     16     clean
+    2K=24, B=0       12     28     one decoupled 12-parton state at M^2 = 0
+    2K=25, B=1       11     26     four negative M^2, all 11-parton dominated
+    ===============  ====  ======  ==========================================
+
+    See ``docs/fortran-color-overflow.md``.  The Python solver is unaffected.
+
+    Returns an array of indices into ``result.eigenvalues``.
+    """
+    if result.eigenvalues is None or result.eigenvalues.size == 0:
+        return np.array([], dtype=int)
+    # rlamb == 1 is the chiral limit, where a zero mode is genuine.
+    if result.rlamb >= 1.0 - 1e-12:
+        return np.array([], dtype=int)
+    return np.flatnonzero(result.eigenvalues <= tol)
+
+
+def physical_indices(result, tol=1e-12):
+    """Eigenstate indices with the spurious zero modes removed.
+
+    Use this wherever the paper says "the first three states"; indexing
+    ``eigenvalues`` directly can silently pick up a decoupled mode.
+    """
+    bad = set(spurious_zero_modes(result, tol).tolist())
+    n = result.n_eigenvalues
+    return np.array([i for i in range(n) if i not in bad], dtype=int)
 
 
 def valence_parton_count(N: int, B: int) -> int:
