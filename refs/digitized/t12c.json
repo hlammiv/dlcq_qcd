@@ -1,0 +1,104 @@
+{
+  "panel": "t12c",
+  "description": "THESIS Fig 12(c) = article Fig 6(c): 3rd baryon, 2K=21",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 82,
+  "dpi": 600,
+  "page_size_px": [
+    3990,
+    5395
+  ],
+  "crop_box_px": [
+    1316,
+    2913,
+    2753,
+    4046
+  ],
+  "bbox_fraction": [
+    0.33,
+    0.54,
+    0.69,
+    0.75
+  ],
+  "frame_px": [
+    28,
+    1383,
+    39,
+    1098
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    15.0
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    38.0,
+    145.5,
+    197.5,
+    252.5,
+    307.5,
+    469.5,
+    523.5,
+    576.5,
+    847.5,
+    954.5,
+    1006.5,
+    1061.5,
+    1115.5,
+    1169.5,
+    1222.5,
+    1277.5,
+    1330.5,
+    1382.5
+  ],
+  "x_fit": {
+    "slope": 0.0007380073800738007,
+    "intercept": -0.020664206642066082,
+    "max_residual": 3.365363543395006e-16
+  },
+  "y_fit": {
+    "slope": -0.0141643059490085,
+    "intercept": 15.552407932011333,
+    "max_residual": 1.7763568394002505e-15
+  },
+  "n_markers": 25,
+  "n_legend_suppressed": 20,
+  "notes": [
+    "x ticks: found 18, expected 6 (calibration still from frame edges)",
+    "suppressed 16 in-plot legend/text blobs",
+    "column probe at 2K=21: 11 markers (11 filled, 0 open)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 21,
+  "check": {
+    "K_inferred": 22,
+    "K_code": 22,
+    "inlier_fraction": 0.68,
+    "median_grid_residual": 0.01381607322566708,
+    "max_grid_residual": 0.04177619547456424,
+    "consistent": true,
+    "K_from_x_min": 38.55024213075011,
+    "K_from_spacing": 81.60406338800337,
+    "n_points": 25,
+    "K_expected": 21,
+    "ok": false
+  },
+  "K_used": 21,
+  "K_source": "stated in paper",
+  "sum_rule_scale": 1.2219230769230771,
+  "sum_rule_quark_number": 3.0,
+  "n_on_lattice": 11,
+  "n_dropped_off_lattice": 0
+}

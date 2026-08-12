@@ -28,6 +28,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PDF = ROOT / "literature" / "PhysRevD.41.3814.pdf"
+# Hornbostel's thesis (SLAC-333) reprints the same figures at better print
+# quality; see CITATION.md.  Its Figs. 11 and 12 are the article's Figs. 5 and 6.
+THESIS_PDF = ROOT / "literature" / "SLAC-333_Hornbostel_thesis.pdf"
+
+SOURCES = {"article": PDF, "thesis": THESIS_PDF}
+
+THESIS_PAGE_CONTENT = {
+    81: ("thesis 68", "FIG. 11 meson wavefunctions = article FIG. 5"),
+    82: ("thesis 70", "FIG. 12 baryon wavefunctions = article FIG. 6"),
+}
 
 # PDF page -> journal page -> content.  Journal pages run 3814-3821.
 PAGE_CONTENT = {
@@ -41,9 +51,9 @@ DEFAULT_OUT = Path("/tmp/claude-1000/-home-hlamm-Desktop-Ideas-hornbostel/"
                    "14a87109-c0c0-46a4-a343-37f4b9c69905/scratchpad/pages")
 
 
-def render(pdf: Path, page: int, dpi: int, outdir: Path) -> Path:
+def render(pdf: Path, page: int, dpi: int, outdir: Path, prefix="p") -> Path:
     outdir.mkdir(parents=True, exist_ok=True)
-    stem = outdir / f"p{page:02d}_{dpi}dpi"
+    stem = outdir / f"{prefix}{page:02d}_{dpi}dpi"
     subprocess.run(
         ["pdftoppm", "-r", str(dpi), "-f", str(page), "-l", str(page),
          "-png", str(pdf), str(stem)],

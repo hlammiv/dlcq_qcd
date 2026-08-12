@@ -35,6 +35,27 @@ It is included here as the historical artifact being validated. The Numerical Re
 routines `TRR8` / `TQR8` / `ESRTR8` (`tred2` / `tqli` / eigenvalue sort) are replaced by
 `scipy.linalg.eigh` in the Python port.
 
+## The thesis behind the code
+
+Ref. 14 of the paper is the thesis this Fortran was written for:
+
+> K. Hornbostel, *"The application of light-cone quantization to quantum
+> chromodynamics in one-plus-one dimensions"*, Ph.D. thesis, Stanford
+> University; SLAC Report No. 333 (1988).
+
+It is a DOE technical report, freely available from OSTI:
+<https://www.osti.gov/biblio/6783753> (full text:
+<https://www.osti.gov/servlets/purl/6783753>).
+
+It matters here for two reasons. Its Sec. 2.4 gives the structure-function
+definition the code implements, and it reprints the same figures as the journal
+article at noticeably better print quality — its Figs. 11 and 12 are the
+article's Figs. 5 and 6. `tools/digitize.py` therefore traces the **thesis**
+panels in preference to the journal scan.
+
+Place a copy at `literature/SLAC-333_Hornbostel_thesis.pdf` to run that
+tooling. Like the article, it is gitignored rather than redistributed here.
+
 ## External data appearing in the paper's figures
 
 Figure 8(a) overlays SU(2) Hamiltonian-lattice results from:

@@ -16,6 +16,27 @@ on our curves for *both* series including the x10^3; on Fig 6(a) they sit on the
 valence curve while the x10^3 series is qualitatively right but quantitatively
 off.
 
+## Thesis figures as digitization targets
+
+Hornbostel's thesis (SLAC-333, Ref. 14 of the paper) reprints these same panels
+at markedly better print quality — its Fig. 11 is the article's Fig. 5 and its
+Fig. 12 is Fig. 6. `tools/digitize.py` can now trace either document
+(`Panel.source`), and the thesis baryon panels are defined as `t12a/t12b/t12c`.
+
+They trace cleanly: the column probe recovers 11–14 markers per panel at the
+stated 2K=21.
+
+**Remaining work.** The thesis draws its two series with `×` (valence) and `♦`
+(five-quark) — both solid glyphs, separated by *shape*, whereas the article uses
+filled and open circles separated by *fill*. The ring-vs-disc classifier
+therefore mislabels them, and simple shape metrics do not separate them either
+(bounding-box fill spans 0.42–0.97 with no bimodality, because the glyphs sit on
+top of the curves). A classifier keyed on the curve style instead — the thesis
+draws valence solid and five-quark dashed — is the natural next step; until then
+the thesis panels give reliable marker *positions* but not reliable series
+*assignment*, so the numbers quoted in this document still come from the
+article scan.
+
 ## The tracer
 
 Two rounds of improvement, both driven by failures the images exposed.

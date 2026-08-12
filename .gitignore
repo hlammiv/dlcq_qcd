@@ -45,3 +45,6 @@ tmp/
 
 # Claude Code session scratch (worktrees, local settings)
 .claude/
+
+# Thesis PDF: freely available from OSTI, not redistributed here (see CITATION.md)
+literature/SLAC-333*.pdf

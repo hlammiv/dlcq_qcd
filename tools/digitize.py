@@ -72,6 +72,10 @@ class Panel:
     # distribution, N*B for a baryon's.
     quark_number: float | None = None
     sector: str = ""
+    # Which document the panel is traced from.  The thesis (SLAC-333) reprints
+    # the article's figures at better print quality, so it is the preferred
+    # target where a panel appears in both.
+    source: str = "article"
 
 
 PANELS = {
@@ -152,6 +156,27 @@ PANELS = {
                    description="FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=22",
                    expected_K=22, B=2, N=3, quark_number=6.0, sector="valence"),
 
+    # ── THESIS Figs. 11 and 12 -- the same panels as the article's Figs. 5
+    # and 6, but far more legibly printed.  These are the preferred targets.
+    "t12a": Panel(name="t12a", page=82, source="thesis",
+                  bbox=(0.330, 0.089, 0.690, 0.300),
+                  xlim=(0.0, 1.0), ylim=(0.0, 15.0),
+                  xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                  description="THESIS Fig 12(a) = article Fig 6(a): 1st baryon, 2K=21",
+                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+    "t12b": Panel(name="t12b", page=82, source="thesis",
+                  bbox=(0.330, 0.313, 0.690, 0.523),
+                  xlim=(0.0, 1.0), ylim=(0.0, 15.0),
+                  xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                  description="THESIS Fig 12(b) = article Fig 6(b): 2nd baryon, 2K=21",
+                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+    "t12c": Panel(name="t12c", page=82, source="thesis",
+                  bbox=(0.330, 0.540, 0.690, 0.750),
+                  xlim=(0.0, 1.0), ylim=(0.0, 15.0),
+                  xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                  description="THESIS Fig 12(c) = article Fig 6(c): 3rd baryon, 2K=21",
+                  expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+
     # ── FIG. 8 (page 7): meson mass vs m/g, with Hamer's SU(2) lattice points ──
     "fig8a": Panel(name="fig8a", page=7, bbox=(0.5943, 0.1381, 0.8324, 0.2760),
                    # 8 x ticks every 0.25 (0..1.75) and 9 y ticks every 0.5
@@ -186,17 +211,21 @@ def load_panel_image(panel: Panel, dpi: int = 600, pages_dir: Path | None = None
     """Return the cropped panel as a boolean 'ink' array (True = dark)."""
     from PIL import Image
 
-    from render_pages import DEFAULT_OUT, PDF, render
+    from render_pages import DEFAULT_OUT, SOURCES, render
 
+    src = SOURCES.get(panel.source)
+    prefix = "p" if panel.source == "article" else "t"
     pages_dir = pages_dir or DEFAULT_OUT
-    candidates = sorted(Path(pages_dir).glob(f"p{panel.page:02d}_{dpi}dpi*.png"))
+    candidates = sorted(Path(pages_dir).glob(
+        f"{prefix}{panel.page:02d}_{dpi}dpi*.png"))
     if not candidates:
-        if not PDF.exists():
+        if src is None or not src.exists():
             raise SystemExit(
-                f"{PDF} not found; the article is not redistributed with this "
-                "repo. See CITATION.md."
+                f"{src} not found; source documents are not redistributed with "
+                "this repo. See CITATION.md."
             )
-        candidates = [render(PDF, panel.page, dpi, Path(pages_dir))]
+        candidates = [render(src, panel.page, dpi, Path(pages_dir),
+                             prefix=prefix)]
 
     img = Image.open(candidates[0]).convert("L")
     w, h = img.size
@@ -396,7 +425,11 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
             probed, boxed = drop_in_box(probed, frame,
                                         legend_bbox(legend_hits, frame))
             probe_legend = list(probe_legend) + list(boxed)
-            if len(probed) >= max(3, len(records) // 2):
+            # Prefer the probe whenever it found a plausible number of
+            # markers.  Requiring it to match the blob count was backwards:
+            # the blob count is inflated by legend text, so a clean probe was
+            # being rejected for finding *fewer* things.
+            if len(probed) >= 3:
                 provenance["probe_records"] = [
                     dict(x=xs * m["px"] + xi, y=ys * m["py"] + yi,
                          filled=m["filled"], area=m["area"],

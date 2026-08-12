@@ -1,0 +1,107 @@
+{
+  "panel": "t12a",
+  "description": "THESIS Fig 12(a) = article Fig 6(a): 1st baryon, 2K=21",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 82,
+  "dpi": 600,
+  "page_size_px": [
+    3990,
+    5395
+  ],
+  "crop_box_px": [
+    1316,
+    480,
+    2753,
+    1618
+  ],
+  "bbox_fraction": [
+    0.33,
+    0.089,
+    0.69,
+    0.3
+  ],
+  "frame_px": [
+    56,
+    1411,
+    42,
+    1103
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    15.0
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    65.5,
+    119.0,
+    173.5,
+    226.0,
+    280.5,
+    332.5,
+    388.5,
+    495.0,
+    549.5,
+    603.5,
+    763.5,
+    818.5,
+    871.5,
+    924.5,
+    978.0,
+    1031.5,
+    1082.5,
+    1137.5,
+    1192.5,
+    1298.5,
+    1408.5
+  ],
+  "x_fit": {
+    "slope": 0.0007380073800738008,
+    "intercept": -0.04132841328413288,
+    "max_residual": 3.469446951953614e-17
+  },
+  "y_fit": {
+    "slope": -0.014137606032045238,
+    "intercept": 15.593779453345899,
+    "max_residual": 1.7763568394002505e-15
+  },
+  "n_markers": 46,
+  "n_legend_suppressed": 35,
+  "notes": [
+    "x ticks: found 21, expected 6 (calibration still from frame edges)",
+    "suppressed 28 in-plot legend/text blobs",
+    "column probe at 2K=21: 14 markers (13 filled, 1 open)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 21,
+  "check": {
+    "K_inferred": 36,
+    "K_code": 36,
+    "inlier_fraction": 0.782608695652174,
+    "median_grid_residual": 0.018035697179401816,
+    "max_grid_residual": 0.025398197019944835,
+    "consistent": true,
+    "K_from_x_min": 130.81056466302414,
+    "K_from_spacing": 71.36827976586974,
+    "n_points": 46,
+    "K_expected": 21,
+    "ok": false
+  },
+  "K_used": 21,
+  "K_source": "stated in paper",
+  "sum_rule_scale": 0.6077741407528641,
+  "sum_rule_quark_number": 3.0,
+  "n_on_lattice": 14,
+  "n_dropped_off_lattice": 0
+}

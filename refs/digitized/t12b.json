@@ -1,0 +1,109 @@
+{
+  "panel": "t12b",
+  "description": "THESIS Fig 12(b) = article Fig 6(b): 2nd baryon, 2K=21",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 82,
+  "dpi": 600,
+  "page_size_px": [
+    3990,
+    5395
+  ],
+  "crop_box_px": [
+    1316,
+    1688,
+    2753,
+    2821
+  ],
+  "bbox_fraction": [
+    0.33,
+    0.313,
+    0.69,
+    0.523
+  ],
+  "frame_px": [
+    46,
+    1403,
+    40,
+    1097
+  ],
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    15.0
+  ],
+  "xtick_values": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "xtick_pixels": [
+    55.5,
+    110.0,
+    216.0,
+    271.0,
+    323.5,
+    379.0,
+    433.0,
+    486.5,
+    541.5,
+    593.5,
+    758.0,
+    809.0,
+    863.5,
+    918.0,
+    972.0,
+    1026.0,
+    1078.0,
+    1130.5,
+    1185.0,
+    1241.0,
+    1295.0,
+    1350.0,
+    1400.5
+  ],
+  "x_fit": {
+    "slope": 0.0007369196757553426,
+    "intercept": -0.03389830508474559,
+    "max_residual": 1.6653345369377348e-16
+  },
+  "y_fit": {
+    "slope": -0.014191106906338702,
+    "intercept": 15.567644276253557,
+    "max_residual": 8.881784197001252e-15
+  },
+  "n_markers": 22,
+  "n_legend_suppressed": 26,
+  "notes": [
+    "x ticks: found 23, expected 6 (calibration still from frame edges)",
+    "suppressed 20 in-plot legend/text blobs",
+    "column probe at 2K=21: 12 markers (12 filled, 0 open)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 21,
+  "check": {
+    "K_inferred": 21,
+    "K_code": 21,
+    "inlier_fraction": 0.7272727272727273,
+    "median_grid_residual": 0.004739964601250174,
+    "max_grid_residual": 0.08704425027195839,
+    "consistent": true,
+    "K_from_x_min": 22.52068157344642,
+    "K_from_spacing": 23.71126706788976,
+    "n_points": 22,
+    "K_expected": 21,
+    "ok": true
+  },
+  "K_used": 21,
+  "K_source": "stated in paper",
+  "sum_rule_scale": 0.7621287553648065,
+  "sum_rule_quark_number": 3.0,
+  "n_on_lattice": 12,
+  "n_dropped_off_lattice": 0
+}
