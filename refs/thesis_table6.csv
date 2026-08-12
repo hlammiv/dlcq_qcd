@@ -1,0 +1,23 @@
+# TABLE 6. Magnitude of Higher-Fock Component in Lightest SU(2) Meson Versus m/g
+# K. Hornbostel, SLAC Report 333 (1988), p. 84.  See CITATION.md.
+#
+# The probability of the four-quark Fock component in the lightest SU(2) meson.
+# Richardson-extrapolated from 2K = 10-24; the parenthesized figure is the
+# magnitude of the last term in the series, as in the paper's Table I.
+#
+# The thesis restricted the space to at most four-quark states, noting that
+# "six-quark and higher states contributed less than .1% to these values at any
+# value of K, and so fall below the errors" -- which is why our sweep's LPN=4
+# truncation is the matching calculation.
+#
+# It also cautions that "results for couplings of lambda beyond .9425
+# (m/g < 0.2) are probably not reliable enough to allow any firm conclusions",
+# so the last two rows are flagged unreliable.
+#
+# This is a rare thing: a published, uncertainty-quoted number for a HIGHER-FOCK
+# magnitude, which is otherwise only checkable against digitized curves.
+lambda,mg,probability,last_term,reliable
+0.8158,0.40,0.00300,0.00020,1
+0.9425,0.20,0.00740,0.00060,1
+0.9847,0.10,0.01110,0.00030,0
+0.9961,0.05,0.01296,0.00005,0

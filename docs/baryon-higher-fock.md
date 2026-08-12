@@ -143,6 +143,72 @@ Note this cannot be settled by comparing our two codes: the Python port
 reproduces the Fortran's matrix elements to 1e-14, so any difference from
 `wfbig` is shared by both.
 
+## The thesis validates our higher-Fock *magnitudes*
+
+The thesis carries something the article does not: **numbers, with
+uncertainties, for a higher-Fock magnitude**. Its Table 6 gives the
+probability of the four-quark component in the lightest SU(2) meson,
+Richardson-extrapolated over 2K = 10-24 (`refs/thesis_table6.csv`):
+
+| m/g | thesis | ours | pull | rel |
+|---|---|---|---|---|
+| 0.40 | 0.00300(20) | 0.0030328 | 0.2 | 1.1% |
+| 0.20 | 0.00740(60) | 0.0077682 | 0.6 | 5.0% |
+| 0.10 | 0.01110(30) | 0.0112771 | 0.6 | 1.6% |
+| 0.05 | 0.01296(5) | 0.0128183 | 2.8 | 1.1% |
+
+Three of four sit inside the thesis's own quoted uncertainty, and all four
+agree to 1-5% relative. The one with a large pull is at m/g = 0.05, where the
+thesis itself says "results for couplings of lambda beyond .9425 are probably
+not reliable enough to allow any firm conclusions".
+
+The thesis also restricted its space to four-quark states, noting six-quark and
+higher contribute "less than .1% ... and so fall below the errors" — which is
+why our LPN=4 sweep is the matching calculation.
+
+So the Fock projection's **normalization is right**, checked against published
+numbers rather than against a traced curve. Combined with the meson
+higher-Fock *shape* matching at 2.3%, what remains unexplained is specifically
+the baryon five-quark **shape at small x**.
+
+## The thesis explains the shape, and flags that region as unresolved
+
+Sec. 2.8 derives the double-bump form from momentum flow as valence quarks
+split off pairs, and predicts for the SU(3) baryon "a quark distribution with
+roughly equal peaks at x = .33 and x = .13 ... An antiquark peak should appear
+at x = .083 with about half the height of the quark peaks."
+
+Against ours:
+
+| quantity | thesis text | ours |
+|---|---|---|
+| quark peak (upper) | 0.33 | **0.333** |
+| quark peak (lower) | 0.13 | 0.048 |
+| the two peaks | roughly equal | ratio 1.58 |
+| antiquark peak | 0.083 | 0.048 |
+| qbar/q peak height | ~0.5 | 0.651 |
+
+Note these predicted positions are schematic — the same section says "assuming
+peaks closer than about .1 are unresolved". Our *meson* four-quark curve, which
+matches the published figure to 2.3%, likewise peaks at 0.042 and 0.625 rather
+than the text's "~.17" and "~.5", while reproducing the stated 3:1 ratio (ours
+3.90). So a position mismatch against the text is not evidence of an error.
+
+Crucially the thesis then says of exactly this region:
+
+> "Because of the lack of resolution, the pairs of peaks anticipated at small x
+> merge into single peaks. These would presumably be resolved if K were
+> sufficiently increased."
+
+and, of higher-Fock K-sensitivity generally, that curves at 2K = 14 vs 20
+differ "by at most, slightly less than 30% in the region where x is less than
+.2". Our own K scan shows the same: the baryon five-quark values move
+substantially between 2K = 21, 25 and 29.
+
+The residual disagreement is therefore concentrated in precisely the region the
+original author identified as unresolved and K-sensitive — on a sector where
+our two codes already differ from each other by 16%.
+
 ## Status
 
 Reported, not resolved. The affected curves are the higher-Fock series of

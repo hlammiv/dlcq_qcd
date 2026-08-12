@@ -271,3 +271,84 @@ def test_thooft_mass_grows_with_quark_mass():
 
     vals = [thooft_mass(t, 3) for t in (0.1, 0.4, 0.8, 1.6)]
     assert all(b > a for a, b in zip(vals, vals[1:]))
+
+
+# ── the thesis (SLAC-333), which quotes higher-Fock magnitudes ────────────
+
+def load_thesis_table6():
+    """Four-quark Fock probability in the lightest SU(2) meson, from the thesis."""
+    path = ROOT / "refs" / "thesis_table6.csv"
+    rows = []
+    with open(path) as fh:
+        for row in csv.DictReader(l for l in fh if not l.startswith("#")):
+            rows.append(dict(mg=float(row["mg"]),
+                             probability=float(row["probability"]),
+                             last_term=float(row["last_term"]),
+                             reliable=bool(int(row["reliable"]))))
+    return rows
+
+
+def test_thesis_table6_transcription():
+    rows = load_thesis_table6()
+    assert len(rows) == 4
+    assert {r["mg"] for r in rows} == {0.40, 0.20, 0.10, 0.05}
+    # Higher-Fock grows as the quarks get lighter.
+    ordered = sorted(rows, key=lambda r: r["mg"], reverse=True)
+    vals = [r["probability"] for r in ordered]
+    assert all(b > a for a, b in zip(vals, vals[1:]))
+
+
+@pytest.mark.slow
+@pytest.mark.fortran
+def test_higher_fock_magnitude_matches_the_thesis():
+    """Our four-quark probability against the thesis's published values.
+
+    This is the only quantitative check of a higher-Fock *magnitude* that does
+    not go through a digitized curve -- the thesis quotes numbers with
+    uncertainties.  It is the direct answer to whether our Fock projection has
+    the right normalization, independent of any figure.
+    """
+    import re
+
+    from dlcq.observables import richardson_extrapolate
+    from dlcq.read_fortran import read_out
+
+    sweep = ROOT / "runs" / "sweep"
+    if not sweep.exists():
+        pytest.skip("no sweep; run tools/sweep_fortran.sh")
+
+    wanted = {r["mg"]: r for r in load_thesis_table6()}
+    runs = {}
+    for d in sorted(sweep.glob("N2_B0_*")):
+        m = re.match(r"N2_B0_K(\d+)_mg([\d.]+)", d.name)
+        if not m or not (d / "qcdf.out").exists():
+            continue
+        mg = float(m[2])
+        if mg not in wanted:
+            continue
+        r = read_out(d / "qcdf.out")
+        idx = physical_indices(r)
+        if not idx.size:
+            continue
+        dx = 2.0 / r.K_code
+        prob = {}
+        for n in (2, 4):
+            _, q, qb = structure_function(r, int(idx[0]), nparton=n)
+            # partons per state -> probability of the Fock component
+            prob[n] = float(np.sum(q + qb) * dx) / n
+        runs.setdefault(mg, []).append((int(m[1]), prob[4] / (prob[2] + prob[4])))
+
+    checked = 0
+    for mg, ref in wanted.items():
+        if mg not in runs or len(runs[mg]) < 3:
+            continue
+        v = sorted(runs[mg])
+        p0, _ = richardson_extrapolate([k for k, _ in v], [p for _, p in v],
+                                       mg, 2, n_terms=2)
+        # 10% covers the extrapolation spread; the thesis itself calls
+        # m/g < 0.2 unreliable, so the tolerance is not tightened there.
+        assert p0 == pytest.approx(ref["probability"], rel=0.10), (
+            f"m/g={mg}: ours {p0:.4e}, thesis {ref['probability']:.4e}"
+        )
+        checked += 1
+    assert checked >= 3, f"only {checked} couplings compared"
