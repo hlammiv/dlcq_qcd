@@ -80,3 +80,26 @@ def python_K21():
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: expensive; excluded by default")
     config.addinivalue_line("markers", "fortran: needs Fortran output or the binary")
+
+
+@pytest.fixture(scope="session")
+def two_baryon_K24():
+    """N=3, B=2, 2K=24 -- the run Fig. 6(d) is actually drawn from.
+
+    Not in HISTORICAL: the 1990-era outputs kept in the repo are the B=0 and
+    B=1 cases.  Fortran and Python agree to every printed digit here, so either
+    solver validates the figure; prefer Fortran when a build is available.
+    """
+    from dlcq.figures import paper_lambda
+    from dlcq.providers import FortranProvider, PythonProvider
+
+    lam = paper_lambda(1.6)
+    for provider in (FortranProvider(allow_run=True,
+                                     extra_search=[ROOT / "python"]),
+                     PythonProvider(ncpus=4)):
+        try:
+            return provider.get(3, 1, 2, 24, lam)
+        except Exception:
+            continue
+    pytest.skip("no N=3 B=2 2K=24 run and neither solver could produce one")
+

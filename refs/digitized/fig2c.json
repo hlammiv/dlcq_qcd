@@ -26,6 +26,9 @@
     18,
     862
   ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 0,
+  "axis_dot_n": 2,
   "xlim": [
     0.0,
     1.0
@@ -50,10 +53,14 @@
     "max_residual": 2.842170943040401e-14
   },
   "n_markers": 10,
+  "n_legend_suppressed": 0,
   "notes": [
-    "x ticks: found 2, expected 0 (calibration still from frame edges)"
+    "x ticks: found 2, expected 0 (calibration still from frame edges)",
+    "column probe at 2K=28: 62 markers (0 filled, 62 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 28,
   "check": {
     "K_inferred": 28,
     "K_code": 28,
@@ -67,6 +74,8 @@
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "n_on_lattice": 6,
-  "n_dropped_off_lattice": 4
+  "K_used": 28,
+  "K_source": "inferred",
+  "n_on_lattice": 62,
+  "n_dropped_off_lattice": 0
 }

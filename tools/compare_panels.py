@@ -39,14 +39,23 @@ sys.path.insert(0, str(ROOT / "tools"))
 # panel -> what physics it shows.
 #   B, K       the run
 #   state      index into the PHYSICAL spectrum (spurious modes removed)
-#   series     list of (parton count, multiplier, marker-is-filled, label)
+#   series     list of (parton count, multiplier, marker-is-filled, label) with
+#              an optional 5th entry giving that curve's m/g.  Fig. 3 draws TWO
+#              couplings in one panel -- filled circles at m/g=1.6 and open ones
+#              at m/g=0.1 -- so a single-coupling comparison can never match
+#              half its markers.
+#              A NEGATIVE parton count means the ANTIQUARK distribution of that
+#              sector -- Fig. 6(d) plots q(x) and qbar(x) of the 8-parton sector
+#              as two separate curves.
 # The multipliers are the paper's own x10^n legend entries.  Note Fig. 5(d)
 # puts its x10^4 on the FILLED (valence) curve, not the open one.
 PANEL_PHYSICS = {
     "fig3a": dict(B=0, K=14, state=0,
-                  series=[(2, 1.0, True, r"$q\bar q$ valence")]),
+                  series=[(2, 1.0, True, r"$q\bar q$, $m/g=1.6$"),
+                          (2, 1.0, False, r"$q\bar q$, $m/g=0.1$", 0.1)]),
     "fig3b": dict(B=1, K=15, state=0,
-                  series=[(3, 1.0, True, "qqq valence")]),
+                  series=[(3, 1.0, True, "qqq, $m/g=1.6$"),
+                          (3, 1.0, False, "qqq, $m/g=0.1$", 0.1)]),
     "fig5a": dict(B=0, K=24, state=0,
                   series=[(2, 1.0, True, r"$q\bar q$"),
                           (4, 1e3, False, r"$q\bar qq\bar q\ (\times10^3)$")]),
@@ -68,14 +77,25 @@ PANEL_PHYSICS = {
     "fig6c": dict(B=1, K=21, state=2,
                   series=[(3, 1.0, True, "qqq"),
                           (5, 1e2, False, r"$qqqq\bar q\ (\times10^2)$")]),
-    "fig6d": dict(B=2, K=22, state=0,
+    # 2K=24, not 22 -- the caption never states K for this panel; see the
+    # lattice measurement in tools/digitize.py.  The legend's three entries are
+    # the 6-parton valence, and the 8-parton sector's quark AND antiquark
+    # distributions -- three curves from two Fock sectors.
+    "fig6d": dict(B=2, K=24, state=0,
                   series=[(6, 1.0, True, "6q"),
-                          (8, 5e2, False, r"$6qq\bar q\ (\times5\!\times\!10^2)$")]),
+                          (8, 5e2, False, r"$6qq\bar q\ (\times5\!\times\!10^2)$"),
+                          (-8, 1e3, False, r"$6qq\bar q\ \bar q(x)\ (\times10^3)$")]),
 }
 
 
-def paper_crop(panel, dpi=600, pages_dir=None):
-    """The published panel as an image array."""
+def paper_crop(panel, dpi=600, pages_dir=None, margin=0.012):
+    """The published panel as an image array.
+
+    ``margin`` widens the crop slightly for display only.  The panel bboxes are
+    tuned so the frame finder sees exactly one frame, which leaves the axis
+    labels sitting right on the edge; a little air makes the published panel
+    readable beside the computed ones without touching what gets digitized.
+    """
     from PIL import Image
     from render_pages import DEFAULT_OUT, PDF, render
 
@@ -88,6 +108,8 @@ def paper_crop(panel, dpi=600, pages_dir=None):
     img = Image.open(hits[0]).convert("L")
     w, h = img.size
     l, t, r, b = panel.bbox
+    l, r = max(0.0, l - margin), min(1.0, r + margin)
+    t, b = max(0.0, t - margin), min(1.0, b + margin)
     return np.asarray(img.crop((int(l * w), int(t * h), int(r * w), int(b * h))))
 
 
@@ -113,15 +135,18 @@ def computed(provider, name, phys):
     from dlcq.observables import structure_function, physical_indices
     from dlcq.figures import paper_lambda
 
-    r = provider.get(3, 1, phys["B"], phys["K"], paper_lambda(1.6))
-    idx = physical_indices(r)
-    if phys["state"] >= idx.size:
-        return None, []
     out, xs = [], None
-    for npart, scale, filled, label in phys["series"]:
-        x, q, _ = structure_function(r, int(idx[phys["state"]]), nparton=npart)
+    for entry in phys["series"]:
+        npart, scale, filled, label = entry[:4]
+        mg = entry[4] if len(entry) > 4 else 1.6
+        r = provider.get(3, 1, phys["B"], phys["K"], paper_lambda(mg))
+        idx = physical_indices(r)
+        if phys["state"] >= idx.size:
+            return None, []
+        x, q, qbar = structure_function(r, int(idx[phys["state"]]),
+                                        nparton=abs(npart))
         xs = x
-        out.append((q * scale, filled, label))
+        out.append(((qbar if npart < 0 else q) * scale, filled, label))
     return xs, out
 
 
@@ -165,11 +190,15 @@ def make_figure(name, outdir, dpi=600, pages_dir=None):
             ax.text(0.5, 0.5, "state unavailable", ha="center", va="center",
                     transform=ax.transAxes)
         else:
-            for q, filled, lab in series:
-                ax.plot(x, q, "-o" if filled else "--s",
-                        markerfacecolor="k" if filled else "none",
-                        color="k" if filled else "crimson",
-                        markersize=4, lw=1.1, label=lab)
+            # One style per series, in the paper's own order: it draws the
+            # valence sector with filled circles and each higher-Fock curve
+            # with a distinct open marker.  Fig. 6(d) carries two open series
+            # -- the 8-parton q(x) and qbar(x) -- which must not look alike.
+            styles = [("-o", "k", True), ("--s", "crimson", False),
+                      ("-.^", "royalblue", False), (":d", "seagreen", False)]
+            for (q, filled, lab), (st, col, fill) in zip(series, styles):
+                ax.plot(x, q, st, color=col, markersize=5, lw=1.1, label=lab,
+                        markerfacecolor=col if fill else "none")
         if dig_f:
             ax.plot(*zip(*dig_f), "o", mfc="none", mec="0.55", ms=9, mew=1.2,
                     label="paper, digitized", zorder=0)

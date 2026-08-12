@@ -1,0 +1,106 @@
+{
+  "panel": "t13a",
+  "description": "THESIS Fig 13(a) = article Fig 6(d): lightest B=2 state, 2K=24",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 83,
+  "dpi": 600,
+  "page_size_px": [
+    3956,
+    5368
+  ],
+  "crop_box_px": [
+    494,
+    579,
+    1918,
+    1728
+  ],
+  "bbox_fraction": [
+    0.125,
+    0.108,
+    0.485,
+    0.322
+  ],
+  "frame_px": [
+    34,
+    1389,
+    38,
+    1099
+  ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 0,
+  "axis_dot_n": 1,
+  "xlim": [
+    0.0,
+    0.6
+  ],
+  "ylim": [
+    0.0,
+    30.0
+  ],
+  "xtick_values": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6
+  ],
+  "xtick_pixels": [
+    42.5,
+    86.0,
+    133.5,
+    177.0,
+    221.0,
+    265.5,
+    310.5,
+    356.0,
+    401.0,
+    446.0,
+    490.5,
+    713.5,
+    937.5,
+    982.5,
+    1116.5,
+    1160.5,
+    1207.5,
+    1297.5,
+    1343.5,
+    1386.5
+  ],
+  "x_fit": {
+    "slope": 0.0004428044280442804,
+    "intercept": -0.015055350553505546,
+    "max_residual": 1.1102230246251565e-16
+  },
+  "y_fit": {
+    "slope": -0.028275212064090467,
+    "intercept": 31.074458058435447,
+    "max_residual": 2.4868995751603507e-14
+  },
+  "n_markers": 23,
+  "n_legend_suppressed": 33,
+  "notes": [
+    "x ticks: found 20, expected 7 (calibration still from frame edges)",
+    "suppressed 33 in-plot legend/text blobs"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "blob (probe found too few)",
+  "check": {
+    "K_inferred": 22,
+    "K_code": 22,
+    "inlier_fraction": 0.6086956521739131,
+    "median_grid_residual": 0.0172451285935043,
+    "max_grid_residual": 0.04470085824453751,
+    "consistent": true,
+    "K_from_x_min": 24.571784624640117,
+    "K_from_spacing": 73.9236156985954,
+    "n_points": 23,
+    "K_expected": 24,
+    "ok": false
+  },
+  "K_used": 24,
+  "K_source": "stated in paper",
+  "n_on_lattice": 13,
+  "n_dropped_off_lattice": 10
+}

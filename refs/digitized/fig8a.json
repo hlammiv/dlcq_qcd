@@ -26,6 +26,9 @@
     27,
     865
   ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 0,
+  "axis_dot_n": 1,
   "xlim": [
     0.0,
     1.756
@@ -64,25 +67,32 @@
     "intercept": 4.149522673031027,
     "max_residual": 1.7763568394002505e-15
   },
-  "n_markers": 15,
+  "n_markers": 7,
+  "n_legend_suppressed": 10,
   "notes": [
     "x ticks agree to 0.0429",
-    "WARNING: x tick mismatch, check xlim"
+    "WARNING: x tick mismatch, check xlim",
+    "suppressed 8 in-plot legend/text blobs",
+    "column probe at 2K=25: 9 markers (2 filled, 7 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 25,
   "check": {
-    "K_inferred": 23,
-    "K_code": 23,
-    "inlier_fraction": 0.6,
-    "median_grid_residual": 0.017835390773522197,
-    "max_grid_residual": 0.7334073420677546,
+    "K_inferred": 25,
+    "K_code": 25,
+    "inlier_fraction": 0.7142857142857143,
+    "median_grid_residual": 0.016666345578617903,
+    "max_grid_residual": 0.7264508203286241,
     "consistent": true,
     "K_from_x_min": 49.20020949147973,
-    "K_from_spacing": 28.17448552045651,
-    "n_points": 15,
+    "K_from_spacing": 18.52082842748197,
+    "n_points": 7,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
+  "K_used": 25,
+  "K_source": "inferred",
   "n_on_lattice": 9,
-  "n_dropped_off_lattice": 6
+  "n_dropped_off_lattice": 0
 }

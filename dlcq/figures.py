@@ -20,6 +20,7 @@ Fig  content                                                parameters
 4    higher-Fock contributions                              N=3, m/g=0.1, 1.6
 5    first three meson states plus the 11th                 N=3, m/g=1.6, 2K=24
 6    first three baryon states plus first B=2               N=3, m/g=1.6, 2K=21
+     ...panel (d) is 2K=24; the caption states no K for it
 7    extrapolated masses, N = 2, 3, 4                       Richardson, 2K=16-24
 8    comparison with large-N and lattice                    N = 2, 3, 4
 ===  =====================================================  ==================
@@ -63,6 +64,8 @@ K_MESON, K_BARYON = 24, 21
 # even K and every baryon panel an odd K -- the parity each sector requires,
 # which is not built into the inference -- and the same procedure reproduces the
 # stated 2K = 24 and 21 of Figs. 5 and 6.  See docs/inferred-K.md.
+# Fig. 6(d)'s K is never stated in the paper.  Measured from the panel: 24.
+K_TWO_BARYON = 24
 K_FIG3_MESON, K_FIG3_BARYON = 14, 15
 K_FIG4_MESON, K_FIG4_BARYON = 14, 15
 
@@ -220,9 +223,12 @@ def _wavefunction_panel(ax, r, idx, sectors, title):
         return
     Mg = code_to_M_over_g(r.eigenvalues[idx], r.rlamb)
     for npart, style, lab in sectors:
-        x, q, qbar = structure_function(r, idx, nparton=npart)
-        if np.max(np.abs(q)) > 1e-18:
-            ax.plot(x, q, style, markersize=3, lw=1, label=lab)
+        # A negative parton count selects that sector's ANTIQUARK distribution:
+        # Fig. 6(d) plots q(x) and qbar(x) of the 8-parton sector separately.
+        x, q, qbar = structure_function(r, idx, nparton=abs(npart))
+        y = qbar if npart < 0 else q
+        if np.max(np.abs(y)) > 1e-18:
+            ax.plot(x, y, style, markersize=3, lw=1, label=lab)
     ax.set_title(f"{title}   M/g = {Mg:.3f}", fontsize=10)
     ax.set_xlabel("x = k/K"); ax.set_ylabel("q(x)")
     ax.set_xlim(0, 1); ax.legend(fontsize=7)
@@ -260,10 +266,16 @@ def figure6(provider, source):
 
     ax = axes.flat[3]
     try:
-        r2 = provider.get(3, 1, 2, 22, lam)
-        _wavefunction_panel(ax, r2, 0, [(6, "k-o", "6q"),
-                                        (8, "r-s", r"$6qq\bar q$")],
-                            "(d) 1st B=2, 2K=22")
+        # 2K = 24, not 22.  The caption states 2K=21 for (a)-(c) and gives no
+        # K at all for (d); 24 is what the row of zero-valued markers along the
+        # panel's own x axis says, and at 24 the computed curves land on the
+        # published ones to better than 1%.  See docs/baryon-higher-fock.md.
+        r2 = provider.get(3, 1, 2, K_TWO_BARYON, lam)
+        _wavefunction_panel(ax, r2, 0,
+                            [(6, "k-o", "6q"),
+                             (8, "r-s", r"$6qq\bar q$  $q(x)$"),
+                             (-8, "b-^", r"$6qq\bar q$  $\bar q(x)$")],
+                            f"(d) 1st B=2, 2K={K_TWO_BARYON}")
     except Exception as exc:                       # provider may lack the run
         ax.text(0.5, 0.5, f"B=2 unavailable:\n{exc}", ha="center", va="center",
                 transform=ax.transAxes, fontsize=7)

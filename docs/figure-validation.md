@@ -4,17 +4,93 @@ Both codes can *produce* every figure. That is not the same as agreeing with
 the published one. This is the per-curve accounting, including the series the
 paper rescales by powers of ten.
 
-## Side-by-side images
+## The current numbers
 
+`tools/agreement.py` puts a number on every digitized marker: it finds the
+computed value at the same lattice site in whichever of that panel's series
+comes closest, and reports the relative deviation. Median |deviation|, with the
+marker count in brackets — Fortran and Python give the same table:
+
+| panel | valence | higher-Fock |
+|---|---|---|
+| 3(a) | 1.3% (12) | — |
+| 3(b) | 1.4% (9) | — |
+| 5(a) | 3.9% (8) | 4.1% (10) |
+| 5(b) | 0.8% (8) | 2.0% (7) |
+| 5(c) | 3.4% (7) | 4.8% (9) |
+| 5(d) | 2.7% (6) | 1.7% (1) |
+| 6(a) | 7.9% (7) | 34.5% (5) |
+| 6(b) | 1.3% (5) | 16.3% (2) |
+| 6(c) | 2.9% (4) | 348.5% (3) |
+| 6(d) | **0.3% (3)** | **0.8% (5)** |
+
+Every valence curve is inside 8%, most inside 4%. Every meson higher-Fock curve
+is inside 5%, at multipliers of 10² to 10⁴. The three bad cells are the baryon
+higher-Fock series of Figs. 6(a)–(c), which is a **tracing** failure with a
+known cause and an independent validation — see
+`docs/baryon-higher-fock.md`: those panels draw the valence and five-quark
+curves crossing three times, and at scan resolution the dashes of the dashed
+curve read as markers. Against the thesis's uncluttered plot of that same
+sector (Fig. 18(a)) it agrees to 0.07–3.9%.
+
+## Four calibration bugs the images exposed
+
+Getting there meant fixing four ways of mis-reading a published axis. All four
+were found by auditing tick *geometry* against tick *labels*, and none of them
+was visible in the numbers alone.
+
+**The frame top is often not the last labelled tick.** Fig. 6's ticks sit at
+height fractions 0.185/0.365/0.541/0.721/0.895 and the labelled 10.5 is the one
+at 0.721, so the top is 14.77, not 21 — reading the top as 21 inflates every y
+by 1.42×. Fig. 3(b) is the same trap: 11.25 sits at 0.833, so the top is 13.5,
+not 11.25.
+
+**A shared axis may not belong to the panel beside it.** Fig. 5's right-hand
+axis (0 2.4 4.8 7.2 9.6 12.0) spans panel **(d)** only — it starts at the
+(b)/(d) boundary and runs down. Panel (b) shares the *left* axis with (a), which
+the tick fractions confirm: (a) and (b) both read 0.163/0.334/0.498/0.663/0.830,
+while (d) reads 0.201/0.400/0.600/0.796. Reading (b) against the right axis
+inflated every y by 3.33×, and its median deviation fell from 70% to 0.8% when
+corrected.
+
+**A panel may plot more than one coupling.** Fig. 3 draws *two* curves per
+panel — filled circles at m/g = 1.6 and open ones at m/g = 0.1 — so comparing
+against a single coupling can never match half the markers. Fixing this took
+Fig. 3(a) from 61% to 1.3% and Fig. 3(b) from 97% to 1.4%.
+
+**A K the caption never states.** Fig. 6(d) is 2K = 24, not the 22 we assumed.
+See `docs/inferred-K.md` for how the panel itself says so, and
+`docs/baryon-higher-fock.md` for the result.
+
+## The sum rule is a check, not a calibration
+
+∫q dx is exactly the quark number, so in principle the valence curve fixes its
+own vertical scale with no tick labels at all. That is how this repository used
+it at first, and it was doing real work while the frame calibrations above were
+still wrong.
+
+It is no longer safe to use that way, because it can only calibrate a trace that
+recovered the whole curve. Where markers are missing from the peak the sum comes
+out short and the correction inflates every surviving point. Fig. 6(b) asked for
+2.22× and moved good points as far as 60% off; Fig. 5(b) asked for a far more
+plausible **1.11×** and still left every point uniformly 9% low — a bias that
+looks exactly like a physics discrepancy.
+
+`tools/digitize.py` now accepts it only as a refinement (within 10% of unity)
+and otherwise reports the rejection with the site coverage, leaving the audited
+frame calibration in place. Under that rule it confirms Figs. 3(a), 5(a), 5(c),
+5(d) and 6(a) to within 6%, and declines to touch the rest.
+
+## Side-by-side images
 `tools/compare_panels.py` renders every reproducible panel as **paper |
 fortran | python**, with the computed panels drawn on the axis limits read off
 the paper's own frame (so a scale difference cannot hide behind autoscaling)
 and the digitized markers overlaid in grey. Output in `figures/compare/`.
 
-They make the split below visible at a glance: on Fig 5(a) the grey markers sit
-on our curves for *both* series including the x10^3; on Fig 6(a) they sit on the
-valence curve while the x10^3 series is qualitatively right but quantitatively
-off.
+They make the split above visible at a glance: on Figs. 5(a) and 6(d) the grey
+markers sit on our curves for *every* series including the rescaled ones; on
+Fig. 6(a) they sit on the valence curve while the ×10³ series is qualitatively
+right but quantitatively off.
 
 ## Thesis figures as digitization targets
 
@@ -39,12 +115,28 @@ article scan.
 
 ## The tracer
 
-Two rounds of improvement, both driven by failures the images exposed.
+Four rounds of improvement, all driven by failures the images exposed.
 
 **Legend suppression.** These panels put legends inside the axes, and the
 enclosed counters of letters like q, b, o were being read as open circles.
 Separated by the shape of the arrangement -- >=3 markers sharing a y cannot be
 a peaked structure function.
+
+**Declared legend boxes.** The row rule handles a small legend, but not
+Fig. 6(d)'s, which covers half the panel with three lines whose letter counters
+read as open markers — and no shape rule separates those from data. Panels may
+now declare the rectangle their legend occupies (`Panel.legend_box`), measured
+from the render and written into the provenance JSON with everything it removed.
+This is deliberately explicit rather than clever: it is auditable, and each box
+is placed with the panel's own peak in view so it cannot eat real data.
+
+**K from the row of zero-valued markers.** Where a structure function vanishes
+the marker is still drawn and comes to rest on the axis, so panels that are zero
+over much of their range carry a clean row of lattice sites along the bottom.
+That is a far better K signal than the curve markers, and it is what settled
+Fig. 6(d) — see `docs/inferred-K.md`. It is gated to speak only when it finds
+≥ 7 dots with ≥ 80% matched, because the method needs the distribution to
+actually vanish somewhere.
 
 **Lattice column probe.** Momenta are odd, so a marker can only sit at
 ``x = k/K``. Probing those known columns turns 2D blob detection into a few 1D

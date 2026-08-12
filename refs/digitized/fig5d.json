@@ -26,6 +26,9 @@
     28,
     603
   ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 3,
+  "axis_dot_n": 5,
   "xlim": [
     0.0,
     1.0
@@ -57,11 +60,12 @@
     "max_residual": 1.7763568394002505e-15
   },
   "n_markers": 12,
-  "n_legend_suppressed": 16,
+  "n_legend_suppressed": 15,
   "notes": [
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
+    "axis-dot lattice: inconclusive (3/5 dots matched; needs >=7 and >=80%)",
     "suppressed 12 in-plot legend/text blobs",
-    "column probe at 2K=24: 11 markers (10 filled, 1 open)"
+    "column probe at 2K=24: 7 markers (6 filled, 1 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
@@ -81,8 +85,8 @@
   },
   "K_used": 24,
   "K_source": "stated in paper",
-  "sum_rule_scale": 0.8285302593659936,
+  "sum_rule_scale": 0.9745762711864404,
   "sum_rule_quark_number": 1.0,
-  "n_on_lattice": 11,
+  "n_on_lattice": 7,
   "n_dropped_off_lattice": 0
 }

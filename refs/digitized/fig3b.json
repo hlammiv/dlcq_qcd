@@ -26,13 +26,16 @@
     19,
     582
   ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 5,
+  "axis_dot_n": 5,
   "xlim": [
     0.0,
     1.0
   ],
   "ylim": [
     0.0,
-    11.25
+    13.5
   ],
   "xtick_values": [
     0.0,
@@ -52,15 +55,18 @@
     "max_residual": 2.498001805406602e-16
   },
   "y_fit": {
-    "slope": -0.019982238010657204,
-    "intercept": 11.629662522202489,
-    "max_residual": 3.552713678800501e-15
+    "slope": -0.023978685612788646,
+    "intercept": 13.955595026642987,
+    "max_residual": 5.329070518200751e-15
   },
-  "n_markers": 18,
-  "n_legend_suppressed": 0,
+  "n_markers": 14,
+  "n_legend_suppressed": 6,
   "notes": [
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
-    "column probe at 2K=15: 12 markers (5 filled, 7 open)"
+    "axis-dot lattice: inconclusive (5/5 dots matched; needs >=7 and >=80%)",
+    "declared legend box removed 4 blobs",
+    "column probe at 2K=15: 9 markers (3 filled, 6 open)",
+    "sum rule wants 1.779x from a trace covering 3/7 lattice sites -- too big to be a refinement, so the trace is missing real weight.  Keeping the frame calibration; treat magnitudes from this panel with care."
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
@@ -69,19 +75,18 @@
     "K_inferred": 15,
     "K_code": 15,
     "inlier_fraction": 1.0,
-    "median_grid_residual": 0.003669450425175802,
+    "median_grid_residual": 0.0030280581008437224,
     "max_grid_residual": 0.018863443596267793,
     "consistent": true,
     "K_from_x_min": 15.643894566971552,
-    "K_from_spacing": 17.08380249192432,
-    "n_points": 18,
+    "K_from_spacing": 15.27806602301088,
+    "n_points": 14,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
   "K_used": 15,
   "K_source": "inferred",
-  "sum_rule_scale": 1.2075067024128692,
-  "sum_rule_quark_number": 3.0,
-  "n_on_lattice": 12,
+  "sum_rule_rejected_scale": 1.7788309636650879,
+  "n_on_lattice": 9,
   "n_dropped_off_lattice": 0
 }

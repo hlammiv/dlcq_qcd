@@ -52,3 +52,48 @@ Confirmed against the physics: at the recovered K, both solvers reproduce the
 published curves to 2.6% (Fig. 3a) and 1.9% (Fig. 3b).
 
 `dlcq.figures` uses 2K = 14 (meson) and 15 (baryon) for Figs. 3 and 4.
+
+## Fig. 6(d): K from the row of zero-valued markers
+
+The caption of Fig. 6 states 2K = 21 for panels (a)–(c) and **no K at all for
+(d)**. Inferring it from the curve markers, as everywhere else on this page,
+gives the wrong answer: those markers are few, they sit where three curves
+overlap, and `infer_K_from_x_grid` returns the *smallest* K explaining a quorum,
+so their scatter biases it low. It answers 21 for the article's panel and 22 for
+the thesis's reprint of the same plot. Both are wrong; it is **24**.
+
+There is a much better signal on exactly this kind of panel. Wherever a
+structure function vanishes, the marker is still drawn and comes to rest on the
+axis — and a two-baryon distribution is zero over most of its range, so the
+panel carries a long row of zero-valued markers along the bottom, one per
+lattice site, at full contrast with nothing to merge with. Measured against the
+frame:
+
+| site | measured | k/24 | k/22 |
+|---|---|---|---|
+| 1 | 0.0427 | 0.0417 | 0.0455 |
+| 3 | 0.1304 | 0.1250 | 0.1364 |
+| 5 | 0.2095 | 0.2083 | 0.2273 |
+| 7 | 0.2937 | 0.2917 | 0.3182 |
+| 9 | 0.3763 | 0.3750 | 0.4091 |
+| 11 | 0.4569 | 0.4583 | 0.5000 |
+| 13 | 0.5427 | 0.5417 | 0.5909 |
+
+Worst deviation: 0.006 for K = 24, 0.048 for K = 22 — a full site's drift by the
+right-hand edge, far outside the scatter.
+
+Two facts make the fit well posed. Momenta are odd, so the lattices for K and
+2K are **disjoint** rather than nested and a factor-of-two error cannot hide.
+And K's parity is fixed outright: a state of n partons, each of odd momentum,
+has K_code ≡ n (mod 2) — even for mesons and for the B = 2 baryon pair, odd for
+a single N = 3 baryon. That alone rules out the K = 23 the thesis panel's
+noisier dot row otherwise prefers.
+
+`tools/digitize.py:infer_K_from_axis_dots` implements this. It is deliberately
+gated to speak only when it finds ≥ 7 dots with ≥ 80% matched, because the
+method needs the distribution to actually vanish somewhere: on a valence meson
+panel, nonzero nearly everywhere, there is no dot row and the band picks up tick
+marks instead — Fig. 3(a) yields a confident-looking 5-of-6 for K = 18, which is
+wrong. Under that gate it reports on Figs. 6(b) and 6(d) only, and is correct on
+both.
+

@@ -393,3 +393,93 @@ def test_baryon_five_quark_matches_the_thesis():
             f"{quantity}(x={xp}): ours {ours:.3f}, thesis {val:.3f} ({rel:.1%})"
         )
     assert worst < 0.20
+
+
+# ── Fig. 6(d): the two-baryon panel, whose K the caption never states ──────
+
+# Read off the published panel (PDF page 5) with a column probe on the 2K=24
+# lattice.  Series are named by (parton count, multiplier) exactly as the
+# panel's legend gives them; a negative parton count means that sector's
+# ANTIQUARK distribution.  These are the numbers in refs/digitized/fig6d.csv.
+FIG6D_PUBLISHED = [
+    # (x,        n_parton, multiplier, published value)
+    (1 / 24.0,    8,  5e2, 18.448),
+    (1 / 24.0,   -8,  1e3, 16.219),
+    (3 / 24.0,    6,  1.0, 35.454),
+    (3 / 24.0,    8,  5e2, 19.279),
+    (5 / 24.0,    6,  1.0, 35.541),
+]
+
+
+def test_fig6d_is_2K_24_not_22():
+    """The caption gives 2K=21 for (a)-(c) and no K at all for (d).
+
+    It is 24.  Wherever the structure function vanishes the marker is still
+    drawn and comes to rest on the axis, so the panel carries a row of
+    zero-valued markers that lands on every lattice site.  Those dots fall at
+    k/24 for odd k; at 2K=22 the predicted positions drift by a full site
+    before the right-hand edge, which is far outside the measurement scatter.
+    """
+    measured = [0.0427, 0.1304, 0.2095, 0.2937, 0.3763, 0.4569, 0.5427]
+    odd = np.arange(1, 2 * len(measured), 2)
+    err24 = np.abs(np.array(measured) - odd / 24.0).max()
+    err22 = np.abs(np.array(measured) - odd / 22.0).max()
+    assert err24 < 0.006, f"2K=24 residual {err24:.4f}"
+    assert err22 > 0.04, f"2K=22 residual only {err22:.4f}"
+
+
+@pytest.mark.parametrize("x, npart, mult, published", FIG6D_PUBLISHED)
+def test_fig6d_matches_the_published_panel(two_baryon_K24, x, npart, mult,
+                                           published):
+    """Our B=2 solution reproduces Fig. 6(d) curve by curve at 2K=24.
+
+    This is the panel that resisted for a long time.  Nothing was wrong with
+    the higher-Fock physics: we were solving at 2K=22 and comparing against a
+    figure drawn at 2K=24.
+    """
+    r = two_baryon_K24
+    idx = int(physical_indices(r)[0])
+    xs, q, qbar = structure_function(r, idx, nparton=abs(npart))
+    i = int(np.argmin(np.abs(xs - x)))
+    ours = (qbar if npart < 0 else q)[i] * mult
+    rel = abs(ours - published) / published
+    assert rel < 0.03, f"x={x:.4f} n={npart}: ours {ours:.3f} vs paper {published:.3f}"
+
+
+def test_fig6d_has_all_three_fock_sectors_and_exact_quark_number(two_baryon_K24):
+    """2K=24 opens the 10-parton sector; 2K=22 cannot.
+
+    Momenta are odd and Pauli exclusion allows at most N=3 quarks per momentum,
+    so ten partons need momentum >= 24.  At 2K=22 the B=2 state has only the
+    6- and 8-parton sectors; at 24 all three are present and the number sum
+    rule closes on N*B = 6 across them.
+    """
+    r = two_baryon_K24
+    idx = int(physical_indices(r)[0])
+    sectors = sorted(set(int(v) for v in r.state_len))
+    assert sectors == [6, 8, 10], sectors
+    total = 0.0
+    for n in sectors:
+        xs, q, qbar = structure_function(r, idx, nparton=n)
+        total += float(np.sum(q - qbar) * (xs[1] - xs[0]))
+    assert total == pytest.approx(6.0, abs=1e-6)
+
+
+def test_fig6d_y_axis_is_confirmed_by_the_number_sum_rule():
+    """The paper and the thesis print this panel on y-scales differing by 1.6.
+
+    The article's Fig. 6(d) is labelled 0 12 24 36 48 up the right-hand side;
+    the thesis reprints the identical curves (Fig. 13(a), same 2K=24 lattice,
+    same legend and multipliers) labelled 0 10 20 30 on the left.  Read against
+    those axes the two disagree by a constant 48/30 = 1.6 at every point, so
+    one of them is mislabelled.
+
+    The number sum rule decides it using published numbers only, with no solver
+    involved: the valence curve must satisfy int q dx = N*B = 6, and dx = 2/24.
+    The article's scale gives 5.9, the thesis's 3.7.
+    """
+    dx = 2.0 / 24.0
+    valence_article = [0.0, 35.454, 35.541, 0.0]     # k = 1, 3, 5, 7
+    assert sum(valence_article) * dx == pytest.approx(6.0, abs=0.15)
+    thesis = [v * 30.0 / 48.0 for v in valence_article]
+    assert sum(thesis) * dx < 4.0                     # nowhere near 6

@@ -1,0 +1,86 @@
+{
+  "panel": "t4b",
+  "description": "THESIS Fig 4(b) = article Fig 2(b): SU(3) B=1, 2K=13",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 64,
+  "dpi": 600,
+  "page_size_px": [
+    3960,
+    5372
+  ],
+  "crop_box_px": [
+    1287,
+    1305,
+    2732,
+    2121
+  ],
+  "bbox_fraction": [
+    0.325,
+    0.243,
+    0.69,
+    0.395
+  ],
+  "frame_px": [
+    32,
+    1388,
+    21,
+    459
+  ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 0,
+  "axis_dot_n": 1,
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    70.0
+  ],
+  "xtick_values": [],
+  "xtick_pixels": [
+    39.0,
+    496.5,
+    588.5,
+    739.5,
+    890.0,
+    1387.0
+  ],
+  "x_fit": {
+    "slope": 0.0007374631268436578,
+    "intercept": -0.023598820058996973,
+    "max_residual": 7.632783294297951e-17
+  },
+  "y_fit": {
+    "slope": -0.15981735159817348,
+    "intercept": 73.35616438356166,
+    "max_residual": 2.842170943040401e-14
+  },
+  "n_markers": 34,
+  "n_legend_suppressed": 4,
+  "notes": [
+    "x ticks: found 6, expected 0 (calibration still from frame edges)",
+    "suppressed 3 in-plot legend/text blobs",
+    "column probe at 2K=28: 20 markers (0 filled, 20 open)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 28,
+  "check": {
+    "K_inferred": 28,
+    "K_code": 28,
+    "inlier_fraction": 0.6176470588235294,
+    "median_grid_residual": 0.016995116893476922,
+    "max_grid_residual": 0.03302278353419019,
+    "consistent": true,
+    "K_from_x_min": 132.75524475524344,
+    "K_from_spacing": 56.75177257289801,
+    "n_points": 34,
+    "ok": true,
+    "note": "paper does not state K for this panel; inferred"
+  },
+  "K_used": 28,
+  "K_source": "inferred",
+  "n_on_lattice": 20,
+  "n_dropped_off_lattice": 0
+}

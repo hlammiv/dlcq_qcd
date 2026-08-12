@@ -72,6 +72,13 @@ class Panel:
     # distribution, N*B for a baryon's.
     quark_number: float | None = None
     sector: str = ""
+    # Fractional (x0, x1, ytop, ybot) box inside the frame occupied by the
+    # in-plot legend, measured from the render.  The generic row rule handles
+    # small legends, but Fig. 6(d)'s covers half the panel with three lines of
+    # text whose letter counters read as open markers, and no shape rule
+    # separates those from data.  Declaring the box is honest and auditable:
+    # it is written into the provenance JSON with everything it removed.
+    legend_box: tuple | None = None
     # Which document the panel is traced from.  The thesis (SLAC-333) reprints
     # the article's figures at better print quality, so it is the preferred
     # target where a panel appears in both.
@@ -85,11 +92,16 @@ PANELS = {
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 3(a) SU(3) meson valence; K not stated",
                    B=0, N=3, quark_number=1.0, sector="valence"),
+    # The frame top is NOT the last labelled tick.  Ticks sit at height
+    # fractions 0.147 0.288 0.560 0.696 0.833 0.998, and the labelled 11.25 is
+    # the one at 0.833, so the top is 11.25/0.833 = 13.5.  Reading it as 11.25
+    # shrinks every y by 1.20x.
     "fig3b": Panel(name="fig3b", page=4, bbox=(0.3061, 0.7906, 0.4677, 0.8818),
-                   xlim=(0.0, 1.0), ylim=(0.0, 11.25),
+                   xlim=(0.0, 1.0), ylim=(0.0, 13.5),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 3(b) SU(3) baryon valence; K not stated",
-                   B=1, N=3, quark_number=3.0, sector="valence"),
+                   B=1, N=3, quark_number=3.0, sector="valence",
+                   legend_box=(0.50, 0.99, 0.02, 0.40)),
 
     # ── FIG. 4 (page 4): higher-Fock sectors, scaled by 10^n ────────────────
     "fig4a": Panel(name="fig4a", page=4, bbox=(0.5376, 0.0949, 0.6999, 0.1902),
@@ -113,22 +125,32 @@ PANELS = {
                    xlim=(0.0, 1.0), ylim=(0.0, 3.6),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 5(a) 1st meson state, m/g=1.6, 2K=24",
-                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence",
+                   legend_box=(0.05, 0.99, 0.02, 0.25)),
+    # ylim 3.6, not 12.0.  Fig. 5's right-hand axis (0 2.4 4.8 7.2 9.6 12.0)
+    # spans panel (d) only -- it starts at the (b)/(d) boundary and runs down.
+    # Panel (b) shares the LEFT axis with (a), which the tick geometry confirms:
+    # (a) and (b) have identical major-tick fractions 0.163 0.334 0.498 0.663
+    # 0.830 0.997, while (d)'s are 0.201 0.400 0.600 0.796 0.990.  Reading (b)
+    # against the right axis inflates every y by 3.33x.
     "fig5b": Panel(name="fig5b", page=4, bbox=(0.7037, 0.7005, 0.8708, 0.7973),
-                   xlim=(0.0, 1.0), ylim=(0.0, 12.0),
+                   xlim=(0.0, 1.0), ylim=(0.0, 3.6),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 5(b) 2nd meson state, m/g=1.6, 2K=24",
-                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence",
+                   legend_box=(0.05, 0.99, 0.02, 0.25)),
     "fig5c": Panel(name="fig5c", page=4, bbox=(0.5478, 0.7873, 0.7106, 0.8836),
                    xlim=(0.0, 1.0), ylim=(0.0, 3.6),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 5(c) 3rd meson state, m/g=1.6, 2K=24",
-                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence",
+                   legend_box=(0.05, 0.99, 0.02, 0.25)),
     "fig5d": Panel(name="fig5d", page=4, bbox=(0.6994, 0.7873, 0.8665, 0.8836),
                    xlim=(0.0, 1.0), ylim=(0.0, 12.0),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 5(d) 11th meson state, m/g=1.6, 2K=24",
-                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence"),
+                   expected_K=24, B=0, N=3, quark_number=1.0, sector="valence",
+                   legend_box=(0.33, 0.99, 0.02, 0.25)),
 
     # ── FIG. 6 (page 5): baryon spectrum, 2K = 21 ──────────────────────────
     # The y frame top is NOT a labelled value: ticks sit at height-fractions
@@ -150,11 +172,29 @@ PANELS = {
                    xlim=(0.0, 1.0), ylim=(0.0, 14.77),
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 6(c) 3rd baryon state, m/g=1.6, 2K=21",
-                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence",
+                   # The legend sits high on the right; the valence peak is at
+                   # x/frame 0.38, uncomfortably close, so the box starts well
+                   # clear of it at 0.55.  The two blobs it removes sit at
+                   # x = 0.81 and 0.90 with y = 12.7 and 13.2, where the
+                   # distribution has long since gone to zero.
+                   legend_box=(0.55, 0.99, 0.02, 0.28)),
     "fig6d": Panel(name="fig6d", page=5, bbox=(0.2737, 0.2141, 0.4337, 0.3059),
                    xlim=(0.0, 0.6), ylim=(0.0, 48.0),
-                   description="FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=22",
-                   expected_K=22, B=2, N=3, quark_number=6.0, sector="valence"),
+                   # The caption gives 2K=21 for (a)-(c) only and states NO K for
+                   # (d).  It is 2K=24, read off the row of zero-valued markers
+                   # lying on the axis, which mark every lattice site: they fall
+                   # at k/24 for odd k (1.02 3.13 5.03 7.05 9.03 10.97 13.02)
+                   # whereas 2K=22 would put them at 0.94 2.87 4.61 6.46 8.28
+                   # 10.05 11.94 -- drifting by a full site by the right edge.
+                   description="FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=24",
+                   # No quark_number here: the sum rule fixes the scale of a
+                   # single valence curve, and this panel superposes three
+                   # series carrying different powers of ten.  Its y axis is
+                   # labelled 0 12 24 36 48 on the RIGHT, so the frame is
+                   # calibration enough.
+                   expected_K=24, B=2, N=3, sector="valence",
+                   legend_box=(0.39, 0.99, 0.18, 0.62)),
 
     # ── THESIS Figs. 11 and 12 -- the same panels as the article's Figs. 5
     # and 6, but far more legibly printed.  These are the preferred targets.
@@ -176,6 +216,37 @@ PANELS = {
                   xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                   description="THESIS Fig 12(c) = article Fig 6(c): 3rd baryon, 2K=21",
                   expected_K=21, B=1, N=3, quark_number=3.0, sector="valence"),
+
+    # THESIS Fig 13(a): the article's Fig 6(d).  Three curves from TWO Fock
+    # sectors -- 6q valence, and the 8-parton sector's q and qbar.  There is no
+    # 10-parton sector at 2K=22: Pauli exclusion allows at most N=3 quarks per
+    # momentum, so 10 partons need momentum >= 24 > 22.
+    # Note the axes: x runs to 0.6, not 1, and y to 30.
+    #
+    # CAUTION: this panel's y axis disagrees with the article's by a constant
+    # factor of 1.6.  It is the same plot -- same 2K=24 lattice, same legend,
+    # same multipliers, same curves -- but printed here against 0 10 20 30 and
+    # in the article against 0 12 24 36 48, and 48/30 = 1.6 is exactly the
+    # ratio measured point by point.  The number sum rule picks the article:
+    # int q dx must be N*B = 6 for the valence curve, which the article's scale
+    # gives and this one misses by the same 1.6.  So digitize it for SHAPE, and
+    # take magnitudes from fig6d.
+    #
+    # 2K = 24, NOT the article's 22.  The thesis ran the two-baryon sector one
+    # step further.  Read off the row of zero-valued markers lying on the axis,
+    # which mark every lattice site: they fall at 0.0418 0.1236 0.2050 0.2927
+    # 0.3736 0.4568 0.5408, i.e. k/24 for odd k (0.0417 0.125 0.2083 0.2917
+    # 0.375 0.4583 0.5417) to within 0.003.  At 2K=22 they would be at 0.0455
+    # 0.1364 0.2273 ..., which they are not.
+    "t13a": Panel(name="t13a", page=83, source="thesis",
+                  bbox=(0.125, 0.108, 0.485, 0.322),
+                  xlim=(0.0, 0.6), ylim=(0.0, 30.0),
+                  xticks=(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6),
+                  description="THESIS Fig 13(a) = article Fig 6(d): lightest "
+                              "B=2 state, 2K=24",
+                  expected_K=24, B=2, N=3, sector="two-baryon"),
+    # NOTE: t13(b)-(e) are the 2nd-5th B=2 states, available as further
+    # regression targets for the same 2K=24 run.
 
     # THESIS Fig 4: the article's Fig. 2, and it states the K on each panel
     # ("K = 10/2", "13/2", "22/2"), confirming 2K = 10, 13, 22.
@@ -414,10 +485,45 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
     # Two stages.  Blob detection is general enough to establish K on a panel
     # whose K the paper never states; the column probe then re-reads the plot
     # at that K, which is far more robust where curves cross or markers touch.
+    # K mod 2 is fixed by the parton count: every momentum is odd, so a state
+    # of n partons needs K_code == n (mod 2).  n is N*B for a baryon sector and
+    # 2 for a meson.
+    parity = (panel.N * panel.B) % 2 if panel.B else 0
+    K_dots, n_match, n_dots = infer_K_from_axis_dots(ink, frame, panel.xlim,
+                                                     parity=parity)
+    trust = K_dots is not None and n_dots >= 7 and n_match >= 0.8 * n_dots
+    if trust:
+        notes.append(f"axis-dot lattice: K = {K_dots} from {n_match}/{n_dots} "
+                     f"zero-valued markers on the axis")
+        if panel.expected_K and K_dots != panel.expected_K:
+            notes.append(f"WARNING: axis dots say K = {K_dots}, panel declares "
+                         f"{panel.expected_K}")
+    elif K_dots is not None:
+        notes.append(f"axis-dot lattice: inconclusive "
+                     f"({n_match}/{n_dots} dots matched; needs >=7 and >=80%)")
+
     markers = detect_markers(ink, frame)
     markers, legend_hits = suppress_legend(markers, frame)
     if legend_hits:
         notes.append(f"suppressed {len(legend_hits)} in-plot legend/text blobs")
+
+    def drop_legend_box(ms):
+        """Remove blobs inside the panel's declared legend rectangle."""
+        if not panel.legend_box:
+            return ms, []
+        bx0, bx1, byt, byb = panel.legend_box
+        keep, boxed = [], []
+        for m in ms:
+            fx = (m["px"] - left) / float(right - left)
+            fy = (m["py"] - top) / float(bottom - top)
+            (boxed if (bx0 <= fx <= bx1 and byt <= fy <= byb)
+             else keep).append(m)
+        return keep, boxed
+
+    markers, boxed = drop_legend_box(markers)
+    legend_hits += boxed
+    if boxed:
+        notes.append(f"declared legend box removed {len(boxed)} blobs")
     records = []
     for m in markers:
         records.append(dict(x=xs * m["px"] + xi, y=ys * m["py"] + yi,
@@ -430,6 +536,8 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
         pdf_page=panel.page, dpi=dpi, page_size_px=list(page_size),
         crop_box_px=list(box), bbox_fraction=list(panel.bbox),
         frame_px=list(frame),
+        axis_dot_K=K_dots if trust else None,
+        axis_dot_matched=n_match, axis_dot_n=n_dots,
         xlim=list(panel.xlim), ylim=list(panel.ylim),
         xtick_values=list(panel.xticks), xtick_pixels=list(xt),
         x_fit=dict(slope=xs, intercept=xi, max_residual=xres),
@@ -450,14 +558,21 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
             except Exception:
                 K_probe = None
         if K_probe:
-            probed = trace_at_lattice(ink, frame, K_probe)
-            probed, probe_legend = suppress_legend(probed, frame)
-            # The probe samples only lattice columns, so it recovers too few
-            # legend glyphs per row for the row rule to fire.  Reuse the box
-            # the blob pass established.
-            probed, boxed = drop_in_box(probed, frame,
-                                        legend_bbox(legend_hits, frame))
-            probe_legend = list(probe_legend) + list(boxed)
+            # Panel width sets the scale: the article's frames are ~550 px
+            # wide at 600 dpi, the thesis's ~1350.
+            pscale = max(1.0, min(4.0, (frame[1] - frame[0]) / 550.0))
+            probed = trace_at_lattice(ink, frame, K_probe, xlim=panel.xlim,
+                                      scale=pscale)
+            # Do NOT re-apply the row rule to probe markers: a multi-peaked
+            # structure function legitimately puts several markers at the same
+            # height, and in Fig. 6(c) that rule removed 7 real points.  The
+            # legend is located once, by the blob pass, and probe markers are
+            # matched against those glyph positions individually.
+            probed, probe_legend = drop_near_legend(probed, legend_hits)
+            probed, probe_boxed = drop_legend_box(probed)
+            if probe_boxed:
+                notes.append(f"declared legend box removed {len(probe_boxed)} "
+                             "probe markers")
             # Prefer the probe whenever it found a plausible number of
             # markers.  Requiring it to match the blob count was backwards:
             # the blob count is inflated by legend text, so a clean probe was
@@ -485,8 +600,90 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
     return records, provenance
 
 
+def infer_K_from_axis_dots(ink, frame, xlim=(0.0, 1.0), parity=None, K_max=60):
+    """Recover K from the row of zero-valued markers lying on the x axis.
+
+    This is the most reliable K determination available on these panels, and it
+    is what settled Fig. 6(d).  Wherever a structure function vanishes the
+    marker still gets plotted, so it comes to rest on the axis -- and in the
+    two-baryon panels the distribution is zero over most of its range, leaving a
+    long, evenly spaced row of dots along the bottom, every one of them a
+    lattice site at full contrast with no neighbouring curve to merge with.
+
+    Contrast that with inferring K from the *curve* markers, which is what
+    :func:`dlcq.units.infer_K_from_x_grid` does: those are few, they sit where
+    curves overlap, and their x scatter is comparable to the spacing between
+    neighbouring K.  Since that routine returns the smallest K explaining a
+    quorum, the scatter biases it low -- on Fig. 6(d) it answers 21, where the
+    axis dots give 24, which is the correct value.
+
+    Two things make the fit well posed:
+
+    * momenta are odd, so the lattices for K and 2K are *disjoint* rather than
+      nested, and a factor-of-two error cannot hide;
+    * ``parity`` fixes K mod 2 outright.  A state of ``n`` partons, each of odd
+      momentum, has ``K_code == n (mod 2)``: even for mesons and for the B=2
+      baryon pair, odd for a single N=3 baryon.  Passing it removes half the
+      candidates, including the K=23 the thesis panel's noisier dot row prefers.
+
+    Returns ``(K, n_matched, n_dots)``, or ``(None, 0, n_dots)`` if there are
+    too few dots to be worth trusting.
+
+    The caller must gate on the counts, because the method only works when the
+    distribution really does vanish over a stretch of the axis.  On a valence
+    meson panel, which is nonzero nearly everywhere, there is no dot row at all
+    and what little the band picks up is tick marks -- Fig. 3(a) yields a
+    confident-looking 5-of-6 for K=18, which is wrong.  Demanding at least seven
+    dots with at least 80% matched admits Figs. 6(b) and 6(d), where it is
+    right, and rejects every case where it is not.
+    """
+    from scipy import ndimage
+
+    left, right, top, bottom = frame
+    fw = float(right - left)
+    x0, x1 = xlim
+    span = float(x1 - x0)
+    scale = max(1.0, fw / 550.0)
+    depth = max(12, int(0.040 * (bottom - top)))
+
+    band = ink[bottom - depth:bottom - 4, left:right + 1]
+    if band.size == 0:
+        return None, 0, 0
+    lab, n = ndimage.label(band)
+    if n == 0:
+        return None, 0, 0
+
+    xs = []
+    for i, sl in enumerate(ndimage.find_objects(lab)):
+        if (lab[sl] == i + 1).sum() < 40 * scale * scale:
+            continue
+        if sl[1].stop - sl[1].start < 10 * scale:      # a tick, not a marker
+            continue
+        xd = x0 + span * (0.5 * (sl[1].start + sl[1].stop)) / fw
+        if xd > 0.008:                                 # not the origin
+            xs.append(xd)
+
+    xs = np.sort(np.asarray(xs))
+    if xs.size < 4:
+        return None, 0, int(xs.size)
+
+    # Score each candidate K by how many *distinct* odd sites its lattice
+    # accounts for.  The tolerance is a fixed fraction of the site spacing, so
+    # a denser lattice gets no free credit for being dense.
+    best = (0, None)
+    for K in range(4, K_max + 1):
+        if parity is not None and K % 2 != parity % 2:
+            continue
+        k = np.round((xs * K - 1) / 2) * 2 + 1
+        ok = (k >= 1) & (np.abs(xs - k / K) <= 0.15 * 2.0 / K)
+        matched = len(set(k[ok].tolist()))
+        if matched > best[0]:
+            best = (matched, K)
+    return best[1], best[0], int(xs.size)
+
+
 def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
-                     pad=3):
+                     pad=3, xlim=(0.0, 1.0), scale=1.0):
     """Probe the columns where markers *must* be, instead of hunting blobs.
 
     Momenta are odd integers, so a marker can only sit at ``x = k/K``.  That
@@ -511,10 +708,24 @@ def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
     """
     left, right, top, bottom = frame
     fw = float(right - left)
+    x0, x1 = xlim
+    span = float(x1 - x0)
+    # All the pixel geometry below is in units of the rendered panel.  The
+    # thesis pages render about 2.5x larger than the article's, so the marker
+    # sizes have to follow the panel rather than be hard-coded to the article.
+    stroke = max(1, int(round(stroke * scale)))
+    marker_min = max(4, int(round(marker_min * scale)))
+    marker_max = int(round(marker_max * scale))
+    pad = max(1, int(round(pad * scale)))
     out = []
 
     for k in range(1, K, 2):
-        xc = left + fw * (k / float(K))
+        # Panels do not all run 0..1 in x -- thesis Fig 13 spans 0..0.6 -- so
+        # the lattice site has to be placed through the panel's own limits.
+        xdata = k / float(K)
+        if not (x0 <= xdata <= x1):
+            continue
+        xc = left + fw * (xdata - x0) / span
         c0, c1 = int(round(xc - pad)), int(round(xc + pad)) + 1
         c0, c1 = max(c0, left + 1), min(c1, right)
         if c1 <= c0:
@@ -585,36 +796,28 @@ def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
     return out
 
 
-def legend_bbox(dropped, frame, margin=0.02):
-    """Bounding box (in frame fractions) of the blobs :func:`suppress_legend` cut.
+def drop_near_legend(markers, legend_blobs, radius=26.0):
+    """Drop probe markers that coincide with a known legend glyph.
 
-    The blob pass sees the whole legend -- its markers *and* the letter counters
-    of its text -- so it localizes the region reliably.  The column probe only
-    samples lattice columns and therefore finds too few legend glyphs per row
-    for the >=3-in-a-row rule to fire, so it is given this box instead.
+    The blob pass localizes the legend (its sample markers *and* the letter
+    counters of its text).  The column probe samples only lattice columns and so
+    finds too few legend glyphs per row for the row rule to fire, so it needs
+    that information passed in.
+
+    This used to be done with the *bounding box* of the suppressed blobs, which
+    is far too blunt: in Fig. 6(b) the legend text spans x = 0.08 to 0.88 of the
+    panel, so the box covered nearly the full width and deleted the real data
+    points sharing that y band -- including that state's peak.  Matching each
+    probe marker against individual glyph positions instead removes only what
+    actually sits on a legend glyph.
     """
-    if not dropped:
-        return None
-    left, right, top, bottom = frame
-    fw, fh = float(right - left), float(bottom - top)
-    xs = [(m["px"] - left) / fw for m in dropped]
-    ys = [(bottom - m["py"]) / fh for m in dropped]
-    return (min(xs) - margin, min(ys) - margin,
-            max(xs) + margin, max(ys) + margin)
-
-
-def drop_in_box(markers, frame, box):
-    """Remove markers inside a frame-fraction bounding box."""
-    if box is None:
+    if not legend_blobs:
         return markers, []
-    left, right, top, bottom = frame
-    fw, fh = float(right - left), float(bottom - top)
-    x0, y0, x1, y1 = box
     keep, cut = [], []
     for m in markers:
-        fx = (m["px"] - left) / fw
-        fy = (bottom - m["py"]) / fh
-        (cut if (x0 <= fx <= x1 and y0 <= fy <= y1) else keep).append(m)
+        near = any((m["px"] - g["px"]) ** 2 + (m["py"] - g["py"]) ** 2
+                   <= radius ** 2 for g in legend_blobs)
+        (cut if near else keep).append(m)
     return keep, cut
 
 
@@ -823,15 +1026,44 @@ def main(argv=None):
     if panel.quark_number and records:
         valence = [r for r in records if r["filled"]] or records
         total = sum(r["y"] for r in valence) * (2.0 / K)
-        if total > 1e-9:
-            scale = panel.quark_number / total
+        scale = panel.quark_number / total if total > 1e-9 else None
+        # Coverage is reported for diagnosis but is not the gate: the sites a
+        # trace misses are mostly the zero-valued ones, which contribute
+        # nothing to the integral, so 8-of-12 can still integrate correctly.
+        sites = [k for k in range(1, K, 2)
+                 if panel.xlim[0] <= k / K <= panel.xlim[1]]
+        covered = len({r.get("k") for r in valence if r.get("k")})
+        coverage = covered / len(sites) if sites else 0.0
+        # GATE.  Every panel's frame calibration has now been audited against
+        # its own tick geometry, so the sum rule is a CHECK, not the primary
+        # calibration it once was -- and a check must not silently rewrite the
+        # data when it fails.  Where markers are missing from the peak the sum
+        # comes out short and the "correction" inflates every surviving point:
+        # Fig. 6(b) asked for 2.22x and moved good points as far as 60% off,
+        # Fig. 5(b) asked for a far more plausible 1.11x and still left every
+        # point 9% low.  A trace whose missing markers are the zero-valued ones
+        # lands within a few percent of 1 -- Figs. 3(a), 5(a), 5(c), 5(d) and
+        # 6(a) all do.  So accept a small refinement and reject anything more,
+        # keeping the frame calibration, which at least is not silently wrong.
+        if scale is not None and abs(scale - 1.0) <= 0.10:
             for r in records:
                 r["y_raw"] = r["y"]
                 r["y"] *= scale
             provenance["sum_rule_scale"] = scale
             provenance["sum_rule_quark_number"] = panel.quark_number
             print(f"  sum rule      : rescaled y by {scale:.4f} so "
-                  f"int q dx = {panel.quark_number:g}")
+                  f"int q dx = {panel.quark_number:g} "
+                  f"({covered}/{len(sites)} sites)")
+        elif scale is not None:
+            provenance["sum_rule_rejected_scale"] = scale
+            provenance["notes"].append(
+                f"sum rule wants {scale:.3f}x from a trace covering "
+                f"{covered}/{len(sites)} lattice sites -- too big to be a "
+                f"refinement, so the trace is missing real weight.  "
+                f"Keeping the frame calibration; "
+                f"treat magnitudes from this panel with care.")
+            print(f"  sum rule      : REJECTED ({scale:.3f}x, "
+                  f"{covered}/{len(sites)} sites) -- trace incomplete")
     provenance["n_on_lattice"] = len(records)
     provenance["n_dropped_off_lattice"] = len(dropped)
     print(f"  on lattice    : {len(records)} kept, {len(dropped)} dropped "

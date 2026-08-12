@@ -1,0 +1,104 @@
+{
+  "panel": "t4a",
+  "description": "THESIS Fig 4(a) = article Fig 2(a): SU(3) B=0, 2K=10",
+  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "pdf_page": 64,
+  "dpi": 600,
+  "page_size_px": [
+    3960,
+    5372
+  ],
+  "crop_box_px": [
+    1287,
+    445,
+    2732,
+    1289
+  ],
+  "bbox_fraction": [
+    0.325,
+    0.083,
+    0.69,
+    0.24
+  ],
+  "frame_px": [
+    40,
+    1396,
+    213,
+    788
+  ],
+  "axis_dot_K": null,
+  "axis_dot_matched": 3,
+  "axis_dot_n": 4,
+  "xlim": [
+    0.0,
+    1.0
+  ],
+  "ylim": [
+    0.0,
+    55.0
+  ],
+  "xtick_values": [],
+  "xtick_pixels": [
+    51.5,
+    101.5,
+    154.5,
+    207.0,
+    315.0,
+    475.0,
+    530.0,
+    584.0,
+    639.0,
+    692.0,
+    746.0,
+    800.0,
+    853.5,
+    906.0,
+    961.0,
+    1014.0,
+    1069.0,
+    1121.0,
+    1177.0,
+    1230.0,
+    1285.0,
+    1339.0,
+    1387.5
+  ],
+  "x_fit": {
+    "slope": 0.0007374631268436578,
+    "intercept": -0.029498525073746368,
+    "max_residual": 1.1102230246251565e-16
+  },
+  "y_fit": {
+    "slope": -0.09565217391304352,
+    "intercept": 75.37391304347827,
+    "max_residual": 2.842170943040401e-14
+  },
+  "n_markers": 31,
+  "n_legend_suppressed": 16,
+  "notes": [
+    "x ticks: found 23, expected 0 (calibration still from frame edges)",
+    "axis-dot lattice: inconclusive (3/4 dots matched; needs >=7 and >=80%)",
+    "suppressed 15 in-plot legend/text blobs",
+    "column probe at 2K=32: 13 markers (1 filled, 12 open)"
+  ],
+  "method": "tools/digitize.py connected-component marker tracing",
+  "detector": "lattice column probe",
+  "K_probe": 32,
+  "check": {
+    "K_inferred": 32,
+    "K_code": 32,
+    "inlier_fraction": 0.6129032258064516,
+    "median_grid_residual": 0.01746674347592514,
+    "max_grid_residual": 0.029628800068260963,
+    "consistent": true,
+    "K_from_x_min": 127.25980911983126,
+    "K_from_spacing": 82.30436432484947,
+    "n_points": 31,
+    "ok": true,
+    "note": "paper does not state K for this panel; inferred"
+  },
+  "K_used": 32,
+  "K_source": "inferred",
+  "n_on_lattice": 13,
+  "n_dropped_off_lattice": 0
+}

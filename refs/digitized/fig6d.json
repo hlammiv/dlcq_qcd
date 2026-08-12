@@ -1,6 +1,6 @@
 {
   "panel": "fig6d",
-  "description": "FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=22",
+  "description": "FIG. 6(d) 1st B=2 state, m/g=1.6, 2K=24",
   "source": "Phys. Rev. D 41, 3814 (1990)",
   "pdf_page": 5,
   "dpi": 600,
@@ -26,6 +26,9 @@
     31,
     580
   ],
+  "axis_dot_K": 24,
+  "axis_dot_matched": 7,
+  "axis_dot_n": 7,
   "xlim": [
     0.0,
     0.6
@@ -58,33 +61,34 @@
     "intercept": 50.71038251366121,
     "max_residual": 7.105427357601002e-15
   },
-  "n_markers": 15,
-  "n_legend_suppressed": 18,
+  "n_markers": 14,
+  "n_legend_suppressed": 15,
   "notes": [
     "x ticks: found 11, expected 0 (calibration still from frame edges)",
+    "axis-dot lattice: K = 24 from 7/7 zero-valued markers on the axis",
     "suppressed 12 in-plot legend/text blobs",
-    "column probe at 2K=22: 10 markers (4 filled, 6 open)"
+    "declared legend box removed 1 blobs",
+    "declared legend box removed 3 probe markers",
+    "column probe at 2K=24: 8 markers (2 filled, 6 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
-  "K_probe": 22,
+  "K_probe": 24,
   "check": {
-    "K_inferred": 21,
-    "K_code": 21,
-    "inlier_fraction": 0.6,
-    "median_grid_residual": 0.016396746817538943,
-    "max_grid_residual": 0.040924426450742346,
+    "K_inferred": 22,
+    "K_code": 22,
+    "inlier_fraction": 0.7857142857142857,
+    "median_grid_residual": 0.01240109220587586,
+    "max_grid_residual": 0.04511102336600539,
     "consistent": true,
     "K_from_x_min": 23.014392630972957,
     "K_from_spacing": 79.71848065111367,
-    "n_points": 15,
-    "K_expected": 22,
+    "n_points": 14,
+    "K_expected": 24,
     "ok": false
   },
-  "K_used": 22,
+  "K_used": 24,
   "K_source": "stated in paper",
-  "sum_rule_scale": 0.9144457904300423,
-  "sum_rule_quark_number": 6.0,
   "n_on_lattice": 8,
-  "n_dropped_off_lattice": 2
+  "n_dropped_off_lattice": 0
 }

@@ -26,6 +26,9 @@
     35,
     582
   ],
+  "axis_dot_K": 21,
+  "axis_dot_matched": 8,
+  "axis_dot_n": 10,
   "xlim": [
     0.0,
     1.0
@@ -68,8 +71,10 @@
   "n_legend_suppressed": 17,
   "notes": [
     "x ticks: found 10, expected 6 (calibration still from frame edges)",
+    "axis-dot lattice: K = 21 from 8/10 zero-valued markers on the axis",
     "suppressed 13 in-plot legend/text blobs",
-    "column probe at 2K=21: 9 markers (4 filled, 5 open)"
+    "column probe at 2K=21: 7 markers (3 filled, 4 open)",
+    "sum rule wants 2.216x from a trace covering 3/10 lattice sites -- too big to be a refinement, so the trace is missing real weight.  Keeping the frame calibration; treat magnitudes from this panel with care."
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
@@ -89,8 +94,7 @@
   },
   "K_used": 21,
   "K_source": "stated in paper",
-  "sum_rule_scale": 2.1805377153740566,
-  "sum_rule_quark_number": 3.0,
-  "n_on_lattice": 9,
+  "sum_rule_rejected_scale": 2.215741078300322,
+  "n_on_lattice": 7,
   "n_dropped_off_lattice": 0
 }

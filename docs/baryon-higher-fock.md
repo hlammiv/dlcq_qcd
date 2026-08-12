@@ -1,8 +1,15 @@
 # The baryon higher-Fock discrepancy — RESOLVED
 
-**Our baryon five-quark structure function is correct.** It reproduces the
-thesis's own plot of that sector to 0.07–3.9%, antiquark distribution included.
-The apparent discrepancy was a digitization failure on one particular panel.
+**Our baryon higher-Fock structure functions are correct.** There were two
+separate problems, neither of them in the physics:
+
+1. **Figs. 6(a)–(c)** were traced from a panel where the valence and five-quark
+   curves cross three times and the dashed curve's dashes read as markers. Our
+   five-quark sector reproduces the thesis's own uncluttered plot of it
+   (Fig. 18(a)) to 0.07–3.9%, antiquark distribution included.
+2. **Fig. 6(d)** was being solved at 2K = 22 against a figure drawn at
+   **2K = 24** — a K the article's caption never states. At the right K it
+   agrees with the published curves to 0.14–0.8%.
 
 ## The resolution
 
@@ -32,6 +39,75 @@ Reading the figure by eye first gave the same picture: q(0.067) ≈ 8.0, q(0.20)
 
 Note this is also the article's **Fig. 4(b)**, which had never been validated.
 
+## The last panel: Fig. 6(d) was solved at the wrong K
+
+Fig. 6(d), the two-baryon panel, stayed stubbornly wrong long after the rest of
+Fig. 6 was understood. It was not a Fock-sector problem at all.
+
+**The article's caption states 2K = 21 for panels (a)–(c) and gives no K for
+(d).** We assumed 22, on the grounds that six partons of odd momentum need an
+even K and 22 is the neighbour of 21. The panel is drawn at **2K = 24**.
+
+The panel says so itself. Wherever a structure function vanishes the marker is
+still plotted and comes to rest on the axis, so a two-baryon panel — zero over
+most of its range — carries a long row of zero-valued markers, one per lattice
+site, at full contrast with no neighbouring curve to merge with. Measured
+against the frame they fall at
+
+    0.0427  0.1304  0.2095  0.2937  0.3763  0.4569  0.5427
+
+which is k/24 for odd k (0.0417 0.125 0.2083 0.2917 0.375 0.4583 0.5417) to
+within 0.006. At 2K = 22 the predicted positions are 0.0455 0.1364 0.2273
+0.3182 0.4091 0.5 0.5909 — drifting by a full site before the right-hand edge,
+far outside the measurement scatter. `tools/digitize.py` now does this
+automatically (`infer_K_from_axis_dots`), and it is more trustworthy than
+inferring K from the curve markers, which are few, overlapping, and biased low.
+
+Recomputed at 2K = 24, the panel falls into place — Fortran and Python
+agreeing to every printed digit, and both agreeing with the published curves:
+
+| x | series | published | ours | deviation |
+|---|---|---|---|---|
+| 1/24 | 8-parton q ×5·10² | 18.448 | 18.296 | **0.8%** |
+| 1/24 | 8-parton q̄ ×10³ | 16.219 | 16.133 | **0.5%** |
+| 3/24 | 6-parton valence | 35.454 | 35.505 | **0.14%** |
+| 3/24 | 8-parton q ×5·10² | 19.279 | 19.231 | **0.25%** |
+| 5/24 | 6-parton valence | 35.541 | 35.448 | **0.26%** |
+
+At 2K = 22 the same state has 11.3 at x = 1/22, where the published valence
+curve is on the floor — the shape was wrong, not just the scale.
+
+### All three Fock sectors, and why 22 could not work
+
+The legend lists three curves, but they come from **two** sectors: the 6-parton
+valence, and the 8-parton sector's quark *and* antiquark distributions plotted
+separately. At 2K = 24 a third sector does open up. Ten partons of odd momentum,
+with Pauli exclusion allowing at most N = 3 quarks per momentum, need total
+momentum ≥ 24 — so the 10-parton sector exists at 24 and is forbidden at 22.
+Our 2K = 24 solution carries all three, and the number sum rule closes exactly:
+
+    6-parton   5.990892
+    8-parton   0.010622  (q)   0.001517  (q̄)
+    10-parton  0.000004  (q)   0.000001  (q̄)
+    ------------------------------------------
+    total q - qbar = 6.000000 = N*B
+
+### The thesis prints this panel on a different y-scale
+
+Thesis Fig. 13(a) is the same plot — same 2K = 24 lattice, same legend, same
+multipliers, same curves — but its y axis is labelled 0 10 20 30 where the
+article's is labelled 0 12 24 36 48. Read against those axes the two published
+versions disagree by a constant 48/30 = 1.6 at every point, which is what a
+point-by-point measurement gives (1.603 ± 0.009 over six points).
+
+The number sum rule picks the article, using published numbers only: the
+valence curve must satisfy ∫q dx = N·B = 6 with dx = 2/24. The article's scale
+gives 5.9; the thesis's gives 3.7. So `t13a` is digitized for shape and
+magnitudes are taken from `fig6d`.
+
+Thesis Fig. 13(b)–(e) show the 2nd–5th B = 2 states from the same run and remain
+available as further regression targets.
+
 ## Independently: the magnitudes were already right
 
 The thesis Table 6 gives the four-quark probability in the lightest SU(2) meson
@@ -55,7 +131,7 @@ settled it. Its negative results still stand and are worth keeping: truncation,
 the choice of function, the cluster partition and the weighting were all ruled
 out, correctly — the cause was none of them.
 
-## Where exactly it breaks## Where exactly it breaks
+## Where exactly it breaks
 
 Correlation between the digitized paper series and our computed curve, with the
 scale fitted by least squares (so shape is tested independently of any ×10ⁿ):
@@ -262,8 +338,13 @@ our two codes already differ from each other by 16%.
 
 ## Status
 
-Reported, not resolved. The affected curves are the higher-Fock series of
-Fig. 6 (and by extension Fig. 4's baryon panels). Every mass, every eigenvalue,
-every valence structure function and all meson higher-Fock results are
-unaffected — the baryon higher-Fock sector carries ~0.06% of the ground-state
-wave function.
+Resolved. Both failures were in reading the figures, not in the physics:
+
+* **Fig. 6(a)–(c)** — the valence and five-quark curves cross three times, and
+  at scan resolution the dashes of the dashed curve read as markers. Validated
+  instead against thesis Fig. 18(a), which prints that sector alone: 0.07–3.9%.
+* **Fig. 6(d)** — solved at 2K = 22 against a figure drawn at 2K = 24. At the
+  right K it agrees to 0.14–0.8%.
+
+Regression tests for both are in `tests/test_paper.py`. Every mass, every
+eigenvalue and every valence structure function was unaffected throughout.
