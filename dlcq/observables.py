@@ -46,6 +46,8 @@ __all__ = [
     "valence_parton_count",
     "richardson_extrapolate",
     "richardson_stability",
+    "richardson_ensemble",
+    "richardson_budget",
     "thooft_valence_limit",
     "spurious_zero_modes",
     "physical_indices",
@@ -316,6 +318,113 @@ def richardson_stability(K_codes, masses, mg, N, n_terms=2, min_points=4):
     if len(fits) < 2:
         return M0, float("nan"), len(fits)
     return M0, float(np.std(fits)), len(fits)
+
+
+def richardson_ensemble(K_codes, masses, mg, N, n_terms_set=(2, 3, 4),
+                        min_points=4, min_dof=1):
+    """Every defensible Eq. (27) fit of this data: each order x each sub-window.
+
+    An extrapolated mass is not one number but a choice -- how many correction
+    terms to keep, and which K to fit.  Enumerating those choices is what turns
+    "the fit residual is 1e-5" into an honest uncertainty, because the residual
+    measures how well a *given* form describes the data and is blind to the
+    form being wrong.
+
+    ``min_dof`` requires at least that many degrees of freedom, so an
+    exactly-determined fit (which has zero residual by construction and no
+    predictive content) is never admitted.
+
+    Returns a list of ``(coeffs, exponents, M0)``.
+    """
+    from itertools import combinations
+
+    K_codes = list(K_codes)
+    masses = list(masses)
+    n = len(K_codes)
+    out = []
+    for nt in n_terms_set:
+        for size in range(max(min_points, nt + 1 + min_dof), n + 1):
+            for idx in combinations(range(n), size):
+                kk = [K_codes[i] for i in idx]
+                mm = [masses[i] for i in idx]
+                try:
+                    M0, _, coeffs, exps = richardson_extrapolate(
+                        kk, mm, mg, N, n_terms=nt, return_fit=True)
+                except Exception:
+                    continue
+                if np.isfinite(M0):
+                    out.append((coeffs, exps, float(M0)))
+    return out
+
+
+def richardson_curve(coeffs, exponents, inv_K):
+    """Evaluate a fitted Eq. (27) series at ``1/K_paper`` (0 = the continuum)."""
+    inv_K = np.asarray(inv_K, dtype=float)
+    y = np.zeros_like(inv_K)
+    for c, e in zip(coeffs, exponents):
+        y = y + (c if e == 0 else c * np.where(inv_K > 0, inv_K, 0.0) ** e)
+    return y
+
+
+def richardson_budget(K_codes, masses, mg, N, n_terms=2, n_terms_set=(2, 3, 4),
+                      min_points=4, masses_alt_lpn=None):
+    """Full error budget for one extrapolated mass.
+
+    Four components, combined in quadrature, each measured rather than assumed:
+
+    ``form``
+        Spread of M(0) over the number of correction terms kept, on the full
+        window.  **This dominates** -- 7-18x the window term at every point
+        tested -- because the data sit at 1/K ~ 0.06 while the answer is at
+        1/K = 0, so the curvature across the gap is set by the assumed series.
+    ``window``
+        Spread over sub-windows at fixed order (:func:`richardson_stability`).
+        Honest but narrow: every sub-window shares the same form over the same
+        range, so it cannot see the term above.
+    ``truncation``
+        Sensitivity to the particle-number cut, from ``masses_alt_lpn`` if
+        given.  Measured at ~1e-4 -- raising ``sweep_lpn`` by a whole qqbar
+        pair moves M(0) in the fourth decimal.
+    ``numerical``
+        The solver floor.  ``assembly="exact"`` is basis independent to 6e-13
+        (docs/basis-dependence.md), so this is negligible and carried only so
+        the budget is complete rather than selectively quoted.
+
+    Returns a dict with ``M0`` and the components.
+    """
+    M0, last = richardson_extrapolate(K_codes, masses, mg, N, n_terms=n_terms)
+
+    fits = []
+    for nt in n_terms_set:
+        try:
+            fits.append(richardson_extrapolate(K_codes, masses, mg, N,
+                                               n_terms=nt)[0])
+        except Exception:
+            pass
+    fits = [f for f in fits if np.isfinite(f)]
+    err_form = float(np.std(fits)) if len(fits) > 1 else float("nan")
+
+    _, err_window, _ = richardson_stability(K_codes, masses, mg, N,
+                                            n_terms=n_terms,
+                                            min_points=min_points)
+
+    err_trunc = 0.0
+    if masses_alt_lpn is not None:
+        try:
+            M0b, _ = richardson_extrapolate(K_codes, masses_alt_lpn, mg, N,
+                                            n_terms=n_terms)
+            err_trunc = abs(M0b - M0)
+        except Exception:
+            err_trunc = float("nan")
+
+    err_num = abs(M0) * 1e-12
+
+    parts = [p for p in (err_form, err_window, err_trunc, err_num)
+             if p is not None and np.isfinite(p)]
+    total = float(np.sqrt(np.sum(np.square(parts)))) if parts else float("nan")
+    return {"M0": float(M0), "last_term": float(last), "form": err_form,
+            "window": float(err_window), "truncation": float(err_trunc),
+            "numerical": err_num, "total": total}
 
 
 def thooft_valence_limit(x, N, B=1):

@@ -49,7 +49,7 @@ from .units import (code_to_M_over_g, lambda_to_mg, mg_to_lambda,
                     thooft_rescale)
 
 __all__ = ["figure1", "figure2", "figure3", "figure4", "figure5",
-           "figure6", "figure7", "figure8", "table1", "figure_fits", "FIGURES"]
+           "figure6", "figure7", "figure8", "table1", "table1_budget", "figure_fits", "FIGURES"]
 
 _ROOT = Path(__file__).resolve().parent.parent
 FIGDIR = _ROOT / "figures"
@@ -541,7 +541,8 @@ def figure_fits(provider, source, K_lo=25, K_hi=35, lpn=None,
     ``lpn=None`` uses ``sweep_lpn``; pass a larger value to see the truncation
     move the points.
     """
-    from .observables import richardson_stability
+    from .observables import (richardson_budget, richardson_ensemble,
+                              richardson_curve)
 
     paper = _load_paper_table1()
     mgs = [mg for mg in MG_TABLE if mg > 0]
@@ -566,18 +567,29 @@ def figure_fits(provider, source, K_lo=25, K_hi=35, lpn=None,
 
             M0, last, coeffs, exps = richardson_extrapolate(
                 Ks, ms, mg, N, n_terms=n_terms, return_fit=True)
-            _, spread, _ = richardson_stability(Ks, ms, mg, N, n_terms=n_terms)
+            bud = richardson_budget(Ks, ms, mg, N, n_terms=n_terms)
 
             Kp = np.asarray(Ks) / 2.0
             inv = 1.0 / Kp
-            # The fitted series, continued to the axis.
             grid = np.linspace(0.0, inv.max() * 1.05, 200)
-            curve = np.zeros_like(grid)
-            for c, e in zip(coeffs, exps):
-                curve += c * np.where(grid > 0, grid, 0.0) ** e if e else c
-            ax.plot(grid, curve, "-", color="C0", lw=1.2, zorder=1)
-            ax.plot(inv, ms, "o", color="k", markersize=4, zorder=3)
-            ax.plot([0], [M0], "*", color="C3", markersize=13, zorder=4)
+
+            # The band is the envelope of every defensible fit -- each order
+            # crossed with each sub-window -- evaluated along the grid.  It
+            # pinches where the data constrain the curve and opens toward the
+            # axis, so its width *is* the extrapolation error, and its shape
+            # shows how that error grows with distance from the data.
+            ens = richardson_ensemble(Ks, ms, mg, N)
+            if ens:
+                curves = np.vstack([richardson_curve(c, e, grid)
+                                    for c, e, _ in ens])
+                ax.fill_between(grid, curves.min(axis=0), curves.max(axis=0),
+                                color="C0", alpha=0.20, lw=0, zorder=1)
+
+            ax.plot(grid, richardson_curve(coeffs, exps, grid), "-",
+                    color="C0", lw=1.3, zorder=2)
+            ax.plot(inv, ms, "o", color="k", markersize=4, zorder=4)
+            ax.errorbar([0], [M0], yerr=[bud["total"]], fmt="*", color="C3",
+                        markersize=13, capsize=3, elinewidth=1.4, zorder=5)
 
             row = paper.get((q, N, mg))
             if row is not None:
@@ -592,8 +604,9 @@ def figure_fits(provider, source, K_lo=25, K_hi=35, lpn=None,
             ax.set_xlim(left=-0.02 * inv.max())
             ax.set_title(f"{q} SU({N}),  m/g={mg}", fontsize=9)
             ax.text(0.03, 0.04,
-                    f"M(0)={M0:.4f}\nlast-term {last:.2g}\n"
-                    f"stability {spread:.1g}\n{note}",
+                    f"M(0)={M0:.4f} +- {bud['total']:.2g}\n"
+                    f"form {bud['form']:.1g}   window {bud['window']:.1g}\n"
+                    f"(paper last-term {last:.2g})\n{note}",
                     transform=ax.transAxes, fontsize=6.5, va="bottom",
                     bbox=dict(fc="white", ec="0.8", alpha=0.85, pad=1.5))
             if i == len(mgs) - 1:
@@ -606,11 +619,82 @@ def figure_fits(provider, source, K_lo=25, K_hi=35, lpn=None,
     fig.suptitle(f"Richardson fits behind Table I  --  2K = {K_lo}-{K_hi}, "
                  f"{trunc}, {n_terms} correction terms  [{source}]\n"
                  f"black = computed, blue = Eq. (27) fit, red star = M(0), "
-                 f"green band = paper value +- its quoted last term",
+                 f"green band = paper +- its quoted last term;  "
+                 f"blue band = envelope of all defensible fits",
                  fontsize=9)
     fig.subplots_adjust(top=0.94)
     tag = f"_2K{K_lo}-{K_hi}" + ("" if lpn is None else f"_LPN{lpn}")
     return _finish(fig, f"table1_fits{tag}", source)
+
+
+def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
+                  N_values=(2, 3, 4), n_terms=2, alt_lpn_delta=2):
+    """Table I with a full error budget, one line per entry.
+
+    Each entry carries all four components rather than a single quoted number:
+    ``form`` (how many correction terms), ``window`` (which K), ``trunc`` (the
+    particle-number cut, from a second run at ``LPN + alt_lpn_delta``), and the
+    solver floor.  See :func:`~dlcq.observables.richardson_budget`.
+
+    Written as a separate routine so ``table1`` keeps reproducing the published
+    table in the published units, unchanged.
+    """
+    from .observables import richardson_budget
+
+    paper = _load_paper_table1()
+    cols = ([("mes", N, 0) for N in N_values]
+            + [("bar", N, 1) for N in (3, 4) if N in N_values])
+    FIGDIR.mkdir(parents=True, exist_ok=True)
+    out = FIGDIR / f"table1_budget_2K{K_lo}-{K_hi}_{source}.txt"
+
+    with open(out, "w") as fh:
+        fh.write("TABLE I with a full error budget.\n")
+        fh.write(f"Solver: {source}.  Richardson over 2K = {K_lo}-{K_hi}, "
+                 f"Eq. (27), {n_terms} correction terms.\n")
+        fh.write("Units: M^2/(m^2 + g^2/pi), as Table I actually tabulates "
+                 "(docs/table1-units.md).\n\n")
+        fh.write("Components, added in quadrature:\n")
+        fh.write("  form   spread over the number of correction terms (2..4)  "
+                 "-- DOMINANT\n")
+        fh.write("  wind   spread over sub-windows at fixed order\n")
+        fh.write("  trunc  change when the particle-number cut is raised by "
+                 "one qqbar pair\n")
+        fh.write("  (the solver floor, 6e-13 relative, is carried but never "
+                 "visible at this precision)\n\n")
+        fh.write("'paper' is the printed value, 'pterm' its own quoted last "
+                 "term.  'dev' is |paper-ours|\n"
+                 "in units of OUR total error -- the paper's term is not an "
+                 "uncertainty at weak\ncoupling (docs/table1-units.md).\n\n")
+        hdr = (f"{'case':>8} {'m/g':>5} {'ours':>10} {'+-tot':>9} "
+               f"{'form':>9} {'wind':>9} {'trunc':>9} "
+               f"{'paper':>9} {'pterm':>8} {'dev':>6}")
+        fh.write(hdr + "\n" + "-" * len(hdr) + "\n")
+
+        for q, N, B in cols:
+            for mg in [m for m in MG_TABLE if m > 0]:
+                grid = _K_grid(B, N, K_lo, K_hi)
+                Ks, ms = _mass_series(provider, N, B, mg, grid,
+                                      msq_units=True, lpn=lpn)
+                if len(Ks) < 4:
+                    continue
+                base = sweep_lpn(N, B) if lpn is None else lpn
+                _, ms_alt = _mass_series(provider, N, B, mg, grid,
+                                         msq_units=True,
+                                         lpn=base + alt_lpn_delta)
+                alt = ms_alt if len(ms_alt) == len(ms) else None
+                bud = richardson_budget(Ks, ms, mg, N, n_terms=n_terms,
+                                        masses_alt_lpn=alt)
+                row = paper.get((q, N, mg))
+                pv, pe = row if row else (float("nan"), float("nan"))
+                dev = abs(pv - bud["M0"]) / bud["total"] if bud["total"] else float("nan")
+                fh.write(f"{q + ' N=' + str(N):>8} {mg:5.2f} "
+                         f"{bud['M0']:10.4f} {bud['total']:9.2g} "
+                         f"{bud['form']:9.2g} {bud['window']:9.2g} "
+                         f"{bud['truncation']:9.2g} "
+                         f"{pv:9.3f} {pe:8.3f} {dev:6.1f}\n")
+            fh.write("\n")
+    print(f"  saved {out}")
+    return out
 
 
 def _load_paper_table1():
