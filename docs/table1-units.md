@@ -99,6 +99,18 @@ the paper's quoted last term:
 | 0.20 | 1.2153 p0.6 | 1.2628 p0.5 | 2.8934 p1.0 | 3.0292 p0.4 |
 | 0.10 | 0.3624 p0.7 | 0.3828 p0.6 | 0.8465 p0.8 | 0.8994 p0.7 |
 
+Over the full table -- all five columns, N = 2, 3, 4, computed on Lenore:
+
+| | mean \|pull\| | improved | worsened | unchanged |
+|---|---|---|---|---|
+| 2K = 16-24 (paper's window) | 1.08 | | | |
+| 2K = 25-35 | **0.71** | **27 / 30** | 2 | 1 |
+
+The two that worsen are the N = 3 baryon at m/g = 1.6 and 0.8, from pull 0.1 to
+0.6 and 0.5 to 0.7 -- both still comfortably inside the paper's own quoted term,
+so this is movement at the level of its stated precision rather than a
+regression.
+
 At strong coupling the window barely matters — the answer was already converged.
 At weak coupling it moves every value **toward** the published one, most sharply
 for the m/g = 0.40 baryon, which goes from 1.6% low to matching the paper
@@ -144,6 +156,29 @@ Refitting on every 4- and 5-point sub-window measures the actual stability:
 
 So the rows the paper marks unreliable are far better determined than its own
 error rule reports — at m/g = 0.1 the extrapolation is stable to 0.2%, not 72%.
+
+## What is left is concentrated in SU(4)
+
+After widening the window, every entry with a pull above 1.5 is an N = 4 one:
+
+| | ours | paper | pull |
+|---|---|---|---|
+| baryon, m/g = 1.60 | 20.4561 | 21.200 | **2.5** |
+| meson, m/g = 0.80 | 4.7349 | 4.743 | **4.0** |
+| meson, m/g = 0.05 | 0.1025 | 0.120 | 1.8 |
+
+That is a pattern, not three unrelated outliers, and it points at the one
+systematic the stability estimate below is blind to. The sweeps run under
+`sweep_lpn` -- valence plus a single extra qqbar pair -- which is 4 partons for
+an N = 4 meson and 6 for an N = 4 baryon. SU(4) has the richest colour
+structure of the three, so truncating at one extra pair should bite hardest
+exactly there. The m/g = 0.80 meson is also the sharpest test in the table: at
+0.17% low it is closer in relative terms than most entries that pass, and only
+registers as pull 4.0 because the paper's own quoted term there is 0.002.
+
+The test is cheap and specific: rerun the N = 4 columns with `sweep_lpn` raised
+by one pair and see whether the pull falls. If it does, the residual is
+truncation rather than anything about the extrapolation.
 
 Two caveats before treating the spread as *the* error. It measures the fit's
 stability against the choice of window, not systematic error: the sweep applies
