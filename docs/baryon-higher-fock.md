@@ -194,6 +194,57 @@ It is spline undershoot between the two smallest markers, which in every one of
 these panels are those at k = 5 and k = 7. At 3× magnification both markers are
 plainly there, at 1.14 and 1.71, with the spline dipping to 0.31 between them.
 
+#### The published 2K = 21 panel is inconsistent with the paper's own 2K = 15 panel
+
+The five-quark quark distribution is published twice, at two different K, and we
+reproduce one of them. Tracking how the shape evolves with K settles which of
+the two is the outlier.
+
+Our q(x) for this sector, ×10³, ground state, m/g = 1.6:
+
+| 2K | k=1 | 3 | 5 | 7 | 9 | 11 | 13 |
+|---|---|---|---|---|---|---|---|
+| 15 | 7.93 | 4.97 | 6.24 | 2.76 | 0.27 | — | — |
+| 17 | 7.28 | 5.26 | 5.11 | 4.46 | 1.08 | 0.08 | — |
+| 19 | 6.75 | 5.51 | 4.26 | 5.01 | 2.36 | 0.43 | 0.03 |
+| 21 | 6.30 | 5.67 | 3.86 | 4.77 | 3.48 | 1.14 | 0.18 |
+| 23 | 5.91 | 5.77 | 3.76 | 4.28 | 4.10 | 2.06 | 0.55 |
+| 25 | 5.57 | 5.82 | 3.83 | 3.82 | 4.25 | 2.90 | 1.15 |
+
+The distribution is two-lobed at every K, with a shallow interior minimum that
+drifts right as the lattice refines but stays near x ≈ 0.22–0.28. Its **depth is
+stable**: the minimum sits at 55–63% of the peak throughout.
+
+Against the two published panels:
+
+| 2K | source | peak | interior minimum | min/peak |
+|---|---|---|---|---|
+| 15 | ours | 7.93 | 4.97 | 0.63 |
+| 15 | **published** (thesis Fig. 18(a)) | 7.93 | 4.77 | **0.60** |
+| 21 | ours | 6.30 | 3.48 | 0.55 |
+| 21 | **published** (Fig. 6(a)) | 8.56 | 1.14 | **0.13** |
+
+At 2K = 15 the two agree on the depth to 5%. At 2K = 21 they differ by a factor
+of four, and the published minimum is deeper than anything our calculation
+produces at any K in 15–25.
+
+So the disagreement is not that our five-quark distribution has the wrong shape
+— at 2K = 15 it has the published shape, marker for marker. It is that the
+published shape **changes qualitatively between the paper's own two panels**,
+from a shallow 60% minimum to a deep 13% one, while ours evolves smoothly. Note
+also that the apparent node in Fig. 6(a) is *not* the spline undershoot
+discussed above: the markers themselves, at 1.14 and 1.71, are what make it
+deep.
+
+This does not identify the cause, and it is not proof that the 2K = 21 panel is
+wrong — only that one of the two published panels is inconsistent with a smooth
+K dependence, and it is not the one we fail to reproduce. Combined with §1.4
+(colour sums exact against brute-force enumeration, norm exact, eigenvector
+determined to 10⁻¹², both sum rules at machine precision) and with
+`docs/basis-dependence.md`'s finding that the seven-parton sector is
+basis-independent to 2×10⁻¹², an explanation on our side would have to be
+K-specific and leave every one of those checks intact.
+
 ### 2.2 Fig. 4(c) / thesis Fig. 18(b), seven-quark at 2K = 15
 
 | x | published ×10⁷ | ours ×10⁷ | ratio |
