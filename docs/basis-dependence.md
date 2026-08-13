@@ -100,6 +100,46 @@ four-point vertices, both self-energy terms, and the structure-function
 machinery are confirmed correct to machine precision. The only irreproducible
 element is the choice of basis inside degenerate norm eigenspaces.
 
+## Does the floor limit higher Fock components?
+
+No — and this is worth stating plainly, because the 1e-4 figure is easy to
+mistake for a precision limit on *our* results. It is not. It is the
+reproducibility of **`qcdf.f`'s diagonal-only assembly**, which we keep only for
+Fortran comparison. The default path (`assembly="exact"`) does not have it.
+
+Measured by running the same configuration through two genuinely different
+valid orthonormalizations of the same norm — a global `Z` and a blockwise `Z`
+— at N=3, B=1, 2K=21:
+
+| assembly of the free part | ground state | max relative, whole spectrum |
+|---|---|---|
+| full `Z^T H0 Z` (**default**) | **2.5e-14** | **4.6e-15** |
+| diagonal only (what `qcdf.f` does) | 1.5e-3 | 1.0e-1 |
+
+Eleven orders of magnitude apart. So there is nothing to "push lower" on the
+default path — it is already at machine precision, and the 1e-4 exists purely
+as the yardstick for how closely anything, including `qcdf.f` itself, can
+reproduce the 1990 numbers.
+
+Higher Fock sectors inherit that, which is the case one would most expect to be
+fragile since the amplitudes are tiny. Under the same basis change, with the
+exact assembly:
+
+| sector | probability | agreement across the basis change |
+|---|---|---|
+| 3 partons (valence) | 2.998183 | 1.2e-15 |
+| 5 partons | 2.4222e-3 | 2.2e-15 |
+| 7 partons | 2.086e-7 | 2.2e-12 |
+| 9 partons | ~0 | 3.5e-10 |
+
+The seven-parton sector carries a probability of 2e-7 and is still reproducible
+to 2e-12 — five orders of margin. **Numerical precision is not what limits the
+higher-Fock results.** That agrees with `docs/baryon-higher-fock.md`, which
+found the distribution invariant under precision loss down to float16, under
+the weeding threshold over eight orders of magnitude, and under corrupting
+every high-parton matrix element. Whatever is wrong with Fig. 6(a)'s five-quark
+series is structural, not numerical.
+
 ## Consequences for this repository
 
 1. `dlcq.read_python` defaults to `assembly="exact"` — the basis-independent
