@@ -14,7 +14,10 @@ every figure and Table I, from both solvers, with the measured deviations. Also
 the method: how a published axis is pinned from its label positions, and the six
 ways doing that wrong produced apparent physics results of 16–233%.
 
-**[baryon-higher-fock.md](baryon-higher-fock.md)** — the two published curves
+**[baryon-higher-fock.md](baryon-higher-fock.md)** — despite the name, also the
+home of §1.3, which documents the one part of the original pipeline that had to
+be **rebuilt rather than ported**: the x-space conversion, done in 1990 by a
+separate program `wf`/`wfbig` that does not survive. And the two published curves
 that are *not* reproduced, and the full list of what was eliminated for them.
 Our side is closed from every direction available: the colour sums are exact
 against brute-force enumeration, the norm equals the true Gram matrix, the

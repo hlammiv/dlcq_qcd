@@ -85,25 +85,57 @@ and at m/g = 0.1 the implied multiplier is ×95.6 against a legend of ×10², i.
 4.6%. The article's own Fig. 4(b) is the same data and gives 1.4–3.9%
 independently.
 
-### 1.3 The definition, and the program that is missing
+### 1.3 `structure_function` is a reconstruction of the lost `wfbig`
 
-The thesis (Sec. 2.4) defines
+**The x-space conversion in the original work was done by a separate program,
+`wf`/`wfbig`, which is not in this repository and appears not to survive.**
+`qcdf.f` emits only eigenvectors, Fock content and the basis-change matrix, and
+refers to `wf` in comments. Every structure function in the paper passed through
+that program.
 
-> `q_k = <phi(K)| b^dag_{k,c} b_{k,c} |phi(K)>` … baryon-number sum rule
-> `sum_k (q_k − qbar_k)` = 0 for mesons, N for baryons; momentum sum rule
-> `sum_k k (q_k + qbar_k) = K`; in the continuum `q(x) = K q_k`.
+`dlcq.observables.structure_function` is a reconstruction of it. That is worth
+stating plainly rather than as a caveat: it is the one piece of the original
+pipeline that had to be rebuilt from the physics rather than ported, and it is
+now better validated than the code it replaces.
 
-which is exactly `dlcq.observables.structure_function`, including the factor of K
-and both sum rules. Ref. 17 (Lepage & Brodsky, Phys. Rev. D **22**, 2157) gives
-the same probability-weighted parton count in standard light-cone form.
+It cannot be checked the way the rest of the port was. The Python solver
+reproduces the Fortran's matrix elements to 10⁻¹⁴, so any error in the
+conversion would be shared by both and invisible to a solver-vs-solver
+comparison. Five independent routes were used instead:
 
-Worth knowing: **the x-space conversion in the original work was done by a
-separate program, `wf`/`wfbig`, which is not in this repository.** `qcdf.f` only
-emits eigenvectors, Fock content and the basis-change matrix, and refers to `wf`
-in comments. `structure_function` is a reimplementation of that lost step, so it
-cannot be validated by comparing our two codes — the Python port reproduces the
-Fortran's matrix elements to 10⁻¹⁴, and any difference from `wfbig` is shared by
-both. That is why §1.4 matters.
+1. **The definition is the thesis's.** Sec. 2.4 gives
+   `q_k = <phi(K)| b^dag_{k,c} b_{k,c} |phi(K)>`, the baryon-number sum rule
+   `sum_k (q_k − qbar_k)` = 0 for mesons and N for baryons, the momentum sum
+   rule `sum_k k (q_k + qbar_k) = K`, and the continuum limit `q(x) = K q_k` —
+   which is what `structure_function` implements, factor of K included. Ref. 17
+   (Lepage & Brodsky, Phys. Rev. D **22**, 2157) gives the same
+   probability-weighted parton count in standard light-cone form.
+2. **The weighting is provably the exact expectation value.** The norm couples
+   only basis states sharing a momentum configuration (§1.4), so the number
+   operator acts as a scalar within every coupled block and
+   `<phi|n_k|phi>` collapses to `sum_s n_k(s) c_s (Nc)_s` with `c^T N c = 1`.
+   The `c_s (Nc)_s` weight is not a convention; `c_s^2` would silently break
+   every sum rule.
+3. **The norm it uses is exact** against brute-force colour enumeration (§1.4).
+4. **Both sum rules hold to machine precision**, across four runs and both
+   solvers:
+
+   | run | \|momentum − 1\| | \|number − N·B\| |
+   |---|---|---|
+   | N=3 B=0 2K=24 meson | 0.00e+00 | 3.4e−16 |
+   | N=3 B=1 2K=21 baryon | 2.2e−16 | 0.00e+00 |
+   | N=3 B=1 2K=15 baryon | 2.2e−16 | 4.4e−16 |
+   | N=3 B=2 2K=24 two-baryon | 2.2e−16 | 0.00e+00 |
+   | the same, read from Fortran output | 3.6e−15 | 1.1e−14 |
+
+5. **It reproduces the published curves** wherever they can be read cleanly:
+   0.0–2.0% for every meson sector, 0.4–3.9% for the baryon five-quark sector at
+   2K = 15, 0.8% for the two-baryon eight-parton sector, and 1–5% against the
+   thesis's Table 6 higher-Fock probabilities — the only place the thesis quotes
+   a higher-Fock magnitude with uncertainties.
+
+The two curves in §2 are the exceptions, and the same five checks are what make
+it hard to attribute them to the reconstruction.
 
 ### 1.4 The observable is exact by construction
 

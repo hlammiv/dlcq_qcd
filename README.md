@@ -113,6 +113,25 @@ instead, and checks itself against the value at the frame bottom, which must
 come out zero. And Fig. 6(d)'s K is never stated in its caption; it is 24, not
 the 22 we first assumed, which alone accounted for that panel's disagreement.
 
+## One piece had to be rebuilt, not ported
+
+`qcdf.f` emits eigenvectors, Fock content and the basis-change matrix — but not
+structure functions. Those were produced in the original work by a **separate
+program, `wf`/`wfbig`, which does not survive**; the source refers to it only in
+comments. Every structure function in the paper passed through it.
+
+`dlcq/observables.py:structure_function` is a reconstruction of it, and it is the
+one part of the pipeline a solver-vs-solver comparison cannot validate — the
+Python port matches the Fortran's matrix elements to `1e-14`, so an error in the
+conversion would be shared by both. It is checked five other ways instead: the
+thesis's own definition (Sec. 2.4), a proof that the `c_s (Nc)_s` weighting is
+the exact expectation value given the norm's block structure, a brute-force
+colour enumeration confirming that norm exactly, both sum rules to machine
+precision across four runs and both solvers, and agreement with the published
+curves at 0.0–2.0% (mesons), 0.4–3.9% (baryon five-quark) and 0.8% (two-baryon).
+
+See [docs/baryon-higher-fock.md](docs/baryon-higher-fock.md) §1.3.
+
 ## Port validation
 
 Verified to machine precision, against the Fortran's own basis and its own `Z`:

@@ -3,6 +3,19 @@
 Structure functions, sum rules, and the Richardson extrapolation that turns
 finite-K spectra into the continuum numbers of Table I.
 
+``structure_function`` is a **reconstruction of a lost program.**  The x-space
+conversion in the original work was done by a separate code, ``wf``/``wfbig``,
+which does not survive: ``qcdf.f`` emits only eigenvectors, Fock content and the
+basis-change matrix, and refers to ``wf`` in comments.  Every structure function
+in the paper passed through it.
+
+That also means this is the one piece of the pipeline a solver-vs-solver
+comparison cannot check -- the Python port reproduces the Fortran's matrix
+elements to 1e-14, so an error here would be shared by both.  It is instead
+validated against the thesis's own definition, the two sum rules (machine
+precision, both solvers), a brute-force colour enumeration of the norm it uses,
+and the published curves.  See docs/baryon-higher-fock.md section 1.3.
+
 The structure function follows Eq. (12) of the paper:
 
     q(x) = K_paper <phi| b_k^dag b_k |phi>,     x = k / K_code
