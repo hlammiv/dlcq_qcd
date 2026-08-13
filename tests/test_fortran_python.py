@@ -317,3 +317,89 @@ def test_blockwise_Z_removes_the_assembly_ambiguity(matched):
     assert np.abs(a - b).max() < 1e-9, (
         "block-wise Z should make the diagonal-only and full assemblies identical"
     )
+
+
+# ── blocked weeding: the same algorithm, per norm block ───────────────────
+
+@pytest.mark.slow
+def test_blocked_weeding_preserves_the_spectrum():
+    """Weeding per norm block gives the same physics as weeding globally.
+
+    The norm is block-diagonal in momentum configuration (verified by explicit
+    colour enumeration, `tools/colour_norm.py`), so a state can only be linearly
+    dependent on states in its own block and both weeding stages decompose.
+    Running them per block instead of on all states at once was worth ~500-900x
+    on the weeding step, which had been 76% of a run's wall time.
+
+    The two are not bit-identical.  WEEDR2 diagonalizes the norm, and when
+    several blocks have degenerate zero eigenvalues `eigh` can return null
+    vectors that mix them; the global pass then drops a different member of the
+    same null space, and can drop one or two states the blocked pass keeps
+    (191 vs 193 at 2K=21).  The surviving span -- and so the spectrum -- is what
+    must agree, and it does, far inside the ~1e-4 floor that
+    docs/basis-dependence.md establishes for this algorithm.
+    """
+    import numpy as np
+
+    import dlcq.read_python as rp
+    from dlcq.observables import physical_indices
+    from dlcq.units import mg_to_lambda
+
+    lam = float(mg_to_lambda(1.6))
+    original = rp.weed_fortran
+    spectra = {}
+    try:
+        for blocked in (False, True):
+            rp.weed_fortran = (
+                lambda *a, _b=blocked, **k: original(*a, **{**k, "blocked": _b}))
+            r = rp.run_python(N=3, NF=1, B=1, K_code=21, rlamb=lam, ncpus=4,
+                              policy="fortran")
+            spectra[blocked] = (r.numsta_post,
+                                np.sort(r.eigenvalues[physical_indices(r)]))
+    finally:
+        rp.weed_fortran = original
+
+    (n_global, e_global), (n_blocked, e_blocked) = spectra[False], spectra[True]
+    assert n_blocked >= n_global, "blocked weeding should not drop more states"
+
+    # The ground state is the number every figure and Table I entry reads.
+    assert abs(e_blocked[0] - e_global[0]) / e_global[0] < 1e-6, (
+        f"ground state moved: {e_global[0]:.9f} -> {e_blocked[0]:.9f}")
+
+    # And the low-lying spectrum, well inside the algorithm's own 1e-4 floor.
+    for j in range(6):
+        assert abs(e_blocked[j] - e_global[j]) / e_global[j] < 1e-5, (
+            f"level {j}: {e_global[j]:.9f} -> {e_blocked[j]:.9f}")
+
+
+def test_the_norm_really_is_block_diagonal():
+    """The premise blocked weeding rests on, checked directly.
+
+    If this ever fails, blocked weeding is unsound and `blocked=False` is the
+    correct setting -- the speedup is not worth a wrong basis.
+    """
+    import numpy as np
+    from scipy.sparse import csr_matrix
+    from scipy.sparse.csgraph import connected_components
+
+    from dlcq.figures import paper_lambda
+    from dlcq.providers import PythonProvider
+
+    r = PythonProvider(ncpus=4).get(3, 1, 1, 21, paper_lambda(1.6))
+    N = r.norm
+    n = r.numsta_post
+    lengths = np.asarray(r.state_len[:n])
+
+    # no norm element couples different Fock sectors ...
+    for a in sorted(set(lengths.tolist())):
+        for b in sorted(set(lengths.tolist())):
+            if a == b:
+                continue
+            block = N[np.ix_(lengths == a, lengths == b)]
+            if block.size:
+                assert np.abs(block).max() == 0.0, f"{a}q-{b}q coupling"
+
+    # ... and the blocks are many and small, which is what makes it pay
+    ncomp, _ = connected_components(
+        csr_matrix((np.abs(N[:n, :n]) > 1e-9).astype(np.int8)), directed=False)
+    assert ncomp > n / 4, f"only {ncomp} blocks among {n} states"

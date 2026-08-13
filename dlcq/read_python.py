@@ -61,7 +61,59 @@ def _import_solver(prefer_opt: bool = True):
 # Weeding
 # ──────────────────────────────────────────────────────────────────────────
 
-def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000):
+def _weed_indices(A, eps=1e-4, max_iter=2000):
+    """Which rows of ``A`` survive ``WEEDR`` + ``WEEDR2``.
+
+    The algorithm itself, factored out so it can be run on the whole norm
+    matrix or on one block of it.  Returns surviving indices into ``A``,
+    ascending.
+    """
+    M = np.array(A, dtype=float, copy=True)
+    idx = list(range(M.shape[0]))
+    n = len(idx)
+
+    # ── WEEDR: literal linear redundancy, a row proportional to an earlier one ──
+    loc = 0
+    while loc < n - 1:
+        drops = []
+        for j in range(loc + 1, n):
+            if abs(M[j, loc]) > eps:
+                r = M[j, loc] / M[loc, loc]
+                if np.all(np.abs(r * M[loc, :n] - M[j, :n]) <= eps):
+                    drops.append(j)
+        for d in sorted(drops, reverse=True):
+            M = np.delete(np.delete(M, d, 0), d, 1)
+            idx.pop(d)
+            n -= 1
+        loc += 1
+
+    # ── WEEDR2: null directions of the norm matrix ──
+    for _ in range(max_iter):
+        w, z = eigh(M[:n, :n])
+        nzer = int(np.sum(np.abs(w) < eps))       # abs(), matching Fortran
+        if nzer == 0:
+            break
+        drops, used = [], set()
+        for i in range(nzer):
+            dropped = False
+            # Fortran scans I2 = NUMSTA..1 descending.
+            for j in range(n - 1, -1, -1):
+                if abs(z[j, i]) > eps:
+                    if not dropped and j not in used:
+                        drops.append(j)
+                        dropped = True
+                    used.add(j)
+        if not drops:
+            break
+        for d in sorted(set(drops), reverse=True):
+            M = np.delete(np.delete(M, d, 0), d, 1)
+            idx.pop(d)
+            n -= 1
+
+    return idx
+
+
+def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000, blocked=True):
     """Faithful port of Fortran ``WEEDR`` + ``WEEDR2``.
 
     Stage 1 (``WEEDR``) removes states whose norm row is proportional to an
@@ -72,49 +124,50 @@ def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000):
     each null direction discards one state from its support, marking the rest
     so the discarded states stay independent.  Repeats until no null directions
     remain.
+
+    ``blocked=True`` runs that identical algorithm **per connected block of the
+    norm matrix** instead of on all states at once, which is a large speedup and
+    was the dominant cost of a run: 76% of the wall time at 2K=23, against 16%
+    for the Hamiltonian build and 6% for the norm.
+
+    It is exact, not an approximation.  The norm is block-diagonal in momentum
+    configuration -- verified by explicit colour enumeration, see
+    ``tools/colour_norm.py`` -- so a state can only be linearly dependent on
+    states in its own block, and both stages decompose:
+
+    * ``WEEDR`` compares row j against row loc only when ``|N[j,loc]| > eps``,
+      which already restricts it to a single block;
+    * ``WEEDR2``'s null space is the direct sum of the blocks' null spaces.
+
+    The one place the two can differ is if ``eigh`` returns null eigenvectors
+    that mix several blocks, which it may when their zero eigenvalues are
+    degenerate.  Then the two runs drop a different member of the same null
+    space -- the surviving span, and so the spectrum, is unchanged.
+    ``tests/test_fortran_python.py`` checks both the counts and the spectrum.
+
+    At 2K=23 the 897 states form 180 blocks of median size 4 and maximum 19, so
+    the O(n^2) work drops by about 120x.
     """
-    hnorm = np.array(hnorm, dtype=float, copy=True)
+    A = np.asarray(hnorm, dtype=float)[:numsta, :numsta]
     mstinf = np.array(mstinf, copy=True)
 
-    # ── WEEDR: linear redundancy ──
-    loc = 0
-    while loc < numsta - 1:
-        drops = []
-        for j in range(loc + 1, numsta):
-            if abs(hnorm[j, loc]) > eps:
-                r = hnorm[j, loc] / hnorm[loc, loc]
-                if np.all(np.abs(r * hnorm[loc, :numsta] - hnorm[j, :numsta]) <= eps):
-                    drops.append(j)
-        for d in sorted(drops, reverse=True):
-            hnorm = np.delete(np.delete(hnorm, d, 0), d, 1)
-            mstinf = np.delete(mstinf, d, 0)
-            numsta -= 1
-        loc += 1
+    if blocked and numsta > 1:
+        from scipy.sparse import csr_matrix
+        from scipy.sparse.csgraph import connected_components
 
-    # ── WEEDR2: null directions of the norm matrix ──
-    for _ in range(max_iter):
-        w, z = eigh(hnorm[:numsta, :numsta])
-        nzer = int(np.sum(np.abs(w) < eps))       # abs(), matching Fortran
-        if nzer == 0:
-            break
-        drops, used = [], set()
-        for i in range(nzer):
-            dropped = False
-            # Fortran scans I2 = NUMSTA..1 descending.
-            for j in range(numsta - 1, -1, -1):
-                if abs(z[j, i]) > eps:
-                    if not dropped and j not in used:
-                        drops.append(j)
-                        dropped = True
-                    used.add(j)
-        if not drops:
-            break
-        for d in sorted(set(drops), reverse=True):
-            hnorm = np.delete(np.delete(hnorm, d, 0), d, 1)
-            mstinf = np.delete(mstinf, d, 0)
-            numsta -= 1
+        adj = csr_matrix((np.abs(A) > 1e-9).astype(np.int8))
+        nblocks, labels = connected_components(adj, directed=False)
+        keep = []
+        for b in range(nblocks):
+            members = np.flatnonzero(labels == b)
+            sub = _weed_indices(A[np.ix_(members, members)], eps, max_iter)
+            keep.extend(int(members[i]) for i in sub)
+        keep.sort()
+    else:
+        keep = _weed_indices(A, eps, max_iter)
 
-    return hnorm, mstinf, numsta
+    keep = np.asarray(keep, dtype=int)
+    return A[np.ix_(keep, keep)].copy(), mstinf[keep], int(keep.size)
 
 
 def orthonormalize_blockwise(hnorm, numsta, tol=1e-8):

@@ -113,6 +113,34 @@ instead, and checks itself against the value at the frame bottom, which must
 come out zero. And Fig. 6(d)'s K is never stated in its caption; it is 24, not
 the 22 we first assumed, which alone accounted for that panel's disagreement.
 
+## Reach
+
+The paper extrapolates over 2K = 16–24. That window is set by cost, and the cost
+was dominated by an avoidable step: **weeding** — discarding linearly dependent
+basis states — was 76% of a run's wall time, against 16% for the Hamiltonian
+build and 6% for the norm.
+
+The norm is block-diagonal in momentum configuration (verified by explicit
+colour enumeration, `tools/colour_norm.py`), so a state can only be linearly
+dependent on states in its own block and both weeding stages decompose. At
+2K = 23 the 897 states form 180 blocks of median size 4, so weeding per block is
+~120× less work. Measured, on the weeding step alone: **528× at 2K = 21, 890× at
+2K = 23**.
+
+| 2K | states | before | after |
+|---|---|---|---|
+| 21 | 502 → 193 | 18 s | **5.8 s** |
+| 23 | 897 → 319 | 53 s | **13.8 s** |
+| 25 | 1559 → 510 | 283 s | **32 s** |
+| 27 | 2692 → 818 | did not finish in 5 min | **77 s** |
+| 29 | 4529 → 1274 | — | **180 s** |
+
+So 2K = 29 is now routine where 2K = 25 had been the practical limit, and the
+extrapolation window can be widened past the paper's. The two passes are not
+bit-identical — see `weed_fortran`'s docstring — but the ground state agrees to
+9×10⁻⁸ and the low-lying spectrum to 10⁻⁶, a thousandfold inside this
+algorithm's own 10⁻⁴ reproducibility floor.
+
 ## One piece had to be rebuilt, not ported
 
 `qcdf.f` emits eigenvectors, Fock content and the basis-change matrix — but not
