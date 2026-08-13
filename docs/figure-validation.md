@@ -59,6 +59,57 @@ reproduced to 1.5–4% at 2K = 15, by two independent published panels. So the
 disagreement is not "baryon higher-Fock"; it is specific to 2K = 21, plus the
 two-extra-pair sector.
 
+## Fig. 7 / Table I: the extrapolated masses
+
+Fig. 7 plots exactly what Table I tabulates — the Richardson extrapolation of
+the lightest state to the continuum, Eq. (27), over the paper's own 2K = 16–24
+window. So the table is the better target: numbers, rather than three curves in
+a two-inch panel with a broken y axis.
+
+Nothing had compared them. The existing Table I tests only checked the
+transcription's internal consistency — completeness, monotonicity, spot values,
+the bosonization ratio — never our computed extrapolations against the published
+ones. That is now done, for all 30 non-trivial entries, in M² units
+(`docs/table1-units.md`).
+
+The paper states its own reliability cut, so the tolerance follows it:
+
+> For m/g ≳ 0.2, these are reasonable estimates of the actual error. Beyond
+> this, the largest K employed is likely not large enough for these to be more
+> than a rough guide.
+
+| band | entries | criterion | worst |
+|---|---|---|---|
+| m/g ≥ 0.8 | 10 | max(last term, 5%) | 4.2% |
+| 0.2 ≤ m/g < 0.8 | 10 | max(last term, 12%) | 19.0% |
+| m/g < 0.2 | 10 | max(last term, 30%) | 52.1% |
+
+`last_term` is the magnitude of the last term in the paper's series fit, not an
+error bar, and is as tight as ±0.002 — hence the combined criterion.
+
+**Where the paper calls the extrapolation reliable, the agreement is the
+sharpest in this whole reproduction.** At m/g = 1.6 the mesons are
+
+| N | Table I | ours | |
+|---|---|---|---|
+| 2 | 4.314 | 4.313 | 0.02% |
+| 3 | 4.618 | 4.615 | 0.07% |
+| 4 | 4.845 | 4.844 | 0.02% |
+
+and the baryons 10.710 → 10.753 (0.4%) and 21.200 → 20.312 (4.2%). Over the
+whole m/g ≥ 0.8 band the median deviation is **0.37%**.
+
+Below m/g ~ 0.2 the two extrapolations drift apart, exactly where the paper says
+its own are "no more than a rough guide" — the largest K available is not big
+enough for the series to have converged, and the residual there measures that,
+not a disagreement about physics.
+
+Fig. 7(b) was also read directly as a cross-check: tracking its three curves
+across 191 columns and sampling at the tabulated couplings gives 4.5–12.5%
+against ours, consistent with the table comparison and limited by the panel
+size. Fig. 7(a) cannot be read that way — its y axis is **broken into three
+offset baselines**, one per N.
+
 ## Fig. 2: a spectrum is not a structure function
 
 Fig. 2 plots ~20 eigenvalue trajectories against the **coupling**, which is

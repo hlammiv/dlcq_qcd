@@ -982,3 +982,83 @@ def test_fig2_levels_match_the_computed_spectrum(panel, B, K, ymax):
     assert float(np.median(gaps)) < 0.03, (
         f"{panel}: median gap {np.median(gaps):.1%} of the axis")
     assert float(np.percentile(gaps, 90)) < 0.10
+
+
+# ── FIG. 7 / TABLE I: the extrapolated masses ─────────────────────────────
+
+# Fig. 7 plots exactly the quantities Table I tabulates -- the Richardson
+# extrapolation of the lightest state to the continuum -- so the table is the
+# better target: numbers rather than three curves in a 2-inch panel.  Nothing
+# had ever compared our extrapolations against them; the existing Table I tests
+# only check the transcription's internal consistency.
+#
+# The paper states its own reliability cut:
+#
+#   "For m/g >~ 0.2, these are reasonable estimates of the actual error.
+#    Beyond this, the largest K employed is likely not large enough for these
+#    to be more than a rough guide."
+#
+# so the tolerance follows it.  `last_term` is the magnitude of the last term
+# in the paper's series fit, not an error bar, and is as tight as 0.002; the
+# criterion is whichever of it and a relative band is larger.
+TABLE1_BANDS = [("m/g >= 0.8", 0.8, 9.9, 0.05),
+                ("0.2 <= m/g < 0.8", 0.2, 0.8, 0.12),
+                ("m/g < 0.2 (paper: rough guide)", 0.0, 0.2, 0.30)]
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("label,lo,hi,tol", TABLE1_BANDS)
+def test_extrapolations_reproduce_table1(label, lo, hi, tol):
+    """Our Richardson extrapolation against every entry of Table I.
+
+    In M^2 units -- Table I tabulates M^2/(m^2+g^2/pi) despite column headers
+    reading M/g (docs/table1-units.md).  2K = 16-24, the paper's own window.
+
+    Where the paper calls the extrapolation reliable (m/g >= 0.8) the mesons
+    agree to 0.02-0.4% and the baryons to 0.4-4%.
+    """
+    from pathlib import Path
+
+    from dlcq.figures import _K_grid, _extrapolated_mass
+    from dlcq.providers import FortranProvider
+
+    provider = FortranProvider(allow_run=True, extra_search=[ROOT / "python"])
+    checked = 0
+    for r in load_table1():
+        mg = r["mg"]
+        if mg == 0.0 or not (lo <= mg < hi):
+            continue
+        B = 0 if r["quantity"] == "mes" else 1
+        N = r["N"]
+        got, _ = _extrapolated_mass(provider, N, B, mg, _K_grid(B, N),
+                                    msq_units=True)
+        if got is None:
+            pytest.skip(f"no sweep for N={N} B={B} m/g={mg}")
+        published, last = r["value"], r["last_term"]
+        allowed = max(last, tol * published)
+        checked += 1
+        assert abs(got - published) <= allowed, (
+            f"{r['quantity']} N={N} m/g={mg}: ours {got:.3f} vs published "
+            f"{published:.3f} (allowed {allowed:.3f})")
+    assert checked >= 6, f"{label}: only {checked} entries compared"
+
+
+@pytest.mark.slow
+def test_extrapolations_are_sharp_at_weak_coupling():
+    """The headline number: at m/g = 1.6 the mesons land on Table I exactly.
+
+    This is the sharpest published comparison in the whole reproduction -- the
+    paper quotes four significant figures and we match three of them.
+    """
+    from dlcq.figures import _K_grid, _extrapolated_mass
+    from dlcq.providers import FortranProvider
+
+    provider = FortranProvider(allow_run=True, extra_search=[ROOT / "python"])
+    expect = {2: 4.314, 3: 4.618, 4: 4.845}
+    for N, published in expect.items():
+        got, _ = _extrapolated_mass(provider, N, 0, 1.6, _K_grid(0, N),
+                                    msq_units=True)
+        if got is None:
+            pytest.skip(f"no sweep for N={N}")
+        assert abs(got - published) / published < 0.002, (
+            f"SU({N}) meson: ours {got:.4f} vs Table I {published:.4f}")
