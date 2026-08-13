@@ -199,6 +199,38 @@ construction: every sub-window uses the same form over the same narrow range in
 dominates. Any quotable error bar needs the form spread added -- and the real
 fix is data nearer 1/K = 0, where the choice of form stops mattering.
 
+## Incremental K does not help -- measured, not assumed
+
+Extending the window from 2K = 25-35 to 25-37 was expected to tighten the
+weak-coupling rows. It does essentially nothing:
+
+| | median error reduction | best | weak-coupling rows |
+|---|---|---|---|
+| 25-35 -> 25-37 | **1.00x** | 1.11x (m/g = 1.6) | **1.00x** |
+
+13 of 30 improved at all, and every one of those was at strong coupling where
+the error was already tiny. The reason is that one extra K barely shortens the
+extrapolation, which is what sets the error:
+
+| window | nearest data to the axis |
+|---|---|
+| 2K = 16-24 (the paper's) | 1/K = 0.0833 |
+| 2K = 25-35 | 0.0571 |
+| 2K = 25-37 | 0.0541 |
+| 2K = 25-48 | 0.0417 |
+
+Going 35 -> 37 shortens the reach by 5%; the strong-coupling errors fall by
+roughly that much and the weak-coupling ones, which are dominated by the
+ambiguity in how many correction terms to keep, do not move at all. **An
+earlier estimate here that "K > 35 would cut the weak-coupling errors ~2.5x"
+was wrong** -- that figure was for 2K = 48, and even it should be measured
+rather than assumed, since the form spread is not a simple power of the
+extrapolation distance.
+
+The practical consequence: there is no incremental path. Either accept the
+present errors (0.003% to 6.9%, median 2.2%, and 27/30 consistent with the
+published table) or make the jump to 2K >~ 48, which needs the sparse solver.
+
 ## The one entry that does not reproduce: baryon N=4 at m/g = 1.6
 
 27 of the 30 non-trivial entries agree within the paper's own quoted term. Two
