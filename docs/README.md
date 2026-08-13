@@ -37,10 +37,21 @@ antiperiodic boundary conditions put markers only at odd `k/K`. Fig. 6(d) is
 2K = 24, not the 22 that seemed natural, and that alone accounted for its
 apparent disagreement.
 
+## Ready for new work
+
+**[flavour.md](flavour.md)** — NF > 1 was added to `qcdf.f` in 1990 and no figure
+in the paper uses it, so it shipped untested. It is the obvious direction for new
+work (kaon and strange-baryon analogues), and it works — validated by both sum
+rules, flavour symmetry at degenerate masses, two variational inequalities, and
+cross-solver agreement to 3 × 10⁻⁷. Two things to know before using it: `qcdf.f`
+cannot reach flavour non-singlet channels at all, and the colour-array overflow
+arrives at half the K it does for one flavour.
+
 ## Defects in `qcdf.f`
 
 Neither changes the paper's physics conclusions; both change how its output must
-be read. `fortran/qcdf.f` is kept unpatched — corrected behaviour lives in the
+be read. A third, specific to multiple flavours, is in
+[flavour.md](flavour.md). `fortran/qcdf.f` is kept unpatched — corrected behaviour lives in the
 Python path.
 
 **[basis-dependence.md](basis-dependence.md)** — `qcdf.f` adds the free

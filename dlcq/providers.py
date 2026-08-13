@@ -135,7 +135,18 @@ class FortranProvider(Provider):
                 return path
         return None
 
-    def get(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0) -> DLCQResult:
+    def get(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
+            rmq=None, iflv=None) -> DLCQResult:
+        """``rmq``/``iflv`` are only meaningful for NF > 1.
+
+        ``qcdf.f`` fixes ``rmq(1) = 1`` and reads ``rmq(2..NF)`` as ratios to
+        it, then one flavour quantum number per flavour.  Note that it then
+        **overwrites** ``iflv(1)`` with ``N*B`` regardless of what was entered
+        (qcdf.f:253, flagged there with the author's own ``??????``), so any
+        channel needing a different flavour-1 number is unreachable from the
+        Fortran and generates zero states rather than an error.  The Python
+        solver honours the value it is given.  See docs/flavour.md.
+        """
         from .read_fortran import read_out
 
         path = self._find_existing(N, NF, B, K_code, rlamb, LPN)
@@ -145,12 +156,19 @@ class FortranProvider(Provider):
                     f"no Fortran run for N={N} NF={NF} B={B} 2K={K_code} "
                     f"lambda={rlamb}; run fortran/run_case.sh or pass allow_run=True"
                 )
-            tag = _tag(N, NF, B, K_code, rlamb, cutoff, LPN)
+            extra = []
+            if NF > 1:
+                ratios = list(rmq[1:NF]) if rmq is not None else [1.0] * (NF - 1)
+                numbers = list(iflv[:NF]) if iflv is not None else \
+                    [N * B] + [0] * (NF - 1)
+                extra = [f"{v:g}" for v in ratios] + [str(int(v)) for v in numbers]
+            tag = _tag(N, NF, B, K_code, rlamb, cutoff, LPN,
+                       extra="_".join(extra))
             outdir = self.run_root / tag
             script = _ROOT / "fortran" / "run_case.sh"
             subprocess.run(
                 ["bash", str(script), str(outdir), str(N), str(NF), str(B),
-                 f"{rlamb:.10g}", f"{cutoff:g}", str(LPN), str(K_code)],
+                 f"{rlamb:.10g}", f"{cutoff:g}", str(LPN), str(K_code)] + extra,
                 check=True, capture_output=True,
             )
             path = outdir / "qcdf.out"

@@ -7,12 +7,23 @@
 # solver inside the output directory itself.
 #
 # Usage:
-#   run_case.sh OUTDIR N NF B LAMBDA CUTOFF LPN K
+#   run_case.sh OUTDIR N NF B LAMBDA CUTOFF LPN K [RMQ2..RMQNF IFLV1..IFLVNF]
 #   run_case.sh OUTDIR --reuse HAMFILE LAMBDA        # IHFILE=1 fast lambda sweep
 #
 # Examples:
 #   run_case.sh runs/K21 3 1 1 0.3325 -1.0 0 21
 #   run_case.sh runs/K21_l07 --reuse runs/K21/qcdf.ham 0.7
+#
+#   # NF=2: one mass ratio (rmq2/rmq1) then one flavour number per flavour.
+#   # A flavour-neutral meson with a doubly heavy second flavour:
+#   run_case.sh runs/nf2 3 2 0 0.3325 -1.0 0 12   2.0   0 0
+#   # ...and the non-singlet ("kaon") channel, one quark of each flavour:
+#   run_case.sh runs/nf2ns 3 2 0 0.3325 -1.0 0 12   2.0   1 -1
+#
+# qcdf.f fixes rmq(1) = 1 and reads rmq(2..NF) as RATIOS to it; iflv(f) is the
+# net quark number of flavour f, so a meson is flavour-neutral overall and a
+# baryon's numbers must sum to N*B.  For NF=1 the code sets iflv(1) = N*B
+# itself and prompts for neither.
 #
 # Produces OUTDIR/{qcdf.out,qcdf.ham,stdout.log,case.json}.
 #
@@ -51,18 +62,33 @@ if [ "${1:-}" = "--reuse" ]; then
 {"mode": "reuse", "hamfile": "$HAMFILE", "rlamb": $LAMBDA}
 EOF
 else
-    if [ $# -ne 7 ]; then
-        echo "error: expected 7 parameters (N NF B LAMBDA CUTOFF LPN K), got $#" >&2
+    if [ $# -lt 7 ]; then
+        echo "error: expected at least 7 parameters (N NF B LAMBDA CUTOFF LPN K), got $#" >&2
         exit 1
     fi
     N="$1"; NF="$2"; B="$3"; LAMBDA="$4"; CUTOFF="$5"; LPN="$6"; K="$7"
-    # Read order in qcdf.f: IHFILE, N, NF, B, RLAMB, [rmq, iflv if NF>1],
+    shift 7
+    # For NF>1 qcdf.f prompts for NF-1 mass ratios then NF flavour numbers,
+    # between RLAMB and CUTOFF.  For NF=1 it prompts for neither.
+    NEXTRA=$(( NF > 1 ? 2 * NF - 1 : 0 ))
+    if [ $# -ne "$NEXTRA" ]; then
+        echo "error: NF=$NF needs $NEXTRA extra parameters" \
+             "($(( NF - 1 )) mass ratios + $NF flavour numbers), got $#" >&2
+        exit 1
+    fi
+    FLAVOUR=""
+    for v in "$@"; do FLAVOUR="${FLAVOUR}${v}\n"; done
+    # Read order in qcdf.f: IHFILE, N, NF, B, RLAMB, [rmq(2..NF), iflv(1..NF)],
     # CUTOFF, LPN, K.
-    printf '0\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
+    printf "0\n%s\n%s\n%s\n%s\n${FLAVOUR}%s\n%s\n%s\n" \
         "$N" "$NF" "$B" "$LAMBDA" "$CUTOFF" "$LPN" "$K" > "$OUTDIR/input.txt"
+    EXTRA_JSON=""
+    if [ "$NEXTRA" -gt 0 ]; then
+        EXTRA_JSON=", \"flavour_params\": [$(printf '%s, ' "$@" | sed 's/, $//')]"
+    fi
     cat > "$OUTDIR/case.json" <<EOF
 {"mode": "compute", "N": $N, "NF": $NF, "B": $B, "rlamb": $LAMBDA,
- "cutoff": $CUTOFF, "LPN": $LPN, "K": $K}
+ "cutoff": $CUTOFF, "LPN": $LPN, "K": $K$EXTRA_JSON}
 EOF
 fi
 

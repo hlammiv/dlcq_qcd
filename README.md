@@ -183,6 +183,20 @@ Reproduced from the paper's own text: at 2K=24 the 11th meson state has
 qq̄qq̄ component peaks at `x = 5/24 = 0.208`, the nearest odd-momentum grid
 point to the stated `x = 1/4`.
 
+## Multiple flavours
+
+`NF > 1` was added to `qcdf.f` in May 1990 and **no figure in the paper uses
+it** — it shipped with no coverage. It works, and is the natural direction for
+new physics: unequal quark masses give kaon and strange-baryon analogues the
+paper never computes. `tests/test_flavour.py` now covers it via both sum rules,
+flavour symmetry at degenerate masses, two variational inequalities, and
+cross-solver agreement to `3e-7`.
+
+Two things to know first, both in [docs/flavour.md](docs/flavour.md): `qcdf.f`
+**cannot reach flavour non-singlet channels at all** (it overwrites `iflv(1)`
+with `N*B`, so a kaon-like channel silently generates zero states), and its
+colour-array overflow arrives at `2K = 12` rather than `2K = 24`.
+
 ## Two defects found in `qcdf.f`
 
 Both are documented in full under [docs/](docs/README.md). Neither changes the paper's physics
