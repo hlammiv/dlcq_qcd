@@ -72,7 +72,48 @@ while `mg_to_lambda(1.6)` is `0.33254949`, and that 1.5×10⁻⁵ swamps any tig
 tolerance. And this paper's natural unit is `g²N/2π`, not 't Hooft's `g²N/π` —
 hence the `(2π/N)^½` rescaling on Fig. 8(b).
 
-## Status
+## Does it reproduce the paper?
+
+Every figure and table, from **both** solvers. `docs/figure-validation.md` has
+the per-curve accounting; this is the summary.
+
+| | quantity | agreement |
+|---|---|---|
+| **Table I** | 30 extrapolated masses, M² units | 0.02–4% at m/g ≥ 0.8 |
+| **Fig. 2** | eigenvalue spectra vs coupling | 1.0–1.8% of the axis |
+| **Fig. 3** | valence structure functions | 1.4–1.9% |
+| **Fig. 4** | higher-Fock, plotted alone | 0.0–3.9% (meson, 5q) |
+| **Fig. 5** | meson wavefunctions, 2K=24 | 0.3–2.5% valence, 0.9–2.0% higher-Fock |
+| **Fig. 6** | baryon wavefunctions, 2K=21 | 0.4–2.0% valence |
+| **Fig. 6(d)** | two-baryon, 2K=24 | 0.3% valence, 0.8% higher-Fock |
+| **Fig. 7** | extrapolated masses | see Table I — it plots the same numbers |
+| **Fig. 8** | large-N and lattice comparison | 't Hooft eigenvalues to 4 digits |
+
+The sharpest single comparison is Table I at m/g = 1.6, where the paper quotes
+four significant figures: mesons 4.314 / 4.618 / 4.845 for N = 2, 3, 4 against
+our 4.313 / 4.615 / 4.844.
+
+**Two curves are not reproduced**, both baryon higher-Fock: Figs. 6(a)–(c)'s
+five-quark series at 2K = 21, and the two-extra-pair sector (Fig. 4(c) /
+thesis Fig. 18(b), 17.5% high). `docs/baryon-higher-fock.md` records what was
+eliminated: the colour sums are exact against brute-force enumeration, the norm
+equals the true Gram matrix, the eigenvector is determined to 10⁻¹², and the
+distribution is invariant under precision loss down to float16, under the
+weeding threshold over eight orders of magnitude, and under corrupting every
+high-parton matrix element. The same sector at 2K = 15 is reproduced to 0.4%.
+
+### Six ways a published axis can be misread
+
+Worth its own line, because it caused every false alarm in this project. Five
+panels have a frame top **above** their highest printed label, and Fig. 5(b)
+uses its neighbour's axis entirely. Read naively these give apparent
+discrepancies of 16%, 20%, 44% and 233% — each of which looks exactly like a
+physics result. `tools/pin_axes.py` fits the scale from the label positions
+instead, and checks itself against the value at the frame bottom, which must
+come out zero. And Fig. 6(d)'s K is never stated in its caption; it is 24, not
+the 22 we first assumed, which alone accounted for that panel's disagreement.
+
+## Port validation
 
 Verified to machine precision, against the Fortran's own basis and its own `Z`:
 
