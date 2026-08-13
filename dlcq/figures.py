@@ -423,37 +423,52 @@ def figure8(provider, source, N_values=(2, 3, 4)):
     return _finish(fig, "fig8_large_N", source)
 
 
-def table1(provider, source, N_values=(2, 3, 4)):
+def table1(provider, source, N_values=(2, 3, 4), K_lo=16, K_hi=24):
     """Table I -- N dependence of meson and baryon mass.
 
     Reported in **both** conventions, because the paper's table and its figures
     use different ones: Table I tabulates ``M^2/(m^2 + g^2/pi)`` -- the y-axis
     of Fig. 2 -- despite column headers reading ``M_mes/g``, while Figs. 7 and 8
     plot ``M/g``.  See docs/table1-units.md.
+
+    ``K_lo``/``K_hi`` set the Richardson window.  The paper's is 16-24 ("2K in
+    the range of roughly 16-24"), which is the default so this reproduces the
+    published table.  A wider window is now affordable and tightens the fit
+    sharply where the paper is reliable -- at N=3, B=1, m/g=1.6 the last
+    Richardson term falls from 0.0041 to 0.0005 on 2K = 25-35, a factor of
+    eight, while the central value moves by less than the paper's own quoted
+    uncertainty.  It does **not** rescue the weak-coupling rows; see
+    docs/table1-units.md.
+
+    The particle-number truncation is ``sweep_lpn`` at every K, so the two
+    windows are compared on identical physics rather than on a truncation that
+    changes with the window.
     """
     paper = _load_paper_table1()
+    grid = lambda B, N: _K_grid(B, N, K_lo, K_hi)      # noqa: E731
     rows = []
     for mg in MG_TABLE:
         row = {"mg": mg}
         for N in N_values:
             row[f"mes_N{N}"] = (
-                _extrapolated_mass(provider, N, 0, mg, _K_grid(0, N), msq_units=True),
-                _extrapolated_mass(provider, N, 0, mg, _K_grid(0, N)))
-        for N in (3, 4):
+                _extrapolated_mass(provider, N, 0, mg, grid(0, N), msq_units=True),
+                _extrapolated_mass(provider, N, 0, mg, grid(0, N)))
+        for N in (n for n in (3, 4) if n in N_values):
             row[f"bar_N{N}"] = (
-                _extrapolated_mass(provider, N, 1, mg, _K_grid(1, N), msq_units=True),
-                _extrapolated_mass(provider, N, 1, mg, _K_grid(1, N)))
+                _extrapolated_mass(provider, N, 1, mg, grid(1, N), msq_units=True),
+                _extrapolated_mass(provider, N, 1, mg, grid(1, N)))
         rows.append(row)
 
     FIGDIR.mkdir(parents=True, exist_ok=True)
-    out = FIGDIR / f"table1_{source}.txt"
+    tag = "" if (K_lo, K_hi) == (16, 24) else f"_2K{K_lo}-{K_hi}"
+    out = FIGDIR / f"table1_{source}{tag}.txt"
     cols = [(f"mes_N{N}", "mes", N) for N in N_values] + \
-           [(f"bar_N{N}", "bar", N) for N in (3, 4)]
+           [(f"bar_N{N}", "bar", N) for N in (3, 4) if N in N_values]
 
     with open(out, "w") as fh:
         fh.write("TABLE I.  N dependence of meson and baryon mass.\n")
         fh.write(f"Reproduced with the {source} solver, Richardson-extrapolated\n")
-        fh.write("over 2K = 16-24 using Eq. (27).\n\n")
+        fh.write(f"over 2K = {K_lo}-{K_hi} using Eq. (27).\n\n")
         fh.write("UNITS: M^2/(m^2 + g^2/pi), matching what Table I actually\n")
         fh.write("tabulates (see docs/table1-units.md).  'paper' is the printed\n")
         fh.write("value; 'pull' is |paper-ours| over the paper's own quoted\n")
@@ -519,6 +534,9 @@ def main(argv=None):
     ap.add_argument("--fig", nargs="+", type=int, default=None,
                     help="figure numbers (default: the cheap ones, 1 3 4 5 6)")
     ap.add_argument("--table1", action="store_true")
+    ap.add_argument("--table1-window", nargs=2, type=int, metavar=("LO", "HI"),
+                    default=(16, 24),
+                    help="Richardson window in 2K (paper: 16 24)")
     ap.add_argument("--ncpus", type=int, default=1)
     ap.add_argument("--backend", choices=["thread", "process"], default=None,
                     help="matrix-build parallelism; identical results either "
@@ -547,7 +565,8 @@ def main(argv=None):
 
     if args.table1:
         print(f"Table I [{args.source}]:")
-        table1(provider, args.source)
+        table1(provider, args.source,
+               K_lo=args.table1_window[0], K_hi=args.table1_window[1])
 
 
 if __name__ == "__main__":
