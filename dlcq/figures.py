@@ -520,6 +520,9 @@ def main(argv=None):
                     help="figure numbers (default: the cheap ones, 1 3 4 5 6)")
     ap.add_argument("--table1", action="store_true")
     ap.add_argument("--ncpus", type=int, default=1)
+    ap.add_argument("--backend", choices=["thread", "process"], default=None,
+                    help="matrix-build parallelism; identical results either "
+                         "way (see docs/performance.md)")
     ap.add_argument("--assembly", choices=["exact", "fortran"], default="exact",
                     help="free-part assembly; see docs/basis-dependence.md")
     ap.add_argument("--allow-run", action="store_true",
@@ -528,7 +531,8 @@ def main(argv=None):
 
     if args.source == "python":
         from .providers import PythonProvider
-        provider = PythonProvider(ncpus=args.ncpus, assembly=args.assembly)
+        provider = PythonProvider(ncpus=args.ncpus, assembly=args.assembly,
+                                  backend=args.backend)
     else:
         from .providers import FortranProvider
         provider = FortranProvider(allow_run=args.allow_run,

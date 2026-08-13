@@ -10,9 +10,10 @@ Key optimizations vs qcdf.py:
   5. Numba JIT for hot micro-kernels (brack, stachk, conj_state, selfen)
   6. Table-driven vertex loop in hamqcd (less code, same logic)
 """
-import sys, os, json, time, logging
+import sys, os, json, time, logging, threading
 import numpy as np
 from scipy.linalg import eigh
+from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool, cpu_count
 from numba import njit
 
@@ -437,26 +438,99 @@ def _worker_row_global(task):
             rh0[:,nstlt]=e0; rh[nstlt]=e
     return nstrt, rh0, rh, rn
 
-def build_matrices(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak, ncpus):
-    ham0=np.zeros((NF,numsta,numsta)); ham=np.zeros((numsta,numsta)); hnorm=np.zeros((numsta,numsta))
-    t0=time.time(); label="norm" if norh==0 else "ham"
-    log.info(f"  {label} ({numsta}², {ncpus} cpus)...")
+def _row_tasks(norh, mstate, mstinf, numsta):
+    """Work items for one matrix build, ordered longest-first for balance.
 
-    # The norm couples only states with identical parton content, so group by
-    # that and hand each row just its own group's columns.  For the Hamiltonian
-    # a four-point vertex allows up to four mismatches, so every pair has to be
-    # visited and the full triangle stands.
+    The norm couples only states with identical parton content, so group by
+    that and hand each row just its own group's columns.  For the Hamiltonian a
+    four-point vertex allows up to four mismatches, so every pair has to be
+    visited and the full upper triangle stands -- and since row *r* then costs
+    ``numsta - r``, contiguous chunks would be badly unbalanced.
+    """
     if norh == 0:
         groups = {}
         for s, key in enumerate(_config_keys(mstate, mstinf, numsta)):
             groups.setdefault(key, []).append(s)
-        tasks = [(r, [c for c in groups[k] if c >= r])
+        tasks = [(r, np.array([c for c in groups[k] if c >= r], dtype=np.int64))
                  for k in groups for r in groups[k]]
-        tasks.sort(key=lambda t: -len(t[1]))     # longest first, for balance
-    else:
-        # Row r does numsta-r elements, so contiguous chunks are badly
-        # unbalanced; interleaving pairs a long row with a short one.
-        tasks = sorted(range(numsta), key=lambda r: -(numsta - r))
+        tasks.sort(key=lambda t: -len(t[1]))
+        return tasks
+    return sorted(range(numsta), key=lambda r: -(numsta - r))
+
+
+def _symmetrize(a):
+    """Mirror an upper-triangular build into a full symmetric matrix."""
+    return np.triu(a) + np.triu(a, 1).T
+
+
+def _build_threaded(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
+                    nthreads):
+    """Threaded build over the nogil kernels in ``qcdf_kernels``.
+
+    Each row is written straight into the destination matrix, so nothing is
+    pickled and nothing is copied back; the workers touch disjoint rows, and
+    only the upper triangle is filled, so there is no write conflict and no
+    lock.  Per-thread :class:`~qcdf_kernels.Scratch` replaces the module-global
+    buffers, which were safe only because ``fork`` gave each process a copy.
+    """
+    import qcdf_kernels as kern
+
+    nprms, ibrpm = kern.epsb_table(N)
+    ham0 = np.zeros((NF, numsta, numsta))
+    ham = np.zeros((numsta, numsta))
+    hnorm = np.zeros((numsta, numsta))
+    tasks = _row_tasks(norh, mstate, mstinf, numsta)
+
+    tls = threading.local()
+
+    def run(task):
+        sc = getattr(tls, "scratch", None)
+        if sc is None:
+            sc = tls.scratch = kern.Scratch(NF, K)
+        if norh == 0:
+            r, cols = task
+            kern.norm_row(r, cols, mstate, mstinf, N, NF, B, K, hnorm[r],
+                          nprms, ibrpm, *sc.norm_args())
+        else:
+            r = task
+            kern.ham_row(r, numsta, mstate, mstinf, N, NF, B, K, selfen,
+                         cbreak, ham0[:, r, :], ham[r], nprms, ibrpm,
+                         *sc.ham_args())
+
+    if tasks:
+        # Compile on this thread first: JIT compilation holds the GIL, so
+        # letting several workers race into it would serialize the startup.
+        run(tasks[0])
+        rest = tasks[1:]
+        if nthreads > 1 and len(rest) > 1:
+            with ThreadPoolExecutor(nthreads) as ex:
+                for _ in ex.map(run, rest):
+                    pass
+        else:
+            for t in rest:
+                run(t)
+
+    if norh == 0:
+        return ham0, ham, _symmetrize(hnorm)
+    for ifl in range(NF):
+        ham0[ifl] = _symmetrize(ham0[ifl])
+    return ham0, _symmetrize(ham), hnorm
+
+
+def _build_process(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
+                   ncpus):
+    """The original process-pool build over the interpreted reference routines.
+
+    Kept as the cross-check for ``_build_threaded`` -- ``tests/test_kernels.py``
+    asserts the two produce identical matrices -- and as a fallback if numba is
+    unavailable.
+    """
+    ham0 = np.zeros((NF, numsta, numsta))
+    ham = np.zeros((numsta, numsta))
+    hnorm = np.zeros((numsta, numsta))
+    tasks = _row_tasks(norh, mstate, mstinf, numsta)
+    if norh == 0:                       # this path wants plain lists
+        tasks = [(r, cols.tolist()) for r, cols in tasks]
 
     if ncpus > 1 and numsta > 10:
         # Use initializer to share state via fork — no pickling of arrays!
@@ -473,7 +547,33 @@ def build_matrices(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak, nc
         else:
             ham0[:,r,r:numsta]+=rh0[:,r:]; ham0[:,r:numsta,r]=ham0[:,r,r:numsta]
             ham[r,r:numsta]+=rh[r:]; ham[r:numsta,r]=ham[r,r:numsta]
-    log.info(f"  {label}: {time.time()-t0:.2f}s"); return ham0,ham,hnorm
+    return ham0, ham, hnorm
+
+
+#: Default parallel backend.  ``"thread"`` runs the nogil numba kernels in a
+#: thread pool; ``"process"`` runs the interpreted reference routines under
+#: multiprocessing.  Override per call, or globally with ``QCDF_BACKEND``.
+DEFAULT_BACKEND = "thread"
+
+
+def build_matrices(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
+                   ncpus, backend=None):
+    """Build the norm (``norh=0``) or Hamiltonian (``norh=1``) matrix.
+
+    ``backend`` selects how the work is spread; both backends return identical
+    matrices, bit for bit.  See ``docs/performance.md``.
+    """
+    backend = backend or os.environ.get("QCDF_BACKEND") or DEFAULT_BACKEND
+    if backend not in ("thread", "process"):
+        raise ValueError(f"unknown backend {backend!r}")
+    t0 = time.time()
+    label = "norm" if norh == 0 else "ham"
+    log.info(f"  {label} ({numsta}², {ncpus} {backend}s)...")
+    fn = _build_threaded if backend == "thread" else _build_process
+    ham0, ham, hnorm = fn(norh, mstate, mstinf, numsta, N, NF, B, K,
+                          selfen, cbreak, ncpus)
+    log.info(f"  {label}: {time.time()-t0:.2f}s")
+    return ham0, ham, hnorm
 
 # ─── Weeding ─────────────────────────────────────────────────────
 def weed(hnorm, mstinf, numsta):

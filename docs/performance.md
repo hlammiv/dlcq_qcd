@@ -22,9 +22,10 @@ instead of 10.390380 — because the diagonal-only assembly step is basis
 dependent. The `-O2` column above is for a fair speed comparison only, not a
 recommendation.
 
-The Python port wins for two reasons that have nothing to do with the language:
-`qcdf_opt.py` is numba-compiled, and it is parallel where `qcdf.f` is strictly
-serial.
+Those Python numbers predate the threading work below; the current figures are
+in "Threading" further down. The port wins for two reasons that have nothing to
+do with the language: the hot path is numba-compiled, and it is parallel where
+`qcdf.f` is strictly serial.
 
 ## Where the time goes, and what was done about it
 
@@ -71,26 +72,112 @@ End to end:
 So 2K = 29 is routine where 2K = 25 had been the practical limit. The paper
 extrapolates over 2K = 16–24; that window can now be widened.
 
+## Threading
+
+The process pool plateaued at ~5×, and the reason turned out **not** to be the
+one recorded here previously. IPC was measured, not assumed: one Hamiltonian
+build at 2K = 23 moves **2.4 MB** across the process boundary in 319 tasks, and
+accumulating all of it into the destination matrix costs **2 ms** out of a 4.4 s
+build. Pool creation is 10–19 ms. Effectively all the time was inside
+`pool.map`, doing arithmetic.
+
+The actual reason is simpler: `clfact` and `hamqcd` were never compiled. Only
+the micro-kernels (`brack`, `conj_state`, `selfen`) carried `@njit`. Profiling
+one row batch:
+
+| routine | tottime | share |
+|---|---|---|
+| `clfact` | 4.62 s | **79%** |
+| `hamqcd` | 0.50 s | 7% |
+| `numpy.zeros` (called 140831×) | 0.65 s | 9% |
+| `gprbig_array` (called 15409×) | 0.11 s | 2% |
+
+So the work was interpreter overhead, which more processes can only divide, not
+remove — and dividing it across a 6 P-core + 8 E-core machine is what capped
+the useful thread count at ~8.
+
+`python/qcdf_kernels.py` compiles both routines with **`nogil=True`**, which
+fixes both halves at once: the serial path stops being interpreted, and because
+the kernels hold no lock, a plain `ThreadPoolExecutor` gives real parallelism
+with no fork, no pickling, and each row written straight into the destination
+matrix. Three things had to change to make it compile, all behaviour-preserving:
+
+- **The epsilon table is hoisted.** `clfact` rebuilt the SU(N) permutation table
+  via `gprbig_array` on *every call* — 15409 times in the batch above — for a
+  table that depends only on `N`. It is now built once per run by
+  `epsb_table(N)`.
+- **Scratch buffers are per-thread.** The module-global `ClfactBuffers` was safe
+  only because `fork` gave each process a copy.
+- **The vertex table is arrays, not lambdas.** `hamqcd`'s `V4` closures became
+  integer tables: the `BRACK` arguments as coefficient vectors over `(k₀..k₃)`,
+  the flavour assignment as a 0/1 selector over `(f₁, f₂)`.
+
+**Both backends produce bit-identical matrices.** That is asserted, not assumed:
+`tests/test_kernels.py` builds the norm and the Hamiltonian both ways for eight
+configurations — mesons and baryons, SU(2)/SU(3)/SU(4), one and two flavours —
+and requires `array_equal`, not a tolerance. Exact equality is the right bar
+here, because `docs/basis-dependence.md` records that the assembly step is basis
+dependent at the 1e-4 level, so anything looser would be indistinguishable from
+noise the Fortran already has against itself. `PythonProvider` therefore leaves
+the backend out of its cache tag.
+
+Hamiltonian build alone, 14 threads:
+
+| 2K | states | process pool | threads | |
+|---|---|---|---|---|
+| 21 | 193 | 2.01 s | **0.09 s** | 22× |
+| 23 | 319 | 4.95 s | **0.12 s** | 41× |
+| 25 | 510 | 11.44 s | **0.14 s** | 82× |
+| 27 | 818 | 24.17 s | **0.20 s** | 121× |
+| 29 | 1274 | 50.39 s | **0.31 s** | 163× |
+
+End to end (`run_python`, N = 3, B = 1, m/g = 1.6, medians of 3):
+
+| 2K | before | after | |
+|---|---|---|---|
+| 21 | 2.43 s | **0.66 s** | 3.7× |
+| 23 | 6.09 s | **1.07 s** | 5.7× |
+| 25 | 13.27 s | **1.51 s** | 8.8× |
+| 27 | 27.81 s | **1.99 s** | 14× |
+| 29 | 59.92 s | **4.87 s** | 12× |
+
+Thread scaling on the build itself, 2K = 29: 1.34 s → 0.42 (4) → 0.26 (8) →
+0.21 (14) → 0.18 (20), i.e. **7.3×**. Past 14 the gain is small, as expected
+when 6 of the 20 logical CPUs are hyperthreads and 8 are E-cores. `ncpus` above
+14 is not harmful, just not useful.
+
+Select with `--backend`, `backend=` on `run_python`/`PythonProvider`, or
+`QCDF_BACKEND`. The process backend is kept because it runs the *interpreted
+reference* routines, which is what makes the equality test meaningful.
+
 ## What is left
 
-**Parallel efficiency is the weakest point.** At 2K = 21 the scaling was 3.4× on
-8 processes (43%) and *negative* past that — 16 processes were slower than 8.
-Longest-first dispatch helps, but each task still returns arrays of length
-`numsta`, so O(n²) data crosses the process boundary. Threads with `nogil`
-numba kernels, or accumulating into shared memory, would avoid that. On a
-14-core machine there is roughly a 3× gain still on the table.
+**The profile has inverted.** The Hamiltonian build was 88% of a 2K = 29 run;
+it is now 6%. What dominates now:
 
-**The Hamiltonian build is now the dominant cost** (~80% of a run). It is
-genuinely denser than the norm — 21–26% non-zero — so there is no equivalent
-structural shortcut. The one selection rule that does hold exactly is
-**|ΔL| ≤ 2**: measured over every non-zero off-diagonal at 2K = 21 and 23, not
-one couples states differing by more than one qq̄ pair. The worker's existing
-four-mismatch filter already captures this, and skipping those pairs before the
-matching loop would save about 16%.
+| phase | 2K = 29 | share |
+|---|---|---|
+| state generation (`qcdsta`) | 2.02 s | **41%** |
+| dense `eigh` | 1.79 s | **37%** |
+| Hamiltonian build | 0.31 s | 6% |
+| norm build | 0.26 s | 5% |
+| weeding | 0.21 s | 4% |
+| NUZ | 0.19 s | 4% |
 
-**The dramatic option, not attempted.** Every eigenvalue is currently computed,
-by dense `eigh`, when the figures and Table I need only the lowest few. A
-matrix-free formulation — applying H to a vector directly and using Lanczos —
-would replace O(n²) stored elements and O(n³) diagonalization with O(nnz) per
-matvec. That is a real rewrite and would need validating against the present
-code state by state, but it is what would make 2K ≫ 30 reachable.
+**State generation is now the single largest cost** and is still pure
+interpreted Python in `qcdf.py` (`qcdsta`, `prmx`, `gprbig_array`). It is also
+what blocks going higher: 2K = 31 fails in `prmx` with `index 25001 is out of
+bounds`, a fixed `kpx` cap, not a time limit. Raising that cap and compiling the
+generator is the next step, and it is independent of everything above.
+
+**The dramatic option, not attempted.** Every eigenvalue is computed, by dense
+`eigh`, when the figures and Table I need only the lowest few. A matrix-free
+formulation — applying H to a vector directly and using Lanczos — would replace
+O(n²) stored elements and O(n³) diagonalization with O(nnz) per matvec. That is
+a real rewrite and would need validating state by state, but with the build cost
+gone it is now the other half of what stands between here and 2K ≫ 30.
+
+**A selection rule still unused.** |ΔL| ≤ 2 holds exactly: measured over every
+non-zero off-diagonal at 2K = 21 and 23, not one couples states differing by
+more than one qq̄ pair. The four-mismatch filter already captures it; skipping
+those pairs before the matching loop would save ~16% of a now-small cost.

@@ -234,7 +234,7 @@ def weed_spectral(hnorm, mstinf, numsta, threshold=0.5):
 
 def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
                rmq=None, iflv=None, ncpus=1, policy="fortran",
-               assembly="exact", prefer_opt=True) -> DLCQResult:
+               assembly="exact", prefer_opt=True, backend=None) -> DLCQResult:
     """Run the Python DLCQ solver and return a :class:`DLCQResult`.
 
     Parameters
@@ -261,6 +261,15 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
 
         The shift is far below the precision the paper quotes (Table I gives
         M_bar/g = 10.71(2)), so the published physics is unaffected.
+
+    backend : {"thread", "process", None}
+        How the matrix builds are parallelised.  ``"thread"`` (the default)
+        runs the ``nogil`` numba kernels of ``qcdf_kernels.py`` in a thread
+        pool; ``"process"`` runs the interpreted reference routines under
+        multiprocessing.  The two produce bit-identical matrices -- that is
+        asserted in ``tests/test_kernels.py`` -- so this is purely a speed
+        knob and results stay cache-compatible across it.  ``None`` takes
+        ``QCDF_BACKEND`` from the environment, else the default.
 
     ``rlamb`` is taken literally.  Do not derive it from m/g when comparing
     against a Fortran run: the input files use 0.3325 while
@@ -302,7 +311,8 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
     if use_opt:
         _, _, hnorm = opt.build_matrices(0, states.mstate, states.mstinf,
                                          numsta_pre, N, NF, B, K_code,
-                                         selfen, p.cbreak, ncpus)
+                                         selfen, p.cbreak, ncpus,
+                                         backend=backend)
     else:
         _, _, hnorm = base.clrdis(0, p, states, selfen, ncpus=ncpus)
     mstinf = states.mstinf[:numsta_pre].copy()
@@ -332,7 +342,8 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
     if use_opt:
         ham0, ham, _ = opt.build_matrices(1, states.mstate, mstinf_w[:numsta],
                                           numsta, N, NF, B, K_code,
-                                          selfen, p.cbreak, ncpus)
+                                          selfen, p.cbreak, ncpus,
+                                          backend=backend)
     else:
         ham0, ham, _ = base.clrdis(1, p, states, selfen, ncpus=ncpus)
 
@@ -373,7 +384,9 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         source="python",
         provenance={"solver": "qcdf_opt" if use_opt else "qcdf",
                     "weeding_policy": policy, "assembly": assembly,
-                    "ncpus": ncpus},
+                    "ncpus": ncpus,
+                    "backend": backend or os.environ.get("QCDF_BACKEND")
+                    or getattr(opt, "DEFAULT_BACKEND", "process")},
         numsta_pre=numsta_pre, numsta_post=numsta,
         state_len=lengths, state_types=types, state_moms=moms,
         state_flavors=flavors,

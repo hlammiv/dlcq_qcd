@@ -7,13 +7,15 @@ This is a Python translation of Kent Hornbostel's 1993 Fortran 77 program `qcdf.
 The translation uses:
 - **NumPy** for array operations and matrix storage
 - **SciPy** (`scipy.linalg.eigh`) for symmetric eigenvalue decomposition (replacing the Numerical Recipes routines TRR8/TQR8/ESRTR8)
-- **multiprocessing** to parallelize the O(N²) Hamiltonian matrix construction across CPU cores
+- **numba** `nogil` kernels (`qcdf_kernels.py`) for the colour factor and Hamiltonian element, driven from a **thread pool** so the O(N²) matrix construction parallelizes without forking or pickling. A **multiprocessing** path over the interpreted reference routines is kept for cross-checking; see [../docs/performance.md](../docs/performance.md)
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `qcdf.py` | Main Python program (~1800 lines) |
+| `qcdf.py` | Main Python program (~1800 lines), and the reference for state generation |
+| `qcdf_opt.py` | Optimized driver: matrix builds, weeding, backend selection |
+| `qcdf_kernels.py` | `nogil` numba kernels for `clfact`/`hamqcd` and the row workers |
 | `input_small.json` | Small test case (K=6, LPN=4, ~5 states) |
 | `input_medium.json` | Medium test case (K=10, ~21 states) |
 | `input_original.json` | Original Fortran test case (K=24, ~818 states after weeding) |
@@ -33,8 +35,10 @@ python3 qcdf.py input_small.json
 
 ### Control parallelism
 ```bash
-export QCDF_NCPUS=8
+export QCDF_NCPUS=14          # threads; past the physical core count adds little
 python3 qcdf.py input_original.json
+
+export QCDF_BACKEND=process   # interpreted reference path, for cross-checking
 ```
 
 ## JSON Input Format
@@ -76,13 +80,16 @@ Key features:
 
 ## Parallelization Details
 
-The dominant computational cost is the double loop over state pairs to compute Hamiltonian matrix elements (subroutine `CLRDIS` in the original Fortran). In Python this is parallelized with `multiprocessing.Pool.map()`:
+The double loop over state pairs (subroutine `CLRDIS` in the original Fortran) used to be the dominant cost. It is parallelized one row at a time:
 
-- Each (i, j) matrix element is computed independently
-- State data is passed as flat arrays to worker processes
-- Results are assembled into the full symmetric matrix
+- `qcdf_kernels.py` compiles the colour factor and the Hamiltonian element with `@njit(nogil=True)`, so worker **threads** run genuinely concurrently
+- each thread owns a `Scratch` — the module-global buffers in `qcdf_opt.py` were safe only because `fork` gave each process a copy
+- each row is written straight into the destination matrix, so nothing is pickled and nothing is copied back; workers touch disjoint rows and fill only the upper triangle, so there is no lock
+- rows are dispatched longest-first, since row *r* costs `numsta - r`
 
-For the original test case (818 states → ~335k matrix elements), this scales well to 4-8 cores. The eigenvalue decomposition itself uses SciPy's highly optimized LAPACK routines, which are internally threaded.
+Set `QCDF_BACKEND=process` to run the interpreted reference routines under `multiprocessing` instead. The two produce **bit-identical** matrices — `tests/test_kernels.py` asserts it — so the choice is purely about speed.
+
+Scaling is ~7× on 14 physical cores; past that the machine has only hyperthreads and E-cores left, so more threads add little. The eigenvalue decomposition uses SciPy's LAPACK routines, which are internally threaded, and is now a *larger* share of a run than the matrix build.
 
 ## Correspondence to Fortran Subroutines
 
@@ -96,9 +103,10 @@ For the original test case (818 states → ~335k matrix elements), this scales w
 | GPRBIG | `gprbig_array()` |
 | IBARFL | `ibarfl()` |
 | IMESFL | `imesfl()` |
-| CLRDIS | `clrdis()` (parallelized) |
-| HAMQCD | `hamqcd()` |
-| CLFACT + CLSUM + CNTRCT + BREDCE + NWTERM | `clfact_compute()` |
+| CLRDIS | `clrdis()`; `qcdf_opt.build_matrices()` / `qcdf_kernels.norm_row()`, `ham_row()` |
+| HAMQCD | `hamqcd()`; `qcdf_kernels.hamqcd_nb()` |
+| CLFACT + CLSUM + CNTRCT + BREDCE + NWTERM | `clfact_compute()`; `qcdf_kernels.clfact_nb()` |
+| EPSB (epsilon permutation table) | `qcdf_kernels.epsb_table()` |
 | WEEDR / WEEDR2 / DROPR | `weedr()` / `weedr2()` / `_dropr()` |
 | NUHAM | `nuham()` |
 | NUZ | `nuz()` |
@@ -118,6 +126,7 @@ For the original test case (818 states → ~335k matrix elements), this scales w
 ```
 numpy
 scipy
+numba
 ```
 
 ## Notes
@@ -125,4 +134,5 @@ scipy
 - The Fortran code uses extensive `COMMON` blocks for global state; the Python version uses dataclass containers passed explicitly
 - Array indexing has been translated from 1-based (Fortran) to 0-based (Python) throughout
 - The color contraction engine (`clfact_compute`) faithfully reproduces the diagrammatic delta-function contraction and epsilon-tensor reduction algorithms from the original
-- For large K (K≥24), the computation may take significant time; the parallelization helps but the color factor computation remains the bottleneck
+- The colour factor was the bottleneck for a long time; with `clfact` compiled it no longer is. A full N=3, B=1 run at 2K=29 takes ~4.9 s, of which the Hamiltonian build is 0.31 s. State generation (`qcdsta`/`prmx`, still interpreted) and the dense `eigh` now dominate
+- 2K≥31 is blocked by a fixed `kpx` cap in `prmx`, not by runtime

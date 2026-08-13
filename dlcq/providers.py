@@ -43,15 +43,20 @@ class PythonProvider(Provider):
     ``assembly="exact"`` (the default) is the basis-independent scheme and the
     scientific reference; ``"fortran"`` reproduces the historical diagonal-only
     step.  See ``docs/basis-dependence.md``.
+
+    ``backend`` picks how the matrix builds are parallelised.  It is absent
+    from the cache tag on purpose: the two backends produce bit-identical
+    matrices, so a cached run stays valid whichever built it.
     """
 
     name = "python"
 
     def __init__(self, ncpus=1, assembly="exact", policy="fortran",
-                 cache_dir=None):
+                 cache_dir=None, backend=None):
         self.ncpus = ncpus
         self.assembly = assembly
         self.policy = policy
+        self.backend = backend
         self.cache_dir = Path(cache_dir or _ROOT / "runs" / "python_cache")
 
     def get(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0) -> DLCQResult:
@@ -65,7 +70,8 @@ class PythonProvider(Provider):
 
         result = run_python(N=N, NF=NF, B=B, K_code=K_code, rlamb=rlamb,
                             cutoff=cutoff, LPN=LPN, ncpus=self.ncpus,
-                            policy=self.policy, assembly=self.assembly)
+                            policy=self.policy, assembly=self.assembly,
+                            backend=self.backend)
         save(result, path)
         return result
 

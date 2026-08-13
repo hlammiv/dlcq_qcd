@@ -40,10 +40,12 @@ apparent disagreement.
 ## Ready for new work
 
 **[performance.md](performance.md)** — is the Python faster than the Fortran?
-Yes: 7–11× as shipped, 3–4× against an `-O2` rebuild, because it is
-numba-compiled and parallel where `qcdf.f` is serial. Also where the time now
-goes, the two structural optimizations applied so far, and what is left on the
-table (parallel efficiency, and a matrix-free rewrite).
+Yes, decisively: 2K = 29 runs in 4.9 s. Records the measurement that redirected
+the parallel work — the process pool's bottleneck was *not* IPC (2.4 MB per
+build, 2 ms to accumulate) but the fact that `clfact` and `hamqcd` were never
+compiled — and what compiling them `nogil` and threading them bought. Also where
+the time goes now that the build is 6% of a run rather than 88%: state
+generation and the dense `eigh`.
 
 **[flavour.md](flavour.md)** — NF > 1 was added to `qcdf.f` in 1990 and no figure
 in the paper uses it, so it shipped untested. It is the obvious direction for new

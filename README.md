@@ -115,12 +115,18 @@ the 22 we first assumed, which alone accounted for that panel's disagreement.
 
 ## Speed
 
-The Python port is **7–11× faster than `qcdf.f` as shipped** and 3–4× faster
-than an `-O2` rebuild of it — numba-compiled and parallel, against a serial
-unoptimized F77. (The shipped binary carries no optimization flag deliberately:
-rebuilding at `-O2` changes its own answer, see
-[docs/basis-dependence.md](docs/basis-dependence.md).) Details and the remaining
-opportunities are in [docs/performance.md](docs/performance.md).
+The Python port is far faster than `qcdf.f`: a full N = 3, B = 1 run at 2K = 29
+takes **4.9 s**, and the Hamiltonian build inside it 0.31 s against the 50 s the
+process pool needed. (The shipped Fortran carries no optimization flag
+deliberately: rebuilding at `-O2` changes its own answer, see
+[docs/basis-dependence.md](docs/basis-dependence.md).)
+
+The hot routines are compiled with `nogil=True` and driven from a thread pool,
+so nothing is forked or pickled and each row lands straight in the destination
+matrix. The older multiprocessing path is kept as `--backend process`: it runs
+the *interpreted reference* routines, which is what lets `tests/test_kernels.py`
+demand the two agree **bit for bit** rather than merely closely. Details and the
+remaining opportunities are in [docs/performance.md](docs/performance.md).
 
 ## Reach
 
