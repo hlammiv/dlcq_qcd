@@ -165,3 +165,64 @@ def test_baryon_mass_still_converges_past_2K_24():
     assert masses[0] < masses[1] < masses[2], masses
     # Converging, not drifting: successive gaps must shrink.
     assert masses[2] - masses[1] < masses[1] - masses[0]
+
+
+def test_richardson_stability_is_tiny_for_an_exact_series():
+    """On data generated from the fit form itself, every sub-window agrees."""
+    from dlcq.observables import richardson_stability
+    from dlcq.units import endpoint_exponent
+
+    mg, N = 1.6, 3
+    a = endpoint_exponent(mg, N)
+    Ks = np.array([25, 27, 29, 31, 33, 35])
+    Kp = Ks / 2.0
+    exact = 5.0 + 0.7 / Kp + 0.3 / Kp ** (1 + a)
+    M0, spread, nwin = richardson_stability(Ks, exact, mg, N, n_terms=2)
+    assert nwin > 5
+    assert abs(M0 - 5.0) < 1e-8
+    assert spread < 1e-8
+
+
+def test_richardson_stability_needs_enough_points():
+    from dlcq.observables import richardson_stability
+
+    M0, spread, nwin = richardson_stability([21, 23, 25, 27],
+                                            [1.0, 1.1, 1.15, 1.18], 1.6, 3)
+    assert nwin < 2
+    assert np.isnan(spread)
+
+
+@pytest.mark.slow
+def test_last_term_rule_overstates_the_error_at_weak_coupling():
+    """The paper's error definition degrades as the Eq. (27) basis degenerates.
+
+    Eq. (26)'s exponent ``a`` goes to zero in the chiral limit, so
+    ``1/K^(1+a)`` collapses onto ``1/K``.  The fit is unaffected -- it still
+    reproduces M(K) to five digits -- but the coefficients grow large and
+    cancel, inflating the last term.  Refitting on sub-windows measures the
+    actual stability and shows the gap widening as m/g falls.
+    """
+    from dlcq.figures import sweep_lpn
+    from dlcq.observables import richardson_extrapolate, richardson_stability
+    from dlcq.providers import PythonProvider
+    from dlcq.units import code_to_M_over_g, mg_to_lambda
+
+    prov = PythonProvider(ncpus=8)
+    ratios = {}
+    for mg in (1.6, 0.1):
+        lam = float(mg_to_lambda(mg))
+        Ks, ms = [], []
+        for K in (25, 27, 29, 31, 33, 35):
+            r = prov.get(3, 1, 1, K, lam, -1.0, sweep_lpn(3, 1))
+            ph = physical_indices(r)
+            if ph.size:
+                Ks.append(K)
+                ms.append(code_to_M_over_g(float(r.eigenvalues[ph[0]]), lam))
+        _, last = richardson_extrapolate(Ks, ms, mg, 3, n_terms=2)
+        _, spread, _ = richardson_stability(Ks, ms, mg, 3, n_terms=2)
+        ratios[mg] = last / spread
+
+    # Both overstate, and the weak-coupling one overstates far more.
+    assert ratios[1.6] > 2
+    assert ratios[0.1] > 50
+    assert ratios[0.1] > 10 * ratios[1.6]

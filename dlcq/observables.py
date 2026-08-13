@@ -45,6 +45,7 @@ __all__ = [
     "number_sum_rule",
     "valence_parton_count",
     "richardson_extrapolate",
+    "richardson_stability",
     "thooft_valence_limit",
     "spurious_zero_modes",
     "physical_indices",
@@ -265,6 +266,56 @@ def richardson_extrapolate(K_codes, masses, mg, N, n_terms=4, return_fit=False):
     if return_fit:
         return M0, last_term, coeffs, exponents
     return M0, last_term
+
+
+def richardson_stability(K_codes, masses, mg, N, n_terms=2, min_points=4):
+    """How much ``M(0)`` moves when the fit window is changed.
+
+    The paper reports "the magnitude of the last term in the series fit" as its
+    uncertainty, which :func:`richardson_extrapolate` returns.  That rule breaks
+    down at weak coupling, and not because K is too small.  The Eq. (27) basis
+    is ``1, 1/K, 1/K^(1+a), ...`` with the Eq. (26) exponent ``a``, and ``a -> 0``
+    in the chiral limit, so ``1/K^(1+a)`` collapses onto ``1/K``.  The fit stays
+    excellent -- maximum residual 1e-5 or better at every coupling, five digits
+    on M(K) -- but the coefficients blow up with near-total cancellation: 0.892
+    and 0.098 at m/g = 1.6, against 8.383 and 8.800 at m/g = 0.1.  The last term
+    is then large because the basis is degenerate, not because the answer is
+    uncertain.
+
+    This refits on every sub-window of at least ``min_points`` points and
+    returns the standard deviation of the resulting ``M(0)``.  Measured against
+    the last-term rule for the N = 3 baryon over 2K = 25-35, the latter
+    overstates by 6x at m/g = 1.6 rising to **341x at m/g = 0.1**, where the
+    extrapolation is stable to 0.2% rather than the 72% the rule reports.
+
+    **What this does not measure.**  It is the fit's sensitivity to the window,
+    not a total uncertainty.  Systematics that shift every point in the same
+    direction are invisible to it -- in particular the ``sweep_lpn``
+    particle-number truncation, and any finite-K effect the Eq. (27) form does
+    not capture.  At weak coupling the residual disagreement with the published
+    values is larger than either estimate, so something systematic remains.
+
+    Returns ``(M0, spread, n_windows)``; ``spread`` is NaN when there are too
+    few points to form more than one sub-window.
+    """
+    from itertools import combinations
+
+    K_codes = list(K_codes)
+    masses = list(masses)
+    M0, _ = richardson_extrapolate(K_codes, masses, mg, N, n_terms=n_terms)
+    n = len(K_codes)
+    fits = []
+    for size in range(min_points, n + 1):
+        for idx in combinations(range(n), size):
+            if size == n:
+                continue
+            sub = richardson_extrapolate([K_codes[i] for i in idx],
+                                         [masses[i] for i in idx],
+                                         mg, N, n_terms=n_terms)[0]
+            fits.append(sub)
+    if len(fits) < 2:
+        return M0, float("nan"), len(fits)
+    return M0, float(np.std(fits)), len(fits)
 
 
 def thooft_valence_limit(x, N, B=1):
