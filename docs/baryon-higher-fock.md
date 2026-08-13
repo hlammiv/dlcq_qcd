@@ -194,6 +194,24 @@ It is spline undershoot between the two smallest markers, which in every one of
 these panels are those at k = 5 and k = 7. At 3× magnification both markers are
 plainly there, at 1.14 and 1.71, with the spline dipping to 0.31 between them.
 
+#### Fock truncation cannot be the mechanism
+
+Re-verified against the current code, and the result is sharper than "LPN makes
+no difference". The five-quark distribution at 2K = 21 is **identical to four
+decimals** across truncations that change the basis by a factor of two:
+
+| LPN | states retained | q(x) x10^3 at k = 1..11 | corr. with published |
+|---|---|---|---|
+| 0 (none) | 193 | 6.30 5.67 3.86 4.77 3.48 1.14 | +0.7661 |
+| 5 | **95** | 6.30 5.67 3.86 4.77 3.48 1.14 | +0.7662 |
+| 7 | 175 | 6.30 5.67 3.86 4.77 3.48 1.14 | +0.7661 |
+
+Halving the basis moves nothing. The five-quark sector is effectively decoupled
+from everything above it -- unsurprising given the sector probabilities
+(2.4x10^-3 at five partons, 2.1x10^-7 at seven), but worth pinning, because a
+truncation in the original run is otherwise the most natural explanation for a
+panel that disagrees at one K and not another.
+
 #### The published 2K = 21 panel is inconsistent with the paper's own 2K = 15 panel
 
 The five-quark quark distribution is published twice, at two different K, and we
