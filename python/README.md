@@ -16,6 +16,7 @@ The translation uses:
 | `qcdf.py` | Main Python program (~1800 lines), and the reference for state generation |
 | `qcdf_opt.py` | Optimized driver: matrix builds, weeding, backend selection |
 | `qcdf_kernels.py` | `nogil` numba kernels for `clfact`/`hamqcd` and the row workers |
+| `qcdf_states.py` | `nogil` numba kernels for Fock-state generation (`brmsgn`, `prmx`, `prmm`) |
 | `input_small.json` | Small test case (K=6, LPN=4, ~5 states) |
 | `input_medium.json` | Medium test case (K=10, ~21 states) |
 | `input_original.json` | Original Fortran test case (K=24, ~818 states after weeding) |
@@ -96,7 +97,7 @@ Scaling is ~7× on 14 physical cores; past that the machine has only hyperthread
 | Fortran | Python |
 |---------|--------|
 | MAIN PROG | `main()` |
-| QCDSTA | `qcdsta()` |
+| QCDSTA | `qcdsta()`; `qcdf_opt.qcdsta_fast()` |
 | BRMSGN | `brmsgn()` |
 | PRMX | `prmx()` |
 | PRMM | `prmm()` |
@@ -107,6 +108,9 @@ Scaling is ~7× on 14 physical cores; past that the machine has only hyperthread
 | HAMQCD | `hamqcd()`; `qcdf_kernels.hamqcd_nb()` |
 | CLFACT + CLSUM + CNTRCT + BREDCE + NWTERM | `clfact_compute()`; `qcdf_kernels.clfact_nb()` |
 | EPSB (epsilon permutation table) | `qcdf_kernels.epsb_table()` |
+| BRMSGN | `brmsgn()`; `qcdf_states.brmsgn_nb()` |
+| PRMX / PRMM | `prmx()` / `prmm()`; `qcdf_states.prmx_nb()` / `prmm_nb()` |
+| STACHK | `stachk()`; `qcdf_states.stachk_nb()` |
 | WEEDR / WEEDR2 / DROPR | `weedr()` / `weedr2()` / `_dropr()` |
 | NUHAM | `nuham()` |
 | NUZ | `nuz()` |
@@ -134,5 +138,6 @@ numba
 - The Fortran code uses extensive `COMMON` blocks for global state; the Python version uses dataclass containers passed explicitly
 - Array indexing has been translated from 1-based (Fortran) to 0-based (Python) throughout
 - The color contraction engine (`clfact_compute`) faithfully reproduces the diagrammatic delta-function contraction and epsilon-tensor reduction algorithms from the original
-- The colour factor was the bottleneck for a long time; with `clfact` compiled it no longer is. A full N=3, B=1 run at 2K=29 takes ~4.9 s, of which the Hamiltonian build is 0.31 s. State generation (`qcdsta`/`prmx`, still interpreted) and the dense `eigh` now dominate
-- 2K≥31 is blocked by a fixed `kpx` cap in `prmx`, not by runtime
+- The colour factor was the bottleneck for a long time, then state generation was; with both compiled, neither is. A full N=3, B=1 run at 2K=29 takes ~1.8 s, of which the Hamiltonian build is 0.28 s and state generation 0.01 s. The dense `eigh` and the norm orthonormalization now dominate
+- The compiled generator sizes `kpx` and the state arrays to the run, so `LKPXMX`/`NMSTMX` bound only `qcdf.py`'s interpreted reference. It reaches 2K=48 (190,171 states) in 5.8 s
+- What limits reach now is memory: the norm is built dense at the pre-weeding size, 8.6 GB at 2K=37

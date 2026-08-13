@@ -21,6 +21,7 @@ from numba import njit
 from qcdf import (
     Params, StateData, PermTables, FlavorTables,
     lpnsub, qcdsta, NMSTMX, NMXFR,
+    prmx, prmm, ibarfl, imesfl, minmom, iodev,
 )
 MXTRM = 12552; MXLNG = 54; MXP = 25
 # MXLNG = 2*MXP + 4 (max right state + max operators + max left state)
@@ -458,9 +459,28 @@ def _row_tasks(norh, mstate, mstinf, numsta):
     return sorted(range(numsta), key=lambda r: -(numsta - r))
 
 
+@njit(nogil=True, cache=True)
+def _mirror_upper(a):
+    """Copy the strict upper triangle of ``a`` into its lower triangle."""
+    n = a.shape[0]
+    for i in range(n):
+        for j in range(i + 1, n):
+            a[j, i] = a[i, j]
+
+
 def _symmetrize(a):
-    """Mirror an upper-triangular build into a full symmetric matrix."""
-    return np.triu(a) + np.triu(a, 1).T
+    """Mirror an upper-triangular build into a full symmetric matrix, in place.
+
+    This was ``np.triu(a) + np.triu(a, 1).T``, which is correct but touches
+    three extra n x n arrays.  The norm is built at the *pre*-weeding size, so
+    at 2K=39 that turned a 22 GB matrix into 88 GB of live allocation and was
+    the binding memory wall -- ahead of anything about speed.  The workers fill
+    only ``j >= i``, so mirroring in place is the same result with no
+    temporaries, and being a pure copy it cannot perturb a value (which the
+    bit-exactness tests in ``tests/test_kernels.py`` would catch).
+    """
+    _mirror_upper(a)
+    return a
 
 
 def _build_threaded(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
@@ -476,9 +496,18 @@ def _build_threaded(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
     import qcdf_kernels as kern
 
     nprms, ibrpm = kern.epsb_table(N)
-    ham0 = np.zeros((NF, numsta, numsta))
-    ham = np.zeros((numsta, numsta))
-    hnorm = np.zeros((numsta, numsta))
+    # Allocate only the matrix this path fills.  Both were allocated
+    # unconditionally before, so a norm build reserved (NF+1) n^2 it never
+    # touched -- lazily faulted, so mostly address space rather than RSS, but
+    # there is no reason to reserve it.
+    if norh == 0:
+        ham0 = np.zeros((NF, 0, 0))
+        ham = np.zeros((0, 0))
+        hnorm = np.zeros((numsta, numsta))
+    else:
+        ham0 = np.zeros((NF, numsta, numsta))
+        ham = np.zeros((numsta, numsta))
+        hnorm = np.zeros((0, 0))
     tasks = _row_tasks(norh, mstate, mstinf, numsta)
 
     tls = threading.local()
@@ -525,9 +554,14 @@ def _build_process(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
     asserts the two produce identical matrices -- and as a fallback if numba is
     unavailable.
     """
-    ham0 = np.zeros((NF, numsta, numsta))
-    ham = np.zeros((numsta, numsta))
-    hnorm = np.zeros((numsta, numsta))
+    if norh == 0:
+        ham0 = np.zeros((NF, 0, 0))
+        ham = np.zeros((0, 0))
+        hnorm = np.zeros((numsta, numsta))
+    else:
+        ham0 = np.zeros((NF, numsta, numsta))
+        ham = np.zeros((numsta, numsta))
+        hnorm = np.zeros((0, 0))
     tasks = _row_tasks(norh, mstate, mstinf, numsta)
     if norh == 0:                       # this path wants plain lists
         tasks = [(r, cols.tolist()) for r, cols in tasks]
@@ -574,6 +608,158 @@ def build_matrices(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
                           selfen, cbreak, ncpus)
     log.info(f"  {label}: {time.time()-t0:.2f}s")
     return ham0, ham, hnorm
+
+# ─── State generation ────────────────────────────────────────────
+
+def _sector_list(params, lnb, lnd):
+    """The ``(nbrb, nbrd, nmes, kbrb, kbrd, kmes)`` sectors ``qcdsta`` visits.
+
+    Factored out of ``qcdf.qcdsta``'s four nested loops verbatim, so the
+    compiled driver walks them in exactly the same order.  That order is the
+    state order, and the state order is load-bearing: ``WEEDR``/``WEEDR2`` drop
+    linearly dependent states by index.
+    """
+    N, NF, B, K = params.N, params.NF, params.B, params.K
+    sectors = []
+    lmbf = lnb - N * B
+    for lmb in range(lmbf + 1):
+        nxbmx = lmb // N if params.IBAB != 0 else 0
+        for nxb in range(nxbmx + 1):
+            nbar = B + 2 * nxb
+            nmes = lmb - N * nxb
+
+            kbmn = minmom(N * (B + nxb), N, NF)
+            kdmn = minmom(N * nxb, N, NF)
+            kmmn = minmom(nmes, N, NF)
+            kbarmn = kbmn + kdmn
+            kmesmn = 2 * kmmn
+            kbarmx = K - kmesmn
+
+            if nbar == 0:
+                kbarmn, kbarmx = 0, 0
+            if nmes == 0:
+                kbarmn, kbarmx = K, K
+
+            if not ((nmes != 0 or nbar != 0)
+                    and (N * B + lmb) <= lnb and lmb <= lnd):
+                continue
+
+            nbrb = B + nxb
+            nbrd = nxb
+            noe = iodev(N)
+            nbrboe = iodev(nbrb)
+            nbrdoe = iodev(nbrd)
+
+            for kbar in range(kbarmn, kbarmx + 1):
+                kmes_val = K - kbar
+                kbrbmn = minmom(N * nbrb, N, NF)
+                kbrdmn = minmom(N * nbrd, N, NF)
+                kbrbmx = kbar - kbrdmn
+                kbrdmx = kbar - kbrbmn
+                if nbrd == 0:
+                    kbrbmn, kbrbmx = kbar, kbar
+                    kbrdmn, kbrdmx = 0, 0
+
+                for kbrb in range(kbrbmn, kbrbmx + 1):
+                    kbrd = kbar - kbrb
+                    if iodev(kmes_val) != 1:
+                        continue
+                    kbrboe = iodev(kbrb)
+                    kbrdoe = iodev(kbrd)
+                    if ((noe == 1 and kbrboe == 1 and kbrdoe == 1)
+                            or (noe == -1 and kbrboe == nbrboe
+                                and kbrdoe == nbrdoe)):
+                        sectors.append((nbrb, nbrd, nmes, kbrb, kbrd, kmes_val))
+    return sectors
+
+
+def qcdsta_fast(params, states, perm, flavtab, ncpus=1):
+    """Compiled equivalent of ``qcdf.qcdsta``.
+
+    Produces **element-identical** ``mstate``/``mstinf`` to the interpreted
+    version -- asserted in ``tests/test_states.py`` -- because state order
+    feeds weeding, which feeds the basis, which feeds the spectrum.
+
+    The permutation tables (``prmx``/``prmm``) and flavour tables
+    (``ibarfl``/``imesfl``) are built once per run and stay in Python; only
+    ``brmsgn``, which is 98% of the cost, is compiled.
+    """
+    import qcdf_states as ks
+
+    N, NF, B, K = params.N, params.NF, params.B, params.K
+    states.numsta = 0
+
+    lnb, lnd = lpnsub(N, NF, B, K)
+    log.info(f"  LPNSUB: LNB={lnb}, LND={lnd}")
+    nptmx = params.LPN if (params.LPN != 0 and params.LPN < lnb) else lnb
+    if params.LPN > (lnb + lnd):
+        params.LPN = lnb + lnd
+
+    # The momentum-partition table is the one array whose size is not knowable
+    # in advance and which grows ~1.6x per +2 in K (62k rows at 2K=35, 140k at
+    # 2K=39, ~1.5M projected at 2K=48).  Rather than hard-code an ever-larger
+    # LKPXMX, size it to the run: start from whatever PermTables allocated and
+    # double until prmx fits.  This removes LKPXMX as a ceiling entirely.
+    nuterm = np.zeros(ks.MXNP, dtype=np.int64)
+    kpx, kpxloc = perm.kpx, perm.kpxloc
+    while True:
+        numprm = ks.prmx_nb(K, nptmx, N * NF, perm.IX0, perm.IXN,
+                            kpx, kpxloc, nuterm)
+        if numprm != ks.OVERFLOW_PERM:
+            break
+        kpx = np.zeros((kpx.shape[0] * 2, ks.MXNP), dtype=np.int64)
+    perm.kpx, perm.numprm = kpx, numprm
+
+    # kpm needs only K^2/2 rows; the default LKPXMX sizing was vastly generous.
+    kpm = np.zeros((K * K // 2 + 2, 2), dtype=np.int64)
+    nprmm = ks.prmm_nb(K, kpm, perm.kpmloc)
+    if nprmm == ks.OVERFLOW_PERM:            # cannot happen; K^2/2 is exact
+        raise RuntimeError("kpm sizing bound violated")
+    perm.kpm, perm.nprmm = kpm, nprmm
+
+    ibarfl(params, flavtab)
+    imesfl(params, flavtab)
+
+    sectors = _sector_list(params, lnb, lnd)
+    log.info(f"  {len(sectors)} momentum sectors")
+
+    rmq = np.ascontiguousarray(params.rmq, dtype=np.float64)
+    iflv = np.ascontiguousarray(params.iflv, dtype=np.int64)
+    tables = (perm.kpx, perm.kpxloc, perm.kpm, perm.kpmloc, perm.IX0, perm.IXN,
+              flavtab.mbarfl, flavtab.mmesfl, flavtab.ibfdim, flavtab.imfdim)
+
+    scratch = ks.Scratch(NF)
+    ns = 0
+    for (nbrb, nbrd, nmes, kbrb, kbrd, kmes) in sectors:
+        while True:
+            r = ks.brmsgn_nb(N, NF, nbrb, nbrd, nmes, kbrb, kbrd, kmes,
+                             params.LPN, params.cutoff, K, rmq, iflv,
+                             *tables,
+                             states.mstate, states.mstinf, ns,
+                             *scratch.args())
+            if r == ks.OVERFLOW_PERM:
+                # Required size is only knowable at runtime and grows ~1.6x
+                # per +2 in K; grow and redo the sector from the same index.
+                scratch = scratch.grown(NF)
+                continue
+            if r == ks.OVERFLOW_STATES:
+                # Same treatment as kpx: the state count grows ~1.6x per +2 in
+                # K, so grow rather than making the caller guess NMSTMX.  The
+                # sector is redone from ns, overwriting its partial writes.
+                old = states.mstinf.shape[0]
+                new = max(old * 2, 1024)
+                mstinf = np.zeros((new, 8), dtype=np.int64)
+                mstinf[:old] = states.mstinf
+                mstate = np.zeros((4 * new, ks.MXNP), dtype=np.int64)
+                mstate[:4 * old] = states.mstate
+                states.mstinf, states.mstate = mstinf, mstate
+                continue
+            ns += r
+            break
+
+    states.numsta = ns
+    log.info(f"  QCDSTA complete: {ns} states generated")
+
 
 # ─── Weeding ─────────────────────────────────────────────────────
 def weed(hnorm, mstinf, numsta):

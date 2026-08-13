@@ -150,56 +150,112 @@ Select with `--backend`, `backend=` on `run_python`/`PythonProvider`, or
 `QCDF_BACKEND`. The process backend is kept because it runs the *interpreted
 reference* routines, which is what makes the equality test meaningful.
 
+## State generation
+
+The same treatment, applied to the next bottleneck. `qcdf_states.py` compiles
+`brmsgn`, `prmx`, `prmm` and their helpers with `nogil=True`; `qcdf_opt.
+qcdsta_fast` drives them. `qcdf.py` keeps its versions as the interpreted
+reference, and `tests/test_states.py` asserts the two produce
+**element-identical** `mstate`/`mstinf` — not merely the same set of states,
+because state *order* is load-bearing: `WEEDR`/`WEEDR2` drop linearly dependent
+states by index, so a permuted basis would silently change which states survive.
+
+The profile said the work was not where it looked. At 2K = 29, `brmsgn`'s own
+bytecode was 73% of generation — not a callee, but the `istate` fill loops doing
+~44 boxed `int64` item-assignments per candidate, ~9.2M per run. Underneath that
+sat three compounding wastes:
+
+- **A 46:1 candidate funnel.** 209,152 candidates were fully constructed for
+  4,529 kept; 96.3% died on `oddchk`. But `oddchk` is a *momentum-parity* test,
+  and momenta come from the `kpx`/`kpm` row picked by the quotient
+  `(ist[l,j]-1)//dim` while flavour comes from the remainder — so parity depends
+  only on the row, and `oddchk` is a conjunction over the baryon/antibaryon/meson
+  groups. Filtering each group's rows once is equivalent and collapses the funnel.
+- **1.9 MB allocated per call, 1,129 times.** `gprbig_array` allocated a fresh
+  `(ISTMAX_BG, MXNP)` table each call and wrote ~67 rows on average. Worse,
+  absent species got the same 1.9 MB and never read it — ~2.7 GB of zeroed pages
+  per run. Buffers are now caller-owned.
+- **`stachk` hashed Python dicts** — 364,389 lookups per run. Its two dicts are
+  keyed injectively on disjoint domains, so the function reduces to "does any
+  value occur more than `indx` times"; with `nptcl <= 25` a pairwise count is
+  equivalent and allocation-free.
+
+Measured, N = 3, B = 1 (interpreted vs compiled, both element-identical):
+
+| 2K | states | interpreted | compiled | |
+|---|---|---|---|---|
+| 29 | 4,529 | 1.4 s | **0.004 s** | 313× |
+| 33 | 12,471 | 9.4 s | 0.08 s | 125× |
+| 35 | 20,353 | 17.4 s | **0.02 s** | 736× |
+
+**No cap needs hand-tuning again.** `kpx` and the state arrays now double on
+demand, so `LKPXMX`/`NMSTMX` bound only the interpreted reference. Reach of the
+generator alone, which is no longer a constraint anywhere in range:
+
+| 2K | 37 | 39 | 41 | 43 | | 2K (meson) | 42 | 46 | **48** |
+|---|---|---|---|---|---|---|---|---|---|
+| states | 32,816 | 52,519 | 83,167 | 130,794 | | | 56,375 | 127,500 | **190,171** |
+| time | 0.05 s | 0.13 s | 0.23 s | 0.47 s | | | 0.83 s | 3.4 s | **5.8 s** |
+
+Threading it over momentum sectors was planned and then **measured to be
+unnecessary**: generation is now 0.2% of a run. The sectors are independent and
+the split is easy to add if the sparse work below ever makes it matter again.
+
 ## What is left
 
-**The profile has inverted.** The Hamiltonian build was 88% of a 2K = 29 run;
-it is now 6%. What dominates now:
+**The profile has inverted twice.** The Hamiltonian build was 88% of a run and
+is now 7%; state generation was 41% and is now 0.2%. What dominates at 2K = 35:
 
-| phase | 2K = 29 | share |
+| phase | time | share |
 |---|---|---|
-| state generation (`qcdsta`) | 2.02 s | **41%** |
-| dense `eigh` | 1.79 s | **37%** |
-| Hamiltonian build | 0.31 s | 6% |
-| norm build | 0.26 s | 5% |
-| weeding | 0.21 s | 4% |
-| NUZ | 0.19 s | 4% |
+| dense `eigh` (all eigenpairs) | 13.98 s | **48%** |
+| NUZ (`eigh` of the norm + scaling) | 8.68 s | **30%** |
+| weeding | 2.99 s | 10% |
+| Hamiltonian build | 2.05 s | 7% |
+| norm build | 1.36 s | 5% |
+| state generation | 0.05 s | 0.2% |
 
-**State generation is now the single largest cost** and is still pure
-interpreted Python in `qcdf.py` (`qcdsta`, `prmx`, `gprbig_array`). Compiling it
-is the next step, and it is independent of everything above.
+**It is now dense linear algebra, and the wall is memory, not time.** 2K = 37 is
+OOM-killed on a 15 GB machine. The norm is built at the *pre*-weeding size, so:
 
-It *was* also what blocked going higher — 2K = 31 died in `prmx` with `index
-25001 is out of bounds` — but that was a fixed cap, not a time limit, and the
-caps are now raised. Requirements measured on the N = 3, B = 1 baryon:
+| case | n_pre | dense n² |
+|---|---|---|
+| baryon 2K = 35 | 20,353 | 3.3 GB |
+| baryon 2K = 37 | 32,816 | 8.6 GB |
+| baryon 2K = 39 | 52,519 | 22.1 GB |
+| baryon 2K = 41 | 83,167 | 55.3 GB |
 
-| 2K | partons | KPX perms | states pre → post | run |
-|---|---|---|---|---|
-| 29 | 11 | 18801 | 4529 → 1274 | 2.9 s |
-| 31 | 13 | 32072 | 7569 → 1983 | 7.8 s |
-| 33 | 13 | 45013 | 12471 → 3032 | 16 s |
-| 35 | 13 | 62290 | 20353 → 4610 | 46 s |
+`_symmetrize` used to multiply that by four (`np.triu(a) + np.triu(a,1).T`
+touches three extra n² arrays); it now mirrors in place. The immediate remaining
+offender is `weed_fortran`, which densifies `|N| > 1e-9` into a CSR matrix
+(`dlcq/read_python.py:158`) — `np.abs(A)` alone is another full n² — to recover
+block labels that `qcdf_opt._config_keys` already computes in O(n·L) without
+touching the matrix. That is what kills 2K = 37 today.
 
-The old caps were `LKPXMX = 25001` and `NMSTMX = 6902`, both inherited from
-`qcdf.f`; they now sit at 80000 and 25000, costing ~37 MB of zeroed array per
-run instead of ~11 MB. `MXNP = 25` is **not** binding — `lpnsub` caps this
-channel at 13 partons — and `MXKMX`/`MAXK_CLF` have ample headroom.
-`ISTMAX_SM` is dead code.
+**The sparse rewrite, now the only thing between here and 2K = 48.** Density
+falls steadily, which is what makes the target reachable:
 
-Raising `NMSTMX` also required fixing a latent allocation in `qcdf.py`'s own
-`main()`: `z_full` was sized `NMSTMX × NMSTMX` regardless of the problem, which
-was 381 MB wasted at the old cap and would have been 5 GB at the new one. `nuz`
-and `nuham` only ever touch `[:numsta]`.
+| 2K | n_post | nnz/row | density |
+|---|---|---|---|
+| 21 | 193 | 50.3 | 26.05% |
+| 25 | 510 | 85.0 | 16.67% |
+| 29 | 1,274 | 136.0 | 10.68% |
+| 31 | 1,983 | 169.0 | 8.52% |
 
-Past 2K = 35, raise the caps again; each overflow path now names the constant.
+`n` grows 1.58× per +2 in K; `nnz/row` only 1.25×. Extrapolated to 2K = 48:
+~150k states at ~0.7% density, so **sparse H is ~2 GB where dense is 185 GB**.
+The norm is better still — block-diagonal, maximum block size 6 → 11.
 
-**The dramatic option, not attempted.** Every eigenvalue is computed, by dense
-`eigh`, when the figures and Table I need only the lowest few. A matrix-free
-formulation — applying H to a vector directly and using Lanczos — would replace
-O(n²) stored elements and O(n³) diagonalization with O(nnz) per matvec. That is
-a real rewrite and would need validating state by state, but with the build cost
-gone it is now the other half of what stands between here and 2K ≫ 30.
+The pieces: block-diagonal norm built from `_config_keys` labels and never
+materialized; `Z` stored as blocks (it is provably block-diagonal under
+`orthonormalize_blockwise`, yet assembled dense today); sparse H with candidate
+pairs enumerated from configuration keys plus the exact **|ΔL| ≤ 2** rule
+(measured over every non-zero off-diagonal at 2K = 21 and 23 — not one couples
+states differing by more than one qq̄ pair — and still unused); and Lanczos for
+the lowest ~30 eigenvalues instead of a full `eigh`. Nothing downstream needs
+more: the figures use at most 30 eigenvalues and 11 eigenvectors, and
+`DLCQResult` already tolerates fewer eigenvectors than eigenvalues.
 
-**A selection rule still unused.** |ΔL| ≤ 2 holds exactly: measured over every
-non-zero off-diagonal at 2K = 21 and 23, not one couples states differing by
-more than one qq̄ pair. The four-mismatch filter already captures it; skipping
-those pairs before the matching loop would save ~16% of a now-small cost.
+`Z^T H0 Z` need never be formed at all: `H0 = D·N` with `D` constant on each
+norm block (off-diagonal of `N⁻¹H0` measured at 7e-15), so in a blockwise basis
+it is diagonal by construction.

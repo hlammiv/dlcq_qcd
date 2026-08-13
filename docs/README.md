@@ -43,9 +43,11 @@ apparent disagreement.
 Yes, decisively: 2K = 29 runs in 4.9 s. Records the measurement that redirected
 the parallel work — the process pool's bottleneck was *not* IPC (2.4 MB per
 build, 2 ms to accumulate) but the fact that `clfact` and `hamqcd` were never
-compiled — and what compiling them `nogil` and threading them bought. Also where
-the time goes now that the build is 6% of a run rather than 88%: state
-generation and the dense `eigh`.
+compiled — and what compiling them `nogil` and threading them bought. Then the
+same for state generation, which the profile showed was 96% wasted work: 209,152
+candidates built for 4,529 kept, because a momentum-parity test ran per candidate
+instead of per momentum row. Also where the time goes now that the build is 7% of
+a run and generation 0.2%: dense linear algebra, and a memory wall at 2K = 37.
 
 **[flavour.md](flavour.md)** — NF > 1 was added to `qcdf.f` in 1990 and no figure
 in the paper uses it, so it shipped untested. It is the obvious direction for new

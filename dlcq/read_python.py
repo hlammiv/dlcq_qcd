@@ -299,7 +299,12 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
     flav = base.FlavorTables()
     selfen = opt.compute_selfen(N) if use_opt else base.compute_selfen(p)
 
-    base.qcdsta(p, states, perm, flav)
+    # qcdsta_fast produces element-identical mstate/mstinf (tests/test_states.py)
+    # and grows its own tables, so it is not bound by LKPXMX/NMSTMX.
+    if use_opt:
+        opt.qcdsta_fast(p, states, perm, flav)
+    else:
+        base.qcdsta(p, states, perm, flav)
     numsta_pre = states.numsta
     if numsta_pre == 0:
         return DLCQResult(N=N, NF=NF, B=B, K_code=K_code, rlamb=rlamb,
