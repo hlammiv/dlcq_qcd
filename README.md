@@ -113,6 +113,15 @@ instead, and checks itself against the value at the frame bottom, which must
 come out zero. And Fig. 6(d)'s K is never stated in its caption; it is 24, not
 the 22 we first assumed, which alone accounted for that panel's disagreement.
 
+## Speed
+
+The Python port is **7–11× faster than `qcdf.f` as shipped** and 3–4× faster
+than an `-O2` rebuild of it — numba-compiled and parallel, against a serial
+unoptimized F77. (The shipped binary carries no optimization flag deliberately:
+rebuilding at `-O2` changes its own answer, see
+[docs/basis-dependence.md](docs/basis-dependence.md).) Details and the remaining
+opportunities are in [docs/performance.md](docs/performance.md).
+
 ## Reach
 
 The paper extrapolates over 2K = 16–24. That window is set by cost, and the cost
@@ -129,11 +138,11 @@ dependent on states in its own block and both weeding stages decompose. At
 
 | 2K | states | before | after |
 |---|---|---|---|
-| 21 | 502 → 193 | 18 s | **5.8 s** |
-| 23 | 897 → 319 | 53 s | **13.8 s** |
-| 25 | 1559 → 510 | 283 s | **32 s** |
-| 27 | 2692 → 818 | did not finish in 5 min | **77 s** |
-| 29 | 4529 → 1274 | — | **180 s** |
+| 21 | 502 → 193 | 18 s | **3.6 s** |
+| 23 | 897 → 319 | 53 s | **8.6 s** |
+| 25 | 1559 → 510 | 283 s | **16.5 s** |
+| 27 | 2692 → 818 | did not finish in 5 min | **37 s** |
+| 29 | 4529 → 1274 | — | ~**180 s** |
 
 So 2K = 29 is now routine where 2K = 25 had been the practical limit, and the
 extrapolation window can be widened past the paper's. The two passes are not

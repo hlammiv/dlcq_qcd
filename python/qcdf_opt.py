@@ -380,14 +380,41 @@ def _init_worker(mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak, norh):
     _g_N = N; _g_NF = NF; _g_B = B; _g_K = K
     _g_selfen = selfen; _g_cbreak = cbreak; _g_norh = norh
 
-def _worker_row_global(nstrt):
-    """Compute one row using global (forked) state — no pickling of arrays."""
+def _config_keys(mstate, mstinf, numsta):
+    """One hashable key per state: its multiset of (type, momentum, flavour).
+
+    Two states can have a non-zero norm element only if these agree exactly --
+    the worker's own filter already demands it, and tools/colour_norm.py
+    confirms the norm is block-diagonal in exactly this grouping.  Computing
+    the key once per state, in O(n L), replaces an O(n^2 L^2) scan over pairs
+    that almost all fail.
+    """
+    keys = []
+    for s in range(numsta):
+        loc = mstinf[s, 0] - 1
+        L = mstinf[s, 1]
+        keys.append(tuple(sorted(
+            (int(mstate[loc, j]), int(mstate[loc + 2, j]), int(mstate[loc + 3, j]))
+            for j in range(L))))
+    return keys
+
+
+def _worker_row_global(task):
+    """Compute one row using global (forked) state — no pickling of arrays.
+
+    ``task`` is either a row index (visit every column at or after it) or a
+    ``(row, columns)`` pair naming exactly the columns that can be non-zero.
+    """
+    if isinstance(task, tuple):
+        nstrt, cols = task
+    else:
+        nstrt, cols = task, None
     mstate=_g_mstate; mstinf=_g_mstinf; numsta=_g_numsta
     N=_g_N; NF=_g_NF; B=_g_B; K=_g_K; selfen=_g_selfen; cbreak=_g_cbreak; norh=_g_norh
 
     lr=mstinf[nstrt,0]-1; lstr=mstinf[nstrt,1]; matrt=mstate[lr:lr+4,:MXP].copy()
     rh0=np.zeros((NF,numsta)); rh=np.zeros(numsta); rn=np.zeros(numsta)
-    for nstlt in range(nstrt, numsta):
+    for nstlt in (range(nstrt, numsta) if cols is None else cols):
         ll=mstinf[nstlt,0]-1; lstl=mstinf[nstlt,1]; matlt=mstate[ll:ll+4,:MXP].copy()
         used=np.zeros(lstl,dtype=bool); sb=sd=0
         for ir in range(lstr):
@@ -415,14 +442,31 @@ def build_matrices(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak, nc
     t0=time.time(); label="norm" if norh==0 else "ham"
     log.info(f"  {label} ({numsta}², {ncpus} cpus)...")
 
+    # The norm couples only states with identical parton content, so group by
+    # that and hand each row just its own group's columns.  For the Hamiltonian
+    # a four-point vertex allows up to four mismatches, so every pair has to be
+    # visited and the full triangle stands.
+    if norh == 0:
+        groups = {}
+        for s, key in enumerate(_config_keys(mstate, mstinf, numsta)):
+            groups.setdefault(key, []).append(s)
+        tasks = [(r, [c for c in groups[k] if c >= r])
+                 for k in groups for r in groups[k]]
+        tasks.sort(key=lambda t: -len(t[1]))     # longest first, for balance
+    else:
+        # Row r does numsta-r elements, so contiguous chunks are badly
+        # unbalanced; interleaving pairs a long row with a short one.
+        tasks = sorted(range(numsta), key=lambda r: -(numsta - r))
+
     if ncpus > 1 and numsta > 10:
         # Use initializer to share state via fork — no pickling of arrays!
         with Pool(ncpus, initializer=_init_worker,
                   initargs=(mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak, norh)) as pool:
-            results = pool.map(_worker_row_global, range(numsta))
+            # chunksize=1: dynamic scheduling, since per-row cost varies a lot.
+            results = pool.map(_worker_row_global, tasks, chunksize=1)
     else:
         _init_worker(mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak, norh)
-        results = [_worker_row_global(r) for r in range(numsta)]
+        results = [_worker_row_global(t) for t in tasks]
 
     for r,rh0,rh,rn in results:
         if norh==0: hnorm[r,r:numsta]+=rn[r:]; hnorm[r:numsta,r]=hnorm[r,r:numsta]

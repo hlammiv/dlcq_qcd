@@ -39,6 +39,12 @@ apparent disagreement.
 
 ## Ready for new work
 
+**[performance.md](performance.md)** — is the Python faster than the Fortran?
+Yes: 7–11× as shipped, 3–4× against an `-O2` rebuild, because it is
+numba-compiled and parallel where `qcdf.f` is serial. Also where the time now
+goes, the two structural optimizations applied so far, and what is left on the
+table (parallel efficiency, and a matrix-free rewrite).
+
 **[flavour.md](flavour.md)** — NF > 1 was added to `qcdf.f` in 1990 and no figure
 in the paper uses it, so it shipped untested. It is the obvious direction for new
 work (kaon and strange-baryon analogues), and it works — validated by both sum
