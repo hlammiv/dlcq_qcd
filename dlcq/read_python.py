@@ -113,7 +113,53 @@ def _weed_indices(A, eps=1e-4, max_iter=2000):
     return idx
 
 
-def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000, blocked=True):
+def _labels_from_matrix(A):
+    """Block labels via connected components of ``|A| > 1e-9``.
+
+    The fallback for callers that cannot supply the state list.  Materializes
+    dense ``n x n`` temporaries, so prefer :func:`config_block_labels`.
+    """
+    from scipy.sparse import csr_matrix
+    from scipy.sparse.csgraph import connected_components
+
+    adj = csr_matrix((np.abs(A) > 1e-9).astype(np.int8))
+    return connected_components(adj, directed=False)[1]
+
+
+def config_block_labels(mstate, mstinf, numsta):
+    """Block labels for the norm matrix, straight from the state list.
+
+    The norm couples two states only if their parton content is identical, so
+    the multiset of ``(type, momentum, flavour)`` labels the blocks -- in
+    ``O(n L)``, without touching the matrix.  This is the same grouping
+    ``qcdf_opt._config_keys`` uses to schedule the norm build.
+
+    It is *coarser* than the connected components of ``|N| > 1e-9``: a few
+    configuration groups split further because their states happen to be
+    colour-orthogonal (119 groups vs 120 components at 2K=21, 567 vs 577 at
+    2K=29).  Coarser is safe -- weeding a superset of a block is still exact,
+    just marginally more work -- and measured, both retain exactly the rank of
+    the Gram matrix at 2K=21/25/29 and B=0/1.
+
+    The alternative, ``csr_matrix(np.abs(A) > 1e-9)``, has to materialize two
+    more dense ``n x n`` arrays to recover labels it could have had for free.
+    At 2K=37 the norm is already 8.6 GB, so that is what runs a 15 GB machine
+    out of memory.
+    """
+    keys = {}
+    labels = np.empty(numsta, dtype=np.int64)
+    for s in range(numsta):
+        loc = int(mstinf[s, 0]) - 1
+        L = int(mstinf[s, 1])
+        key = tuple(sorted(
+            (int(mstate[loc, j]), int(mstate[loc + 2, j]), int(mstate[loc + 3, j]))
+            for j in range(L)))
+        labels[s] = keys.setdefault(key, len(keys))
+    return labels
+
+
+def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000,
+                 blocked=True, labels=None, return_kept=False):
     """Faithful port of Fortran ``WEEDR`` + ``WEEDR2``.
 
     Stage 1 (``WEEDR``) removes states whose norm row is proportional to an
@@ -152,14 +198,11 @@ def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000, blocked=True):
     mstinf = np.array(mstinf, copy=True)
 
     if blocked and numsta > 1:
-        from scipy.sparse import csr_matrix
-        from scipy.sparse.csgraph import connected_components
-
-        adj = csr_matrix((np.abs(A) > 1e-9).astype(np.int8))
-        nblocks, labels = connected_components(adj, directed=False)
+        if labels is None:
+            labels = _labels_from_matrix(A)
         keep = []
-        for b in range(nblocks):
-            members = np.flatnonzero(labels == b)
+        for b in np.unique(labels[:numsta]):
+            members = np.flatnonzero(labels[:numsta] == b)
             sub = _weed_indices(A[np.ix_(members, members)], eps, max_iter)
             keep.extend(int(members[i]) for i in sub)
         keep.sort()
@@ -167,10 +210,13 @@ def weed_fortran(hnorm, mstinf, numsta, eps=1e-4, max_iter=2000, blocked=True):
         keep = _weed_indices(A, eps, max_iter)
 
     keep = np.asarray(keep, dtype=int)
-    return A[np.ix_(keep, keep)].copy(), mstinf[keep], int(keep.size)
+    out = (A[np.ix_(keep, keep)].copy(), mstinf[keep], int(keep.size))
+    # `return_kept` lets the caller carry block labels across the deletion
+    # instead of rediscovering them from the weeded matrix.
+    return out + (keep,) if return_kept else out
 
 
-def orthonormalize_blockwise(hnorm, numsta, tol=1e-8):
+def orthonormalize_blockwise(hnorm, numsta, tol=1e-8, labels=None):
     """Build Z block by block, which makes the Fortran's assembly well-posed.
 
     ``qcdf.f`` adds the free Hamiltonian to the diagonal only of ``Z^T H0 Z``,
@@ -193,15 +239,12 @@ def orthonormalize_blockwise(hnorm, numsta, tol=1e-8):
 
     Returns ``(Z, kept_columns)``.
     """
-    import scipy.sparse as sp
-    from scipy.sparse.csgraph import connected_components
-
-    A = sp.csr_matrix((np.abs(hnorm[:numsta, :numsta]) > 1e-9).astype(np.int8))
-    nblocks, labels = connected_components(A, directed=False)
+    if labels is None:
+        labels = _labels_from_matrix(np.asarray(hnorm)[:numsta, :numsta])
 
     cols = []
-    for b in range(nblocks):
-        idx = np.flatnonzero(labels == b)
+    for b in np.unique(labels[:numsta]):
+        idx = np.flatnonzero(labels[:numsta] == b)
         w, v = eigh(hnorm[np.ix_(idx, idx)])
         keep = w > tol
         if not np.any(keep):
@@ -322,14 +365,22 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         _, _, hnorm = base.clrdis(0, p, states, selfen, ncpus=ncpus)
     mstinf = states.mstinf[:numsta_pre].copy()
 
+    # Block labels from the state list, not by thresholding the matrix: the
+    # latter costs two more dense n x n temporaries on top of a norm that is
+    # already 8.6 GB at 2K=37.  See config_block_labels.
+    labels = config_block_labels(states.mstate, mstinf, numsta_pre)
+
     # ── weed ──
     if policy == "fortran":
-        hnorm_w, mstinf_w, numsta = weed_fortran(hnorm, mstinf, numsta_pre)
+        hnorm_w, mstinf_w, numsta, kept = weed_fortran(
+            hnorm, mstinf, numsta_pre, labels=labels, return_kept=True)
         w_n, z_n = eigh(hnorm_w[:numsta, :numsta])
         Z = z_n / np.sqrt(w_n)[np.newaxis, :]          # NUZ
     elif policy == "blockwise":
-        hnorm_w, mstinf_w, numsta = weed_fortran(hnorm, mstinf, numsta_pre)
-        Z, _ = orthonormalize_blockwise(hnorm_w, numsta)
+        hnorm_w, mstinf_w, numsta, kept = weed_fortran(
+            hnorm, mstinf, numsta_pre, labels=labels, return_kept=True)
+        Z, _ = orthonormalize_blockwise(hnorm_w, numsta,
+                                        labels=labels[kept])
     elif policy == "spectral":
         hnorm_w, mstinf_w, numsta, Z = weed_spectral(hnorm, mstinf, numsta_pre)
     else:

@@ -403,3 +403,96 @@ def test_the_norm_really_is_block_diagonal():
     ncomp, _ = connected_components(
         csr_matrix((np.abs(N[:n, :n]) > 1e-9).astype(np.int8)), directed=False)
     assert ncomp > n / 4, f"only {ncomp} blocks among {n} states"
+
+
+def test_config_labels_match_the_matrix_derived_blocks():
+    """Block labels from the state list agree with those from the norm matrix.
+
+    ``weed_fortran`` used to recover its blocks by thresholding the assembled
+    norm -- ``csr_matrix(np.abs(A) > 1e-9)`` -- which costs two more dense n x n
+    temporaries on top of a matrix that is already 8.6 GB at 2K=37.  That is
+    what ran a 15 GB machine out of memory.  ``config_block_labels`` gets the
+    same blocks in O(n L) from the parton content, which is what makes them
+    block-diagonal in the first place.
+
+    The two are not identical: configuration groups are *coarser*, because a
+    few groups split further when their states happen to be colour-orthogonal.
+    Coarser is safe -- weeding a superset of a block is still exact -- and what
+    must hold is that no component straddles two configuration groups, and that
+    both retain the same basis.
+    """
+    import numpy as np
+
+    import qcdf as base
+    import qcdf_opt as opt
+    from dlcq.read_python import (_labels_from_matrix, config_block_labels,
+                                  weed_fortran)
+
+    for B, K in ((1, 21), (0, 24)):
+        p = base.Params()
+        p.N, p.NF, p.B, p.K, p.rlamb = 3, 1, B, K, 0.3325
+        p.cutoff, p.LPN = -1.0, 0
+        p.iflv[0] = 3 * B
+        st = base.StateData()
+        opt.qcdsta_fast(p, st, base.PermTables(), base.FlavorTables())
+        n = st.numsta
+        _, _, hn = opt.build_matrices(0, st.mstate, st.mstinf, n,
+                                      3, 1, B, K, opt.compute_selfen(3),
+                                      p.cbreak, 4)
+        A = hn[:n, :n]
+        mi = st.mstinf[:n].copy()
+
+        from_matrix = _labels_from_matrix(A)
+        from_states = config_block_labels(st.mstate, mi, n)
+
+        # Every matrix-derived component must sit inside one config group.
+        for c in np.unique(from_matrix):
+            assert len(set(from_states[from_matrix == c].tolist())) == 1, (
+                f"component {c} straddles two configuration groups")
+
+        # And the weeding outcome must be the same basis size -- which is the
+        # rank of the Gram matrix, so neither labelling loses a direction.
+        rank = int(np.sum(np.abs(np.linalg.eigvalsh(A)) > 1e-8))
+        _, _, n_matrix = weed_fortran(A, mi, n, labels=from_matrix)
+        _, _, n_states = weed_fortran(A, mi, n, labels=from_states)
+        assert n_matrix == n_states == rank, (
+            f"B={B} 2K={K}: matrix {n_matrix}, states {n_states}, rank {rank}")
+
+
+def test_weeding_removes_exactly_the_null_space():
+    """Weeding is redundancy removal, not truncation.
+
+    The Fock basis is non-orthogonal -- different colour contractions of the
+    same partons are linear combinations of each other -- so the Gram matrix is
+    singular and ``Z = N^-1/2`` does not exist until the dependent states go.
+    What must hold is that the retained count equals the *rank*: no independent
+    direction is discarded, so the span, and with it the physics, is unchanged.
+
+    The threshold has enormous margin: the smallest retained norm eigenvalue is
+    6.0 and the largest discarded is ~1e-12.
+    """
+    import numpy as np
+
+    import qcdf as base
+    import qcdf_opt as opt
+    from dlcq.read_python import config_block_labels, weed_fortran
+
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = 3, 1, 1, 21, 0.3325
+    p.cutoff, p.LPN = -1.0, 0
+    p.iflv[0] = 3
+    st = base.StateData()
+    opt.qcdsta_fast(p, st, base.PermTables(), base.FlavorTables())
+    n = st.numsta
+    _, _, hn = opt.build_matrices(0, st.mstate, st.mstinf, n, 3, 1, 1, 21,
+                                  opt.compute_selfen(3), p.cbreak, 4)
+    A = hn[:n, :n]
+    w = np.sort(np.abs(np.linalg.eigvalsh(A)))
+    rank = int(np.sum(w > 1e-8))
+
+    labels = config_block_labels(st.mstate, st.mstinf[:n], n)
+    _, _, kept = weed_fortran(A, st.mstinf[:n].copy(), n, labels=labels)
+    assert kept == rank, f"kept {kept} but rank is {rank}"
+
+    # The gap the eps=1e-4 threshold sits in, spanning ~12 orders of magnitude.
+    assert w[n - rank - 1] < 1e-9 < 1.0 < w[n - rank]
