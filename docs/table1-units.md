@@ -157,7 +157,49 @@ Refitting on every 4- and 5-point sub-window measures the actual stability:
 So the rows the paper marks unreliable are far better determined than its own
 error rule reports — at m/g = 0.1 the extrapolation is stable to 0.2%, not 72%.
 
-## What is left is concentrated in SU(4)
+## The dominant uncertainty is the fit form, not the truncation
+
+Two hypotheses for the residual disagreement were tested. The first was wrong.
+
+**Not the particle-number truncation.** The sweeps run under ``sweep_lpn`` --
+valence plus one qqbar pair -- and the three worst entries were all N = 4,
+where SU(4)'s richer colour structure should make that bite hardest. Raising
+LPN by a full pair (meson 4 -> 6 partons, baryon 6 -> 8) moves the extrapolated
+values in the **fourth decimal** and leaves every pull unchanged:
+
+| | LPN | ours | paper | pull |
+|---|---|---|---|---|
+| meson N=4, m/g = 0.80 | 4 | 4.7349 | 4.743 | 4.0 |
+| meson N=4, m/g = 0.80 | **6** | 4.7348 | 4.743 | **4.1** |
+| baryon N=4, m/g = 1.60 | 6 | 20.4561 | 21.200 | 2.5 |
+| baryon N=4, m/g = 1.60 | **8** | 20.4560 | 21.200 | **2.5** |
+
+**It is the number of correction terms.** ``figure_fits`` shows why: the data
+live at 1/K in [0.057, 0.080] and the answer is at 1/K = 0, so the fit crosses
+a gap as wide as the data range itself, and the curvature across that gap is
+set by the assumed series rather than by anything measured. Varying ``n_terms``
+moves M(0) far more than either the window or the truncation:
+
+| case | m/g | n=1 | n=2 | n=3 | n=4 | paper |
+|---|---|---|---|---|---|---|
+| meson N=4 | 0.80 | 4.707 | 4.735 | **4.742** | 4.745 | **4.743** |
+| baryon N=4 | 0.80 | 20.555 | 20.823 | **20.907** | 20.930 | **20.900** |
+| baryon N=3 | 0.20 | 2.696 | 3.029 | 3.191 | 3.323 | 3.100 |
+
+Two of the three worst entries land on the published value at three correction
+terms. So ``n_terms=2`` is systematically low at weak coupling, and the "pull
+4.0" was never a physics disagreement.
+
+Measured across N = 3, 4 and m/g = 1.6, 0.8, 0.2, the spread over
+``n_terms`` in 2..4 exceeds the sub-window spread by **7-18x at every point**.
+
+**Consequence for :func:`richardson_stability`.** It cannot see this, by
+construction: every sub-window uses the same form over the same narrow range in
+1/K. It measures window sensitivity honestly and is silent on the term that
+dominates. Any quotable error bar needs the form spread added -- and the real
+fix is data nearer 1/K = 0, where the choice of form stops mattering.
+
+## The SU(4) rows, for the record
 
 After widening the window, every entry with a pull above 1.5 is an N = 4 one:
 

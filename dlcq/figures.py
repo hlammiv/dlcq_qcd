@@ -49,7 +49,7 @@ from .units import (code_to_M_over_g, lambda_to_mg, mg_to_lambda,
                     thooft_rescale)
 
 __all__ = ["figure1", "figure2", "figure3", "figure4", "figure5",
-           "figure6", "figure7", "figure8", "table1", "FIGURES"]
+           "figure6", "figure7", "figure8", "table1", "figure_fits", "FIGURES"]
 
 _ROOT = Path(__file__).resolve().parent.parent
 FIGDIR = _ROOT / "figures"
@@ -292,19 +292,13 @@ def figure6(provider, source):
 MG_TABLE = [1.6, 0.8, 0.4, 0.2, 0.1, 0.05, 0.0]
 
 
-def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
-    """Lightest state extrapolated to the continuum via Eq. (27).
+def _mass_series(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
+    """The ``(2K, mass)`` points a Richardson fit is built from.
 
-    ``msq_units=False`` returns M/g, the quantity Figs. 7 and 8 plot.
-    ``msq_units=True`` returns M^2/(m^2+g^2/pi), the quantity **Table I**
-    tabulates despite its M/g headers -- see docs/table1-units.md.
+    Factored out so ``figure_fits`` plots exactly the points
+    ``_extrapolated_mass`` fits -- if they could drift apart, the diagnostic
+    would stop diagnosing.
     """
-    if mg == 0.0:
-        # Exact: the lightest state is massless for any N, B, K (Eq. 16).
-        return 0.0, 0.0
-    # Sweeps use the exact coupling.  paper_lambda's rounded 0.3325 exists only
-    # to match the preserved Fig. 5/6 runs; using it here would miss every
-    # swept run and silently return "no data".
     lam = float(mg_to_lambda(mg))
     Ks, masses = [], []
     for K in K_codes:
@@ -318,6 +312,23 @@ def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
         Ks.append(K)
         ev = float(r.eigenvalues[phys[0]])
         masses.append(ev if msq_units else code_to_M_over_g(ev, lam))
+    return Ks, masses
+
+
+def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
+    """Lightest state extrapolated to the continuum via Eq. (27).
+
+    ``msq_units=False`` returns M/g, the quantity Figs. 7 and 8 plot.
+    ``msq_units=True`` returns M^2/(m^2+g^2/pi), the quantity **Table I**
+    tabulates despite its M/g headers -- see docs/table1-units.md.
+    """
+    if mg == 0.0:
+        # Exact: the lightest state is massless for any N, B, K (Eq. 16).
+        return 0.0, 0.0
+    # Sweeps use the exact coupling.  paper_lambda's rounded 0.3325 exists only
+    # to match the preserved Fig. 5/6 runs; using it here would miss every
+    # swept run and silently return "no data".
+    Ks, masses = _mass_series(provider, N, B, mg, K_codes, msq_units, lpn)
     if len(Ks) < 3:
         return None, None
     return richardson_extrapolate(Ks, masses, mg, N, n_terms=2)
@@ -509,6 +520,99 @@ def table1(provider, source, N_values=(2, 3, 4), K_lo=16, K_hi=24):
     return rows
 
 
+def figure_fits(provider, source, K_lo=25, K_hi=35, lpn=None,
+                N_values=(2, 3, 4), n_terms=2):
+    """One panel per Table I entry: the data, the fit, and the published value.
+
+    Every number in Table I is an extrapolation, and an extrapolation is only
+    as trustworthy as the fit behind it.  This plots each one so it can be
+    checked by eye rather than taken on the strength of a residual: the
+    computed M^2(K) against 1/K_paper, the fitted Eq. (27) series continued to
+    the axis, the extrapolated M(0) as a star, and the paper's value as a
+    horizontal band whose half-width is its own quoted last term.
+
+    What to look for.  The points should sit on a gently curving line that the
+    fit follows without wiggling; the star should be a short, believable
+    extension of it rather than a long extrapolation from a steep tail.  A fit
+    that has to bend sharply between the last point and the axis is the visual
+    signature of the coefficient blow-up documented in docs/table1-units.md,
+    where the Eq. (26) exponent a -> 0 makes 1/K^(1+a) collapse onto 1/K.
+
+    ``lpn=None`` uses ``sweep_lpn``; pass a larger value to see the truncation
+    move the points.
+    """
+    from .observables import richardson_stability
+
+    paper = _load_paper_table1()
+    mgs = [mg for mg in MG_TABLE if mg > 0]
+    cols = ([("mes", N, 0) for N in N_values]
+            + [("bar", N, 1) for N in (3, 4) if N in N_values])
+
+    fig, axes = plt.subplots(len(mgs), len(cols),
+                             figsize=(3.5 * len(cols), 2.7 * len(mgs)),
+                             squeeze=False)
+
+    for i, mg in enumerate(mgs):
+        for j, (q, N, B) in enumerate(cols):
+            ax = axes[i][j]
+            Ks, ms = _mass_series(provider, N, B, mg,
+                                  _K_grid(B, N, K_lo, K_hi),
+                                  msq_units=True, lpn=lpn)
+            if len(Ks) < 3:
+                ax.text(0.5, 0.5, "no data", ha="center", va="center",
+                        transform=ax.transAxes, fontsize=8, color="0.5")
+                ax.set_xticks([]); ax.set_yticks([])
+                continue
+
+            M0, last, coeffs, exps = richardson_extrapolate(
+                Ks, ms, mg, N, n_terms=n_terms, return_fit=True)
+            _, spread, _ = richardson_stability(Ks, ms, mg, N, n_terms=n_terms)
+
+            Kp = np.asarray(Ks) / 2.0
+            inv = 1.0 / Kp
+            # The fitted series, continued to the axis.
+            grid = np.linspace(0.0, inv.max() * 1.05, 200)
+            curve = np.zeros_like(grid)
+            for c, e in zip(coeffs, exps):
+                curve += c * np.where(grid > 0, grid, 0.0) ** e if e else c
+            ax.plot(grid, curve, "-", color="C0", lw=1.2, zorder=1)
+            ax.plot(inv, ms, "o", color="k", markersize=4, zorder=3)
+            ax.plot([0], [M0], "*", color="C3", markersize=13, zorder=4)
+
+            row = paper.get((q, N, mg))
+            if row is not None:
+                pv, pe = row
+                ax.axhspan(pv - pe, pv + pe, color="C2", alpha=0.18, zorder=0)
+                ax.axhline(pv, color="C2", lw=1.0, ls="--", zorder=2)
+                pull = abs(pv - M0) / pe if pe else float("nan")
+                note = f"pull {pull:.1f}"
+            else:
+                note = "no paper value"
+
+            ax.set_xlim(left=-0.02 * inv.max())
+            ax.set_title(f"{q} SU({N}),  m/g={mg}", fontsize=9)
+            ax.text(0.03, 0.04,
+                    f"M(0)={M0:.4f}\nlast-term {last:.2g}\n"
+                    f"stability {spread:.1g}\n{note}",
+                    transform=ax.transAxes, fontsize=6.5, va="bottom",
+                    bbox=dict(fc="white", ec="0.8", alpha=0.85, pad=1.5))
+            if i == len(mgs) - 1:
+                ax.set_xlabel(r"$1/K$", fontsize=8)
+            if j == 0:
+                ax.set_ylabel(r"$M^2/(m^2+g^2/\pi)$", fontsize=8)
+            ax.tick_params(labelsize=7)
+
+    trunc = "sweep_lpn" if lpn is None else f"LPN={lpn}"
+    fig.suptitle(f"Richardson fits behind Table I  --  2K = {K_lo}-{K_hi}, "
+                 f"{trunc}, {n_terms} correction terms  [{source}]\n"
+                 f"black = computed, blue = Eq. (27) fit, red star = M(0), "
+                 f"green band = paper value +- its quoted last term",
+                 fontsize=9)
+    fig.subplots_adjust(top=0.94)
+    tag = f"_2K{K_lo}-{K_hi}" + ("" if lpn is None else f"_LPN{lpn}")
+    return _finish(fig, f"table1_fits{tag}", source)
+
+
 def _load_paper_table1():
     """Table I as printed, keyed by (quantity, N, m/g) -> (value, last_term)."""
     import csv
@@ -535,6 +639,8 @@ def main(argv=None):
     ap.add_argument("--fig", nargs="+", type=int, default=None,
                     help="figure numbers (default: the cheap ones, 1 3 4 5 6)")
     ap.add_argument("--table1", action="store_true")
+    ap.add_argument("--fits", action="store_true",
+                    help="diagnostic: the Richardson fit behind every Table I entry")
     ap.add_argument("--table1-window", nargs=2, type=int, metavar=("LO", "HI"),
                     default=(16, 24),
                     help="Richardson window in 2K (paper: 16 24)")
@@ -568,6 +674,11 @@ def main(argv=None):
         print(f"Table I [{args.source}]:")
         table1(provider, args.source,
                K_lo=args.table1_window[0], K_hi=args.table1_window[1])
+
+    if args.fits:
+        print(f"Table I fits [{args.source}]:")
+        figure_fits(provider, args.source,
+                    K_lo=args.table1_window[0], K_hi=args.table1_window[1])
 
 
 if __name__ == "__main__":
