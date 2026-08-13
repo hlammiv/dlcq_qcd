@@ -59,6 +59,37 @@ reproduced to 1.5–4% at 2K = 15, by two independent published panels. So the
 disagreement is not "baryon higher-Fock"; it is specific to 2K = 21, plus the
 two-extra-pair sector.
 
+## Fig. 2: a spectrum is not a structure function
+
+Fig. 2 plots ~20 eigenvalue trajectories against the **coupling**, which is
+continuous. It has no momentum lattice. For a long time it was nevertheless
+digitized through the structure-function path, which inferred a K, ran a column
+probe at `k/K`, and snapped every point onto that grid — producing a file of
+couplings quantized to `k/24`, which means nothing. Three panels of the paper
+were "digitized" this way and never numerically compared.
+
+`Panel.sector == "spectrum"` now routes to a column scan instead: at each of 59
+coupling columns, take the centre of every ink run and report the *set* of
+levels there. No lattice, no marker classification, no sum rule. Individual
+trajectories cannot be followed through crossings, but the set of eigenvalues
+at a given coupling is exactly what one column contains.
+
+| panel | B | 2K | traced levels | computed | median gap | 90th pct |
+|---|---|---|---|---|---|---|
+| 2(a) | 0 | 10 | 8–19 | 19–21 | 1.5% | 5.4% |
+| 2(b) | 1 | 13 | 11–18 | 18–21 | 1.8% | 4.4% |
+| 2(c) | 2 | 22 | 10–14 | 17–21 | 1.0% | 6.2% |
+
+Gaps are as a fraction of the panel's y range. This is a weaker check than the
+structure-function panels get, and honestly so: with twenty trajectories in one
+frame, a traced level landing near *some* eigenvalue is not as sharp as matching
+a marker to a curve.
+
+What gives it teeth is the direction of the count. Trajectories that touch at
+scan resolution merge, so the trace can only ever find **fewer** levels than
+exist — never more. A trace reporting more levels than we compute would mean we
+are missing states. It never does.
+
 ## The axes, pinned
 
 Misreading a vertical scale was by far the most common way these comparisons

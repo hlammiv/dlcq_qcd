@@ -352,13 +352,13 @@ PANELS = {
     # and flagged low confidence.
     "fig2a": Panel(name="fig2a", page=3, bbox=(0.5985, 0.0921, 0.8402, 0.2250),
                    xlim=(0.0, 1.0), ylim=(0.0, 50.0),
-                   description="FIG. 2(a) SU(3) B=0, 2K=10", B=0, N=3),
+                   description="FIG. 2(a) SU(3) B=0, 2K=10", B=0, N=3, sector="spectrum"),
     "fig2b": Panel(name="fig2b", page=3, bbox=(0.5985, 0.2189, 0.8402, 0.3511),
                    xlim=(0.0, 1.0), ylim=(0.0, 60.0),
-                   description="FIG. 2(b) SU(3) B=1, 2K=13", B=1, N=3),
+                   description="FIG. 2(b) SU(3) B=1, 2K=13", B=1, N=3, sector="spectrum"),
     "fig2c": Panel(name="fig2c", page=3, bbox=(0.5985, 0.3451, 0.8402, 0.4783),
                    xlim=(0.0, 1.0), ylim=(0.0, 100.0),
-                   description="FIG. 2(c) SU(3) B=2, 2K=22", B=2, N=3),
+                   description="FIG. 2(c) SU(3) B=2, 2K=22", B=2, N=3, sector="spectrum"),
 }
 
 
@@ -543,6 +543,43 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
     # K mod 2 is fixed by the parton count: every momentum is odd, so a state
     # of n partons needs K_code == n (mod 2).  n is N*B for a baryon sector and
     # 2 for a meson.
+    # A spectrum panel has no momentum lattice at all: its x axis is the
+    # COUPLING, continuous from 0 to 1, and its content is ~25-40 eigenvalue
+    # trajectories rather than markers on odd k.  Everything below -- the
+    # axis-dot lattice, the column probe at k/K, snap_to_lattice, the sum rule
+    # -- assumes a structure function and is meaningless here.  Running it
+    # anyway is what produced the old refs/digitized/fig2*.csv, in which every
+    # coupling had been snapped to a k/24 grid.
+    if panel.sector == "spectrum":
+        cols = [i / 60.0 for i in range(1, 60)]
+        levels = trace_spectrum(ink, frame, cols)
+        records = []
+        for xf, ys in sorted(levels.items()):
+            lam = panel.xlim[0] + xf * (panel.xlim[1] - panel.xlim[0])
+            for yf in ys:
+                records.append(dict(x=lam, y=panel.ylim[0] + yf *
+                                    (panel.ylim[1] - panel.ylim[0]),
+                                    filled=True, area=0,
+                                    px=left + xf * (right - left),
+                                    py=bottom - yf * (bottom - top)))
+        counts = [len(v) for v in levels.values()]
+        notes.append(f"spectrum scan: {len(cols)} columns, "
+                     f"{min(counts)}-{max(counts)} levels resolved per column "
+                     f"(levels that touch at this resolution merge, so each "
+                     f"count is a lower bound)")
+        provenance = dict(
+            panel=panel.name, description=panel.description,
+            source=("K. Hornbostel, SLAC-333 (1988)" if panel.source == "thesis"
+                    else "Phys. Rev. D 41, 3814 (1990)"),
+            pdf_page=panel.page, dpi=dpi, page_size_px=list(page_size),
+            crop_box_px=list(box), bbox_fraction=list(panel.bbox),
+            frame_px=list(frame), detector="spectrum column scan",
+            x_fit=dict(slope=xs, intercept=xi, max_residual=xres),
+            y_fit=dict(slope=ys, intercept=yi, max_residual=yres),
+            notes=notes, n_records=len(records),
+        )
+        return records, provenance
+
     parity = (panel.N * panel.B) % 2 if panel.B else 0
     K_dots, n_match, n_dots = infer_K_from_axis_dots(ink, frame, panel.xlim,
                                                      parity=parity)
@@ -1095,6 +1132,14 @@ def main(argv=None):
     # coarser lattice can fit as well as the true one (fig6b/c returned 20
     # instead of 21 after legend suppression thinned them), and silently
     # adopting that would corrupt every x.
+    if panel.sector == "spectrum":
+        # No lattice, no sum rule: see the spectrum branch in digitize().
+        provenance["n_on_lattice"] = len(records)
+        print(f"  levels        : {len(records)} across "
+              f"{len({round(r['x'], 6) for r in records})} coupling columns")
+        _write(args, panel, records, provenance)
+        return 0
+
     K = panel.expected_K if panel.expected_K else verdict["K_inferred"]
     provenance["K_used"] = K
     provenance["K_source"] = "stated in paper" if panel.expected_K else "inferred"
@@ -1166,6 +1211,12 @@ def main(argv=None):
     print(f"  on lattice    : {len(records)} kept, {len(dropped)} dropped "
           f"(curve-crossing artifacts)")
 
+    _write(args, panel, records, provenance)
+    return 0
+
+
+def _write(args, panel, records, provenance):
+    import json as _json
     if args.out:
         args.out.mkdir(parents=True, exist_ok=True)
         csv_path = args.out / f"{panel.name}.csv"

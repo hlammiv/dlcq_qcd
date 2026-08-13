@@ -1,7 +1,7 @@
 {
   "panel": "t4b",
   "description": "THESIS Fig 4(b) = article Fig 2(b): SU(3) B=1, 2K=13",
-  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "source": "K. Hornbostel, SLAC-333 (1988)",
   "pdf_page": 64,
   "dpi": 600,
   "page_size_px": [
@@ -26,61 +26,40 @@
     21,
     459
   ],
-  "axis_dot_K": null,
-  "axis_dot_matched": 0,
-  "axis_dot_n": 1,
-  "xlim": [
-    0.0,
-    1.0
-  ],
-  "ylim": [
-    0.0,
-    70.0
-  ],
-  "xtick_values": [],
-  "xtick_pixels": [
-    39.0,
-    496.5,
-    588.5,
-    739.5,
-    890.0,
-    1387.0
-  ],
+  "detector": "spectrum column scan",
   "x_fit": {
     "slope": 0.0007374631268436578,
     "intercept": -0.023598820058996973,
     "max_residual": 7.632783294297951e-17
   },
   "y_fit": {
-    "slope": -0.15981735159817348,
+    "slope": [
+      0.13812785388127857,
+      0.5536529680365296,
+      0.6575342465753424,
+      0.7922374429223744,
+      0.9851598173515982
+    ],
     "intercept": 73.35616438356166,
     "max_residual": 2.842170943040401e-14
   },
-  "n_markers": 34,
-  "n_legend_suppressed": 4,
   "notes": [
     "x ticks: found 6, expected 0 (calibration still from frame edges)",
-    "suppressed 3 in-plot legend/text blobs",
-    "column probe at 2K=28: 20 markers (1 filled, 19 open)"
+    "spectrum scan: 59 columns, 5-13 levels resolved per column (levels that touch at this resolution merge, so each count is a lower bound)"
   ],
-  "method": "tools/digitize.py connected-component marker tracing",
-  "detector": "lattice column probe",
-  "K_probe": 28,
+  "n_records": 490,
   "check": {
-    "K_inferred": 28,
-    "K_code": 28,
-    "inlier_fraction": 0.6176470588235294,
-    "median_grid_residual": 0.016995116893476922,
-    "max_grid_residual": 0.03302278353419019,
+    "K_inferred": 30,
+    "K_code": 30,
+    "inlier_fraction": 0.7653061224489796,
+    "median_grid_residual": 0.016666666666666663,
+    "max_grid_residual": 0.03333333333333333,
     "consistent": true,
-    "K_from_x_min": 132.75524475524344,
-    "K_from_spacing": 56.75177257289801,
-    "n_points": 34,
+    "K_from_x_min": 60.0,
+    "K_from_spacing": 120.00000000000003,
+    "n_points": 490,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "K_used": 28,
-  "K_source": "inferred",
-  "n_on_lattice": 20,
-  "n_dropped_off_lattice": 0
+  "n_on_lattice": 490
 }

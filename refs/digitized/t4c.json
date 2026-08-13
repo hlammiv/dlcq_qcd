@@ -1,7 +1,7 @@
 {
   "panel": "t4c",
   "description": "THESIS Fig 4(c) = article Fig 2(c): SU(3) B=2, 2K=22",
-  "source": "Phys. Rev. D 41, 3814 (1990)",
+  "source": "K. Hornbostel, SLAC-333 (1988)",
   "pdf_page": 64,
   "dpi": 600,
   "page_size_px": [
@@ -26,63 +26,45 @@
     60,
     737
   ],
-  "axis_dot_K": null,
-  "axis_dot_matched": 0,
-  "axis_dot_n": 1,
-  "xlim": [
-    0.0,
-    1.0
-  ],
-  "ylim": [
-    0.0,
-    125.0
-  ],
-  "xtick_values": [],
-  "xtick_pixels": [
-    30.0,
-    424.0,
-    567.0,
-    592.0,
-    971.0,
-    1055.5,
-    1069.0,
-    1377.0
-  ],
+  "detector": "spectrum column scan",
   "x_fit": {
     "slope": 0.0007363770250368192,
     "intercept": -0.01620029455081023,
     "max_residual": 2.220446049250313e-16
   },
   "y_fit": {
-    "slope": -0.1846381093057606,
+    "slope": [
+      0.01477104874446089,
+      0.10487444608567209,
+      0.3737075332348597,
+      0.4246676514032496,
+      0.5051698670605613,
+      0.6344165435745939,
+      0.6683899556868538,
+      0.7673559822747416,
+      0.7954209748892171,
+      0.895864106351551
+    ],
     "intercept": 136.07828655834558,
     "max_residual": 5.684341886080802e-14
   },
-  "n_markers": 44,
-  "n_legend_suppressed": 7,
   "notes": [
     "x ticks: found 8, expected 0 (calibration still from frame edges)",
-    "suppressed 6 in-plot legend/text blobs",
-    "column probe at 2K=30: 40 markers (2 filled, 38 open)"
+    "spectrum scan: 59 columns, 8-21 levels resolved per column (levels that touch at this resolution merge, so each count is a lower bound)"
   ],
-  "method": "tools/digitize.py connected-component marker tracing",
-  "detector": "lattice column probe",
-  "K_probe": 30,
+  "n_records": 825,
   "check": {
     "K_inferred": 30,
     "K_code": 30,
-    "inlier_fraction": 0.6363636363636364,
-    "median_grid_residual": 0.016649835191808682,
-    "max_grid_residual": 0.03305477623245945,
+    "inlier_fraction": 0.7575757575757576,
+    "median_grid_residual": 0.016666666666666663,
+    "max_grid_residual": 0.03333333333333333,
     "consistent": true,
-    "K_from_x_min": 23.787417461482132,
-    "K_from_spacing": 104.46153846153823,
-    "n_points": 44,
+    "K_from_x_min": 60.0,
+    "K_from_spacing": 120.00000000000003,
+    "n_points": 825,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "K_used": 30,
-  "K_source": "inferred",
-  "n_on_lattice": 40,
-  "n_dropped_off_lattice": 0
+  "n_on_lattice": 825
 }

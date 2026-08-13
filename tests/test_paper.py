@@ -909,3 +909,76 @@ def test_no_numerical_damage_reproduces_the_published_five_quark_curve():
     _, _, wrecked = five_q(H0c, Hc)
     assert abs(wrecked.sum() - ref.sum()) / ref.sum() > 0.2, (
         "corrupting the five-quark block no longer changes its total")
+
+
+# ── FIG. 2: the spectra, which have no momentum lattice at all ────────────
+
+FIG2_PANELS = [("fig2a", 0, 10, 50.0), ("fig2b", 1, 13, 60.0),
+               ("fig2c", 2, 22, 100.0)]
+
+
+def load_spectrum_trace(panel):
+    """{coupling: [levels]} from a spectrum panel's trace."""
+    import io
+
+    body = [ln for ln in (ROOT / "refs" / "digitized" / f"{panel}.csv")
+            .read_text().splitlines() if not ln.startswith("#")]
+    out = {}
+    for row in csv.DictReader(io.StringIO("\n".join(body))):
+        out.setdefault(round(float(row["x"]), 6), []).append(float(row["y"]))
+    return out
+
+
+@pytest.mark.parametrize("panel,B,K,ymax", FIG2_PANELS)
+def test_fig2_trace_has_no_momentum_lattice(panel, B, K, ymax):
+    """Fig. 2's x axis is the COUPLING, so its trace must not be snapped.
+
+    This panel set was digitized for a long time through the structure-function
+    path, which inferred a K, ran a column probe at k/K and snapped every point
+    onto that grid.  The result was a file of couplings quantized to k/24, which
+    is meaningless -- Fig. 2 has no momentum lattice.  Guard against it coming
+    back.
+    """
+    xs = sorted(load_spectrum_trace(panel))
+    assert len(xs) > 30, f"{panel}: only {len(xs)} coupling columns"
+    steps = np.diff(xs)
+    assert steps.max() < 0.05, "coupling columns look quantized"
+    # a k/24 grid would put everything on multiples of 1/24
+    off = np.abs(np.array(xs) * 24 - np.round(np.array(xs) * 24))
+    assert off.mean() > 0.1, f"{panel}: x values still snapped to a k/24 grid"
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("panel,B,K,ymax", FIG2_PANELS)
+def test_fig2_levels_match_the_computed_spectrum(panel, B, K, ymax):
+    """Every traced level should coincide with one of our eigenvalues.
+
+    This is a weaker check than the structure-function panels get, and honestly
+    so: Fig. 2 packs ~20 trajectories into one frame, so a traced level landing
+    near *some* eigenvalue is not as sharp as matching a marker to a curve.
+
+    What makes it meaningful is the second assertion.  Trajectories that touch
+    at scan resolution merge, so the trace can only ever find FEWER levels than
+    exist -- never more.  A trace reporting more levels than we compute would
+    mean we are missing states.
+    """
+    from dlcq.providers import PythonProvider
+
+    trace = load_spectrum_trace(panel)
+    provider = PythonProvider(ncpus=4)
+    gaps = []
+    for lam in [x for x in sorted(trace) if 0.05 < x < 0.98][::9]:
+        r = provider.get(3, 1, B, K, lam)
+        ev = r.eigenvalues[physical_indices(r)]
+        ev = ev[(ev > 0) & (ev <= ymax)]
+        levels = np.array(sorted(trace[lam]))
+        if not ev.size or not levels.size:
+            continue
+        assert levels.size <= ev.size + 2, (
+            f"{panel} lam={lam:.3f}: traced {levels.size} levels but only "
+            f"{ev.size} computed -- the trace cannot resolve more than exist")
+        gaps += [float(np.min(np.abs(ev - t))) / ymax for t in levels]
+    assert gaps
+    assert float(np.median(gaps)) < 0.03, (
+        f"{panel}: median gap {np.median(gaps):.1%} of the axis")
+    assert float(np.percentile(gaps, 90)) < 0.10

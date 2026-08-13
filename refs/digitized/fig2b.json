@@ -26,56 +26,49 @@
     18,
     857
   ],
-  "axis_dot_K": null,
-  "axis_dot_matched": 0,
-  "axis_dot_n": 2,
-  "xlim": [
-    0.0,
-    1.0
-  ],
-  "ylim": [
-    0.0,
-    60.0
-  ],
-  "xtick_values": [],
-  "xtick_pixels": [
-    42.5,
-    1195.0
-  ],
+  "detector": "spectrum column scan",
   "x_fit": {
     "slope": 0.0008620689655172415,
     "intercept": -0.0318965517241379,
     "max_residual": 2.220446049250313e-16
   },
   "y_fit": {
-    "slope": -0.07151370679380217,
+    "slope": [
+      0.016090584028605526,
+      0.1722288438617402,
+      0.2050059594755661,
+      0.2586412395709178,
+      0.3480333730631704,
+      0.3682955899880811,
+      0.4302741358760429,
+      0.44576877234803336,
+      0.5107270560190703,
+      0.5804529201430274,
+      0.6555423122765196,
+      0.7908224076281287,
+      0.9243146603098927,
+      0.9874851013110846
+    ],
     "intercept": 61.28724672228844,
     "max_residual": 2.842170943040401e-14
   },
-  "n_markers": 7,
-  "n_legend_suppressed": 0,
   "notes": [
     "x ticks: found 2, expected 0 (calibration still from frame edges)",
-    "column probe at 2K=33: 55 markers (7 filled, 48 open)"
+    "spectrum scan: 59 columns, 11-20 levels resolved per column (levels that touch at this resolution merge, so each count is a lower bound)"
   ],
-  "method": "tools/digitize.py connected-component marker tracing",
-  "detector": "lattice column probe",
-  "K_probe": 33,
+  "n_records": 906,
   "check": {
-    "K_inferred": 33,
-    "K_code": 33,
-    "inlier_fraction": 0.7142857142857143,
-    "median_grid_residual": 0.01747943843327593,
-    "max_grid_residual": 0.04797781097248821,
+    "K_inferred": 30,
+    "K_code": 30,
+    "inlier_fraction": 0.7649006622516556,
+    "median_grid_residual": 0.016666666666666663,
+    "max_grid_residual": 0.03333333333333333,
     "consistent": true,
-    "K_from_x_min": 79.69791858537461,
-    "K_from_spacing": 8.679404787410428,
-    "n_points": 7,
+    "K_from_x_min": 60.0,
+    "K_from_spacing": 120.00000000000003,
+    "n_points": 906,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "K_used": 33,
-  "K_source": "inferred",
-  "n_on_lattice": 55,
-  "n_dropped_off_lattice": 0
+  "n_on_lattice": 906
 }

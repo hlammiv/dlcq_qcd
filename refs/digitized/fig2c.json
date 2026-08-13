@@ -26,56 +26,54 @@
     18,
     862
   ],
-  "axis_dot_K": null,
-  "axis_dot_matched": 0,
-  "axis_dot_n": 2,
-  "xlim": [
-    0.0,
-    1.0
-  ],
-  "ylim": [
-    0.0,
-    100.0
-  ],
-  "xtick_values": [],
-  "xtick_pixels": [
-    37.0,
-    1187.5
-  ],
+  "detector": "spectrum column scan",
   "x_fit": {
     "slope": 0.0008643042350907515,
     "intercept": -0.02765773552290388,
     "max_residual": 3.3306690738754696e-16
   },
   "y_fit": {
-    "slope": -0.11848341232227484,
+    "slope": [
+      0.01954976303317535,
+      0.09537914691943128,
+      0.17890995260663511,
+      0.19253554502369663,
+      0.21563981042654023,
+      0.2659952606635071,
+      0.29383886255924174,
+      0.34834123222748814,
+      0.37263033175355453,
+      0.3904028436018957,
+      0.431872037914692,
+      0.45082938388625593,
+      0.48992890995260663,
+      0.5154028436018958,
+      0.5959715639810427,
+      0.6901658767772512,
+      0.7950236966824644,
+      0.8969194312796208,
+      0.9875592417061612
+    ],
     "intercept": 102.13270142180095,
     "max_residual": 2.842170943040401e-14
   },
-  "n_markers": 10,
-  "n_legend_suppressed": 0,
   "notes": [
     "x ticks: found 2, expected 0 (calibration still from frame edges)",
-    "column probe at 2K=28: 62 markers (9 filled, 53 open)"
+    "spectrum scan: 59 columns, 9-19 levels resolved per column (levels that touch at this resolution merge, so each count is a lower bound)"
   ],
-  "method": "tools/digitize.py connected-component marker tracing",
-  "detector": "lattice column probe",
-  "K_probe": 28,
+  "n_records": 799,
   "check": {
-    "K_inferred": 28,
-    "K_code": 28,
-    "inlier_fraction": 0.6,
-    "median_grid_residual": 0.011147397088960398,
-    "max_grid_residual": 0.026704568839400134,
+    "K_inferred": 30,
+    "K_code": 30,
+    "inlier_fraction": 0.7684605757196495,
+    "median_grid_residual": 0.016666666666666663,
+    "max_grid_residual": 0.03333333333333333,
     "consistent": true,
-    "K_from_x_min": 110.99127906976543,
-    "K_from_spacing": 13.990954468408885,
-    "n_points": 10,
+    "K_from_x_min": 60.0,
+    "K_from_spacing": 120.00000000000003,
+    "n_points": 799,
     "ok": true,
     "note": "paper does not state K for this panel; inferred"
   },
-  "K_used": 28,
-  "K_source": "inferred",
-  "n_on_lattice": 62,
-  "n_dropped_off_lattice": 0
+  "n_on_lattice": 799
 }
