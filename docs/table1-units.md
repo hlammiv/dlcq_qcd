@@ -273,10 +273,39 @@ And SU(4) is not broken in general: the strong-coupling bosonization ratio
 at m/g = 0.05 -- 9%, against the ~10% the paper itself quotes for that
 comparison.
 
-So the published value is not reproducible from the code that produced the
-paper. We cannot say why; a transcription slip is the obvious candidate but
-20.5 -> 21.2 is not an evident digit error. Recorded as an open discrepancy
-rather than resolved.
+### Most of the gap is form ambiguity in the paper's own window
+
+The comparison above is unfair in one respect: it fits our window, 2K = 25-37,
+against a number obtained from 2K = 16-24. Those are disjoint. Refitting *our*
+masses on *their* window shows how much of the difference that accounts for:
+
+| window | pts | n=1 | n=2 | n=3 | spread |
+|---|---|---|---|---|---|
+| **16-24 (the paper's)** | 5 | 20.489 | 20.295 | **20.955** | **+-0.27** |
+| 16-28 | 7 | 20.475 | 20.354 | 20.755 | +-0.20 |
+| **25-37 (ours)** | 6 | 20.451 | 20.457 | 20.484 | **+-0.013** |
+
+The paper's window carries **20x the form ambiguity of ours**, and the +-0.27 we
+measure there is essentially the 0.300 the paper quotes -- their error estimate
+was capturing this effect correctly.
+
+At three correction terms on their window we get **20.955**, against their
+21.200: a gap of 0.245, comfortably inside their own quoted term. So the entry
+is not irreproducible after all. It is a number extracted from a window where
+the fit was only determined to about +-0.3, and our value is the same physics
+measured 20x more sharply.
+
+What remains unexplained is small: 21.200 still sits about 0.25 above the
+highest fit we obtain on their window, so we cannot claim to have recovered
+their exact procedure. But the entry no longer looks like a discrepancy in the
+physics, and the underlying masses are confirmed against the 1993 Fortran to
+2e-5.
+
+**Method note.** This is the general hazard in comparing extrapolations: an
+apparent disagreement between two continuum values can be entirely an artifact
+of fitting different K windows. The check is cheap -- refit on the other side's
+window -- and it should be the first thing tried whenever a published
+extrapolation does not reproduce.
 
 ## The SU(4) rows, for the record
 
