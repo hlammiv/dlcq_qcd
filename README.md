@@ -13,7 +13,7 @@ fortran/   qcdf.f (6397 lines, F77) -- the historical code, deliberately unpatch
 python/    qcdf.py / qcdf_opt.py    -- the Python port
 dlcq/      the shared pipeline both solvers feed
 refs/      Table I transcribed from the paper
-docs/      findings that change how results must be read
+docs/      findings that change how results must be read (docs/README.md indexes them)
 tests/     the regression suite
 ```
 
@@ -138,7 +138,7 @@ point to the stated `x = 1/4`.
 
 ## Two defects found in `qcdf.f`
 
-Both are documented in full under `docs/`. Neither changes the paper's physics
+Both are documented in full under [docs/](docs/README.md). Neither changes the paper's physics
 conclusions, but both change how its output must be read.
 
 **1. The spectrum is basis-dependent** —
