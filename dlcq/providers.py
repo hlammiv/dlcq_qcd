@@ -102,6 +102,13 @@ class FortranProvider(Provider):
         self.lam_atol = self.LAMBDA_ATOL if lam_atol is None else lam_atol
         # Historical outputs preserved in python/ carry K-tagged names.
         self.extra_search = [Path(p) for p in extra_search]
+        # Parsed headers, keyed by (path, mtime_ns, size).  Without this every
+        # get() re-read every qcdf.out in full -- some are 12 MB -- just to
+        # recover a header.  With ~160 run directories that turned a sweep into
+        # tens of GB of I/O: the first full test run on a 16-core box took 50
+        # minutes, the second (warm page cache) two.  The value is the parsed
+        # metadata, or None for "not a Fortran output".
+        self._header_cache: dict = {}
 
     # The Python solver writes a header in the same format as the Fortran, so
     # matching on parameters alone would silently accept qcdf_py.out as a
@@ -125,14 +132,31 @@ class FortranProvider(Provider):
 
         for path in candidates:
             try:
-                text = path.read_text(errors="replace")
+                st = path.stat()
             except OSError:
                 continue
-            if not self._is_fortran_output(text):
-                continue
-            try:
-                meta = _parse_header(text.splitlines())
-            except Exception:
+            key = (str(path), st.st_mtime_ns, st.st_size)
+            if key in self._header_cache:
+                meta = self._header_cache[key]
+            else:
+                meta = None
+                try:
+                    text = path.read_text(errors="replace")
+                except OSError:
+                    text = None
+                # The whole file has to be read: the discriminating marker,
+                # TOTAL NUM STATES, is emitted by PRNTST after the state list,
+                # so its offset scales with the basis size.  The other marker
+                # is NOT sufficient on its own -- qcdf.py:1956 writes
+                # "NUMBER OF STATES BEFORE WEEDING" too.  Reading once per
+                # file and caching is what makes that affordable.
+                if text is not None and self._is_fortran_output(text):
+                    try:
+                        meta = _parse_header(text.splitlines())
+                    except Exception:
+                        meta = None
+                self._header_cache[key] = meta
+            if meta is None:
                 continue
             if (meta["N"] == N and meta["NF"] == NF and meta["B"] == B
                     and meta["K_code"] == K_code
