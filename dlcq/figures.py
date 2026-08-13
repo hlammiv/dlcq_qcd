@@ -292,7 +292,7 @@ def figure6(provider, source):
 MG_TABLE = [1.6, 0.8, 0.4, 0.2, 0.1, 0.05, 0.0]
 
 
-def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False):
+def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
     """Lightest state extrapolated to the continuum via Eq. (27).
 
     ``msq_units=False`` returns M/g, the quantity Figs. 7 and 8 plot.
@@ -308,7 +308,8 @@ def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False):
     lam = float(mg_to_lambda(mg))
     Ks, masses = [], []
     for K in K_codes:
-        r = provider.get(N, 1, B, K, lam, -1.0, sweep_lpn(N, B))
+        r = provider.get(N, 1, B, K, lam, -1.0,
+                         sweep_lpn(N, B) if lpn is None else lpn)
         if r.n_eigenvalues == 0:
             continue
         phys = physical_indices(r)
