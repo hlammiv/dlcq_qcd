@@ -150,11 +150,30 @@ dependent on states in its own block and both weeding stages decompose. At
 | 27 | 2692 → 818 | did not finish in 5 min | **37 s** |
 | 29 | 4529 → 1274 | — | ~**180 s** |
 
-So 2K = 29 is now routine where 2K = 25 had been the practical limit, and the
-extrapolation window can be widened past the paper's. The two passes are not
-bit-identical — see `weed_fortran`'s docstring — but the ground state agrees to
-9×10⁻⁸ and the low-lying spectrum to 10⁻⁶, a thousandfold inside this
-algorithm's own 10⁻⁴ reproducibility floor.
+The two passes are not bit-identical — see `weed_fortran`'s docstring — but the
+ground state agrees to 9×10⁻⁸ and the low-lying spectrum to 10⁻⁶, a
+thousandfold inside this algorithm's own 10⁻⁴ reproducibility floor.
+
+Threading the matrix build (above) then removed what was left, and the last
+obstacle was not cost at all but three fixed array caps inherited from `qcdf.f`
+— `LKPXMX` (25001 momentum permutations) and `NMSTMX`/`NMXFR` (6902 states).
+2K = 31 needs 32072 and 7569. Raising them is a pure cap raise, exactly as with
+the Fortran's colour arrays; `MXNP` is *not* binding, since `lpnsub` caps the
+N = 3 baryon at 13 partons. Current reach, N = 3, m/g = 1.6:
+
+| 2K | states | time | | 2K | states | time |
+|---|---|---|---|---|---|---|
+| 27 | 2692 → 818 | 1.7 s | | baryon | | |
+| 29 | 4529 → 1274 | 2.9 s | | 33 | 12471 → 3032 | 16 s |
+| 31 | 7569 → 1983 | 7.8 s | | 35 | 20353 → 4610 | 46 s |
+
+Both sum rules still close exactly at 2K = 31 (momentum to 1.0000000, number to
+3.000000), and M² keeps rising monotonically — 10.4647, 10.4825, 10.4980 at
+2K = 27, 29, 31 — which is what a silently truncated basis would break.
+`tests/test_observables.py` asserts both. So the extrapolation window is no
+longer set by what the code can reach: **2K = 35 is 7 units past the paper's
+largest**, and beyond it the caps simply need raising again, with each overflow
+now naming the constant to change.
 
 ## One piece had to be rebuilt, not ported
 

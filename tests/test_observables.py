@@ -11,7 +11,8 @@ import pytest
 
 from dlcq.observables import (structure_function, momentum_sum_rule,
                               number_sum_rule, thooft_valence_limit,
-                              richardson_extrapolate, valence_parton_count)
+                              richardson_extrapolate, valence_parton_count,
+                              physical_indices)
 from dlcq.units import endpoint_exponent
 
 
@@ -116,3 +117,51 @@ def test_richardson_handles_the_chiral_limit_degeneracy():
     Kp = K / 2.0
     M0, _ = richardson_extrapolate(K, 1.0 + 0.5 / Kp, 0.0, 3)
     assert M0 == pytest.approx(1.0, abs=1e-6)
+
+
+# ──────────────────────────────────────────────────────────────────────────
+# Reach beyond the paper
+# ──────────────────────────────────────────────────────────────────────────
+
+@pytest.mark.slow
+@pytest.mark.parametrize("B,K_code,min_pre", [(1, 31, 7569), (0, 30, 4141)])
+def test_sum_rules_hold_past_the_papers_largest_K(B, K_code, min_pre):
+    """2K = 30/31 exceeds every basis the paper used, and still closes exactly.
+
+    The paper extrapolates "for 2K in the range of roughly 16-24", so 2K = 31
+    is a basis it never reached.  Getting there needed no new physics, only two
+    caps raised in ``qcdf.py``: ``LKPXMX`` (25001 momentum permutations, 32072
+    needed) and ``NMSTMX`` (6902 states, 7569 needed).  This pins that they are
+    in fact large enough, by checking the two sum rules that must hold exactly
+    at any K -- if the state generator had silently truncated, they would not.
+    """
+    from dlcq.read_python import run_python
+    from dlcq.units import mg_to_lambda
+
+    r = run_python(N=3, NF=1, B=B, K_code=K_code, rlamb=mg_to_lambda(1.6),
+                   ncpus=8)
+    assert r.numsta_pre >= min_pre, (
+        f"only {r.numsta_pre} states generated; a cap truncated the basis")
+    i = int(physical_indices(r)[0])
+    assert momentum_sum_rule(r, i) == pytest.approx(1.0, abs=1e-9)
+    assert number_sum_rule(r, i) == pytest.approx(3 * B, abs=1e-9)
+
+
+@pytest.mark.slow
+def test_baryon_mass_still_converges_past_2K_24():
+    """M^2(K) must keep rising monotonically toward its continuum limit.
+
+    A cap overflow that quietly dropped high-Fock states would show up as the
+    sequence turning over, since those states lower the ground state.
+    """
+    from dlcq.read_python import run_python
+    from dlcq.units import mg_to_lambda
+
+    lam = mg_to_lambda(1.6)
+    masses = []
+    for K in (27, 29, 31):
+        r = run_python(N=3, NF=1, B=1, K_code=K, rlamb=lam, ncpus=8)
+        masses.append(r.eigenvalues[int(physical_indices(r)[0])])
+    assert masses[0] < masses[1] < masses[2], masses
+    # Converging, not drifting: successive gaps must shrink.
+    assert masses[2] - masses[1] < masses[1] - masses[0]

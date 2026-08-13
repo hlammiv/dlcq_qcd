@@ -38,11 +38,25 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Constants / dimension limits (mirroring Fortran PARAMETER-like values)
 # ---------------------------------------------------------------------------
-NMSTMX   = 6902    # max number of states
-NMXFR    = 27608   # 4 * NMSTMX  (state storage)
+# The three K-sensitive caps.  qcdf.f fixes them at NMSTMX = 6902 and
+# LKPXMX = 25001, which is what the paper's 2K <= 24 needed; they are raised
+# here because nothing else stands between this code and larger K.  Measured
+# requirements for the N=3, B=1 baryon (the channel that grows fastest):
+#
+#     2K     partons    KPX perms    states
+#     29        11         18801       4529     <- fits the original caps
+#     31        13         32072       7569     <- needs both raised
+#     33        13         45013      12471
+#     35        13         62290      20353
+#
+# The cost is ~37 MB of zeroed array per run instead of ~11 MB.  Beyond 2K=35
+# raise these again; both overflow paths raise RuntimeError naming the cap, and
+# MXNP is not the binding constraint (lpnsub caps the baryon at 13 partons).
+NMSTMX   = 25000   # max number of states
+NMXFR    = 100000  # 4 * NMSTMX  (state storage)
 NMFLMX   = 3       # max number of flavors
 MXNP     = 25      # max length of states (particles per state)
-LKPXMX   = 25001   # max permutations in KPX
+LKPXMX   = 80000   # max permutations in KPX
 MXKMX    = 100     # max total momentum in KPX
 ISTMAX_SM = 6902   # array size for gprmx intermediate arrays
 ISTMAX_BG = 9523   # array size for gprbig intermediate arrays
@@ -371,7 +385,9 @@ def prmx(kmx, nptmx, N_eff, perm):
 
     perm.numprm = numprm - 1
     if perm.numprm >= LKPXMX:
-        raise RuntimeError("Overflow in KPX")
+        raise RuntimeError(
+            f"Overflow in KPX: {perm.numprm} momentum permutations needed, "
+            f"LKPXMX = {LKPXMX}. Raise LKPXMX in qcdf.py.")
 
 # ---------------------------------------------------------------------------
 # PRMM: generate meson momentum distributions
@@ -391,7 +407,9 @@ def prmm(kmx, perm):
         perm.kpmloc[k1, 1] = nprmm
     perm.nprmm = nprmm
     if nprmm >= LKPXMX:
-        raise RuntimeError("Overflow in KPM")
+        raise RuntimeError(
+            f"Overflow in KPM: {nprmm} meson permutations needed, "
+            f"LKPXMX = {LKPXMX}. Raise LKPXMX in qcdf.py.")
 
 # ---------------------------------------------------------------------------
 # IBARFL: generate baryon flavor permutations
@@ -731,7 +749,10 @@ def brmsgn(params, states, perm, flavtab, N, NF, nbrb, nbrd, nmes, kbrb, kbrd, k
                             # Store the state
                             ns = states.numsta
                             if ns >= NMSTMX:
-                                raise RuntimeError("numsta exceeds NMSTMX")
+                                raise RuntimeError(
+                                    f"numsta exceeds NMSTMX = {NMSTMX}. "
+                                    f"Raise NMSTMX (and NMXFR = 4*NMSTMX) "
+                                    f"in qcdf.py.")
                             states.mstinf[ns, 0] = 4 * ns + 1  # 1-based location
                             states.mstinf[ns, 1] = lngsta
                             states.mstinf[ns, 2] = nmes
@@ -1981,8 +2002,10 @@ def main(input_file=None):
         w_norm = w_norm[idx]
         z_norm = z_norm[:, idx]
 
-        # Normalize Z
-        z_full = np.zeros((NMSTMX, NMSTMX))
+        # Normalize Z.  Sized to numsta, not NMSTMX: nuz and nuham only ever
+        # touch [:numsta], so allocating the cap wasted 381 MB at the old
+        # NMSTMX and would be 5 GB at the raised one.
+        z_full = np.zeros((numsta, numsta))
         z_full[:numsta, :numsta] = z_norm
         z_full = nuz(w_norm, z_full, numsta)
 

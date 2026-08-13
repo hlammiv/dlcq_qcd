@@ -165,10 +165,32 @@ it is now 6%. What dominates now:
 | NUZ | 0.19 s | 4% |
 
 **State generation is now the single largest cost** and is still pure
-interpreted Python in `qcdf.py` (`qcdsta`, `prmx`, `gprbig_array`). It is also
-what blocks going higher: 2K = 31 fails in `prmx` with `index 25001 is out of
-bounds`, a fixed `kpx` cap, not a time limit. Raising that cap and compiling the
-generator is the next step, and it is independent of everything above.
+interpreted Python in `qcdf.py` (`qcdsta`, `prmx`, `gprbig_array`). Compiling it
+is the next step, and it is independent of everything above.
+
+It *was* also what blocked going higher — 2K = 31 died in `prmx` with `index
+25001 is out of bounds` — but that was a fixed cap, not a time limit, and the
+caps are now raised. Requirements measured on the N = 3, B = 1 baryon:
+
+| 2K | partons | KPX perms | states pre → post | run |
+|---|---|---|---|---|
+| 29 | 11 | 18801 | 4529 → 1274 | 2.9 s |
+| 31 | 13 | 32072 | 7569 → 1983 | 7.8 s |
+| 33 | 13 | 45013 | 12471 → 3032 | 16 s |
+| 35 | 13 | 62290 | 20353 → 4610 | 46 s |
+
+The old caps were `LKPXMX = 25001` and `NMSTMX = 6902`, both inherited from
+`qcdf.f`; they now sit at 80000 and 25000, costing ~37 MB of zeroed array per
+run instead of ~11 MB. `MXNP = 25` is **not** binding — `lpnsub` caps this
+channel at 13 partons — and `MXKMX`/`MAXK_CLF` have ample headroom.
+`ISTMAX_SM` is dead code.
+
+Raising `NMSTMX` also required fixing a latent allocation in `qcdf.py`'s own
+`main()`: `z_full` was sized `NMSTMX × NMSTMX` regardless of the problem, which
+was 381 MB wasted at the old cap and would have been 5 GB at the new one. `nuz`
+and `nuham` only ever touch `[:numsta]`.
+
+Past 2K = 35, raise the caps again; each overflow path now names the constant.
 
 **The dramatic option, not attempted.** Every eigenvalue is computed, by dense
 `eigh`, when the figures and Table I need only the lowest few. A matrix-free
