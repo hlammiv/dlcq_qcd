@@ -199,6 +199,53 @@ construction: every sub-window uses the same form over the same narrow range in
 dominates. Any quotable error bar needs the form spread added -- and the real
 fix is data nearer 1/K = 0, where the choice of form stops mattering.
 
+## The one entry that does not reproduce: baryon N=4 at m/g = 1.6
+
+27 of the 30 non-trivial entries agree within the paper's own quoted term. Two
+of the exceptions are marginal (meson N=4 at m/g = 0.80 and 0.05, both within
+about 2x). The third is not, and it is worth recording precisely because every
+other explanation was eliminated.
+
+Published: **21.200(300)**. Ours: **20.4561(130)** -- 3.5% low, 2.5x outside the
+paper's own term.
+
+It is not the extrapolation. The masses converge smoothly with shrinking
+increments, and every order of fit agrees:
+
+| 2K | 26 | 28 | 30 | 32 | 34 |
+|---|---|---|---|---|---|
+| M^2 | 19.62695 | 19.68571 | 19.73665 | 19.78128 | 19.82071 |
+
+increments 0.059, 0.051, 0.045, 0.039; and M(0) = 20.450 / 20.456 / 20.486 /
+20.460 at 1 / 2 / 3 / 4 correction terms. Reaching 21.200 would need the
+sequence to rise another 7% against a clearly converging trend.
+
+It is not the truncation: raising ``sweep_lpn`` by a whole qqbar pair moves
+M(0) from 20.4561 to 20.4560.
+
+It is not our solver. **The 1993 Fortran and the Python agree to 2e-5 at every
+K**, on exactly this configuration:
+
+| 2K | python | fortran | rel. diff |
+|---|---|---|---|
+| 20 | 19.378668 | 19.377980 | 3.6e-05 |
+| 22 | 19.477027 | 19.477310 | 1.5e-05 |
+| 24 | 19.558350 | 19.558745 | 2.0e-05 |
+
+At 2K = 24 -- the **top of the paper's own 16-24 window** -- the mass is 19.558.
+No fit over 2K = 16-24 of data topping out at 19.558 reaches 21.200; our own
+extrapolation on that window gives 20.295.
+
+And SU(4) is not broken in general: the strong-coupling bosonization ratio
+(Eq. 23) predicts ``2 sin[pi/(2(2N-1))] = 0.4450`` for N = 4, and we get 0.4870
+at m/g = 0.05 -- 9%, against the ~10% the paper itself quotes for that
+comparison.
+
+So the published value is not reproducible from the code that produced the
+paper. We cannot say why; a transcription slip is the obvious candidate but
+20.5 -> 21.2 is not an evident digit error. Recorded as an open discrepancy
+rather than resolved.
+
 ## The SU(4) rows, for the record
 
 After widening the window, every entry with a pull above 1.5 is an N = 4 one:

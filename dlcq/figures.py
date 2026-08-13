@@ -661,13 +661,17 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
                  "one qqbar pair\n")
         fh.write("  (the solver floor, 6e-13 relative, is carried but never "
                  "visible at this precision)\n\n")
-        fh.write("'paper' is the printed value, 'pterm' its own quoted last "
-                 "term.  'dev' is |paper-ours|\n"
-                 "in units of OUR total error -- the paper's term is not an "
-                 "uncertainty at weak\ncoupling (docs/table1-units.md).\n\n")
+        fh.write("'paper' is the printed value and 'pterm' its own quoted "
+                 "last term -- which is the\nmagnitude of the last series "
+                 "term, NOT a 1-sigma error bar.  So the meaningful\n"
+                 "comparison is 'd/pt': |paper-ours| in units of the PAPER's "
+                 "term, which should be\n<= 1.  'd/ours' is the same "
+                 "difference in units of our own error; it is routinely\n"
+                 "large simply because our error is up to 38x smaller, and on "
+                 "its own it does NOT\nindicate disagreement.\n\n")
         hdr = (f"{'case':>8} {'m/g':>5} {'ours':>10} {'+-tot':>9} "
                f"{'form':>9} {'wind':>9} {'trunc':>9} "
-               f"{'paper':>9} {'pterm':>8} {'dev':>6}")
+               f"{'paper':>9} {'pterm':>8} {'d/pt':>6} {'d/ours':>7} {'ok':>3}")
         fh.write(hdr + "\n" + "-" * len(hdr) + "\n")
 
         for q, N, B in cols:
@@ -686,12 +690,15 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
                                         masses_alt_lpn=alt)
                 row = paper.get((q, N, mg))
                 pv, pe = row if row else (float("nan"), float("nan"))
-                dev = abs(pv - bud["M0"]) / bud["total"] if bud["total"] else float("nan")
+                diff = abs(pv - bud["M0"])
+                d_pt = diff / pe if pe else float("nan")
+                d_our = diff / bud["total"] if bud["total"] else float("nan")
                 fh.write(f"{q + ' N=' + str(N):>8} {mg:5.2f} "
                          f"{bud['M0']:10.4f} {bud['total']:9.2g} "
                          f"{bud['form']:9.2g} {bud['window']:9.2g} "
                          f"{bud['truncation']:9.2g} "
-                         f"{pv:9.3f} {pe:8.3f} {dev:6.1f}\n")
+                         f"{pv:9.3f} {pe:8.3f} {d_pt:6.2f} {d_our:7.1f} "
+                         f"{'ok' if d_pt <= 1.0 else 'OUT':>3}\n")
             fh.write("\n")
     print(f"  saved {out}")
     return out
