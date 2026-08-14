@@ -23,29 +23,55 @@ the relative deviation. Matching to the nearest series rather than a declared on
 is deliberate: the trace does not reliably know which curve a marker came from,
 so forcing an assignment would measure the classifier, not the physics.
 
+The deviation is floored at 5% of each series' own peak (`--floor`, `0`
+disables). Without a floor the statistic is undefined exactly where the complete
+traces now reach: a tail marker the paper draws at q = 0.000 against our 0.012
+scores 1.2e12 percent, and three such markers move a ten-marker median more than
+the whole peak region does. The floor is per *series*, not per panel -- a
+panel-wide floor forgives essentially any error on a higher-Fock curve sitting
+orders of magnitude below the valence one, which would manufacture agreement
+precisely where `baryon-higher-fock.md` says the question is open.
+
 | panel | valence | higher-Fock |
 |---|---|---|
-| 3(a) | 1.9% (12) | — |
-| 3(b) | 1.4% (9) | — |
-| 5(a) | 0.6% (8) | 1.4% (10) |
-| 5(b) | 0.8% (8) | 2.0% (7) |
-| 5(c) | 0.3% (7) | 1.5% (9) |
-| 5(d) | 2.5% (6) | 0.9% (1) |
-| 6(a) | 1.4% (7) | 29.7% (5) |
-| 6(b) | 0.4% (5) | 16.4% (2) |
-| 6(c) | 2.0% (4) | 352.8% (3) |
-| 6(d) | **0.3% (3)** | **0.8% (5)** |
+| 3(a) | 2.5% (14) | — |
+| 3(b) | 2.2% (14) | — |
+| 5(a) | 3.7% (13) | 2.1% (11) |
+| 5(b) | 1.4% (13) | 7.5% (11) |
+| 5(c) | 2.3% (14) | 1.8% (10) |
+| 5(d) | 5.3% (11) | 13.2% (12) |
+| 6(a) | 4.7% (12) | **29.6% (8)** |
+| 6(b) | 6.7% (15) | **42.8% (5)** |
+| 6(c) | 2.7% (12) | **24.8% (7)** |
+| 6(d) | 4.9% (11) | 0.4% (10) |
 
-Median |deviation|, marker count in brackets. Every valence curve is inside
-2.5%; every meson higher-Fock curve inside 2%. The three bad cells are the
-baryon higher-Fock series of Figs. 6(a)–(c) — see
-`docs/baryon-higher-fock.md`, which characterizes that disagreement in full.
+Median |deviation|, marker count in brackets. Every valence curve is inside 7%;
+every meson higher-Fock curve inside 8%. The three bad cells are the baryon
+higher-Fock series of Figs. 6(a)-(c) -- see `docs/baryon-higher-fock.md`, which
+characterizes that disagreement in full.
+
+**This table replaces one that was measured on incomplete traces, and two of its
+claims were wrong.** The earlier numbers were taken before the traces reached
+every momentum site (§3), so they were computed over roughly half the markers --
+5, 2 and 3 respectively for the three bad cells -- and the half they were missing
+is the large-x tail, where we agree least.
+
+* it reported **352.8%** for 6(c)'s higher-Fock series. That was unfloored
+  relative error on three tail markers; on a complete trace and a metric that is
+  defined at zero it is **24.8%**. Still a serious disagreement, not a 3.5x one.
+* it reported that every valence curve was **inside 2.5%**. Over complete traces
+  the range is **1.4-6.7%**. The old figure was not wrong arithmetic; it was the
+  right arithmetic on the markers that were easiest to find.
+
+What survives, and is now much better evidenced: the baryon higher-Fock
+disagreement of Figs. 6(a)-(c) is real. It holds at 25-43% on complete traces
+under a metric chosen so it cannot flatter them.
 
 Figs. 4 and 18 are omitted from this table: they each draw a **second coupling**
 (m/g = 0.1) whose markers sit on the same lattice sites as the m/g = 1.6 ones, so
 a column probe cannot attribute them and half the traced markers can never match.
 `agreement.py` flags those panels rather than reporting a number that really
-measures the unmatched series. They are measured by hand instead — §1.2.
+measures the unmatched series. They are measured by hand instead -- §1.2.
 
 ### 1.2 Every published higher-Fock curve
 

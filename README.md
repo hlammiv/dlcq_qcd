@@ -81,13 +81,19 @@ the per-curve accounting; this is the summary.
 |---|---|---|
 | **Table I** | 30 extrapolated masses, M² units | 0.02–4% at m/g ≥ 0.8 |
 | **Fig. 2** | eigenvalue spectra vs coupling | 1.0–1.8% of the axis |
-| **Fig. 3** | valence structure functions | 1.4–1.9% |
-| **Fig. 4** | higher-Fock, plotted alone | 0.0–3.9% (meson, 5q) |
-| **Fig. 5** | meson wavefunctions, 2K=24 | 0.3–2.5% valence, 0.9–2.0% higher-Fock |
-| **Fig. 6** | baryon wavefunctions, 2K=21 | 0.4–2.0% valence |
-| **Fig. 6(d)** | two-baryon, 2K=24 | 0.3% valence, 0.8% higher-Fock |
+| **Fig. 3** | valence structure functions | 2.2–2.5% |
+| **Fig. 4** | higher-Fock, plotted alone | 2.9% (meson, 5q) |
+| **Fig. 5** | meson wavefunctions, 2K=24 | 1.4–5.3% valence, 1.8–13.2% higher-Fock |
+| **Fig. 6** | baryon wavefunctions, 2K=21 | 2.7–6.7% valence |
+| **Fig. 6(d)** | two-baryon, 2K=24 | 4.9% valence, 0.4% higher-Fock |
 | **Fig. 7** | extrapolated masses | see Table I — it plots the same numbers |
 | **Fig. 8** | large-N and lattice comparison | 't Hooft eigenvalues to 4 digits |
+
+These are larger than this table used to quote (Fig. 5 valence "0.3–2.5%", for
+instance). The numbers did not get worse; the measurement got honest. The
+digitized traces recovered only about half their markers until recently, and the
+half they missed is the large-x tail where agreement is weakest — see
+`docs/figure-validation.md` §1.1 and §3.
 
 The sharpest single comparison is Table I at m/g = 1.6, where the paper quotes
 four significant figures: mesons 4.314 / 4.618 / 4.845 for N = 2, 3, 4 against
