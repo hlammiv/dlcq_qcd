@@ -234,6 +234,38 @@ reads as a physics discrepancy.
 So it stays as a diagnostic: a scale near 1 is evidence the frame was read
 correctly, and a scale far from 1 says the trace is incomplete.
 
+**How incomplete, panel by panel.** `tests/test_digitized.py` now measures it
+rather than leaving it as "about half". Every one of the thirteen
+structure-function panels is short of markers, and the marks are
+`xfail(strict=True)` so each flips to a failure the moment its trace is
+completed:
+
+| | sites found | | sites found |
+|---|---|---|---|
+| 3(a) | 7/7, but no filled marker at k=1 or 13 | 5(b) | 10/12 |
+| 3(b) | 6/7 | 5(c) | 10/12 |
+| 4(a) | 6/7 | 5(d) | 7/12, and 7 gaps within those |
+| 4(b) | 5/7 | 6(a) | 8/10 |
+| 4(c) | 6/7 | 6(b) | 6/10 |
+| 5(a) | 10/12 | 6(c) | 6/10 |
+| | | 6(d) | 4/7 |
+
+Fig. 3(a) is the instructive entry: it reaches every site *and* passes the sum
+rule, and is still missing a whole series at two of them. A site count alone
+calls it clean, which is why the per-series check is separate.
+
+**A tracer that closes this exists but is not merged.** The branch
+`worktree-fig6-digitize` recovers every site on all thirteen panels, with
+residual gaps only at three markers that are provably unrecoverable — two
+series drawn on top of one another — and its sum rules then land within 2.2%
+before any scale is applied (worst 6(c) at 2.11%, most under 1%). The traces
+committed here ask for up to **1.76×** on the same panels — 3(b) 1.757,
+6(c) 1.752, 6(b) 1.704 — and correctly refuse it. Its axis calibration
+predates §2, though, so it
+cannot simply be merged: the work is that tracer run against the current
+frames. `tools/trace_overlay.py` draws the current detector's decisions back
+onto the scan, which is the way in.
+
 ---
 
 ## 4. The tracer
