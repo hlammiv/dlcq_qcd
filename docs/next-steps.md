@@ -161,21 +161,31 @@ but not the proton or π⁺, unless the zero-mode subtraction above is used.
 
 ## 3. Fig. 6(a)–(c), the five-quark series at 2K = 21
 
-The one genuinely unresolved item. See `baryon-higher-fock.md` for the full
-accounting. Eliminated so far: Fock truncation (identical to four decimals at
-LPN 0/5/7, i.e. across a 2× change in basis size), numerical precision (the
-7-parton sector is basis-independent to 2e-12), state identity, sector
-identification, and the tracer.
+**Closed as far as the surviving artifacts allow — do not reopen it as a
+reproduction problem.** See `baryon-higher-fock.md` §2.1 for the accounting.
 
-The strongest remaining lead is the ratio pattern: published/ours is
-**1.36, 1.40, 1.43 at k = 1, 3, 9** and **0.30, 0.36, 0.47 at k = 5, 7, 11** —
-near-constant within each group, alternating between them. That looks mechanical
-rather than physical.
+What is settled: the published five-quark points are not reproducible, and the
+failure is not on our side in any way a better reading or a different convention
+could fix. They exceed a bound our amplitudes cannot violate (§2.1.2); they are
+incompatible with the valence points printed in the same panel, since
+`c₅ = −(H₅₅ − wN₅₅)⁻¹H₅₃c₃` holds to 5.8 × 10⁻⁴ (§2.1.3); and all three panels
+fail the same way while their valence curves reproduce to 0.6–2.9% (§2.1.4).
 
-Note also that the same sector is published at 2K = 15 and **we reproduce it
-marker for marker**, with a dip depth of 0.63 against 0.60. At 2K = 21 the
-published depth is 0.13 where ours is 0.55, and ours varies smoothly (0.55–0.63)
-across 2K = 15–25.
+What is not settled, and probably is not settleable: **the mechanism.** The
+candidates in §2.5 — the colour sums rewritten mid-thesis, the lost `wf`/`wfbig`
+— cannot be run. Any account must act on the five-parton amplitudes, leave the
+valence alone to 3%, be inactive at 2K = 15, and suppress k = 5, 7 while
+enhancing k = 1, 9 across three eigenstates.
+
+**If you pick this up anyway**, the two things worth doing are archival rather
+than computational: find an intermediate `qcdf.f` between the 1988 colour-sum
+rewrite and the 1993 snapshot, or find `wf`/`wfbig`. Everything computational
+has been tried; §2.3 is the list, and it now includes the exhaustive sign scan,
+every state-list truncation, every coupling, and the propagator treatment.
+
+Do **not** re-derive from the drawn curves. They are cubic splines through very
+few points and the thesis says so itself; panel (c)'s valence curve has two
+spline "zeros" that are not in its own data. Work from the markers.
 
 ---
 

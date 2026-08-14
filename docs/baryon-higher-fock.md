@@ -15,11 +15,18 @@ first principles rather than merely cross-checked between the two codes.
 | thesis Fig. 18(a) | baryon qqqqq̄ | 15 | **0.4%** |
 | Fig. 6(d) | two-baryon 6q+qq̄ | 24 | **0.8%** |
 | Fig. 4(c) / thesis Fig. 18(b) | baryon +2 pairs | 15 | ✗ 17.5% high |
-| Figs. 6(a)–(c) | baryon qqqqq̄ | 21 | ✗ right total, wrong distribution |
+| Figs. 6(a)–(c) | baryon qqqqq̄ | 21 | ✗ **incompatible with the same panels' own valence curves** |
 
 The five-quark sector — the one Figs. 6(a)–(c) plot — is reproduced to 0.4–3.9%
 at 2K = 15 by two independent published panels. The disagreement is specific to
 2K = 21, not general to baryon higher-Fock.
+
+For Figs. 6(a)–(c) the question is now settled in one direction and closed in
+the other. **It is not our observable and not our reading of the figure**: the
+published five-quark points exceed a bound our amplitudes cannot violate
+(§2.1.2), and they are incompatible with the valence points printed in the same
+panel (§2.1.3), in all three panels (§2.1.4). **What the 1988–90 code did
+instead is not recoverable** from the surviving artifacts (§2.5).
 
 ---
 
@@ -172,17 +179,146 @@ four-quark component in the lightest SU(2) meson, Richardson-extrapolated over
 
 ### 2.1 Figs. 6(a)–(c), five-quark at 2K = 21
 
-Marker for marker, at the published lattice:
+Marker for marker, at the published lattice. The published row is the mean of
+**three independent extractions** of thesis p. 82 at 600 dpi — the column trace
+in `refs/thesis_fig12a_fivequark.csv`, erosion-centroid blob finding, and raw
+ink runs per lattice column with no morphology at all — with their spread as
+the uncertainty. `tools/fig6a_consistency.py` carries them and every test below:
 
 | k | 1 | 3 | 5 | 7 | 9 | 11 | sum |
 |---|---|---|---|---|---|---|---|
-| published | 8.56 | 7.95 | 1.14 | 1.71 | 4.99 | 0.54 | 24.89 |
-| ours | 6.30 | 5.67 | 3.86 | 4.77 | 3.48 | 1.14 | 25.22 |
+| published | 8.57(4) | 8.01(5) | 1.02(5) | 1.77(6) | 5.04(0) | 0.52(5) | 24.9 |
+| ours | 6.30 | 5.68 | 3.86 | 4.77 | 3.49 | 1.14 | 25.2 |
+
+**Reading the panel is a 1% operation and the disagreement is 42%.** The three
+methods agree with each other to 0.6–1.3% in the same best-scale metric that
+puts each of them 42.2–42.4% from ours.
+
+The vertical scale is not in question either. It is pinned by the label
+positions, per §3, at 15.0; the frames of panels (b) and (c) then measure 6.00
+major-tick intervals, confirming it. (Panel (a)'s own tick scan does *not*
+confirm it — it returns 173.5, 175.5, 175.0, 32.5, 35.0, 106.5 px, the curve-ink
+contamination §3 warns about, which is why label positions and not ticks are
+the primary calibration.) The decisive check is that the same calibration lands
+the *valence* markers on ours to 0.6%, and §2.1.1 removes the axis from the
+argument altogether.
 
 **The sector total agrees to 1.5%; only its distribution over x differs.** That
 is the constraint any explanation has to satisfy, and it is what rules out every
 mechanism in §2.3. Fitting a free scale — so the paper's own ×10³ never enters —
 returns 1055 against a stated 10³, confirming the normalization independently.
+
+#### 2.1.1 The disagreement survives with no axis at all
+
+Both curves are printed on the same axis, so the five-quark/valence ratio
+*within* a panel is independent of how that axis is pinned — every error in the
+calibration cancels exactly:
+
+| k | 3 | 5 | 7 | 9 | 11 |
+|---|---|---|---|---|---|
+| published 5q/valence ×10⁻³ | 4.042 | 0.128 | 0.148 | 0.717 | 0.258 |
+| ours | 2.877 | 0.466 | 0.412 | 0.494 | 0.538 |
+| **ratio** | **1.41** | **0.28** | **0.36** | **1.45** | **0.48** |
+
+while the valence itself agrees to 1.6% rms. No axis-pinning error of any size
+produces that table.
+
+#### 2.1.2 It is not the observable: a bound our amplitudes cannot violate
+
+`q(k)` can never exceed the sector's **total** parton density `q(k) + q̄(k)`.
+Relabelling which parton is the antiquark, plotting one colour cluster,
+partitioning the sector any way at all — every such choice only moves weight
+between `q` and `q̄`, so none can push `q` above the sum. Against our
+amplitudes:
+
+| k | 1 | 3 | 5 | 7 | 9 | 11 |
+|---|---|---|---|---|---|---|
+| published q | 8.57 | 8.01 | 1.02 | 1.77 | 5.04 | 0.52 |
+| our q + q̄ | 10.72 | **7.27** | 4.16 | 4.81 | **3.49** | 1.14 |
+| ratio | 0.80 | **1.10** | 0.25 | 0.37 | **1.44** | 0.45 |
+
+At k = 3 and k = 9 the published quark density exceeds our entire five-parton
+parton density. **No re-reading of our amplitudes can produce the published
+points**; the amplitudes themselves would have to differ. This is a bound, not
+a search — it needs the ×10³ the legend states, and that is legible in panel (a)
+and corroborated by the sector total.
+
+Measured directly rather than argued: neither colour cluster alone matches
+either. Splitting the five-parton states into their (qqq) and (qq̄) clusters —
+verified state by state against `mstinf`'s own `kmes`/`kbrb` — gives free-scale
+residuals of 40.5% (qqq cluster), 90.1% (sea quark) and 54.6% (antiquark)
+against 42.4% for the full distribution. Nothing beats plotting all four quarks,
+which is what `structure_function` does. (The sea-quark/cluster split is
+partly an enumeration convention — no basis state carries its meson-cluster
+quark at k = 1 — so read those rows only as the elimination they are.)
+
+#### 2.1.3 The five-quark points are a function of the valence points
+
+In the original Fock basis `H c = w N c` with `N` block-diagonal in parton
+number, so the five-parton row determines `c₅` from `c₃` outright:
+
+    c₅ = −(H₅₅ − w N₅₅)⁻¹ H₅₃ c₃
+
+Measured against the full eigenvector this is exact to **5.8 × 10⁻⁴** (2K = 21
+ground state), 2.1 × 10⁻³ and 2.7 × 10⁻³ for the two excited states, and
+5.5 × 10⁻⁴ at 2K = 15. And the propagator hardly enters: replacing
+`(H₅₅ − wN₅₅)⁻¹` by its diagonal, or by free masses, moves the residual from
+42.41% to 44.24% and 42.57%. **The five-quark curve is fixed by the valence
+curve**, with no freedom worth the name.
+
+So the two curves in the panel constrain each other. Optimizing over all twelve
+valence amplitudes *and* a free `w` *and* a free overall scale on the five-quark
+points — every benefit of the doubt to the published side — over 1050 local
+optima:
+
+| valence held to | best five-quark residual found |
+|---|---|
+| ±1% | 23.9% |
+| ±2% | 18.5% |
+| ±3% | 15.7% |
+| ±20% | 7.9% |
+| ±100% | 0.0% |
+
+Our actual ground state sits at valence 0.61%, five-quark 42.4%. Read against a
+1% reading error: **with the valence pinned where it demonstrably agrees, no
+wavefunction was found that fits the five-quark points to better than 16–24%**,
+and driving that residual to zero costs a valence that is ~100% wrong. The
+published five-quark points *are* a legitimate five-parton distribution of some
+state — they are not kinematically impossible — but not of the state whose
+valence the same panel prints.
+
+Two honest limits on this one. It is a search, so those are upper bounds on the
+true minima, not proofs. And the ±3% optimum partly exploits the k = 1 valence
+point, left unconstrained because that marker sits on the axis and is the one
+valence point that cannot be read.
+
+#### 2.1.4 All three panels, not one
+
+The same test on panels (b) and (c) — the 2nd and 3rd baryons, same K, same
+basis, same extraction. Markers re-read from thesis p. 82; the five-quark
+residual carries a free scale, because the ×10ⁿ in those two legends is **not**
+legible in the scan, which also means the §2.1.2 bound does not apply to them:
+
+| panel | state | valence residual | five-quark residual |
+|---|---|---|---|
+| (a) | 1st | **0.61%** | **42.4%** |
+| (b) | 2nd | **1.69%** | **73.3%** |
+| (c) | 3rd | **2.93%** | **68.9%** |
+
+and the deviation has the same sign structure in all three — suppressed at
+k = 5, 7 and enhanced at k = 1, 9:
+
+| panel | k=1 | 3 | 5 | 7 | 9 | 11 |
+|---|---|---|---|---|---|---|
+| (a) | 1.29 | 1.34 | 0.25 | 0.35 | 1.37 | 0.43 |
+| (b) | 1.92 | — | — | 0.14 | 4.24 | — |
+| (c) | 2.11 | — | 0.25 | 0.29 | 2.64 | — |
+
+(dashes are markers merged with the valence curve and not separable.) The
+valence peaks at k = 7 in all three states, so **the suppression sits exactly
+under the valence peak and the enhancement away from it.** That is a property of
+the figure, not of one panel, and it is the sharpest surviving clue to whatever
+produced it.
 
 The apparent "node" at x ≈ 0.26 is **not** a data feature. The thesis says of
 exactly these panels:
@@ -296,6 +432,14 @@ directly above it on the same page to 0.4%.
 | the colour sums | exact against brute-force enumeration, §1.4 |
 | K-dependence / fragility | P₅ runs 3.19, 2.96, 2.74, 2.56, 2.42, 2.31 (×10⁻³) across 2K = 13…23 — smooth and monotonic |
 | **numerical damage** | §2.4 |
+| the y-axis calibration, again | the in-panel five-quark/valence ratio needs no axis at all and still disagrees by 0.28–1.45× (§2.1.1) |
+| the marker reading | three independent extractions agree to 0.6–1.3%, against a 42% disagreement (§2.1) |
+| the colour cluster plotted | neither cluster alone, nor the antiquark, beats the full distribution: 40.5 / 90.1 / 54.6% vs 42.4% (§2.1.2) |
+| the sign structure of c₃ | **all 2048** sign patterns of the twelve valence amplitudes scanned; best 34.8%, unflipped 42.3%. Worth doing precisely because the valence curve is blind to these signs and the five-quark curve is not — it was the last free thing in c₃ |
+| the five-quark propagator | exact / diagonal-only / free-mass denominators give 42.3 / 44.1 / 42.4%. The sector's own dynamics barely enter (§2.1.3) |
+| a truncated state list | a fixed-array overflow in the 1988 code was the best mechanical candidate left — K-specific, and it would leave the valence untouched. Every prefix of the generation order solved; best 31.8% at 61 of 193 states. It fails |
+| the coupling | every cached m/g from 0.05 to 1.6: 36.6–42.3%, none reproducing the shape |
+| **any wavefunction at all** | with the valence pinned to its own published points, nothing found below 16–24% (§2.1.3) |
 
 ### 2.4 Numerical damage cannot produce it
 
@@ -347,6 +491,16 @@ Short of finding an intermediate version of `qcdf.f`, this is as far as the
 artifacts allow. The lost `wf`/`wfbig` conversion program (§1.3) is the other
 candidate and is equally unavailable.
 
+What §2.1 adds is a specification any such account now has to meet. It must
+act on the five-parton **amplitudes** — the observable and every re-partition of
+it are excluded by the bound in §2.1.2 — while leaving the valence amplitudes
+alone to better than 3%, since the same panels' valence curves reproduce. It
+must be inactive at 2K = 15, where the same sector reproduces and the two
+published curves *are* mutually consistent. And it must suppress k = 5, 7 and
+enhance k = 1, 9 across three different eigenstates (§2.1.4). Nothing in the
+surviving code does that, which is why this section stays an account rather
+than a finding.
+
 ---
 
 ## 3. Method notes worth keeping
@@ -365,6 +519,26 @@ label. See `docs/figure-validation.md`.
 **Classify filled vs open markers on the ink at the marker's centre**, not on how
 many runs a vertical slice breaks into: a curve entering a ring fills its
 interior, so the run count fails exactly where curves cross.
+
+**Extract each panel three ways and quote the spread.** Column trace,
+erosion-centroid blob finding, and raw ink runs per lattice column fail
+differently — the trace picks up the wrong curve where two cross, erosion drops
+markers that merge with a steep curve, ink runs merge a marker with the curve
+passing through it — so their agreement is real evidence and their spread is an
+honest error bar. On Fig. 6(a) they agree to 0.6–1.3% against a 42%
+disagreement with the calculation, which is what makes that 42% a finding
+rather than a digitization artifact (§2.1).
+
+**Read the ink-run widths, not just the positions.** A marker core is 20–45 px
+at 600 dpi and a curve crossing a column is 4–8 px, so the width alone
+separates them, and a run far outside that range is a merge to be flagged
+rather than a datum. Listing every run in a lattice column — rather than only
+the ones a detector accepts — is also what lets you say where a marker is *not*:
+in panel (b) the five-quark markers at k = 3 and 5 could not be separated (at
+k = 3 the dashed lobe crosses the valence marker; at k = 5 the curve has come
+down onto the axis), but the column shows no ink at all where our calculation
+puts them, 0.93 and 1.36 in that panel's units. Those two were left out of
+§2.1.4 as unmeasured rather than counted as agreeing or disagreeing.
 
 ---
 

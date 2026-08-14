@@ -37,11 +37,13 @@ antiperiodic boundary conditions put markers only at odd `k/K`. Fig. 6(d) is
 2K = 24, not the 22 that seemed natural, and that alone accounted for its
 apparent disagreement.
 
-**[next-steps.md](next-steps.md)** — the three open threads, each written to be
+**[next-steps.md](next-steps.md)** — the open threads, each written to be
 started cold: the sparse/Lanczos solver behind a flag (with the measurement
-showing why incremental K is not the lever), QCD+QED with Standard-Model
+showing why incremental K is not the lever), and QCD+QED with Standard-Model
 charges (and why the abelian piece is a reweighting of a contraction already
-computed), and the one unresolved figure. **Read this before planning new work.**
+computed). The third, Fig. 6(a)–(c), is now closed as far as the artifacts
+allow, and the entry says what would and would not be worth reopening.
+**Read this before planning new work.**
 
 ## Ready for new work
 
