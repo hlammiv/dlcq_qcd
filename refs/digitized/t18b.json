@@ -87,7 +87,8 @@
   "n_legend_suppressed": 16,
   "notes": [
     "x ticks: found 26, expected 6 (calibration still from frame edges)",
-    "suppressed 16 in-plot legend/text blobs"
+    "suppressed 16 in-plot legend/text blobs",
+    "marker template R = 31.1 px (panel marker_scale 2.7)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "blob (probe found too few)",

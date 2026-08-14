@@ -85,10 +85,13 @@
   "notes": [
     "x ticks: found 23, expected 6 (calibration still from frame edges)",
     "suppressed 20 in-plot legend/text blobs",
-    "sum rule check: int q dx wants 0.520x from a trace covering 9/10 lattice sites.  Not applied -- the frame calibration is the primary one.  A value far from 1 means the trace is missing real weight."
+    "marker template R = 11.5 px (panel marker_scale 1)",
+    "column probe at 2K=21: 20 markers (10 filled, 10 open)",
+    "sum rule check: int q dx wants 5.044x from a trace covering 10/10 lattice sites.  Not applied -- the frame calibration is the primary one.  A value far from 1 means the trace is missing real weight."
   ],
   "method": "tools/digitize.py connected-component marker tracing",
-  "detector": "blob (probe found too few)",
+  "detector": "lattice column probe",
+  "K_probe": 21,
   "check": {
     "K_inferred": 21,
     "K_code": 21,
@@ -104,7 +107,7 @@
   },
   "K_used": 21,
   "K_source": "stated in paper",
-  "sum_rule_rejected_scale": 0.5202991773787969,
-  "n_on_lattice": 16,
-  "n_dropped_off_lattice": 6
+  "sum_rule_rejected_scale": 5.044268300442663,
+  "n_on_lattice": 20,
+  "n_dropped_off_lattice": 0
 }

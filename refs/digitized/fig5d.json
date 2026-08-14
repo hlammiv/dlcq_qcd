@@ -60,13 +60,14 @@
     "max_residual": 1.7763568394002505e-15
   },
   "n_markers": 12,
-  "n_legend_suppressed": 15,
+  "n_legend_suppressed": 12,
   "notes": [
     "x ticks: found 2, expected 6 (calibration still from frame edges)",
     "axis-dot lattice: inconclusive (3/5 dots matched; needs >=7 and >=80%)",
     "suppressed 12 in-plot legend/text blobs",
-    "column probe at 2K=24: 7 markers (6 filled, 1 open)",
-    "sum rule check: int q dx wants 0.975x from a trace covering 6/12 lattice sites.  Not applied -- the frame calibration is the primary one.  A value far from 1 means the trace is missing real weight."
+    "marker template R = 11.5 px (panel marker_scale 1)",
+    "column probe at 2K=24: 23 markers (11 filled, 12 open)",
+    "sum rule check: int q dx wants 0.457x from a trace covering 11/12 lattice sites.  Not applied -- the frame calibration is the primary one.  A value far from 1 means the trace is missing real weight."
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "lattice column probe",
@@ -86,7 +87,7 @@
   },
   "K_used": 24,
   "K_source": "stated in paper",
-  "sum_rule_rejected_scale": 0.9745762711864404,
-  "n_on_lattice": 7,
+  "sum_rule_rejected_scale": 0.45707472178060404,
+  "n_on_lattice": 23,
   "n_dropped_off_lattice": 0
 }

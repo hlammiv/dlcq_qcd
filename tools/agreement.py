@@ -72,6 +72,9 @@ def main(argv=None):
     ap.add_argument("--panel", nargs="+")
     ap.add_argument("--source", choices=("python", "fortran"), default="python")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--floor", type=float, default=0.05,
+                    help="denominator floor as a fraction of the panel peak; "
+                         "0 reproduces the unfloored relative deviation")
     args = ap.parse_args(argv)
 
     from compare_panels import PANEL_PHYSICS
@@ -92,13 +95,31 @@ def main(argv=None):
             print(f"{name}: unavailable ({exc})")
             continue
         val, high = [], []
+        # A relative deviation is meaningless where the curve has gone to zero:
+        # a tail marker at q = 0.000 against our 0.012 scores 1.2e12 percent,
+        # and three such markers move a ten-marker median more than the whole
+        # peak region does.  The panel's own peak is the scale that means
+        # something, so the denominator is floored at a fraction of it.
+        #
+        # This matters now and did not before: the traces used to stop before
+        # the tail, so the markers this floor protects against are exactly the
+        # ones that were missing.  Comparing an unfloored number from the old
+        # traces with an unfloored number from the complete ones compares two
+        # different marker sets, not two levels of agreement.
+        # The floor is a fraction of *this series'* peak, not the panel's.
+        # Flooring by the panel peak was tried first and is wrong: the
+        # higher-Fock curves are two to four orders of magnitude below the
+        # valence one, so a panel-wide floor forgives essentially any error on
+        # them -- it moved Fig. 6(c) from 355% to 4.8% by fiat, which is the
+        # one number in this table that must not be manufactured.
         for xd, yd in markers(name):
             best = None
             for x, y, label, is_val in ser:
                 i = int(np.argmin(np.abs(x - xd)))
                 if abs(x[i] - xd) > 1e-3:
                     continue
-                dev = abs(y[i] - yd) / max(abs(yd), 1e-12)
+                floor = args.floor * float(np.max(np.abs(y))) if len(y) else 0.0
+                dev = abs(y[i] - yd) / max(abs(yd), floor, 1e-12)
                 if best is None or dev < best[0]:
                     best = (dev, y[i], label, is_val)
             if best is None:

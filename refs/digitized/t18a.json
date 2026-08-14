@@ -88,7 +88,8 @@
   "notes": [
     "x ticks: found 26, expected 6 (calibration still from frame edges)",
     "axis-dot lattice: inconclusive (4/5 dots matched; needs >=7 and >=80%)",
-    "suppressed 54 in-plot legend/text blobs"
+    "suppressed 54 in-plot legend/text blobs",
+    "marker template R = 31.1 px (panel marker_scale 2.7)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
   "detector": "blob (probe found too few)",

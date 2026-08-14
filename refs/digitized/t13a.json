@@ -82,10 +82,13 @@
   "n_legend_suppressed": 33,
   "notes": [
     "x ticks: found 20, expected 7 (calibration still from frame edges)",
-    "suppressed 33 in-plot legend/text blobs"
+    "suppressed 33 in-plot legend/text blobs",
+    "marker template R = 11.5 px (panel marker_scale 1)",
+    "column probe at 2K=24: 13 markers (7 filled, 6 open)"
   ],
   "method": "tools/digitize.py connected-component marker tracing",
-  "detector": "blob (probe found too few)",
+  "detector": "lattice column probe",
+  "K_probe": 24,
   "check": {
     "K_inferred": 22,
     "K_code": 22,
@@ -102,5 +105,5 @@
   "K_used": 24,
   "K_source": "stated in paper",
   "n_on_lattice": 13,
-  "n_dropped_off_lattice": 10
+  "n_dropped_off_lattice": 0
 }

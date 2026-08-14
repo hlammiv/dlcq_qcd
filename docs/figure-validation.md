@@ -234,11 +234,10 @@ reads as a physics discrepancy.
 So it stays as a diagnostic: a scale near 1 is evidence the frame was read
 correctly, and a scale far from 1 says the trace is incomplete.
 
-**How incomplete, panel by panel.** `tests/test_digitized.py` now measures it
-rather than leaving it as "about half". Every one of the thirteen
-structure-function panels is short of markers, and the marks are
-`xfail(strict=True)` so each flips to a failure the moment its trace is
-completed:
+**How incomplete they were, and how that was closed.** The traces this section
+described recovered about half their markers. `tests/test_digitized.py` measured
+it per panel and held the result as `xfail(strict=True)`, so completing a trace
+would turn its panel red rather than quietly pass:
 
 | | sites found | | sites found |
 |---|---|---|---|
@@ -250,21 +249,36 @@ completed:
 | 5(a) | 10/12 | 6(c) | 6/10 |
 | | | 6(d) | 4/7 |
 
-Fig. 3(a) is the instructive entry: it reaches every site *and* passes the sum
-rule, and is still missing a whole series at two of them. A site count alone
-calls it clean, which is why the per-series check is separate.
+Fig. 3(a) was the instructive entry: it reached every site *and* passed the sum
+rule while missing a whole series at two of them. A site count alone called it
+clean, which is why the per-series check is separate.
 
-**A tracer that closes this exists but is not merged.** The branch
-`worktree-fig6-digitize` recovers every site on all thirteen panels, with
-residual gaps only at three markers that are provably unrecoverable — two
-series drawn on top of one another — and its sum rules then land within 2.2%
-before any scale is applied (worst 6(c) at 2.11%, most under 1%). The traces
-committed here ask for up to **1.76×** on the same panels — 3(b) 1.757,
-6(c) 1.752, 6(b) 1.704 — and correctly refuse it. Its axis calibration
-predates §2, though, so it
-cannot simply be merged: the work is that tracer run against the current
-frames. `tools/trace_overlay.py` draws the current detector's decisions back
-onto the scan, which is the way in.
+**Those marks are gone.** The detector now finds markers by template score
+rather than by reading vertical runs, which recovers the two cases that defeated
+the old one: a marker resting on the x axis, whose run merges with the axis
+line, and a higher-Fock marker sitting on a valence marker that has fallen to
+~0. Every panel reaches every site, and the sum rule -- which was asking for up
+to **1.757x** -- now lands where an identity should:
+
+| | ∫q dx | | ∫q dx |
+|---|---|---|---|
+| 3(a) | 1.026 (want 1) | 6(a) | 3.043 (want 3) |
+| 3(b) | 3.101 (want 3) | 6(b) | 3.050 |
+| 5(a) | 1.018 | 6(c) | 2.960 |
+| 5(b) | 1.000 | 6(d) | 6.026 (want 6) |
+| 5(c) | 1.004 | | |
+
+Five markers are still missing across the thirteen panels, each named
+individually in `ALLOWED_GAPS` so that a *different* one going missing is still
+a failure. Four are unrecoverable in principle -- a marker buried under another
+series', or one that has decayed onto the axis line. The fifth, Fig. 4(b) at
+k=5, is a marker the earlier trace found from its own ink, so it is a shortfall
+rather than an impossibility; Fig. 4(b) carries no live sum rule, so nothing
+else catches it.
+
+`tools/trace_overlay.py` draws the detector's decisions back onto the scan --
+one ring per detection, one cross per short site -- which is how to check the
+remaining five by eye.
 
 ---
 

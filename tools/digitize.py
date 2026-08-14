@@ -95,6 +95,17 @@ class Panel:
     # the article's figures at better print quality, so it is the preferred
     # target where a panel appears in both.
     source: str = "article"
+    # Glyphs this panel draws.  The template probe searches each shape
+    # independently, which is what lets a ring resting on a disc come back as
+    # two detections rather than one confused blob.  A panel drawing a third or
+    # fourth series has to say so -- nothing infers it.
+    shapes: tuple = ("filled", "open")
+    # Marker size relative to the article's structure-function panels, which is
+    # what MARKER_R_600 is calibrated on.  1.0 for everything printed at that
+    # size; the thesis reprints some figures larger, and by different factors
+    # per figure, so those panels declare it.  See the probe call site for the
+    # two inference schemes that were tried and rejected.
+    marker_scale: float = 1.0
 
 
 PANELS = {
@@ -132,7 +143,8 @@ PANELS = {
                    xticks=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
                    description="FIG. 4(b) baryon, one extra pair, incl. antiquarks",
                    B=1, N=3, sector="higher-fock",
-                   ylabels=(22.5, 15.0, 7.5, 0.0)),
+                   ylabels=(22.5, 15.0, 7.5, 0.0),
+                   shapes=("filled", "open", "triangle", "triangle_down")),
     # Frame top 12.63, not the labelled 11.25, which sits at fraction 0.891.
     "fig4c": Panel(name="fig4c", page=4, bbox=(0.5372, 0.1811, 0.6994, 0.2765),
                    xlim=(0.0, 1.0), ylim=(0.0, 12.62),
@@ -229,7 +241,8 @@ PANELS = {
                    # labelled 0 12 24 36 48 on the RIGHT, so the frame is
                    # calibration enough.
                    expected_K=24, B=2, N=3, sector="valence",
-                   legend_box=(0.39, 0.99, 0.18, 0.62)),
+                   legend_box=(0.39, 0.99, 0.18, 0.62),
+                   shapes=("filled", "open", "triangle")),
 
     # ── THESIS Figs. 11 and 12 -- the same panels as the article's Figs. 5
     # and 6, but far more legibly printed.  These are the preferred targets.
@@ -319,7 +332,11 @@ PANELS = {
                   description="THESIS Fig 18(a) = article Fig 4(b): five-quark "
                               "contribution to the lightest N=3 baryon, 2K=15",
                   expected_K=15, B=1, N=3, sector="higher-fock",
-                   ylabels=(25, 20, 15, 10, 5, 0)),
+                   ylabels=(25, 20, 15, 10, 5, 0),
+                  # 2119 px frame against the article's ~780, and the markers
+                  # scale with it.  Measured: at 1.0 the probe finds 11 of the
+                  # 21 committed markers.
+                  marker_scale=2.7),
 
     # THESIS Fig 18(b): the SEVEN-quark contribution to the lightest N=3
     # baryon, 2K=15 -- the article's Fig. 4(c).  Legend: x m/g=1.6 (x10^7),
@@ -334,7 +351,8 @@ PANELS = {
                   description="THESIS Fig 18(b) = article Fig 4(c): seven-quark "
                               "contribution to the lightest N=3 baryon, 2K=15",
                   expected_K=15, B=1, N=3, sector="higher-fock",
-                   ylabels=(12, 10, 8, 6, 4, 2, 0)),
+                   ylabels=(12, 10, 8, 6, 4, 2, 0),
+                  marker_scale=2.7),
 
     # ── FIG. 8 (page 7): meson mass vs m/g, with Hamer's SU(2) lattice points ──
     "fig8a": Panel(name="fig8a", page=7, bbox=(0.5943, 0.1381, 0.8324, 0.2760),
@@ -650,21 +668,48 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
             except Exception:
                 K_probe = None
         if K_probe:
-            # Panel width sets the scale: the article's frames are ~550 px
-            # wide at 600 dpi, the thesis's ~1350.
-            pscale = max(1.0, min(4.0, (frame[1] - frame[0]) / 550.0))
-            probed = trace_at_lattice(ink, frame, K_probe, xlim=panel.xlim,
-                                      scale=pscale)
-            # Do NOT re-apply the row rule to probe markers: a multi-peaked
-            # structure function legitimately puts several markers at the same
-            # height, and in Fig. 6(c) that rule removed 7 real points.  The
-            # legend is located once, by the blob pass, and probe markers are
-            # matched against those glyph positions individually.
-            probed, probe_legend = drop_near_legend(probed, legend_hits)
-            probed, probe_boxed = drop_legend_box(probed)
-            if probe_boxed:
-                notes.append(f"declared legend box removed {len(probe_boxed)} "
-                             "probe markers")
+            # The lattice columns come from *this* panel's fitted x axis, not
+            # from a fraction of the frame width: the calibration above is the
+            # half of this that was already right, and the template probe is
+            # the half that was not.
+            # Template size is declared per panel, not inferred.  Two ways of
+            # inferring it were tried and both are recorded here because both
+            # look reasonable and neither works:
+            #
+            # * **frame width.**  MARKER_R_600 is calibrated on the article's
+            #   structure-function frames (758-798 px), but the thesis does not
+            #   reprint at one magnification -- t18a is 2119 px with markers
+            #   ~2.7x the article's, while t12a is 1355 px with markers the
+            #   *same* size.  Any single width factor breaks one to fix the
+            #   other.
+            # * **median blob area.**  A disc of area A has R = sqrt(A/pi), but
+            #   the blob pass also returns open rings, whose ink is a fraction
+            #   of their disc, so the median underestimates: it gave 0.84 on
+            #   Fig. 6(b) and cost two of its ten sites.
+            #
+            # So a panel that is not printed at the article's size says so,
+            # in the idiom legend_box already uses: explicit and auditable.
+            pscale = panel.marker_scale
+            R0 = MARKER_R_600 * dpi / 600.0
+            notes.append(f"marker template R = {R0 * pscale:.1f} px "
+                         f"(panel marker_scale {pscale:g})")
+            R_px = MARKER_R_600 * dpi / 600.0 * pscale
+            labels, big = curve_components(ink, R_px)
+            xpix = lattice_columns(K_probe, xs, xi, panel.xlim)
+            probed = trace_at_lattice(ink, frame, K_probe, xpix, dpi=dpi,
+                                      labels=labels, big=big,
+                                      shapes=panel.shapes, scale=pscale)
+            # No legend filtering on probe markers.  The blob pass needs it,
+            # because its notion of a marker is loose enough to match a
+            # letter's counter; the template probe rejects the legend by
+            # connectivity instead -- a data marker sits on its curve and so
+            # belongs to a huge component, a legend sample is an island.
+            #
+            # Both filters are blunt enough to eat real data here.  Measured on
+            # Fig. 6(b): they removed the k=7 valence marker, which is the
+            # panel's peak at q=12.44, and losing that one point alone drops
+            # the quark-number sum rule from 3.00 to 1.86.
+            probe_legend = ()
             # Prefer the probe whenever it found a plausible number of
             # markers.  Requiring it to match the blob count was backwards:
             # the blob count is inflated by legend text, so a clean probe was
@@ -673,7 +718,8 @@ def digitize(panel: Panel, dpi=600, pages_dir=None, use_lattice_probe=True):
                 provenance["probe_records"] = [
                     dict(x=xs * m["px"] + xi, y=ys * m["py"] + yi,
                          filled=m["filled"], area=m["area"],
-                         px=m["px"], py=m["py"], k=m.get("k"))
+                         px=m["px"], py=m["py"], k=m.get("k"),
+                         kind=m.get("kind"))
                     for m in probed]
                 provenance["detector"] = "lattice column probe"
                 provenance["K_probe"] = K_probe
@@ -792,133 +838,376 @@ def _centre_fill(ink, px, py, height, frac=0.25):
     return float(sub[disc].mean()) if disc.any() else 1.0
 
 
-def trace_at_lattice(ink, frame, K, stroke=5, marker_min=14, marker_max=46,
-                     pad=3, xlim=(0.0, 1.0), scale=1.0):
+MARKER_R_600 = 11.5
+
+# Acceptance thresholds on the template scores.  They are far apart from the
+# values the other class produces -- a ring scores disc ~ 0.05-0.2 where a disc
+# scores 1.0 -- so nothing here is finely tuned.
+FILLED_DISC_MIN = 0.93
+OPEN_RING_MIN = 0.80
+OPEN_CORE_MAX = 0.45     # a tick through a hole reaches ~0.3; a disc gives 1.0
+# ``core`` is what separates the classes; this only rules out a disc whose
+# middle happens to drop out.  Set tight it rejects real rings drawn with a
+# heavy stroke, whose inner disc is more than half ink even though the hole
+# itself is empty -- Fig. 5(a)'s last marker scores disc 0.59, core 0.00.
+OPEN_DISC_MAX = 0.80
+# How far a marker may sit off its nominal column, as a fraction of the lattice
+# spacing.  Most land within 4 px, but the print misplaces the odd one by more
+# -- Fig. 6(c)'s open marker at x = 3/7 is 17 px right of its site.  A quarter
+# of a spacing catches those while staying well clear of the next site.
+SHIFT_FRAC = 0.25
+
+
+def _template_offsets(R: float):
+    """Pixel offsets of the three test regions, relative to a marker centre.
+
+    ``ring`` straddles the stroke: inked for *both* series, so it answers "is a
+    marker here".  ``core`` is well inside the hole and ``disc`` well inside the
+    outer edge; together they answer "which series", with a wide margin either
+    side of the stroke so that a pixel or two of registration error is harmless.
+    """
+    n = int(np.ceil(1.2 * R)) + 1
+    yy, xx = np.mgrid[-n:n + 1, -n:n + 1]
+    d = np.hypot(yy, xx)
+    regions = {
+        "core": d <= 0.44 * R,                       # r <= 5.0 px: deep in the hole
+        "disc": d <= 0.74 * R,                       # r <= 8.5 px: inside the edge
+        "ring": (d >= 0.68 * R) & (d <= 1.00 * R),   # 7.8..11.5 px: the stroke
+    }
+    return {k: (yy[m], xx[m]) for k, m in regions.items()}
+
+
+def _score_column(ink, known, cx, rows, offsets):
+    """Template scores for every candidate centre row in one column.
+
+    Returns ``{region: array over rows}`` holding the inked fraction of that
+    region, averaged over *known* pixels only.  Frame lines and tick marks are
+    excluded via ``known`` rather than counted as ink: an axis line through a
+    ring's hole would otherwise read as a filled disc, and a marker sitting on
+    the axis -- which is where every large-x point sits -- would be misread.
+    """
+    H, W = ink.shape
+    out = {}
+    for name, (dy, dx) in offsets.items():
+        yy = rows[:, None] + dy[None, :]
+        xx = int(round(cx)) + dx[None, :]
+        good = (yy >= 0) & (yy < H) & (xx >= 0) & (xx < W)
+        yc = np.clip(yy, 0, H - 1)
+        xc = np.clip(np.broadcast_to(xx, yy.shape), 0, W - 1)
+        usable = good & known[yc, xc]
+        n = usable.sum(axis=1)
+        hit = (ink[yc, xc] & usable).sum(axis=1)
+        out[name] = np.where(n > 0, hit / np.maximum(n, 1), 0.0)
+        out[name + "_n"] = n
+    return out
+
+
+def _known_mask(ink, frame, R):
+    """Pixels whose colour is evidence about a marker.
+
+    The frame lines are drawn *through* the plotting area and belong to no
+    marker, so they are excluded from every template average.  Excluding them,
+    rather than counting them as ink, is what lets a marker centred on the x
+    axis still read as a full disc or a full ring: the region simply has fewer
+    usable pixels, not wrong ones.  Counting them instead is the bug that made
+    the whole large-x tail unreadable -- an axis line through a ring's hole
+    reads as a filled disc.
+
+    Tick marks are deliberately *not* masked.  They are the same width as a
+    ring's arc, so any rule narrow enough to catch a tick also erases the sides
+    of every marker resting on the axis, which is precisely the population this
+    is meant to rescue.  Left alone, a tick inside a ring's hole raises ``core``
+    to about 0.3 against a filled disc's 1.0, which the threshold clears
+    comfortably.
+    """
+    H, W = ink.shape
+    known = np.ones_like(ink, dtype=bool)
+    for r in np.flatnonzero(ink.sum(axis=1) > 0.5 * W):
+        known[max(0, r - 1):r + 2, :] = False
+    for c in np.flatnonzero(ink.sum(axis=0) > 0.5 * H):
+        known[:, max(0, c - 1):c + 2] = False
+    return known
+
+
+def curve_components(ink, R):
+    """Label connected ink and flag the components big enough to be a curve.
+
+    Returns ``(labels, big)`` where ``big[label]`` is True when that component
+    is larger than a few markers' worth of ink -- in practice the frame with
+    every curve welded to it, which is one component of tens of thousands of
+    pixels, against a few hundred for anything free-standing.
+    """
+    from scipy import ndimage
+
+    labels, n = ndimage.label(ink, structure=np.ones((3, 3), bool))
+    sizes = np.bincount(labels.ravel(), minlength=n + 1)
+    big = sizes > 6.0 * np.pi * R * R
+    big[0] = False
+    return labels, big
+
+
+def _on_a_curve(labels, big, marker, R):
+    """True if this marker is joined to a curve, false if it is a legend sample.
+
+    Every plotted point is drawn on top of the line through its series, and
+    every line runs into the frame, so a data marker's connected component is
+    the whole curve-and-frame: thousands of pixels.  A legend sample sits in
+    white space and forms a component the size of one marker.  That separates
+    them far more sharply than position or size, which overlap -- measured on
+    Fig. 6(a), legend blobs span 124-416 px and data blobs 164-458 px.
+    """
+    yy, xx = int(round(marker["py"])), int(round(marker["px"]))
+    H, W = labels.shape
+    # Sample the stroke, not the centre: a ring has no ink in the middle.
+    seen = []
+    for ang in np.linspace(0, 2 * np.pi, 32, endpoint=False):
+        y = int(round(yy + 0.95 * R * np.sin(ang)))
+        x = int(round(xx + 0.95 * R * np.cos(ang)))
+        if 0 <= y < H and 0 <= x < W and labels[y, x]:
+            seen.append(labels[y, x])
+    if 0 <= yy < H and 0 <= xx < W and labels[yy, xx]:
+        seen.append(labels[yy, xx])
+    if not seen:
+        return False
+    return bool(big[np.bincount(np.asarray(seen)).argmax()])
+
+
+def _recover_coincident(found, xpix, shapes, R, frame, hollow):
+    """Account for a series whose marker is buried under another series'.
+
+    Two series can land on the same point, and then the paper's own plot holds
+    only one visible marker.  It happens throughout the large-x tail, where
+    every series has fallen to ~0 and their markers pile up on the axis -- at
+    k = 17 and 19 of Fig. 6(a) the open circle is *inside* the filled disc and
+    the ink there is solid black -- and again wherever two curves cross, as at
+    k = 3 of Fig. 6(c).  Nothing can be detected there, by this method or any
+    other.  Dropping those sites is not neutral either: it drops exactly the
+    places where the two series agree and keeps the places where they differ.
+
+    The site is therefore recorded at the covering marker's value with
+    ``conf = "coincident"``, which says the two centres are within a marker of
+    each other -- 0.3 in q at Fig. 6's scale.  It takes one of two licences,
+    either of which pins the hidden value; without one, the site is reported
+    missing rather than papered over.
+
+    * The covering marker sits **on the axis**.  Then q = 0 there for it, and
+      the buried series, being non-negative and not visible above it, is inside
+      one marker of zero as well.  This is the whole large-x tail.
+    * The covering marker is a **filled disc** and the column holds no hollow
+      spot anywhere.  A disc is opaque, so it can hide a ring exactly; that no
+      ring shows up elsewhere in the column is what says the ring is under it
+      rather than somewhere the detector failed to look.  (The converse is real
+      too -- an open marker drawn later paints its white middle over a disc --
+      but that case only arises on the axis, where the first licence covers it.)
+    """
+    left, right, top, bottom = frame
+    by_site = {}
+    for m in found:
+        by_site.setdefault(m["k"], []).append(m)
+
+    out = []
+    for k, marks in by_site.items():
+        have = {m["kind"] for m in marks}
+        missing = [s for s in shapes if s not in have]
+        if not missing:
+            continue
+        on_axis = [m for m in marks if abs(m["py"] - bottom) <= 1.2 * R]
+        opaque = [m for m in marks if m["kind"] == "filled"
+                  and hollow.get(k, 1.0) < OPEN_RING_MIN]
+        if on_axis:
+            host = min(on_axis, key=lambda m: abs(m["py"] - bottom))
+        elif opaque:
+            host = opaque[0]
+        else:
+            continue
+        for shape in missing:
+            out.append(dict(px=host["px"], py=host["py"],
+                            filled=(shape == "filled"), kind=shape, k=k,
+                            score=0.0, area=host["area"], ring=None,
+                            core=None, disc=None, conf="coincident"))
+    return out
+
+
+def lattice_columns(K, x_slope, x_intercept, xlim):
+    """Pixel column of every allowed momentum site, ``{k: pixel}``.
+
+    Momenta are odd integers, so ``x = k/K``.  The pixel comes from the panel's
+    own axis fit, not from a fraction of the frame width -- Fig. 6(d) plots
+    only 0 <= x <= 0.6, and treating its frame as a full unit of x put every
+    probe column in the wrong place.
+    """
+    out = {}
+    for k in range(1, K, 2):
+        x = k / float(K)
+        if not (min(xlim) - 1e-9 <= x <= max(xlim) + 1e-9):
+            continue
+        out[k] = (x - x_intercept) / x_slope
+    return out
+
+
+def find_triangles(ink, frame, xpix, R, labels, big, shift_px,
+                   want=("triangle",)):
+    """Locate open triangle markers -- Fig. 6(d)'s third series, Fig. 4(b)'s
+    two antiquark series.
+
+    A triangle is found by its hole, not its outline: the white middle survives
+    the axis line and the curves crossing it, and its *shape* is unmistakable.
+    An apex-up triangle's hole widens steadily from top to bottom and an
+    apex-down one narrows, where a circle's is widest across the middle -- so
+    comparing the top third of the hole with the bottom third sorts all three
+    kinds of open marker with nothing to tune.  A triangle's hole is also about
+    half a ring's area, which is the cross-check rather than the test.
+    """
+    from scipy import ndimage
+
+    left, right, top, bottom = frame
+    holes = ndimage.binary_fill_holes(ink) ^ ink
+    lab, n = ndimage.label(holes)
+    out = []
+    for i in range(1, n + 1):
+        ys, xs_ = np.where(lab == i)
+        if not (0.1 * np.pi * R * R <= ys.size <= 0.45 * np.pi * R * R):
+            continue
+        y0, y1, x0, x1 = ys.min(), ys.max(), xs_.min(), xs_.max()
+        h, w = y1 - y0 + 1, x1 - x0 + 1
+        if not (0.5 * R <= h <= 1.4 * R and 0.5 * R <= w <= 1.6 * R):
+            continue
+        third = max(1, h // 3)
+        wide_top = np.ptp(xs_[ys < y0 + third]) + 1 if (ys < y0 + third).any() else 0
+        wide_bot = np.ptp(xs_[ys > y1 - third]) + 1 if (ys > y1 - third).any() else 0
+        if wide_top < 0.62 * wide_bot:
+            kind = "triangle"                       # apex up
+        elif wide_bot < 0.62 * wide_top:
+            kind = "triangle_down"                  # apex down
+        else:
+            continue                                # symmetric: a ring
+        if kind not in want:
+            continue
+        cx, cy = 0.5 * (x0 + x1), 0.5 * (y0 + y1)
+        k = min(xpix, key=lambda kk: abs(xpix[kk] - cx))
+        if abs(xpix[k] - cx) > shift_px:
+            continue
+        m = dict(px=float(cx), py=float(cy), filled=False, kind=kind,
+                 k=k, score=1.0, area=int(ys.size), ring=None, core=None,
+                 disc=None, conf="probe")
+        if not _on_a_curve(labels, big, m, R):
+            continue
+        out.append(m)
+    # One per site per kind: a structure function is single-valued.
+    best = {}
+    for m in out:
+        key = (m["k"], m["kind"])
+        if key not in best or m["area"] > best[key]["area"]:
+            best[key] = m
+    return sorted(best.values(), key=lambda m: m["px"])
+
+
+def trace_at_lattice(ink, frame, K, xpix, dpi=600, labels=None, big=None,
+                     shapes=("filled", "open"), scale=1.0):
     """Probe the columns where markers *must* be, instead of hunting blobs.
 
-    Momenta are odd integers, so a marker can only sit at ``x = k/K``.  That
-    turns 2D detection into a handful of 1D problems and fixes the failure mode
-    of blob detection on these plots: where curves cross or markers touch,
-    connected components merge and morphology loses them.  Here a merged blob
-    is irrelevant -- we only ask what lies in a known column.
+    Momenta are odd integers, so a marker can only sit at ``x = k/K``; ``xpix``
+    supplies the pixel column for each such x, taken from the panel's own axis
+    calibration (so a panel whose x range stops at 0.6 is handled like any
+    other).  That turns 2D detection into a handful of 1D problems.
 
-    The subtlety is open circles.  They are drawn with a white interior that
-    masks the connecting curve, so a vertical slice through one hits the upper
-    arc, a gap, then the lower arc: **two** runs, not one.  A filled disc gives
-    a single solid run.  So we group runs whose combined span is marker-sized
-    and read the grouping itself:
+    Within a column the two series are found by **template score**, not by
+    reading vertical runs.  Runs fail exactly where these panels are hardest:
 
-        one run, solid            -> filled marker
-        two runs around a gap     -> open marker
+    * every large-x marker sits *on* the x axis, so its run merges with the
+      axis line and its lower half falls outside the old crop;
+    * where the valence value has fallen to ~0 the higher-Fock marker sits
+      almost on top of it, and two overlapping circles form one tall run that
+      passes neither the marker-height nor the ring-gap test.
 
-    which also gives the fill classification for free, rather than by
-    thresholding an interior density that overlaps between the two classes.
+    A template does not care.  ``ring`` is inked for both series and locates a
+    marker; ``disc`` and ``core`` then say which series it is.  The two classes
+    are searched independently, so a ring resting on a disc is two detections
+    at almost the same y rather than one confused blob.
+
+    ``labels``/``min_component`` reject the legend: a data marker is drawn on
+    its curve and so belongs to a huge connected component, while a legend
+    sample is an island of its own size.
 
     Returns marker dicts with the same keys as :func:`detect_markers`.
     """
     left, right, top, bottom = frame
-    fw = float(right - left)
-    x0, x1 = xlim
-    span = float(x1 - x0)
-    # All the pixel geometry below is in units of the rendered panel.  The
-    # thesis pages render about 2.5x larger than the article's, so the marker
-    # sizes have to follow the panel rather than be hard-coded to the article.
-    stroke = max(1, int(round(stroke * scale)))
-    marker_min = max(4, int(round(marker_min * scale)))
-    marker_max = int(round(marker_max * scale))
-    pad = max(1, int(round(pad * scale)))
+    # ``scale`` follows the rendered panel, not the page.  The template radius
+    # is calibrated on the article's ~550 px frames; the thesis reprints the
+    # same figures about 2.8x larger (t18a is 2119 px against fig6b's 758), and
+    # a template that size finds nothing there.
+    R = MARKER_R_600 * dpi / 600.0 * scale
+    offsets = _template_offsets(R)
+    # A centre may sit anywhere from the top frame down to the axis itself;
+    # q >= 0, so nothing is centred more than a pixel or two below y = 0.
+    rows = np.arange(top + 2, min(bottom + 3, ink.shape[0] - int(R) - 1))
+    known = _known_mask(ink, frame, R)
+
+    spacing = (max(xpix.values()) - min(xpix.values())) / max(1, len(xpix) - 1)
+    shift_px = max(3, int(round(SHIFT_FRAC * spacing)))
+
     out = []
-
-    for k in range(1, K, 2):
-        # Panels do not all run 0..1 in x -- thesis Fig 13 spans 0..0.6 -- so
-        # the lattice site has to be placed through the panel's own limits.
-        xdata = k / float(K)
-        if not (x0 <= xdata <= x1):
+    hollow = {}      # site -> best evidence of a hollow marker anywhere in it
+    for k, xc in sorted(xpix.items()):
+        if not (left < xc < right + R):
             continue
-        xc = left + fw * (xdata - x0) / span
-        c0, c1 = int(round(xc - pad)), int(round(xc + pad)) + 1
-        c0, c1 = max(c0, left + 1), min(c1, right)
-        if c1 <= c0:
-            continue
-
-        strip = ink[top + 2:bottom - 1, c0:c1]
-        if strip.size == 0:
-            continue
-        # A row counts as ink if most of the strip's width is dark, which keeps
-        # a steeply climbing curve from masquerading as a tall marker.
-        col = strip.mean(axis=1) > 0.5
-
-        runs, start = [], None
-        for i, v in enumerate(col):
-            if v and start is None:
-                start = i
-            elif not v and start is not None:
-                runs.append([start, i - 1])
-                start = None
-        if start is not None:
-            runs.append([start, len(col) - 1])
-
-        # Group runs that together span a marker: a ring is two arcs about a
-        # hollow centre, so allow one interior gap.
-        used = [False] * len(runs)
-        for i, (a, b) in enumerate(runs):
-            if used[i]:
-                continue
-            span_a, span_b, members = a, b, [i]
-            for j in range(i + 1, len(runs)):
-                if used[j]:
+        best = {}
+        hollow[k] = 0.0
+        # Print and scan leave a few pixels of registration error; try the
+        # neighbouring columns and keep whichever explains the ink best.  The
+        # search stays well inside half a lattice spacing, so it can drift onto
+        # a smudge but never onto the next momentum site.
+        for shift in range(-shift_px, shift_px + 1):
+            s = _score_column(ink, known, xc + shift, rows, offsets)
+            for i, py in enumerate(rows):
+                if s["ring_n"][i] < 0.4 * offsets["ring"][0].size:
                     continue
-                gap = runs[j][0] - span_b - 1
-                new_span = runs[j][1] - span_a + 1
-                if gap <= 0 or new_span > marker_max:
-                    break
-                # The hollow of a ring is comparable to its arcs; a gap far
-                # larger than that belongs to a different series.
-                if gap > 0.8 * new_span:
-                    break
-                span_b = runs[j][1]
-                members.append(j)
-                break                      # at most one interior gap
-            height = span_b - span_a + 1
-            if not (marker_min <= height <= marker_max):
+                filled = s["disc"][i] >= FILLED_DISC_MIN
+                open_ = (s["ring"][i] >= OPEN_RING_MIN
+                         and s["core"][i] <= OPEN_CORE_MAX
+                         and s["disc"][i] <= OPEN_DISC_MAX)
+                # Track the strongest hollow-looking spot in the column even
+                # when it misses the cut.  Its *absence* is what later licenses
+                # calling an undetected series buried rather than missed.
+                if s["core"][i] <= OPEN_CORE_MAX:
+                    hollow[k] = max(hollow[k], float(s["ring"][i]))
+                if not (filled or open_):
+                    continue
+                kind = "filled" if filled else "open"
+                key = (kind, int(py))
+                # ``ring`` localizes both classes: it is a matched filter for
+                # the stroke and falls off as the template slides off centre.
+                # ``disc``/``core`` only classify -- both saturate over a range
+                # of offsets, so ranking on them puts the centre wherever the
+                # search happened to start.
+                score = s["ring"][i]
+                if key not in best or score > best[key]["score"]:
+                    best[key] = dict(px=float(xc + shift), py=float(py),
+                                     filled=filled, k=k, score=float(score),
+                                     ring=float(s["ring"][i]),
+                                     core=float(s["core"][i]),
+                                     disc=float(s["disc"][i]))
+        # A structure function is single-valued, so a momentum site carries at
+        # most one marker per series: take the best-scoring candidate rather
+        # than every local maximum.  That is what stops a steep curve from
+        # yielding the same marker twice at neighbouring centres.
+        for kind in ("filled", "open"):
+            cands = [c for key, c in best.items() if key[0] == kind
+                     and (labels is None or _on_a_curve(labels, big, c, R))]
+            if not cands:
                 continue
+            c = max(cands, key=lambda c: c["score"])
+            c["area"] = int(round(np.pi * R * R * (1.0 if c["filled"] else 0.45)))
+            c["conf"] = "probe"
+            c["kind"] = kind
+            out.append(c)
 
-            # Height alone is not enough: a steeply climbing curve rises as far
-            # across the strip as a marker is tall.  A marker is also WIDE --
-            # round, roughly as broad as it is high -- while a curve stroke is
-            # only ``stroke`` px across.  Measure the horizontal ink span at the
-            # run's mid-height and require it to be marker-like.
-            row = top + 2 + (span_a + span_b) // 2
-            lo = max(int(xc - marker_max), left + 1)
-            hi = min(int(xc + marker_max) + 1, right)
-            band = ink[row, lo:hi]
-            idx = np.flatnonzero(band)
-            width = (idx[-1] - idx[0] + 1) if idx.size else 0
-            if width < 0.55 * height:
-                continue
+    want = tuple(s for s in shapes if s.startswith("triangle"))
+    if want:
+        out += find_triangles(ink, frame, xpix, R, labels, big, shift_px, want)
 
-            for m in members:
-                used[m] = True
-
-            # Classify filled vs open by the ink at the marker's CENTRE, not by
-            # how many runs the vertical slice broke into.  The run count is
-            # what these panels defeat: where the two curves cross, a curve
-            # entering a ring fills its interior and the ring reads as one solid
-            # run, while a disc clipped by a neighbouring stroke can read as
-            # two.  On Figs. 6(a)-(c) that mislabelled real valence points as
-            # higher-Fock -- Fig. 6(b) at x=3/21 and Fig. 6(c) at x=5/21 are
-            # valence markers the run rule called open.
-            #
-            # A small disc at the centre separates them cleanly: a filled marker
-            # is solid there, while a ring's centre is white except for whatever
-            # stroke crosses it, which covers only part of the disc.  Measured
-            # over all three panels the two classes land at >=0.71 and <=0.49
-            # with nothing in between.
-            py = top + 2 + 0.5 * (span_a + span_b)
-            is_open = _centre_fill(ink, xc, py, height) < 0.6
-            out.append(dict(px=xc, py=py,
-                            area=int(strip[span_a:span_b + 1].sum()),
-                            height=int(height), filled=not is_open, k=k))
+    out += _recover_coincident(out, xpix, shapes, R, frame, hollow)
+    out.sort(key=lambda m: (m["px"], m["py"]))
     return out
 
 
@@ -1225,10 +1514,16 @@ def _write(args, panel, records, provenance):
             fh.write(f"# digitized from {provenance['source']}, "
                      f"PDF page {panel.page} at {args.dpi} dpi\n")
             fh.write("# see the companion .json for full calibration provenance\n")
-            fh.write("x,y,filled,k,x_raw\n")
+            # ``kind`` goes last so the positional readers in
+            # tools/compare_panels.py keep working; it names the glyph, which
+            # the binary ``filled`` flag cannot do for a panel drawing three or
+            # four series (fig4b, fig6d).
+            fh.write("x,y,filled,k,x_raw,kind\n")
             for r in records:
+                kind = r.get("kind") or ("filled" if r["filled"] else "open")
                 fh.write(f"{r['x']:.6f},{r['y']:.6f},{int(r['filled'])},"
-                         f"{r.get('k','')},{r.get('x_raw', r['x']):.6f}\n")
+                         f"{r.get('k','')},{r.get('x_raw', r['x']):.6f},"
+                         f"{kind}\n")
         json_path = args.out / f"{panel.name}.json"
         json_path.write_text(json.dumps(provenance, indent=2))
         print(f"  wrote {csv_path}")

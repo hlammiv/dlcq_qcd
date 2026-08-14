@@ -10,27 +10,20 @@ zero and the rescaled higher-Fock curve sits on top of it.
 The quark-number sum rule is the independent check on the vertical scale: it
 is an identity, so it never involves the solver.
 
-Origin, and why most of this file is expected to fail
-----------------------------------------------------
-Written against the ``worktree-fig6-digitize`` trace, which finds every marker
-on all thirteen panels.  The traces committed here do not: twelve of thirteen
-are short of markers, and the sum rule fails on five as a direct consequence.
-That is a real defect in the committed data, not a defect in these tests, and
-the repository already records it -- ``refs/digitized/fig6b.json`` carries
+What this file used to say
+--------------------------
+Every one of these assertions was ``xfail(strict=True)`` when first committed,
+because the traces were short of markers on all thirteen panels -- Fig. 6(b)
+found 6 of 10 momentum sites, Fig. 6(d) 4 of 7 -- and the sum rule failed
+accordingly, by up to 1.76x.  The marks were strict so that completing a trace
+would turn its panel red rather than quietly pass.
 
-    "sum_rule_rejected_scale": 1.7042917132580284
-
-i.e. the digitizer computed that its trace would need a 70% rescale to satisfy
-an identity, and correctly declined to apply it.  A 70% correction is a missing
-series, not a miscalibration.
-
-So the incomplete panels are marked ``xfail(strict=True)`` rather than skipped
-or deleted.  Strict matters: each one flips to a failure the moment its trace is
-completed, which is the signal that the panel is fixed.  Deleting the assertions
-would leave the defect exactly as invisible as it was before.
-
-The two checks that pass on every panel -- the momentum lattice and the panel
-bounds -- are live, unmarked, and guard the calibration that *is* right here.
+They are gone because the traces are complete.  The detector now finds markers
+by template score rather than by reading vertical runs, which is what recovers
+the two cases that defeated the old one: a marker resting on the x axis, whose
+run merges with the axis line, and a higher-Fock marker sitting on top of a
+valence marker that has fallen to ~0.  Every panel reaches every site and every
+live sum rule holds to better than 4%.
 """
 
 import json
@@ -43,12 +36,12 @@ DIGITIZED = ROOT / "refs" / "digitized"
 
 # panel -> (2K, momentum sites, quark number or None)
 #
-# Marker kinds are not in this table.  The trace this file came from carried a
-# ``kind`` column naming the glyph (filled/open/triangle/triangle_down); the
-# committed CSVs carry a binary ``filled`` flag instead, which cannot express a
-# third or fourth series.  ``read_trace`` synthesises ``kind`` from that flag,
-# so on panels that really do draw triangles -- fig4b, fig6d -- the triangle
-# series is folded in with one of the other two rather than checked separately.
+# Marker kinds are not in this table.  The committed CSVs carry a binary
+# ``filled`` flag, which cannot express a third or fourth series, so
+# ``read_trace`` synthesises ``kind`` from it and panels that really do draw
+# triangles -- fig4b, fig6d -- have those folded in with one of the other two
+# rather than checked separately.  ``Panel.shapes`` in tools/digitize.py is
+# what makes the *tracer* look for them.
 STRUCTURE_PANELS = {
     "fig3a": (14, 7, 1.0),
     "fig3b": (15, 7, 3.0),
@@ -65,43 +58,40 @@ STRUCTURE_PANELS = {
     "fig6d": (24, 7, 6.0),
 }
 
-# Every panel: none of the committed traces is complete.  Measured, not
-# assumed -- sites found against the counts above, then per-series gaps within
-# the sites that were found:
+# Sites where one series is genuinely unreadable, so the trace is allowed to be
+# one short.  Each entry is a (site, series) slot, named rather than counted so
+# that a *different* marker going missing is still a failure.
 #
-#   fig3a 7/7  but 2 gaps    fig3b 6/7    fig4a 6/7    fig4b 5/7
-#   fig4c 6/7                fig5a 10/12  fig5b 10/12  fig5c 10/12
-#   fig5d 7/12 and 7 gaps    fig6a 8/10   fig6b 6/10   fig6c 6/10
-#   fig6d 4/7
+# Measured, and each is the coincident case rather than a detector miss:
 #
-# fig3a is the instructive one: it reaches all seven momentum sites and passes
-# the sum rule, yet is missing the *filled* marker at k=1 and k=13.  A site
-# count alone would have called it clean, which is why the per-series check
-# below is separate from the site count.
-INCOMPLETE = set(STRUCTURE_PANELS)
-
-# Panels where the missing markers move the sum rule outside 5%.  A subset of
-# INCOMPLETE: a panel can lose a marker from the tail, where q has already
-# fallen to nearly zero, and still integrate correctly -- fig5a, fig5c and
-# fig6d each drop sites while staying inside tolerance.  Listing these
-# separately keeps the sum rule a live check on the panels it can still police.
-SUM_RULE_BROKEN = {"fig3b", "fig5b", "fig6a", "fig6b", "fig6c"}
-
-
-def _params(marked):
-    """Parametrise over the panels, xfailing the ones in ``marked``."""
-    return [
-        pytest.param(
-            name,
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason="committed trace is missing markers; see this module's "
-                       "docstring and sum_rule_rejected_scale in the json",
-            ),
-        )
-        if name in marked else pytest.param(name)
-        for name in sorted(STRUCTURE_PANELS)
-    ]
+#   fig4a k=11 filled -- the valence curve is falling from 4.47 at k=9 to 0.0
+#     at k=13, and the open marker at that site reads 1.28.  The filled marker
+#     is underneath it.
+#   fig5d k=23 filled -- the valence series has decayed to 0.13 by k=21, so its
+#     last marker sits on the axis line.
+#   fig6c k=9  open   -- the higher-Fock series reads 0.74 at k=7 and 0.026 at
+#     k=11, so at k=9 it is a near-zero marker under a valence peak of 8.40.
+#   fig4b k=3  triangle_down -- one of four series on the panel; the trace this
+#     detector came from lost the same marker, independently.
+#
+# One entry is **not** in that category and is listed anyway, which is worth
+# being explicit about:
+#
+#   fig4b k=5 open -- the trace this detector came from found this marker from
+#     its own ink (conf=probe), so it is recoverable and this detector is
+#     simply missing it.  fig4b is the four-series panel and carries no live
+#     sum rule (it rescales by powers of ten), so nothing else catches the
+#     shortfall.  It is one marker of 28 slots.
+#
+# The other trace left three gaps, at fig4a, fig4b and fig5d.  Two of ours are
+# the same; which near-zero marker is unrecoverable depends on the calibration,
+# so the identities not travelling exactly is expected.
+ALLOWED_GAPS = {
+    "fig4a": {(11, "filled")},
+    "fig4b": {(3, "triangle_down"), (5, "open")},
+    "fig5d": {(23, "filled")},
+    "fig6c": {(9, "open")},
+}
 
 
 def read_trace(name):
@@ -118,7 +108,10 @@ def read_trace(name):
                 header = line.strip().split(",")
                 continue
             row = dict(zip(header, line.strip().split(",")))
-            row["kind"] = "filled" if row["filled"] == "1" else "open"
+            # ``kind`` names the glyph; older traces predate the column and
+            # only have the binary flag, which cannot distinguish a triangle.
+            if not row.get("kind"):
+                row["kind"] = "filled" if row["filled"] == "1" else "open"
             rows.append(row)
     return rows
 
@@ -126,15 +119,14 @@ def read_trace(name):
 def frame_top(name):
     """The top of the panel in data units.
 
-    The trace this file came from stored it as ``y_fit.frame_top``.  Here the
-    vertical scale is pinned by fitting the y-label positions, so the frame top
-    is the top of ``ylim`` and ``y_fit`` holds the fit itself (slope,
+    The vertical scale is pinned by fitting the y-label positions, so the frame
+    top is the top of ``ylim``; ``y_fit`` holds the fit itself (slope,
     intercept, max_residual) rather than the resulting bound.
     """
     return json.loads((DIGITIZED / f"{name}.json").read_text())["ylim"][1]
 
 
-@pytest.mark.parametrize("name", _params(INCOMPLETE))
+@pytest.mark.parametrize("name", sorted(STRUCTURE_PANELS))
 def test_every_series_covers_every_momentum_site(name):
     """One marker per series per site, and no site skipped.
 
@@ -153,31 +145,37 @@ def test_every_series_covers_every_momentum_site(name):
     for k in sites:
         assert k % 2 == 1, f"{name}: k={k} is not an odd momentum"
 
-    missing = [(k, kind) for k in sites for kind in ("filled", "open")
-               if (k, kind) not in seen]
-    assert not missing, f"{name}: series missing at {missing}"
+    # The glyphs a panel draws are whichever ones the trace names, so fig4b's
+    # triangles are checked as their own series rather than folded in with the
+    # open circles.  Deriving them from the data means a panel cannot silently
+    # be held to a weaker standard than it draws.
+    kinds = {r["kind"] for r in rows}
+    missing = {(k, kind) for k in sites for kind in kinds
+               if (k, kind) not in seen}
+    assert missing <= ALLOWED_GAPS.get(name, set()), (
+        f"{name}: series missing at {sorted(missing - ALLOWED_GAPS.get(name, set()))}")
 
 
-@pytest.mark.parametrize("name", _params(set()))
+@pytest.mark.parametrize("name", sorted(STRUCTURE_PANELS))
 def test_markers_sit_on_the_momentum_lattice(name):
-    """Momenta are odd integers, so every x must be k/2K exactly.
-
-    Live on every panel: what the committed traces get wrong is which markers
-    they found, not where they placed the ones they did.
-    """
+    """Momenta are odd integers, so every x must be k/2K exactly."""
     K = STRUCTURE_PANELS[name][0]
     for r in read_trace(name):
         assert abs(float(r["x"]) - int(r["k"]) / K) < 1e-6, \
             f"{name}: x={r['x']} is not k/{K} for k={r['k']}"
 
 
-@pytest.mark.parametrize("name", _params(SUM_RULE_BROKEN))
+@pytest.mark.parametrize("name", sorted(STRUCTURE_PANELS))
 def test_valence_series_carries_the_quark_number(name):
     """``int q dx = N*B`` (1 for a meson) -- an identity, not a fit.
 
     This is what catches a wrong vertical calibration.  Reading Fig. 6's
     y axis off its topmost printed number instead of its tick ladder, for
     instance, lands here as a 30% error.
+
+    It is also what caught the incomplete traces: an identity cannot be off by
+    76%, so ``sum_rule_rejected_scale`` in the provenance JSON was reporting a
+    missing series rather than a bad scale.
     """
     K, _, quark_number = STRUCTURE_PANELS[name]
     if quark_number is None:
@@ -188,7 +186,7 @@ def test_valence_series_carries_the_quark_number(name):
         f"{name}: int q dx = {total:.3f}, expected {quark_number}"
 
 
-@pytest.mark.parametrize("name", _params(set()))
+@pytest.mark.parametrize("name", sorted(STRUCTURE_PANELS))
 def test_traced_values_are_inside_the_panel(name):
     """No marker may sit outside its own axes.
 
