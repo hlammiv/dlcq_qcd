@@ -52,18 +52,35 @@ class PythonProvider(Provider):
     name = "python"
 
     def __init__(self, ncpus=1, assembly="exact", policy="fortran",
-                 cache_dir=None, backend=None):
+                 cache_dir=None, backend=None, solver="dense", nev=None):
         self.ncpus = ncpus
         self.assembly = assembly
         self.policy = policy
         self.backend = backend
+        self.solver = solver
+        self.nev = nev
         self.cache_dir = Path(cache_dir or _ROOT / "runs" / "python_cache")
 
     def get(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0) -> DLCQResult:
         from .read_python import run_python
 
-        tag = _tag(N, NF, B, K_code, rlamb, cutoff, LPN,
-                   extra=f"{self.assembly}:{self.policy}")
+        # Extend the tag only for non-default values.  ``solver`` must be in it
+        # -- unlike ``backend``, an iterative solve is not bit-identical, so
+        # caching across it would silently mix results -- but appending
+        # ":dense" unconditionally would change the hash for every existing
+        # file: md5("exact:fortran")[:8] is "31275504", the suffix on the great
+        # majority of runs/python_cache, several GB representing hours of
+        # compute.  ``nev`` likewise, since a 40-level result is a different
+        # object from a full one.  And no "a cached k=100 satisfies a k=40
+        # request" rule: the lowest 40 of a 100-vector Lanczos are not the same
+        # bits as a 40-vector one, which is the same argument that puts
+        # ``solver`` in the tag at all.
+        extra = f"{self.assembly}:{self.policy}"
+        if self.solver != "dense":
+            extra += f":{self.solver}"
+        if self.nev is not None:
+            extra += f":k{self.nev}"
+        tag = _tag(N, NF, B, K_code, rlamb, cutoff, LPN, extra=extra)
         path = self.cache_dir / f"{tag}.h5"
         if path.exists():
             return load(path)
@@ -71,7 +88,8 @@ class PythonProvider(Provider):
         result = run_python(N=N, NF=NF, B=B, K_code=K_code, rlamb=rlamb,
                             cutoff=cutoff, LPN=LPN, ncpus=self.ncpus,
                             policy=self.policy, assembly=self.assembly,
-                            backend=self.backend)
+                            backend=self.backend, solver=self.solver,
+                            nev=self.nev)
         save(result, path)
         return result
 

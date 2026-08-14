@@ -45,6 +45,22 @@ CASES = [
     (3, 2, 1, 11, [3, 0]),
 ]
 
+# (4, 1, 1, 16) was silently wrong for a while: its Hamiltonian needs more than
+# the 12552 colour terms ``MXTRM`` used to allow, and *both* backends carry the
+# same limit, so they agreed bit-for-bit on a truncated sum and this file's
+# equality assertions passed.  MXTRM is now 50000 and the values are exact
+# against brute-force colour enumeration, so it is back to being an ordinary
+# case -- but only tests/test_colour_overflow.py can tell the difference, since
+# backend equality cannot see a defect both backends share.
+#
+# These still exceed the limit and must fail loudly rather than truncate.  Note
+# it is the *Hamiltonian* that overruns here while the norm is fine, so parton
+# count alone does not predict which runs are affected.
+OVERFLOW_CASES = [
+    (4, 1, 1, 20, None),
+    (4, 1, 1, 24, None),
+]
+
 
 def _states(N, NF, B, K, iflv=None):
     p = base.Params()
@@ -92,6 +108,31 @@ def test_hamiltonian_identical(N, NF, B, K, iflv):
     assert np.array_equal(ref[0], got[0]), (
         f"H0 differs, max |delta| = {np.max(np.abs(ref[0] - got[0])):.3e}")
     assert np.any(got[1] != 0.0)
+
+
+@pytest.mark.parametrize("N,NF,B,K,iflv", OVERFLOW_CASES)
+def test_colour_overflow_raises_in_both_backends(N, NF, B, K, iflv):
+    """A configuration past MXTRM must fail, and fail the same way both ways.
+
+    The failure has to be symmetric: ``qcdf_kernels.py`` and ``qcdf_opt.py``
+    carry independent copies of MXTRM, and if they ever drift apart one backend
+    would return a number where the other raises -- which is a far more
+    confusing bug than the one this replaces.
+    """
+    p, st = _states(N, NF, B, K, iflv)
+    n = st.numsta
+    selfen = opt.compute_selfen(N)
+    args = (1, st.mstate, st.mstinf[:n].copy(), n, N, NF, B, K, selfen, p.cbreak)
+
+    outcomes = {}
+    for backend in ("process", "thread"):
+        try:
+            opt.build_matrices(*args, 4, backend=backend)
+            outcomes[backend] = "returned"
+        except OverflowError:
+            outcomes[backend] = "raised"
+
+    assert outcomes["process"] == outcomes["thread"] == "raised", outcomes
 
 
 def test_epsilon_table_is_the_signed_permutations():

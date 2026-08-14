@@ -23,7 +23,7 @@ from qcdf import (
     lpnsub, qcdsta, NMSTMX, NMXFR,
     prmx, prmm, ibarfl, imesfl, minmom, iodev,
 )
-MXTRM = 12552; MXLNG = 54; MXP = 25
+MXTRM = 200000; MXLNG = 54; MXP = 25
 # MXLNG = 2*MXP + 4 (max right state + max operators + max left state)
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -166,7 +166,15 @@ def clfact(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K):
                 if ismb: nsbar+=1
                 else:
                     for j in range(ntrms):
-                        if lpo>=MXTRM: return 0.0
+                        # Must stay in lockstep with the same guard in
+                        # qcdf_kernels.clfact_nb: the two paths sharing MXTRM is
+                        # exactly why they agreed bit-for-bit on a wrong answer.
+                        if lpo>=MXTRM:
+                            raise OverflowError(
+                                "colour contraction exceeded MXTRM terms; the "
+                                "result would be silently wrong. Raise MXTRM in "
+                                "BOTH qcdf_opt.py and qcdf_kernels.py (they must "
+                                "match), or reduce the particle-number cutoff LPN.")
                         idel0[lpo,:lng]=idel0[j,:lng]; resl0[lpo]=-resl0[j]
                         idel0[lpo,ip1]=idel0[j,ip2]; idel0[lpo,ip2]=idel0[j,ip1]
                         v1,v2=idel0[j,ip2],idel0[j,ip1]
@@ -252,7 +260,13 @@ def clfact(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K):
                                 idelt[nt, nb2[j1]] = nb1[j1]
                             # Additional permutations (only for N>2)
                             for j2 in range(1, nprms_ep):
-                                if ntpr >= MXTRM: break
+                                if ntpr >= MXTRM:
+                                    raise OverflowError(
+                                        "colour contraction exceeded MXTRM "
+                                        "terms; the result would be silently "
+                                        "wrong. Raise MXTRM in BOTH qcdf_opt.py "
+                                        "and qcdf_kernels.py (they must match), "
+                                        "or reduce LPN.")
                                 reslt[ntpr] = reslt[nt] * float(ibrpm[j2, N-1])
                                 idelt[ntpr, :lng] = idelt[nt, :lng]
                                 for j4 in range(N-1):
@@ -483,8 +497,148 @@ def _symmetrize(a):
     return a
 
 
+def build_norm_blocks(mstate, mstinf, numsta, N, NF, B, K, labels,
+                      nthreads=1):
+    """The norm as a list of dense blocks, never allocating ``numsta**2``.
+
+    The norm is *exactly* block diagonal in parton configuration -- off-block
+    entries are ``0.0``, not 1e-16, verified by explicit colour enumeration --
+    so the dense array was mostly zeros that had to be allocated anyway.  It is
+    also built at the **pre**-weeding size, which makes it the binding memory
+    constraint of the whole solver: 8.6 GB at 2K=37, 51.5 GB at 2K=41, against
+    7.6 MB and 27.9 MB for the blocks alone.
+
+    Nothing about the arithmetic changes.  ``kern.norm_row`` is called with the
+    same arguments over the same column sets that ``_row_tasks(norh=0)`` already
+    groups by configuration key; only the destination differs, so the stored
+    values are bit-identical to slicing the dense build.  Each thread keeps one
+    full-length scratch row (0.7 MB at 2K=41) and copies out just its block's
+    columns.
+
+    ``labels`` comes from :func:`dlcq.read_python.config_block_labels`, which
+    derives the grouping from the state list in O(n L) without touching a
+    matrix.
+
+    Returns ``[(members, block), ...]`` with ``members`` the ascending state
+    indices of that block and ``block`` its dense symmetric submatrix.
+    """
+    import qcdf_kernels as kern
+
+    nprms, ibrpm = kern.epsb_table(N)
+    labels = np.asarray(labels)[:numsta]
+    order = np.argsort(labels, kind="stable")
+    groups = np.split(order, np.flatnonzero(np.diff(labels[order])) + 1)
+    groups = [np.ascontiguousarray(np.sort(g)) for g in groups if g.size]
+
+    blocks = [None] * len(groups)
+    tls = threading.local()
+
+    def run(gi):
+        members = groups[gi]
+        b = members.size
+        sc = getattr(tls, "buf", None)
+        if sc is None:
+            sc = tls.buf = (kern.Scratch(NF, K), np.zeros(numsta))
+        scratch, row = sc
+        M = np.zeros((b, b))
+        for i in range(b):
+            cols = members[i:]
+            row[cols] = 0.0
+            kern.norm_row(members[i], cols, mstate, mstinf, N, NF, B, K, row,
+                          nprms, ibrpm, *scratch.norm_args())
+            M[i, i:] = row[cols]
+        _mirror_upper(M)
+        blocks[gi] = M
+
+    if groups:
+        # Compile on this thread first; JIT holds the GIL, so racing workers
+        # into it would serialize startup (same reason as _build_threaded).
+        run(0)
+        rest = range(1, len(groups))
+        if nthreads > 1 and len(groups) > 2:
+            with ThreadPoolExecutor(nthreads) as ex:
+                for _ in ex.map(run, rest):
+                    pass
+        else:
+            for gi in rest:
+                run(gi)
+    return list(zip(groups, blocks))
+
+
+def build_ham_sparse(mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
+                     nthreads=1, drop=0.0):
+    """The Hamiltonian as CSR, never allocating ``numsta**2``.
+
+    Same traversal and same kernel as the dense build -- ``ham_row`` writes the
+    upper triangle of one row -- so the stored values are bit-identical; only
+    the zeros are not kept.  Each thread reuses one length-``numsta`` row buffer
+    and compresses it before moving on, which is what removes the n^2 array:
+    1.86 GB at 2K=41 for 6.85 M non-zeros, i.e. 82 MB as CSR.
+
+    Density falls steadily with K -- 26.05% at 2K=21, 10.68% at 29, 8.52% at 31,
+    2.95% at 41 -- because ``n`` grows 1.58x per +2 while ``nnz/row`` grows only
+    1.25x.  That is what makes the sparse form worth its overhead, and it is
+    also why the sparse *eigensolver* only pays here: on a dense operator every
+    ARPACK matvec is an O(n^2) GEMV, and measured, ``eigsh`` on this matrix
+    sparse is 3.4 s against 123 s for a dense ``eigh(subset_by_index)``.
+
+    ``drop`` discards |value| <= drop.  It defaults to 0.0 -- exact zeros only.
+    A threshold here would silently change matrix elements, and
+    ``tests/test_kernels.py`` demands they do not move.
+
+    The buffer must be zeroed per row: ``ham_row`` leaves entries that fail its
+    ``|delta| <= 4`` pre-filter untouched rather than writing zero.
+    """
+    import qcdf_kernels as kern
+    import scipy.sparse as sp
+
+    nprms, ibrpm = kern.epsb_table(N)
+    rows_out = [None] * numsta
+    tls = threading.local()
+
+    def run(r):
+        buf = getattr(tls, "buf", None)
+        if buf is None:
+            buf = tls.buf = (kern.Scratch(NF, K), np.zeros(numsta),
+                             np.zeros((NF, numsta)))
+        scratch, row, h0_row = buf
+        row[r:] = 0.0
+        kern.ham_row(r, numsta, mstate, mstinf, N, NF, B, K, selfen, cbreak,
+                     h0_row, row, nprms, ibrpm, *scratch.ham_args())
+        seg = row[r:]
+        nz = np.flatnonzero(np.abs(seg) > drop) if drop else np.flatnonzero(seg)
+        rows_out[r] = (nz + r, seg[nz].copy())
+
+    if numsta:
+        run(0)                       # compile on this thread; JIT holds the GIL
+        rest = range(1, numsta)
+        if nthreads > 1 and numsta > 2:
+            with ThreadPoolExecutor(nthreads) as ex:
+                for _ in ex.map(run, rest):
+                    pass
+        else:
+            for r in rest:
+                run(r)
+
+    indptr = np.zeros(numsta + 1, dtype=np.int64)
+    for r, (cols, _vals) in enumerate(rows_out):
+        indptr[r + 1] = indptr[r] + cols.size
+    indices = np.empty(indptr[-1], dtype=np.int64)
+    data = np.empty(indptr[-1])
+    for r, (cols, vals) in enumerate(rows_out):
+        indices[indptr[r]:indptr[r + 1]] = cols
+        data[indptr[r]:indptr[r + 1]] = vals
+    upper = sp.csr_matrix((data, indices, indptr), shape=(numsta, numsta))
+
+    # Mirror, without double-counting the diagonal the upper triangle already
+    # holds.  The dense path does the same thing via _symmetrize.
+    diag = sp.dia_matrix((upper.diagonal()[None, :], [0]),
+                         shape=(numsta, numsta))
+    return (upper + upper.T - diag).tocsr()
+
+
 def _build_threaded(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
-                    nthreads):
+                    nthreads, want_h0=True):
     """Threaded build over the nogil kernels in ``qcdf_kernels``.
 
     Each row is written straight into the destination matrix, so nothing is
@@ -505,7 +659,14 @@ def _build_threaded(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
         ham = np.zeros((0, 0))
         hnorm = np.zeros((numsta, numsta))
     else:
-        ham0 = np.zeros((NF, numsta, numsta))
+        # ``want_h0=False`` gives each thread a throwaway row instead of a slice
+        # of an (NF, n, n) array.  H0 = D*N with D fixed by parton content, so a
+        # blockwise Z makes Z^T H0 Z exactly diag(D) and the matrix is redundant
+        # -- see dlcq.read_python.free_energy_diagonal.  At 2K=41 that is
+        # 1.86 GB per flavour not allocated, and another 1.86 GB of projection
+        # not performed.  The kernel still needs somewhere to write.
+        ham0 = (np.zeros((NF, numsta, numsta)) if want_h0
+                else np.zeros((NF, 0, 0)))
         ham = np.zeros((numsta, numsta))
         hnorm = np.zeros((0, 0))
     tasks = _row_tasks(norh, mstate, mstinf, numsta)
@@ -522,8 +683,14 @@ def _build_threaded(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
                           nprms, ibrpm, *sc.norm_args())
         else:
             r = task
+            if want_h0:
+                h0_row = ham0[:, r, :]
+            else:
+                h0_row = getattr(tls, "h0_row", None)
+                if h0_row is None or h0_row.shape[1] != numsta:
+                    h0_row = tls.h0_row = np.zeros((NF, numsta))
             kern.ham_row(r, numsta, mstate, mstinf, N, NF, B, K, selfen,
-                         cbreak, ham0[:, r, :], ham[r], nprms, ibrpm,
+                         cbreak, h0_row, ham[r], nprms, ibrpm,
                          *sc.ham_args())
 
     if tasks:
@@ -541,8 +708,9 @@ def _build_threaded(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
 
     if norh == 0:
         return ham0, ham, _symmetrize(hnorm)
-    for ifl in range(NF):
-        ham0[ifl] = _symmetrize(ham0[ifl])
+    if want_h0:
+        for ifl in range(NF):
+            ham0[ifl] = _symmetrize(ham0[ifl])
     return ham0, _symmetrize(ham), hnorm
 
 
@@ -591,11 +759,16 @@ DEFAULT_BACKEND = "thread"
 
 
 def build_matrices(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
-                   ncpus, backend=None):
+                   ncpus, backend=None, want_h0=True):
     """Build the norm (``norh=0``) or Hamiltonian (``norh=1``) matrix.
 
     ``backend`` selects how the work is spread; both backends return identical
     matrices, bit for bit.  See ``docs/performance.md``.
+
+    ``want_h0=False`` skips storing the free part, which a caller using the
+    ``H0 = D N`` shortcut does not need; the returned ``ham0`` is then empty.
+    Only the threaded backend honours it -- the process backend is the
+    bit-exactness reference and is left alone.
     """
     backend = backend or os.environ.get("QCDF_BACKEND") or DEFAULT_BACKEND
     if backend not in ("thread", "process"):
@@ -603,9 +776,13 @@ def build_matrices(norh, mstate, mstinf, numsta, N, NF, B, K, selfen, cbreak,
     t0 = time.time()
     label = "norm" if norh == 0 else "ham"
     log.info(f"  {label} ({numsta}², {ncpus} {backend}s)...")
-    fn = _build_threaded if backend == "thread" else _build_process
-    ham0, ham, hnorm = fn(norh, mstate, mstinf, numsta, N, NF, B, K,
-                          selfen, cbreak, ncpus)
+    if backend == "thread":
+        ham0, ham, hnorm = _build_threaded(norh, mstate, mstinf, numsta, N, NF,
+                                           B, K, selfen, cbreak, ncpus,
+                                           want_h0=want_h0)
+    else:
+        ham0, ham, hnorm = _build_process(norh, mstate, mstinf, numsta, N, NF,
+                                          B, K, selfen, cbreak, ncpus)
     log.info(f"  {label}: {time.time()-t0:.2f}s")
     return ham0, ham, hnorm
 
@@ -700,6 +877,25 @@ def qcdsta_fast(params, states, perm, flavtab, ncpus=1):
     # 2K=39, ~1.5M projected at 2K=48).  Rather than hard-code an ever-larger
     # LKPXMX, size it to the run: start from whatever PermTables allocated and
     # double until prmx fits.  This removes LKPXMX as a ceiling entirely.
+    # ``kpxloc``/``kpmloc`` are indexed by total momentum, up to K, but
+    # ``PermTables`` sizes their momentum axis with the fixed ``MXKMX = 100``.
+    # Numba does not bounds-check, so beyond 2K = 99 ``prmx_nb`` and ``prmm_nb``
+    # wrote past the end of the allocation and smashed the heap: generation
+    # *completed*, returned a plausible state count, and the process then died
+    # with "corrupted size vs. prev_size" whenever the allocator next walked
+    # its metadata -- at interpreter shutdown, typically, far from the cause.
+    # Measured: clean at 2K=99, corrupt from 2K=119, exactly where K first
+    # exceeds MXKMX.
+    #
+    # Sized to the run, like ``kpx`` below, rather than by raising the constant,
+    # so there is no new ceiling to rediscover later.
+    need = K + 2
+    if perm.kpxloc.shape[2] < need:
+        s = perm.kpxloc.shape
+        perm.kpxloc = np.zeros((s[0], s[1], need, s[3]), dtype=np.int64)
+    if perm.kpmloc.shape[0] < need:
+        perm.kpmloc = np.zeros((need, perm.kpmloc.shape[1]), dtype=np.int64)
+
     nuterm = np.zeros(ks.MXNP, dtype=np.int64)
     kpx, kpxloc = perm.kpx, perm.kpxloc
     while True:

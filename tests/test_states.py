@@ -166,3 +166,34 @@ def test_identical_at_large_K(B, K):
     assert p_new.numprm == p_ref.numprm
     assert np.array_equal(s_ref.mstinf[:n], s_new.mstinf[:n])
     assert np.array_equal(s_ref.mstate[:4 * n], s_new.mstate[:4 * n])
+
+
+def test_momentum_tables_are_sized_to_K_not_to_a_constant():
+    """2K > 99 used to smash the heap, silently and then fatally.
+
+    ``kpxloc`` and ``kpmloc`` are indexed by total momentum, up to K, but
+    ``PermTables`` sizes their momentum axis with a fixed ``MXKMX = 100``.
+    Numba does not bounds-check, so ``prmx_nb``/``prmm_nb`` wrote past the end:
+    generation *completed* and returned a plausible count, and the process died
+    later with "corrupted size vs. prev_size" when the allocator next walked its
+    metadata -- typically at interpreter shutdown, nowhere near the cause.
+
+    It was not merely a crash.  The counts were wrong: 2K=149 reported 127,875
+    states from corrupted memory against a true 231,823.
+
+    Asserting the sizing rather than running 2K=119, which would cost minutes
+    and, being heap corruption, might pass by luck.
+    """
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = 3, 1, 1, 119, 0.3325
+    p.cutoff, p.LPN = -1.0, 5
+    p.iflv[0] = 3
+    perm = base.PermTables()
+    st = base.StateData()
+    opt.qcdsta_fast(p, st, perm, base.FlavorTables())
+
+    assert perm.kpxloc.shape[2] > p.K, (
+        f"kpxloc momentum axis is {perm.kpxloc.shape[2]}, must exceed K={p.K}")
+    assert perm.kpmloc.shape[0] > p.K, (
+        f"kpmloc has {perm.kpmloc.shape[0]} rows, must exceed K={p.K}")
+    assert st.numsta > 0

@@ -44,7 +44,8 @@ import matplotlib.pyplot as plt
 
 from .observables import (structure_function, valence_parton_count,
                           richardson_extrapolate, thooft_valence_limit,
-                          physical_indices, spurious_zero_modes)
+                          physical_indices, spurious_zero_modes,
+                          monotone_bracket)
 from .units import (code_to_M_over_g, lambda_to_mg, mg_to_lambda,
                     thooft_rescale)
 
@@ -315,7 +316,44 @@ def _mass_series(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
     return Ks, masses
 
 
-def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
+#: Correction terms kept in the Eq. (27) fit.
+#:
+#: Was 2.  Three independent criteria say that under-fits, measured over the
+#: whole of Table I on 2K = 25-49:
+#:
+#: * held-out K -- fit on 2K = 25-45, predict 47 and 49 -- prefers 4 on **30 of
+#:   30** entries, and never picks 2.  This criterion never sees the paper.
+#: * the Levin u-transform, which assumes no endpoint exponent at all and so
+#:   shares none of Eq. (27)'s structure, lands closer to the 4-term answer on
+#:   **29 of 30**.
+#: * agreement with the published table improves on **21 of 30**, median 1.54x.
+#:
+#: The rows where agreement gets worse are mid-coupling baryons, and Levin sits
+#: *past* the 4-term value there in the same direction (bar N=3, m/g=0.4:
+#: 2-term 7.344, 4-term 7.526, Levin 7.697, published 7.300), so those are
+#: evidence about the published value rather than against four terms.
+#:
+#: **But only where the window supports it.**  All of that evidence comes from
+#: 12-13 points spanning 2K = 25-49.  It does not transfer to the paper's own
+#: window, which is 4-5 points spanning 16-24: there four terms put the N=4
+#: baryon at m/g = 0.8 at 22.073 against a published 20.900, while two terms
+#: land on it.  A flat default is the wrong shape -- the number of correction
+#: terms has to follow the amount of data.
+N_TERMS = 4
+
+#: Points below which the wide-window evidence does not apply and the historical
+#: two terms are used instead.  Eight is the first window size past the paper's
+#: own (5) and past 2K = 25-35 (5-6), and is reached by 2K = 25-41.
+N_TERMS_MIN_POINTS = 8
+
+
+def _terms_for(n_points):
+    """Correction terms a window of ``n_points`` supports."""
+    return N_TERMS if n_points >= N_TERMS_MIN_POINTS else 2
+
+
+def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False, lpn=None,
+                       n_terms=None):
     """Lightest state extrapolated to the continuum via Eq. (27).
 
     ``msq_units=False`` returns M/g, the quantity Figs. 7 and 8 plot.
@@ -331,7 +369,45 @@ def _extrapolated_mass(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
     Ks, masses = _mass_series(provider, N, B, mg, K_codes, msq_units, lpn)
     if len(Ks) < 3:
         return None, None
-    return richardson_extrapolate(Ks, masses, mg, N, n_terms=2)
+    if n_terms is None:
+        n_terms = _terms_for(len(Ks))
+    return richardson_extrapolate(Ks, masses, mg, N, n_terms=n_terms)
+
+
+def _extrapolated_bracket(provider, N, B, mg, K_codes, msq_units=False,
+                          lpn=None):
+    """``(lo, hi)`` bounding ``M(K -> infinity)``, or ``(None, None)``.
+
+    Reported instead of the paper's last-term rule, which does not survive
+    scrutiny: it is *basis dependent*, moving by a factor of several under a
+    change of coordinates that leaves M(0) identical to 14 digits, and at weak
+    coupling it is wildly pessimistic -- at N=3, B=1, m/g=0.05 it quotes 0.594
+    on a value of 0.243, i.e. 244%.
+
+    The bracket assumes only what is measured to hold: ``M^2(K)`` increases with
+    K, its increments decrease, and they decay as a power law.  The lower bound
+    is then free and the upper bound follows from the integral test.
+
+    It is honest rather than flattering.  At strong coupling it is tight (1.4%
+    at N=3, B=1, m/g=1.6); at weak coupling it is enormous -- a factor of 10 at
+    m/g=0.05 -- because the increments there decay as ``K^-1.02``, barely
+    summable, and 2K <= 49 genuinely does not determine the limit.  Both the
+    2- and 4-term fits and the published value sit inside it on essentially
+    every row.
+    """
+    if mg == 0.0:
+        return 0.0, 0.0
+    Ks, masses = _mass_series(provider, N, B, mg, K_codes, True, lpn)
+    if len(Ks) < 4:
+        return None, None
+    lo, hi, _, mono = monotone_bracket(Ks, masses)
+    if not mono:
+        return None, None
+    if msq_units:
+        return lo, hi
+    lam = float(mg_to_lambda(mg))
+    return (code_to_M_over_g(lo, lam),
+            code_to_M_over_g(hi, lam) if np.isfinite(hi) else float("inf"))
 
 
 def sweep_lpn(N, B):
@@ -464,11 +540,15 @@ def table1(provider, source, N_values=(2, 3, 4), K_lo=16, K_hi=24):
         for N in N_values:
             row[f"mes_N{N}"] = (
                 _extrapolated_mass(provider, N, 0, mg, grid(0, N), msq_units=True),
-                _extrapolated_mass(provider, N, 0, mg, grid(0, N)))
+                _extrapolated_mass(provider, N, 0, mg, grid(0, N)),
+                _extrapolated_bracket(provider, N, 0, mg, grid(0, N),
+                                      msq_units=True))
         for N in (n for n in (3, 4) if n in N_values):
             row[f"bar_N{N}"] = (
                 _extrapolated_mass(provider, N, 1, mg, grid(1, N), msq_units=True),
-                _extrapolated_mass(provider, N, 1, mg, grid(1, N)))
+                _extrapolated_mass(provider, N, 1, mg, grid(1, N)),
+                _extrapolated_bracket(provider, N, 1, mg, grid(1, N),
+                                      msq_units=True))
         rows.append(row)
 
     FIGDIR.mkdir(parents=True, exist_ok=True)
@@ -484,14 +564,16 @@ def table1(provider, source, N_values=(2, 3, 4), K_lo=16, K_hi=24):
         fh.write("UNITS: M^2/(m^2 + g^2/pi), matching what Table I actually\n")
         fh.write("tabulates (see docs/table1-units.md).  'paper' is the printed\n")
         fh.write("value; 'pull' is |paper-ours| over the paper's own quoted\n")
-        fh.write("last-Richardson-term uncertainty.\n\n")
+        fh.write("last-Richardson-term uncertainty.\n")
+        fh.write(f"Fits keep {N_TERMS} correction terms; see figures.N_TERMS "
+                 f"for why 2 was wrong.\n\n")
 
         hdr = f"{'m/g':>6}" + "".join(f"{c[1]+' N='+str(c[2]):>22}" for c in cols)
         fh.write(hdr + "\n" + "-" * len(hdr) + "\n")
         for row in rows:
             line = f"{row['mg']:6.2f}"
             for key, q, N in cols:
-                (m0, _), _ = row[key]
+                (m0, _), _, _ = row[key]
                 ref = paper.get((q, N, row["mg"]))
                 if m0 is None:
                     line += f"{'---':>22}"
@@ -512,8 +594,34 @@ def table1(provider, source, N_values=(2, 3, 4), K_lo=16, K_hi=24):
         for row in rows:
             line = f"{row['mg']:6.2f}"
             for key, q, N in cols:
-                _, (g0, gerr) = row[key]
+                _, (g0, gerr) = row[key][0], row[key][1]
                 line += f"{'---':>22}" if g0 is None else f"{g0:>16.4f}({gerr:.2g})"
+            fh.write(line + "\n")
+
+        # The bracket, not the last term, is the defensible uncertainty.  The
+        # last-term rule is basis dependent -- it moves by a factor of several
+        # under a change of coordinates that leaves M(0) identical to 14 digits
+        # -- and at weak coupling it is absurd, quoting 244% at N=3, B=1,
+        # m/g=0.05.  The bracket assumes only that M^2(K) rises with decreasing
+        # increments that decay as a power law, all of which is measured to hold.
+        fh.write("\n\nBracket on M^2(K -> infinity), in Table I's units.\n")
+        fh.write("Lower bound is M^2 at the largest K computed and needs only\n")
+        fh.write("monotonicity; the upper bound additionally assumes the\n")
+        fh.write("increments keep decaying as a power law.  Where this is wide\n")
+        fh.write("the data does not determine the limit, and no fit can fix\n")
+        fh.write("that -- at m/g=0.05 the increments decay as K^-1.02, barely\n")
+        fh.write("summable, so 2K <= 49 leaves a factor of ~10 open.\n\n")
+        fh.write(hdr + "\n" + "-" * len(hdr) + "\n")
+        for row in rows:
+            line = f"{row['mg']:6.2f}"
+            for key, q, N in cols:
+                lo, hi = row[key][2]
+                if lo is None:
+                    line += f"{'---':>22}"
+                elif not np.isfinite(hi):
+                    line += f"{'[%.3f, inf)' % lo:>22}"
+                else:
+                    line += f"{'[%.3f, %.3f]' % (lo, hi):>22}"
             fh.write(line + "\n")
 
     print(f"  saved {out}")
@@ -741,14 +849,38 @@ def main(argv=None):
                          "way (see docs/performance.md)")
     ap.add_argument("--assembly", choices=["exact", "fortran"], default="exact",
                     help="free-part assembly; see docs/basis-dependence.md")
+    # --policy has been reachable from the API since PythonProvider was written
+    # and from the CLI never, so four of the six (assembly, policy) pairs the
+    # test suite exercises could not be run from a command line.
+    ap.add_argument("--policy", choices=["fortran", "blockwise", "spectral"],
+                    default="fortran",
+                    help="weeding/orthonormalization; 'blockwise' never forms "
+                         "the pre-weeding norm and is much faster")
+    ap.add_argument("--solver", choices=["dense", "sparse"], default="dense",
+                    help="eigensolver; 'sparse' needs --assembly exact "
+                         "--policy blockwise")
+    ap.add_argument("--nev", type=int, default=None,
+                    help="keep only the lowest N eigenpairs (default: all for "
+                         "dense, 40 for sparse)")
     ap.add_argument("--allow-run", action="store_true",
                     help="let the Fortran provider launch missing runs")
     args = ap.parse_args(argv)
 
+    # Rejected here rather than deep inside a figure loop, so it costs a usage
+    # message instead of minutes of compute.  Note --policy defaults to
+    # "fortran", which is exactly the combination --solver sparse forbids: the
+    # alternative of having --solver quietly change the weeding policy would
+    # mean a flag named for the eigensolver silently changing the basis, and
+    # docs/basis-dependence.md exists because that kind of coupling bites.
+    if args.solver == "sparse" and (args.assembly, args.policy) != ("exact",
+                                                                    "blockwise"):
+        ap.error("--solver sparse requires --assembly exact --policy blockwise")
+
     if args.source == "python":
         from .providers import PythonProvider
         provider = PythonProvider(ncpus=args.ncpus, assembly=args.assembly,
-                                  backend=args.backend)
+                                  policy=args.policy, backend=args.backend,
+                                  solver=args.solver, nev=args.nev)
     else:
         from .providers import FortranProvider
         provider = FortranProvider(allow_run=args.allow_run,

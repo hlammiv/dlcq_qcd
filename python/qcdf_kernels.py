@@ -38,7 +38,7 @@ from numba import njit
 
 from qcdf import gprbig_array, psign, MXNP
 
-MXTRM = 12552
+MXTRM = 200000
 MXLNG = 54          # 2 * MXP + 4
 MXP = 25
 
@@ -122,7 +122,15 @@ class Scratch:
 
     ``qcdf_opt`` allocates one set at module scope; that is safe under ``fork``
     and unsafe under threads, so each thread gets its own.  The two ``MXTRM x
-    MXLNG`` term tables dominate at 2.7 MB each, i.e. ~5.5 MB per thread.
+    MXLNG`` term tables dominate: ~90 MB per thread at ``MXTRM = 200000``,
+    against ~5.5 MB at the inherited Fortran value of 12552, which was found to
+    be silently truncating colour sums (docs/fortran-color-overflow.md).
+
+    The reservation costs far less than it looks.  ``np.zeros`` hands back lazy
+    zero pages, and the kernels only ever touch rows ``0..ntrms``, so what is
+    resident tracks the actual term count rather than the cap.  Measured: after
+    the increase 2K=29 runs in 1.52 s, against the 4.87 s recorded in
+    docs/performance.md before it.
     """
 
     __slots__ = ("idel0", "resl0", "idelt", "reslt", "my", "lnkb", "icycl",
@@ -364,7 +372,18 @@ def clfact_nb(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K,
                 else:
                     for j in range(ntrms):
                         if lpo >= MXTRM:
-                            return 0.0
+                            # Silently returning 0.0 here produced a norm matrix
+                            # that was not positive semidefinite (N=4, B=1,
+                            # 2K=20: a state's own norm came out 150048 against
+                            # a true 331776, and the matrix had an eigenvalue of
+                            # -1.8e5).  Both backends share MXTRM, so they agreed
+                            # bit-for-bit on the wrong answer and the
+                            # backend-equality tests could not see it.
+                            raise OverflowError(
+                                "colour contraction exceeded MXTRM terms; the "
+                                "result would be silently wrong. Raise MXTRM in "
+                                "BOTH qcdf_kernels.py and qcdf_opt.py (they must "
+                                "match), or reduce the particle-number cutoff LPN.")
                         for t in range(lng):
                             idel0[lpo, t] = idel0[j, t]
                         resl0[lpo] = -resl0[j]
@@ -474,7 +493,16 @@ def clfact_nb(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K,
                                 idelt[nt, nb2[j1]] = nb1[j1]
                             for j2 in range(1, nprms_ep):
                                 if ntpr >= MXTRM:
-                                    break
+                                    # ``break`` here left a *partial sum*, which
+                                    # is how wrong non-zero values arose rather
+                                    # than obvious zeros.  See the note on the
+                                    # other MXTRM guard above.
+                                    raise OverflowError(
+                                        "colour contraction exceeded MXTRM "
+                                        "terms; the result would be silently "
+                                        "wrong. Raise MXTRM in BOTH "
+                                        "qcdf_kernels.py and qcdf_opt.py (they "
+                                        "must match), or reduce LPN.")
                                 reslt[ntpr] = reslt[nt] * float(ibrpm[j2, N - 1])
                                 for t in range(lng):
                                     idelt[ntpr, t] = idelt[nt, t]
