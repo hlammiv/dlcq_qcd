@@ -350,8 +350,12 @@ the same run configuration as fig. 12. Its legend reads "m/g = 1" in the scan, b
 the coupling is **0.1** — the leading "0." is lost, and our valence at 0.1 matches
 its valence markers to **0.89%** where m/g = 1 misses by 66%.
 
-Its five-quark multiplier is **×10**, not illegible: our q(k=1) predicts 3.067
-against 3.145 measured, 2.5%. So:
+Its five-quark multiplier is **×10**, inferred rather than read: our q(k=1)
+predicts 3.054 against 3.296 measured, 7.3%, and a free fit wants ×8.7. (An
+earlier revision said 2.5% — that compared against the marker *before* the
+10.48/10.0 axis rescaling, and 7.3% is the like-for-like figure. The ×10 is
+still the natural reading, but it is inferred at the 10–20% level, not pinned.)
+So:
 
 | | valence | five-quark |
 |---|---|---|
@@ -360,6 +364,11 @@ against 3.145 measured, 2.5%. So:
 
 **The failure is not coupling-specific**, and it is worse at *weak* coupling —
 it shrinks as g grows, the opposite of what a coupling-driven breakdown would do.
+
+The §2.1.2 bound applies here too, on the inferred ×10, and it fails at **the
+same two momenta**: published q exceeds our whole five-parton parton density by
+1.09× at k = 3 and 1.73× at k = 9, against 1.10× and 1.44× at m/g = 1.6. Two
+couplings, two independent runs, the same two k.
 
 ##### The coupling-independence of f(k) is weaker than it first appears
 
@@ -384,6 +393,14 @@ The two panels are nonetheless **independent data**, not one run rescaled: the
 ratio between the published curves varies by 2.85 across k (ours varies by 2.93),
 and their valence curves are different physics — 11.6 peaked at x = 1/3 against a
 broad 5.0 — each matching our solve at its own coupling.
+
+One asymmetry worth knowing before leaning on fig. 15(a): it is the **weaker**
+internal-consistency test of the two. Running §2.1.3's search on it, the best
+five-quark residual with the valence pinned to ±1% is ≤12.8%, against ≤23.9% for
+fig. 12(a). Its valence is broad and flat, so seven markers pin the twelve
+amplitudes less tightly than a sharply peaked valence does. The
+internal-consistency argument rests mainly on the weak-coupling panel; fig. 15(a)
+carries the *replication* — same failure, second coupling, independent run.
 
 #### 2.1.6 The 1990 eigenvector is healthy, which places the defect downstream
 

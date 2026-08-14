@@ -17,7 +17,7 @@ curve is therefore a *function* of the valence curve, and the two published
 curves in one panel constrain each other.  So we can ask: is there ANY valence
 wavefunction that reproduces both?
 
-Three tests, cheapest first:
+Four tests, cheapest first:
 
 ``--bound``     q(k) can never exceed the sector's total parton density
                 q(k)+qbar(k).  Relabelling which parton is the antiquark, or
@@ -42,20 +42,32 @@ Three tests, cheapest first:
                 is NOT pooled this way comes out non-monotone, which is how the
                 under-convergence was caught in the first place.
 
+``--historical``  feed the PRESERVED 1990-era eigenvector (python/qcdf.out)
+                through the same conversion.  This is the test that localizes
+                the defect: a fault in the colour sums, the Hamiltonian build or
+                the diagonalization would show up in the eigenvector, and it
+                does not -- that eigenvector reproduces the published VALENCE to
+                0.6% while sitting 43% from the published five-quark curve.  So
+                whatever went wrong is downstream of the eigensolve.
+
 The published markers below were re-extracted from the thesis reprint
 (SLAC-333 p. 82, the same figure as the article's Fig. 6, printed larger) at
 600 dpi by three independent methods -- the column trace of
 refs/thesis_fig12a_fivequark.csv, erosion-centroid blob finding, and raw ink
 runs per lattice column -- which agree to 0.6-1.3%.  The vertical scale is
-pinned by the major ticks: the frame is 6.00 tick intervals tall in each of the
-three panels, so the top is 15.0.  literature/*.pdf is not in the repository
-(APS copyright), so the numbers are carried here rather than re-derived.
+pinned by the major ticks: p. 82's frame is 6.00 tick intervals tall, so its top
+is 15.0; p. 86's is 5.24, so its top is 10.48 and its markers are carried here
+already rescaled.  literature/*.pdf is not in the repository (APS copyright), so
+the numbers are carried here rather than re-derived.
+
+Panel "15a" is thesis fig. 15(a) -- the same sector and K at m/g = 0.1, which no
+earlier revision of this work used.  It is the second, independent coupling.
 
 Usage::
 
-    python tools/fig6a_consistency.py                # --bound --map, all panels
+    python tools/fig6a_consistency.py                # bound+map+historical, all
     python tools/fig6a_consistency.py --search       # adds the optimization
-    python tools/fig6a_consistency.py --panel a
+    python tools/fig6a_consistency.py --panel 15a    # the strong-coupling panel
 """
 
 from __future__ import annotations
@@ -75,30 +87,42 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "python"))
 
 K_CODE = 21
-RLAMB = 0.3325494921702995                      # paper_lambda(1.6)
+MG_WEAK, MG_STRONG = 1.6, 0.1
 
-# Thesis p. 82, y axis 0..15.0.  "val"/"fiv" are the valence and five-quark
-# markers by lattice k.  Panels (b) and (c) lose some five-quark markers where
-# they merge with the valence curve, and the x10^n in their legends is not
-# legible in the scan -- hence the free scale in the comparison.
+# Thesis p. 82 (figs. 12a-c, weak coupling, y axis 0..15.0) and p. 86 (fig. 15a,
+# strong coupling, y axis 0..10.48 -- the top label sits 48 px below the frame,
+# which the tick spacing confirms: the frame is 5.24 intervals, not 5).
+# "val"/"fiv" are the valence and five-quark markers by lattice k.  Panels (b),
+# (c) lose some five-quark markers where they merge with the valence curve, and
+# the x10^n in those legends is not legible -- hence the free scale.
 PUBLISHED = {
-    "a": dict(state=0,
+    "a": dict(state=0, mg=MG_WEAK,
               val={3: 1.994, 5: 8.343, 7: 11.572, 9: 7.035, 11: 2.200},
               fiv={1: 8.57, 3: 8.01, 5: 1.02, 7: 1.77, 9: 5.04, 11: 0.52},
               scale=1e3),          # legend states x10^3, and it is legible
-    "b": dict(state=1,
+    "b": dict(state=1, mg=MG_WEAK,
               val={3: 3.62, 5: 8.14, 7: 12.44, 9: 0.73, 11: 3.88, 13: 2.07},
               fiv={1: 2.67, 7: 0.24, 9: 1.86},
               scale=None),
-    "c": dict(state=2,
+    "c": dict(state=2, mg=MG_WEAK,
               val={1: 0.24, 3: 4.88, 5: 4.51, 7: 10.78, 9: 8.41, 11: 1.34,
                    13: 1.00},
               fiv={1: 4.05, 5: 0.43, 7: 0.65, 9: 2.63},
               scale=None),
+    # thesis fig. 15(a): same sector, same K, m/g = 0.1.  Its legend reads
+    # "m/g = 1" in the scan, but the coupling is 0.1 -- our valence at 0.1 fits
+    # its valence markers to 0.9% where 1.0 misses by 66%.  Markers below are
+    # already rescaled by 10.48/10.0 for the axis top.
+    "15a": dict(state=0, mg=MG_STRONG,
+                val={1: 4.517, 3: 4.956, 5: 4.886, 7: 4.616, 9: 3.994,
+                     11: 3.141, 13: 2.253},
+                fiv={1: 3.296, 3: 2.353, 5: 0.269, 7: 0.239, 9: 1.197,
+                     11: 0.184},
+                scale=1e1, inferred=True),   # x10 inferred; report_map checks it
 }
 
 
-def build(K=K_CODE, rlamb=RLAMB, N=3, B=1, ncpus=8):
+def build(rlamb, K=K_CODE, N=3, B=1, ncpus=8):
     """Matrices in the ORIGINAL Fock basis, which is where the sectors block."""
     from dlcq.read_python import (_import_solver, config_block_labels,
                                   weed_fortran)
@@ -217,7 +241,10 @@ def report_bound(S, panel, P):
         _, a = _resid(q5[i] * 1e3, pub, True)
         note = f"  (free scale {a:.4g}; this legend's x10^n is not legible)"
     else:
-        a, note = 1.0, f"  (legend x{scale:g}, as stated)"
+        # our q is carried as q x 10^3; the panel plots q x scale
+        a = scale / 1e3
+        note = (f"  (legend x{scale:g}"
+                + (", inferred" if P.get("inferred") else ", as stated") + ")")
     tot = (q5 + qb5)[i] * 1e3 * a
     print(f"\n  parton-density bound, panel ({panel}){note}")
     print("     k  published q   our q+qbar   ratio")
@@ -262,6 +289,12 @@ def report_map(S, panel, P):
     print(f"    five-quark residual (free scale): {rf*100:6.2f}%")
     ratio = pf / (a * q5[[(k - 1) // 2 for k in kf]] * 1e3)
     print(f"    published/ours by k={kf}: {np.round(ratio, 3)}")
+    if P["scale"] is not None and P.get("inferred"):   # inferred -> check it
+        pred = q5[(kf[0] - 1) // 2] * P["scale"]
+        fitted = float(np.mean(pf / q5[[(k - 1) // 2 for k in kf]]))
+        print(f"    legend x{P['scale']:g}: predicts {pred:.3f} at k={kf[0]} "
+              f"vs {pf[0]:.3f} measured ({abs(pred/pf[0]-1)*100:.1f}%); "
+              f"a free fit wants x{fitted:.3g}")
     # how little the propagator matters
     if panel == "a":
         V = S.H53 @ c[S.I3]
@@ -313,6 +346,50 @@ def report_search(S, panel, P, starts=60, seed=1):
     print("    (upper bounds: this is a search, not a proof of the minimum)")
 
 
+def report_historical(path=None, panel="a"):
+    """Does the PRESERVED 1990-era eigenvector produce the published figure?
+
+    This is the test that localizes the defect.  A fault anywhere in the colour
+    sums, the Hamiltonian build or the diagonalization would show up in the
+    eigenvector -- so if the era's own eigenvector is healthy, whatever went
+    wrong happened after the eigensolve, in the x-space conversion.
+
+    python/qcdf.out is gitignored (it is a large historical artifact), so a
+    fresh clone skips this check rather than failing.
+    """
+    from dlcq.observables import structure_function, physical_indices
+    path = Path(path or ROOT / "python" / "qcdf.out")
+    print("\n  preserved 1990-era eigenvector (python/qcdf.out)")
+    if not path.exists():
+        print(f"    {path} not present -- skipped (gitignored artifact).")
+        return
+    from dlcq.read_fortran import read_out
+    with contextlib.redirect_stderr(io.StringIO()):
+        r = read_out(path)
+    if (r.B, r.K_code) != (1, K_CODE):
+        print(f"    B={r.B} 2K={r.K_code}: not the 2K={K_CODE} baryon run -- skipped.")
+        return
+    i = int(physical_indices(r)[0])
+    _, q3, _ = structure_function(r, i, nparton=3)
+    _, q5, _ = structure_function(r, i, nparton=5)
+    P = PUBLISHED[panel]
+    kv, kf = sorted(P["val"]), sorted(P["fiv"])
+    pv = np.array([P["val"][k] for k in kv])
+    pf = np.array([P["fiv"][k] for k in kf])
+    ov = q3[[(k - 1) // 2 for k in kv]]
+    of = q5[[(k - 1) // 2 for k in kf]] * 1e3
+    rv, _ = _resid(ov, pv, False)
+    rf, a = _resid(of, pf, True)
+    print(f"    M^2 = {r.eigenvalues[i]:.9f},  {r.numsta_post} states")
+    print(f"    its valence vs the PUBLISHED valence : {rv*100:6.2f}%")
+    print(f"    its five-quark vs the PUBLISHED curve: {rf*100:6.2f}%")
+    print(f"    published / 1990-eigenvector by k={kf}: "
+          f"{np.round(pf/(a*of), 3)}")
+    print("    -> the era's own eigenvector reproduces the published VALENCE but"
+          " not the\n       published five-quark curve, so the defect is "
+          "downstream of the eigensolve.")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -320,24 +397,35 @@ def main(argv=None):
     ap.add_argument("--bound", action="store_true")
     ap.add_argument("--map", action="store_true")
     ap.add_argument("--search", action="store_true")
+    ap.add_argument("--historical", action="store_true")
     ap.add_argument("--starts", type=int, default=60)
     ap.add_argument("--ncpus", type=int, default=8)
     a = ap.parse_args(argv)
-    if not (a.bound or a.map or a.search):
-        a.bound = a.map = True
+    if not (a.bound or a.map or a.search or a.historical):
+        a.bound = a.map = a.historical = True
 
-    S = Sectors(build(ncpus=a.ncpus))
-    print(f"2K = {S.K}, B = 1, N = 3: "
-          f"{len(S.I3)} valence and {len(S.I5)} five-parton states")
+    from dlcq.units import mg_to_lambda
+    cache = {}
+    def sectors_for(mg):
+        if mg not in cache:
+            cache[mg] = Sectors(build(mg_to_lambda(mg), ncpus=a.ncpus))
+        return cache[mg]
+
     panels = list(PUBLISHED) if a.panel == "all" else [a.panel]
+    first = sectors_for(PUBLISHED[panels[0]]["mg"])
+    print(f"2K = {first.K}, B = 1, N = 3: "
+          f"{len(first.I3)} valence and {len(first.I5)} five-parton states")
     for panel in panels:
         P = PUBLISHED[panel]
+        S = sectors_for(P["mg"])
         if a.map:
             report_map(S, panel, P)
         if a.bound:
             report_bound(S, panel, P)
         if a.search:
             report_search(S, panel, P, starts=a.starts)
+    if a.historical:
+        report_historical()
     return 0
 
 
