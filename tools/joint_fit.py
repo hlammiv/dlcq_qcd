@@ -127,7 +127,12 @@ def main(argv=None):
     ap.add_argument("--rcond", type=float, default=1e-10)
     args = ap.parse_args(argv)
 
-    rows = list(csv.DictReader(open(args.csv)))
+    # Skip the leading '#' provenance block, as every committed CSV here
+    # carries one; DictReader would otherwise take the first comment as the
+    # header row.
+    with open(args.csv) as fh:
+        rows = list(csv.DictReader(
+            line for line in fh if not line.lstrip().startswith("#")))
     mg = np.array([float(r["mg"]) for r in rows])
     Kp = np.array([float(r["K_code"]) for r in rows]) / 2.0
     y = np.array([float(r["msq"]) for r in rows])

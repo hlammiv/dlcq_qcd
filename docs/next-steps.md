@@ -1,77 +1,134 @@
 # Open threads
 
 Three, in the order they are worth taking. Each is written to be started cold.
+§1 has since been **built**, and is kept because what it measured overturned
+several of its own premises — including one this file asserted twice.
 
 Everything here was established by measurement; the supporting numbers are in
-`performance.md`, `table1-units.md` and `baryon-higher-fock.md`.
+`performance.md`, `table1-units.md` and `baryon-higher-fock.md`. Note
+`performance.md` predates §1 and its profile is now inverted: the eigensolve is
+no longer the dominant line, and its claim that 2K = 37 does not fit in memory
+is superseded by the table below.
 
 ---
 
-## 1. Sparse / Lanczos solver, behind a flag
+## 1. Sparse solver — **built**; what is left is a smaller list
 
-**Do not replace the dense path.** It stays the default and stays the
-reference: it is what every bit-exactness test compares against.
+Landed behind flags, dense still the default and still the reference:
+`run_python(solver="dense"|"sparse", nev=None)`, `PythonProvider(solver=, nev=)`,
+`--solver` / `--nev` / `--policy` on the CLI. `solver="sparse"` is legal only
+with `assembly="exact"` **and** `policy="blockwise"` — one cell of six, rejected
+early. The cache tag extends only on non-default values, because appending
+unconditionally orphans ~7 GB of existing cache.
 
-Flag: `run_python(solver="dense"|"sparse")`, `PythonProvider(solver=)`,
-`--solver` on the CLI. **The cache tag must include it** — unlike `backend=`,
-which is excluded because the two backends produce bit-identical matrices. A
-Lanczos path will not, so caching across it would silently mix results.
+Reach, measured end to end:
 
-### Why this and not more K
+| case | before | after |
+|---|---|---|
+| 2K = 37, LPN = 0 | OOM on a 15 GB box | 29.9 s, 1.12 GB |
+| 2K = 41, LPN = 0 | OOM | 105 s, 4.93 GB |
+| 2K = 71, LPN = 5 (Table I truncation) | unreachable | 21 s |
 
-Measured, not assumed: extending the Richardson window from 2K = 25–35 to
-25–37 gave a **median error reduction of 1.00×**. Only 13 of 30 entries moved
-at all and every one was at strong coupling, where the error was already
-negligible. One extra K shortens the extrapolation by 5%; the weak-coupling
-errors are set by how many correction terms to keep, which one point does not
-resolve. **There is no incremental path — 2K ≳ 48 is the only lever**, and even
-that should be measured rather than assumed.
+### The premise this section used to carry was wrong
 
-### Stages
+It said **"there is no incremental path — 2K ≳ 48 is the only lever"**, on the
+strength of 25–35 → 25–37 giving a median error reduction of 1.00×. That
+measurement was made at `n_terms=4`; Table I actually runs at `n_terms=2`
+(`figures.py`). At the model in use, widening 25–35 → 25–49 improves **26 of 30**
+entries, median **1.208×**.
 
-**A — swap the eigensolver only.** Keep the dense build; replace `eigh` with
-`scipy.sparse.linalg.eigsh` for the lowest ~30. This alone removes the O(n³)
-eigensolve, **48% of a 2K = 35 run**, and is small enough to validate
-completely. Do it first: it establishes the flag and the validation pattern
-before anything structural moves. Check against dense at 2K = 21–29 to 1e-10,
-and confirm `test_reader`'s three published eigenvalues still pass at rtol
-1e-12.
+What replaces it is a sharper statement. The binding constraint at weak coupling
+is not K, it is the Eq. (27) basis going degenerate as `a → 0`:
 
-Nothing downstream needs more than this: the figures use at most 30 eigenvalues
-and 11 eigenvectors, and `DLCQResult` already tolerates fewer eigenvectors than
-eigenvalues (that is what `has_eigenvector`/`require_eigenvector` exist for).
+- convergence rate is the endpoint exponent, `p ≈ 1 + a` — measured 1.985
+  against 1+a = 1.845 at m/g = 1.6, and 1.061 against 1.084 at m/g = 0.1
+- so at m/g = 0.1 the tail bound falls only as `K^-0.06`, and **halving the
+  bracket would need K × 84,000**
+- a different fitting *basis* does not help: the confluent parametrization spans
+  the same space and leaves `M₀` identical to 1.1e-14
 
-**B — never materialize the norm.** Build it per block from
-`dlcq.read_python.config_block_labels`, which is already exact and already used
-by weeding. Blocks are tiny (max 6 → 11 over 2K = 21 → 31). Store `Z` as blocks:
-`orthonormalize_blockwise` already *proves* it is block-diagonal and then
-assembles it dense.
+M²(m/g = 0.1) ≈ 1.01 with ~12% model spread; four separate attempts failed to
+reduce it. **More K is still worth having** — it steadily reduces how much of
+each answer is fitted rather than measured (27% at m/g = 0.2 at the top of the
+old window) — but it will not close weak coupling, and no amount of it will.
 
-**C — sparse H.** Do **not** scan all pairs: that is 1.15e10 pair tests at
-n = 150k. Enumerate candidates from configuration keys plus the exact
-**|ΔL| ≤ 2** rule — measured over every non-zero off-diagonal at 2K = 21 and 23,
-not one couples states differing by more than one qq̄ pair, and it is still
-unused. Density falls 26% → 8.5% across 2K = 21 → 31 while `n` grows 1.58× per
-+2 and `nnz/row` only 1.25×, projecting to ~0.7% at 2K = 48: **~2 GB sparse
-against 185 GB dense.**
+### What the staging turned out to be
 
-**D — matrix-free triple product.** `y = Zᵀ(H(Zx))`. `Zᵀ H0 Z` need never be
-formed at all: `H0 = D·N` with `D` constant on each norm block (off-diagonal of
-`N⁻¹H0` measured at 7e-15), so it is diagonal by construction in a blockwise
-basis.
+The old A → B → C → D order was wrong in three places.
+
+**B was the unlock, not A.** The norm is built pre-weeding and is *exactly*
+block diagonal in parton configuration — off-block entries are `0.0`, not 1e-16.
+Storing only the blocks:
+
+| 2K | n_pre | dense norm | blocks |
+|---|---|---|---|
+| 37 | 32,816 | 8.62 GB | 7.56 MB |
+| 41 | 83,167 | **55.33 GB** | **27.86 MB** |
+
+Plus the piece of D that was worth keeping: `H0 = D·N` with `D` constant per
+block by construction, so `Zᵀ H0 Z` is diagonal and need never be built.
+
+**A is real but modest, and pays only after C.** `eigsh` beats
+`eigh(subset_by_index)` 40× at 2K = 41 (3.56 s against 143.80 s) — but on the
+*sparse* operator. Iterative methods pay off because of sparsity, not instead of
+it. Settled numerics: `which='SA'`, no `sigma`, no folding, `tol=1e-8`, fixed
+`v0` (default `eigsh` is non-deterministic, which a cache turns into whichever
+run landed first). Matvec count does not grow with n — 220 → 432 across
+n = 193 → 15,235.
+
+**D's headline is dead.** `hnu = ZᵀHZ` is only **4.3%** denser than `H`
+(3.079% against 2.952% at 2K = 41). The triple product does not fill in, so
+matrix-free saves nothing and adds two sparse products per matvec.
+
+**`n_post` is far smaller than assumed** — the ratio is ≈ 8/(2K), not 0.28. At
+2K = 41 it is 15,235, so the dense objects to size for are 15,235², not 23,000².
+Meson 2K = X has the same `n_post` as baryon 2K = X+3, so "meson 48" is
+"baryon 51" — five steps past what now runs, not one.
+
+### Not built, deliberately
+
+**C2, candidate enumeration.** The **|ΔL| ≤ 2** rule this section used to
+recommend admits **81–86%** of matrix entries at 2K = 21–31, against true
+densities of 26% → 8.5% — a 1.2× filter that does not improve with K. The rule
+that does work: every surviving parton must contract with one of identical
+`(type, momentum, flavour)`, so the two states share a residual key — a hash
+join on "state minus j partons", `j ∈ 0..3`. Verified a superset against every
+non-zero of the dense build at 2K = 21/23/25/29/31, overshoot 1.04–1.06×.
+
+It is simply not needed: the existing bare scan costs 20–26 ns/pair, 1.36 s at
+2K = 39 out of ~90 s. Revisit only if a profile puts it above 20% of a run.
 
 ### Constraints that must survive
 
 - The sparse path supports **`assembly="exact"` + blockwise `Z` only**. The
   Fortran-compatible diagonal-only assembly is inherently dense and basis
   dependent; it stays on the dense path for small-K cross-validation.
-- **Matrix element values must not move.** `tests/test_kernels.py` has six
-  `array_equal` assertions and `tests/test_fortran_python.py` asserts the norm
-  is bit-identical (`== 0.0`) to the 1990 Fortran. Storage, blocking and
-  traversal order across independent rows are unconstrained; **reassociating
-  the arithmetic is not.**
+- **Matrix element values must not move.** `tests/test_kernels.py` carries seven
+  `array_equal` assertions plus one `assert_array_equal`, and
+  `tests/test_fortran_python.py` asserts the norm is bit-identical (`== 0.0`) to
+  the 1990 Fortran. Storage, blocking and traversal order across independent
+  rows are unconstrained; **reassociating the arithmetic is not** — which is why
+  the blockwise gate is bit-equality on stored entries but a *tolerance* on
+  eigenvalues: sparse `Z` sums the triple product in a different order, worth
+  ~1e-13 against this algorithm's own 1e-4 reproducibility floor.
 - `structure_function` needs `norm @ c` as a matvec, and the weight is
-  `c * (Nc)`, **not** `c²` — `c²` silently breaks every sum rule.
+  `c * (Nc)`, **not** `c²` — `c²` silently breaks every sum rule. The blockwise
+  norm is therefore a `BlockDiagonal` supporting `@`, not a `csr_matrix`.
+
+### A correctness bug found while measuring
+
+`MXTRM = 12552` capped the colour-contraction tables in **both** the numba
+kernels and the interpreted path, and neither raised. Because both shared the
+cap they agreed bit-for-bit, so backend-equality tests **structurally could not
+detect it**. At N=4, B=1, 2K=20 the assembled norm had an eigenvalue of −1.8e5,
+where a Gram matrix cannot go below 0.
+
+Both guards now raise and `MXTRM` is 200000, which makes the sums exact —
+N=4/2K=20 now matches `tools/colour_norm.norm_bruteforce` with difference **0**.
+Nothing published was affected (Table I and Figs. 7/8 go through `sweep_lpn`,
+Figs. 4–6 are N=3 at 2K ≤ 29). The regression test is that the norm is positive
+semidefinite per config block — which catches this class where backend equality
+provably cannot.
 
 ---
 
