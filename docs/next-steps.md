@@ -168,20 +168,53 @@ What is settled: the published five-quark points are not reproducible, and the
 failure is not on our side in any way a better reading or a different convention
 could fix. They exceed a bound our amplitudes cannot violate (§2.1.2); they are
 incompatible with the valence points printed in the same panel, since
-`c₅ = −(H₅₅ − wN₅₅)⁻¹H₅₃c₃` holds to 5.8 × 10⁻⁴ (§2.1.3); and all three panels
-fail the same way while their valence curves reproduce to 0.6–2.9% (§2.1.4).
+`c₅ = −(H₅₅ − wN₅₅)⁻¹H₅₃c₃` holds to 5.8 × 10⁻⁴ (§2.1.3); all three panels fail
+the same way while their valence curves reproduce to 0.6–2.9% (§2.1.4); and it
+recurs at a second coupling in thesis fig. 15(a) (§2.1.5).
 
-What is not settled, and probably is not settleable: **the mechanism.** The
-candidates in §2.5 — the colour sums rewritten mid-thesis, the lost `wf`/`wfbig`
-— cannot be run. Any account must act on the five-parton amplitudes, leave the
-valence alone to 3%, be inactive at 2K = 15, and suppress k = 5, 7 while
-enhancing k = 1, 9 across three eigenstates.
+**The defect is downstream of the eigensolve** (§2.1.6). The preserved 1990 run's
+own eigenvector reproduces the published *valence* to 1% and sits 43.2% from the
+published five-quark curve — so the colour sums, the Hamiltonian build and the
+diagonalization are all exonerated, and with them any story about numerical
+instability in the solve. What is left is the step from eigenvector to plotted
+curve: the lost `wf`/`wfbig`.
 
-**If you pick this up anyway**, the two things worth doing are archival rather
-than computational: find an intermediate `qcdf.f` between the 1988 colour-sum
-rewrite and the 1993 snapshot, or find `wf`/`wfbig`. Everything computational
-has been tried; §2.3 is the list, and it now includes the exhaustive sign scan,
-every state-list truncation, every coupling, and the propagator treatment.
+What is not settled: **what that program did.** It cannot be run, and no
+intermediate version survives.
+
+**If you pick this up**, the one high-value move is archival, not computational:
+find `wf`/`wfbig`, or an intermediate `qcdf.f`. Everything computational has
+been tried; §2.3 is the list.
+
+### Published data still unused
+
+Found while chasing this, and worth more than it cost. The thesis prints far
+more than the article, and most of it has never been checked:
+
+| source | what it is | why it is worth doing |
+|---|---|---|
+| **thesis figs. 19, 20, 22** | meson four-quark contribution **as a function of K** | the only published K-scan of a higher-Fock structure function anywhere in this work. It measures the K-dependence of the conversion instead of inferring it. Even-channel, so it cannot settle the odd-channel question above — but it is the only direct probe there is |
+| thesis figs. 14, 16 | meson 4q and two-baryon 8q at **strong** coupling | free regression targets; the weak-coupling versions already reproduce |
+| thesis fig. 15(b), (c) | 2nd and 3rd baryon, five-quark, m/g = 0.1, 2K = 21 | two more states at the second coupling; 15(a) is done (§2.1.5) |
+| thesis figs. 13(b)–(e) | 2nd–5th B = 2 states | already flagged in §1.1 |
+| thesis figs. 21, 23, 24 | momentum splitting, incl. **SU(3) baryons** (fig. 24) | untouched; fig. 24 is the only other baryon higher-Fock content in the thesis |
+
+`literature/` now also holds **SLAC-PUB-5811** (= Brodsky, McCartor, Pauli &
+Pinsky, *Particle World* **3** (1993) 109), whose figs. 2 and 3 redraw this
+sector cleanly at both couplings — see §1.3 item 6. Note CERN's copy is behind
+an anti-bot challenge and the SLAC copy's TLS chain does not validate against
+older CA bundles; fetch it in a browser.
+
+### Qualifications
+
+Two, both of which cost earlier revisions of this file some credibility:
+
+- The f(k) reweighting is coupling-independent in **sign** but not in magnitude
+  (1–4% at k = 3, 5; 15–37% elsewhere). Do not quote it as a fixed function.
+- Every "higher K reproduces" data point is **even-channel** (B = 0 or 2), and
+  `K_code ≡ L (mod 2)` locks parton parity to K parity, so the only within-B=1
+  comparison is 2K = 15 vs 21. A K-growing effect confined to the odd channel is
+  not excluded by published data — no baryon-versus-K panel was ever printed.
 
 Do **not** re-derive from the drawn curves. They are cubic splines through very
 few points and the thesis says so itself; panel (c)'s valence curve has two

@@ -14,7 +14,10 @@ first principles rather than merely cross-checked between the two codes.
 | Fig. 4(b) | baryon qqqqq̄ | 15 | **1.4–3.9%** |
 | thesis Fig. 18(a) | baryon qqqqq̄ | 15 | **0.4%** |
 | Fig. 6(d) | two-baryon 6q+qq̄ | 24 | **0.8%** |
+| Particle World fig. 3, m/g=1.6 | baryon qqqqq̄ | 15 | **0.7–3.3%** |
+| Particle World fig. 3, m/g=0.1 | baryon qqqqq̄ | 15 | **5–15%** |
 | Fig. 4(c) / thesis Fig. 18(b) | baryon +2 pairs | 15 | ✗ 17.5% high |
+| thesis Fig. 15(a) | baryon qqqqq̄, m/g=0.1 | 21 | ✗ 31.9% (valence 0.9%) |
 | Figs. 6(a)–(c) | baryon qqqqq̄ | 21 | ✗ **incompatible with the same panels' own valence curves** |
 
 The five-quark sector — the one Figs. 6(a)–(c) plot — is reproduced to 0.4–3.9%
@@ -25,7 +28,12 @@ For Figs. 6(a)–(c) the question is now settled in one direction and closed in
 the other. **It is not our observable and not our reading of the figure**: the
 published five-quark points exceed a bound our amplitudes cannot violate
 (§2.1.2), and they are incompatible with the valence points printed in the same
-panel (§2.1.3), in all three panels (§2.1.4). **What the 1988–90 code did
+panel (§2.1.3), in all three panels (§2.1.4), and again at a second coupling in
+a thesis panel nobody had used (§2.1.5). **Nor is it the eigenvector**: the
+preserved 1990 run's own eigenvector reproduces the published *valence* to 1%
+and is 43.2% from the published five-quark curve, which puts the defect
+downstream of the eigensolve and rules out both the colour sums and any
+instability in the solve (§2.1.6). **What the lost x-space conversion did
 instead is not recoverable** from the surviving artifacts (§2.5).
 
 ---
@@ -140,6 +148,19 @@ comparison. Five independent routes were used instead:
    2K = 15, 0.8% for the two-baryon eight-parton sector, and 1–5% against the
    thesis's Table 6 higher-Fock probabilities — the only place the thesis quotes
    a higher-Fock magnitude with uncertainties.
+6. **A third, independent printing agrees.** Brodsky, McCartor, Pauli & Pinsky,
+   *Particle World* **3** (1993) 109 (= SLAC-PUB-5811), fig. 3, redraws this
+   sector cleanly from ref. [30]'s data at both couplings. Its markers sit on the
+   odd-k/15 lattice, so it is 2K = 15, and it lands on our numbers at 0.7%, 0.1%
+   and 3.3% for k = 1, 3, 7 at m/g = 1.6. Its companion fig. 2 confirms the
+   valence at both couplings to 4–13%. Since `structure_function` is a
+   reconstruction of a program that does not survive, three independent printings
+   agreeing with it is the strongest validation available.
+   *Caveat*: at x = 1/3 the two couplings' markers cross and merge into one blob;
+   splitting it on the width step gives both, but biased ~6% low in each, so
+   those two points are the least reliable in that figure. Thesis fig. 18(a) gives
+   6.74 there against our 6.24, so the two printings **bracket** us rather than
+   agreeing on an offset.
 
 The two curves in §2 are the exceptions, and the same five checks are what make
 it hard to attribute them to the reconstruction.
@@ -317,8 +338,85 @@ k = 5, 7 and enhanced at k = 1, 9:
 (dashes are markers merged with the valence curve and not separable.) The
 valence peaks at k = 7 in all three states, so **the suppression sits exactly
 under the valence peak and the enhancement away from it.** That is a property of
-the figure, not of one panel, and it is the sharpest surviving clue to whatever
-produced it.
+the figure, not of one panel.
+
+#### 2.1.5 A second coupling: thesis fig. 15, which nobody had used
+
+The thesis prints the same sector again at **strong coupling** — fig. 15, "Structure
+Functions for the Valence and Five-Quark N = 3 Baryon Wavefunctions at Strong
+Coupling", p. 74. It has no counterpart in the article and appears in no earlier
+revision of this file. Its markers sit on the odd-k/21 lattice, so it is **2K = 21**,
+the same run configuration as fig. 12. Its legend reads "m/g = 1" in the scan, but
+the coupling is **0.1** — the leading "0." is lost, and our valence at 0.1 matches
+its valence markers to **0.89%** where m/g = 1 misses by 66%.
+
+Its five-quark multiplier is **×10**, not illegible: our q(k=1) predicts 3.067
+against 3.145 measured, 2.5%. So:
+
+| | valence | five-quark |
+|---|---|---|
+| fig. 12(a), m/g = 1.6 | 0.61% | **42.4%** |
+| fig. 15(a), m/g = 0.1 | 0.89% | **31.9%** |
+
+**The failure is not coupling-specific**, and it is worse at *weak* coupling —
+it shrinks as g grows, the opposite of what a coupling-driven breakdown would do.
+
+##### The coupling-independence of f(k) is weaker than it first appears
+
+Comparing the two panels tests whether the discrepancy is one fixed function of k.
+It is not, quite. The clean form of the test asks whether the published ratio
+*between couplings* equals ours:
+
+| k | 1 | 3 | 5 | 7 | 9 | 11 |
+|---|---|---|---|---|---|---|
+| f(k) at m/g = 1.6 | 1.36 | 1.41 | 0.26 | 0.37 | 1.45 | 0.45 |
+| f(k) at m/g = 0.1 | 1.03 | 1.40 | 0.26 | 0.29 | 1.70 | 0.33 |
+| published-ratio ÷ our-ratio | 1.33 | **1.01** | **1.04** | 1.29 | 0.85 | 1.37 |
+
+So the **sign structure** is coupling-independent — the same k enhanced, the same
+suppressed — while the **magnitudes** agree to 1–4% only at k = 3 and 5 and differ
+by 15–37% elsewhere. A single f(k) fitted to both panels leaves 1.2% at m/g = 1.6
+and 13.6% at m/g = 0.1. An earlier revision of this section called the pattern
+"nearly identical at two couplings" on the strength of k = 3 and 5; that was the
+two best points, not the six.
+
+The two panels are nonetheless **independent data**, not one run rescaled: the
+ratio between the published curves varies by 2.85 across k (ours varies by 2.93),
+and their valence curves are different physics — 11.6 peaked at x = 1/3 against a
+broad 5.0 — each matching our solve at its own coupling.
+
+#### 2.1.6 The 1990 eigenvector is healthy, which places the defect downstream
+
+`python/qcdf.out` is the preserved 1990-era run at 2K = 21 (the rebuilt Fortran
+reproduces it byte-for-byte; see the README). Feeding **its** eigenvector through
+`structure_function`:
+
+| | k=1 | 3 | 5 | 7 | 9 | 11 |
+|---|---|---|---|---|---|---|
+| valence, from the 1990 eigenvector | 0.063 | 1.979 | 8.289 | 11.602 | 7.055 | 2.129 |
+| published valence | — | 1.994 | 8.343 | 11.572 | 7.035 | 2.200 |
+| five-quark, from the 1990 eigenvector | 7.358 | 4.502 | 3.594 | 4.656 | 3.638 | 1.452 |
+| published five-quark | 8.57 | 8.01 | 1.02 | 1.77 | 5.04 | 0.52 |
+
+Its valence reproduces the published valence to ~1%. Its five-quark curve is
+**43.2%** from the published one and only **14.7%** from ours — that residual gap
+being the diagonal-only assembly defect of §A.1, not a new effect. The ratio
+published / 1990-eigenvector is 1.11, 1.70, 0.27, 0.36, 1.32, 0.34: the same
+sign pattern once more.
+
+**The era's own eigenvector does not produce the published figure.** So the
+defect is downstream of the eigensolve. Anything that corrupts the Hamiltonian
+build or the diagonalization — including a conditioning breakdown that grows
+with K — is excluded here, because the output of exactly that step survives and
+is healthy. What remains is the step between the eigenvector and the plotted
+curve: the lost `wf`/`wfbig` (§1.3).
+
+One caveat that cannot be discharged: this rests on the README's provenance for
+`python/qcdf.out`. It cannot be confirmed from the bytes — the rebuilt Fortran
+matches it byte-for-byte, which is precisely why byte-identity cannot separate a
+preserved artifact from a faithful modern rerun. If it were the latter, the
+weaker statement still holds: **the surviving source does not produce the
+published figure either.**
 
 The apparent "node" at x ≈ 0.26 is **not** a data feature. The thesis says of
 exactly these panels:
@@ -438,8 +536,11 @@ directly above it on the same page to 0.4%.
 | the sign structure of c₃ | **all 2048** sign patterns of the twelve valence amplitudes scanned; best 34.8%, unflipped 42.3%. Worth doing precisely because the valence curve is blind to these signs and the five-quark curve is not — it was the last free thing in c₃ |
 | the five-quark propagator | exact / diagonal-only / free-mass denominators give 42.3 / 44.1 / 42.4%. The sector's own dynamics barely enter (§2.1.3) |
 | a truncated state list | a fixed-array overflow in the 1988 code was the best mechanical candidate left — K-specific, and it would leave the valence untouched. Every prefix of the generation order solved; best 31.8% at 61 of 193 states. It fails |
-| the coupling | every cached m/g from 0.05 to 1.6: 36.6–42.3%, none reproducing the shape |
+| the coupling | every cached m/g from 0.05 to 1.6: 36.6–42.3%, none reproducing the shape. And the failure recurs at m/g = 0.1 in a second published panel (§2.1.5) |
 | **any wavefunction at all** | with the valence pinned to its own published points, nothing found below 16–24% (§2.1.3) |
+| numerical instability in the solve | **excluded by the 1990 eigenvector itself** (§2.1.6): it survives, its valence matches the published valence to 1%, and it is 43.2% from the published five-quark curve. Whatever is wrong is downstream of the eigensolve |
+| conditioning growing with K or basis size | measured where panels *do* reproduce: 2K=24 meson has 818 states, 12 partons, cond(norm) 432; 2K=24 two-baryon has cond 648 — both reproduce to ≤2%, while the failing 2K=21 baryon has 193 states, 9 partons, cond 219. **But see the channel caveat below** |
+| **the odd/even channel confound** | *not* eliminated. K_code ≡ L (mod 2), so B=1 forces odd parton number and odd K while B=0/B=2 force even. Every "higher K reproduces" case is even-channel, so the only within-B=1 comparison is 2K=15 vs 21. No baryon-versus-K panel was ever published — thesis figs. 19, 20 and 22 are all mesons. A K-growing effect confined to the odd channel is not excluded by published data; §2.1.6 is what makes the question less load-bearing |
 
 ### 2.4 Numerical damage cannot produce it
 
@@ -491,15 +592,21 @@ Short of finding an intermediate version of `qcdf.f`, this is as far as the
 artifacts allow. The lost `wf`/`wfbig` conversion program (§1.3) is the other
 candidate and is equally unavailable.
 
-What §2.1 adds is a specification any such account now has to meet. It must
-act on the five-parton **amplitudes** — the observable and every re-partition of
-it are excluded by the bound in §2.1.2 — while leaving the valence amplitudes
-alone to better than 3%, since the same panels' valence curves reproduce. It
-must be inactive at 2K = 15, where the same sector reproduces and the two
-published curves *are* mutually consistent. And it must suppress k = 5, 7 and
-enhance k = 1, 9 across three different eigenstates (§2.1.4). Nothing in the
-surviving code does that, which is why this section stays an account rather
-than a finding.
+What §2.1 adds is a specification any such account now has to meet, and §2.1.6
+narrows it decisively. **The colour sums are no longer a live candidate**: they
+enter the Hamiltonian and the norm, so an error there would show up in the
+eigenvector — and the 1990 eigenvector survives, reproduces the published
+valence to 1%, and does not produce the published five-quark curve. Whatever
+happened, happened *after* the eigensolve.
+
+That leaves the **x-space conversion**, `wf`/`wfbig` (§1.3), which is equally
+unavailable. The specification it has to meet: act on the plotted distribution
+while leaving the eigenvector alone; leave the valence curve of the same panel
+intact to ~1%; be inactive at 2K = 15 and at 2K = 24; suppress k = 5, 7 and
+enhance k = 1, 9 across three eigenstates and both couplings, with the sign
+structure fixed but the magnitudes varying by 15–37% between couplings
+(§2.1.5). Nothing in the surviving artifacts does that, which is why this
+section stays an account rather than a finding.
 
 ---
 
