@@ -182,6 +182,14 @@ def main(argv=None):
     d = Path(args.data_dir)
     rows = [("improved", read(d / f"{ch}_improved_N{N}.csv"), "C0", "s"),
             ("standard", read(d / f"{ch}_standard_N{N}.csv"), "k", "o")]
+    # improved's M(0) per coupling, drawn on the standard panels as the target
+    # the one-sided endpoint bar is supposed to reach
+    imp_ref = {}
+    for mg_, g_ in rows[0][1].items():
+        if len(g_) >= 5:
+            r_ = extrapolate(g_, mg_, N, "improved")
+            if r_:
+                imp_ref[mg_] = r_[0]
     pap = paper_values()
     mgs = sorted(set().union(*[set(r[1]) for r in rows]), reverse=True)
     if not mgs:
@@ -193,7 +201,7 @@ def main(argv=None):
     # to 1500x, so a shared axis compresses each fit into a flat line and hides
     # the only thing the figure is for -- the shape of the extrapolation.
     fig, axes = plt.subplots(len(rows), len(mgs),
-                             figsize=(3.05 * len(mgs), 3.3 * len(rows)),
+                             figsize=(3.05 * len(mgs), 3.7 * len(rows)),
                              squeeze=False)
     for ir, (ham, data, col, mk) in enumerate(rows):
         for ic, mg in enumerate(mgs):
@@ -212,14 +220,30 @@ def main(argv=None):
             if res is None:
                 continue
             m0, tot, form, point, curves = res
+            # endpoint systematic: one-sided, upward, no free parameters --
+            # M(0)/(1 - K^-2a) is where the captured-fraction model says the
+            # true answer sits.  Only drawn for standard; improved already
+            # subtracts the endpoint, so it does not carry this term.
+            a_end = endpoint_exponent(mg, N)
+            cap = 1.0 - float(max(ks)) ** (-2.0 * a_end)
+            endp = m0 * (1.0 / cap - 1.0) if (ham == "standard" and cap > 0) else 0.0
             if len(curves):
                 ax.plot(grid, curves[0], "-", color=col, lw=1.0, alpha=0.85, zorder=3)
             ax.errorbar(inv, y, yerr=y * POINT_REL, fmt=mk, color=col, ms=3.6,
                         elinewidth=0.8, capsize=1.5, zorder=4)
+            if endp > 0:
+                ax.errorbar([0], [m0], yerr=[[0.0], [endp]], fmt="none",
+                            ecolor="C3", elinewidth=2.4, capsize=6, alpha=0.85,
+                            zorder=5)
             ax.errorbar([0], [m0], yerr=[tot], fmt=mk, color=col, ms=8, capsize=4,
                         elinewidth=1.7, markeredgecolor="w", markeredgewidth=0.9,
                         zorder=7)
-            seen = [y.min(), y.max(), m0 - tot, m0 + tot]
+            seen = [y.min(), y.max(), m0 - tot, m0 + tot + endp]
+            if endp > 0:
+                gi = imp_ref.get(mg)
+                if gi is not None:
+                    ax.axhline(gi, color="C0", lw=1.2, ls=":", zorder=6)
+                    seen.append(gi)
             pv = pap.get((ch, N, mg))
             if pv:
                 ax.axhspan(pv[0] - pv[1], pv[0] + pv[1], color="C2", alpha=0.18,
@@ -232,10 +256,15 @@ def main(argv=None):
             ax.set_xlim(left=-0.035 * inv.max())
             ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 3))
             a = endpoint_exponent(mg, N)
-            ax.set_title(f"{ham}   m/g={mg:.3g}\n"
-                         f"$M(0)$={m0:.4g}$\\pm${100*tot/m0:.1f}%   "
-                         f"grid sees {100*(1-70.0**(-2*a)):.2f}%", fontsize=7.5)
+            ttl = (f"{ham}   m/g={mg:.3g}\n$M(0)$={m0:.4g}$\\pm${100*tot/m0:.1f}%"
+                   f"   grid sees {100*(1-70.0**(-2*a)):.2f}%")
+            if endp > 0:
+                ttl += f"\nendpoint syst. $+${endp/m0:.0f}x"
+            ax.set_title(ttl, fontsize=7.5)
             ax.tick_params(labelsize=6.5)
+            if endp > 0:
+                ax.set_yscale("log")
+                ax.set_ylim(min(seen) * 0.7, max(seen) * 1.6)
             if ir == len(rows) - 1:
                 ax.set_xlabel(r"$1/K$", fontsize=8.5)
             if ic == 0:
@@ -247,14 +276,14 @@ def main(argv=None):
             if not any(pap.get((ch, N, m)) for m in mgs)
             else "green dashed = published Table I value with its quoted last term")
     fig.suptitle(
-        f"SU({N}) {chan}: K-extrapolation at small m/g.  Separate rows because the "
-        f"two differ by up to 1500x — on shared axes each fit flattens to a line.\n"
-        f"Improved extrapolated in a plain 1/K series (van de Sande Eq. 14), "
-        f"standard in the Eq. (27) ladder; using either basis on the other is wrong.\n"
-        f"Point bars = 1e-4 reproducibility floor; $M(0)$ bar = fit-form ensemble "
-        f"and that floor in quadrature.  {note}", fontsize=9)
+        f"SU({N}) {chan}: K-extrapolation at small m/g.  Rows split because the two "
+        f"differ by up to 1500x.\n"
+        f"Improved: plain 1/K basis (van de Sande Eq. 14).  Standard: Eq. (27) "
+        f"ladder, log axis, RED = one-sided endpoint systematic "
+        f"$M(0)/(1-K^{{-2a}})$ — no free parameters — and blue dotted = improved "
+        f"$M(0)$.\n{note}", fontsize=9.5)
     fig.tight_layout()
-    fig.subplots_adjust(top=0.84)
+    fig.subplots_adjust(top=0.79, hspace=0.42)
     out = args.out or str(ROOT / "figures" / f"tiny_mg_fits_{ch}_N{N}")
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     for ext in ("png", "pdf"):
