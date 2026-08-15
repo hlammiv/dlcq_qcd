@@ -16,6 +16,8 @@ code (``...K24_lam0.332549...``) sitting alongside Fig. 5's "m/g = 1.6, 2K = 24"
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 
 __all__ = [
@@ -258,9 +260,24 @@ def endpoint_exponent(mg, N, bracket=None):
     ``a`` runs from 0 in the chiral limit (m/g = 0) to 1 in the free limit.
     It is needed for the Richardson series of Eq. (27), whose non-analytic
     terms go as ``K^-(1+a)`` and ``K^-(2+a)``.
+
+    Memoized.  The solve is a brentq root-find at xtol=1e-14 and costs 8.8 ms,
+    while ``a`` depends only on ``(mg, N)`` -- but every Richardson fit needs
+    it, and ``richardson_stability`` runs one fit per sub-window: ~250 of them
+    for a 2K = 25-71 series.  That made a single extrapolation cost 0.16 s and
+    a six-panel figure several minutes.  Pure function of its arguments, so
+    caching is safe.
     """
+    return _endpoint_exponent(float(mg), int(N),
+                              tuple(bracket) if bracket is not None else None)
+
+
+@lru_cache(maxsize=4096)
+def _endpoint_exponent(mg: float, N: int, bracket) -> float:
     from scipy.optimize import brentq
 
+    if mg == 0.0:
+        return 0.0
     if bracket is None:
         bracket = (1e-12, 1.0 - 1e-12)
 
@@ -270,8 +287,6 @@ def endpoint_exponent(mg, N, bracket=None):
     def f(a):
         return 1.0 - a * np.pi / np.tan(a * np.pi) - rhs
 
-    if mg == 0.0:
-        return 0.0
     return float(brentq(f, *bracket, xtol=1e-14, rtol=1e-14))
 
 

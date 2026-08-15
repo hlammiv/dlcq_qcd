@@ -654,11 +654,20 @@ def richardson_stability(K_codes, masses, mg, N, n_terms=2, min_points=4):
     is then large because the basis is degenerate, not because the answer is
     uncertain.
 
-    This refits on every sub-window of at least ``min_points`` points and
-    returns the standard deviation of the resulting ``M(0)``.  Measured against
-    the last-term rule for the N = 3 baryon over 2K = 25-35, the latter
+    This refits on every contiguous sub-window of at least ``min_points`` points
+    and returns the standard deviation of the resulting ``M(0)``.  Measured
+    against the last-term rule for the N = 3 baryon over 2K = 25-35, the latter
     overstates by 6x at m/g = 1.6 rising to **341x at m/g = 0.1**, where the
     extrapolation is stable to 0.2% rather than the 72% the rule reports.
+
+    Those two ratios predate a change of definition and are no longer exact.
+    This used to enumerate *every subset* of the points, not every contiguous
+    window -- 2^n, which is 8k fits over 2K = 25-49 but 16.7 million over
+    25-71, where it simply never returns.  Contiguous is also what "window"
+    means: a scattered subset tests whether the fit survives decimation, which
+    is a different question.  The change makes the spread **larger** -- 2.19x on
+    the N = 3 baryon at m/g = 1.6, 2K = 25-49 -- because narrow low-K windows
+    are no longer diluted by the many well-spread subsets that contain them.
 
     **What this does not measure.**  It is the fit's sensitivity to the window,
     not a total uncertainty.  Systematics that shift every point in the same
@@ -670,19 +679,26 @@ def richardson_stability(K_codes, masses, mg, N, n_terms=2, min_points=4):
     Returns ``(M0, spread, n_windows)``; ``spread`` is NaN when there are too
     few points to form more than one sub-window.
     """
-    from itertools import combinations
-
     K_codes = list(K_codes)
     masses = list(masses)
     M0, _ = richardson_extrapolate(K_codes, masses, mg, N, n_terms=n_terms)
     n = len(K_codes)
     fits = []
-    for size in range(min_points, n + 1):
-        for idx in combinations(range(n), size):
-            if size == n:
+    # Contiguous sub-windows: every [i, j) with at least ``min_points`` points.
+    #
+    # This used to enumerate *every subset* via itertools.combinations, which is
+    # exponential -- 2^13 = 8k fits over 2K = 25-49, but 2^24 = 16.7 million
+    # over 25-71, where it simply never returns.  A "window" is a contiguous
+    # range of K in any case: a scattered subset is not a window, and dropping
+    # interior points tests something else entirely (whether the fit survives
+    # decimation, not whether it depends on where the window sits).
+    #
+    # O(n^2) -- 250 fits at n = 24.
+    for i in range(n):
+        for j in range(i + min_points, n + 1):
+            if j - i == n:
                 continue
-            sub = richardson_extrapolate([K_codes[i] for i in idx],
-                                         [masses[i] for i in idx],
+            sub = richardson_extrapolate(K_codes[i:j], masses[i:j],
                                          mg, N, n_terms=n_terms)[0]
             fits.append(sub)
     if len(fits) < 2:
@@ -704,19 +720,23 @@ def richardson_ensemble(K_codes, masses, mg, N, n_terms_set=(2, 3, 4),
     exactly-determined fit (which has zero residual by construction and no
     predictive content) is never admitted.
 
+    The sub-windows are **contiguous**, for the same reason as in
+    :func:`richardson_stability`: enumerating every subset is exponential --
+    3 x 2^24 ~ 5e7 fits over a 2K = 25-71 series, which never returns -- and a
+    scattered subset is not a window anyway.  O(n^2) per order.
+
     Returns a list of ``(coeffs, exponents, M0)``.
     """
-    from itertools import combinations
-
     K_codes = list(K_codes)
     masses = list(masses)
     n = len(K_codes)
     out = []
     for nt in n_terms_set:
-        for size in range(max(min_points, nt + 1 + min_dof), n + 1):
-            for idx in combinations(range(n), size):
-                kk = [K_codes[i] for i in idx]
-                mm = [masses[i] for i in idx]
+        smallest = max(min_points, nt + 1 + min_dof)
+        for i in range(n):
+            for j in range(i + smallest, n + 1):
+                kk = K_codes[i:j]
+                mm = masses[i:j]
                 try:
                     M0, _, coeffs, exps = richardson_extrapolate(
                         kk, mm, mg, N, n_terms=nt, return_fit=True)
@@ -737,7 +757,7 @@ def richardson_curve(coeffs, exponents, inv_K):
 
 
 def richardson_budget(K_codes, masses, mg, N, n_terms=2, n_terms_set=(2, 3, 4),
-                      min_points=4, masses_alt_lpn=None):
+                      min_points=4, masses_alt_lpn=None, K_codes_alt=None):
     """Full error budget for one extrapolated mass.
 
     Four components, combined in quadrature, each measured rather than assumed:
@@ -780,10 +800,29 @@ def richardson_budget(K_codes, masses, mg, N, n_terms=2, n_terms_set=(2, 3, 4),
 
     err_trunc = 0.0
     if masses_alt_lpn is not None:
+        # The alt-LPN series need not span the same window.  Raising the
+        # particle-number cut by one qqbar pair multiplies the basis by 17-23x
+        # (482,320 states against 27,377 for the N=4 baryon at 2K=70), so that
+        # sweep is affordable over a shorter range than the main one.
+        #
+        # Both series are therefore extrapolated on the K they *share*.  Using
+        # each on its own window instead would fold a window change into a
+        # number that is supposed to isolate the truncation.
         try:
-            M0b, _ = richardson_extrapolate(K_codes, masses_alt_lpn, mg, N,
-                                            n_terms=n_terms)
-            err_trunc = abs(M0b - M0)
+            Kb = list(K_codes if K_codes_alt is None else K_codes_alt)
+            common = [k for k in K_codes if k in set(Kb)]
+            if len(common) < min_points:
+                err_trunc = float("nan")
+            else:
+                idx = [list(K_codes).index(k) for k in common]
+                idxb = [Kb.index(k) for k in common]
+                base = [masses[i] for i in idx]
+                alt = [masses_alt_lpn[i] for i in idxb]
+                M0a, _ = richardson_extrapolate(common, base, mg, N,
+                                                n_terms=n_terms)
+                M0b, _ = richardson_extrapolate(common, alt, mg, N,
+                                                n_terms=n_terms)
+                err_trunc = abs(M0b - M0a)
         except Exception:
             err_trunc = float("nan")
 

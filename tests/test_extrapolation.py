@@ -26,8 +26,9 @@ import numpy as np
 import pytest
 
 from dlcq.observables import (_richardson_design, levin_u, monotone_bracket,
-                              richardson_evaluate, richardson_extrapolate,
-                              richardson_holdout, wynn_epsilon)
+                              richardson_budget, richardson_evaluate,
+                              richardson_extrapolate, richardson_holdout,
+                              wynn_epsilon)
 from dlcq.units import endpoint_exponent
 
 K_GRID = np.arange(25, 50, 2)
@@ -232,3 +233,113 @@ def test_bracket_lower_bound_is_the_largest_computed_value():
     S = 3.0 - 1.1 / KP
     lo, _, _, _ = monotone_bracket(K_GRID, S)
     assert lo == pytest.approx(S[-1])
+
+
+# ── the truncation term, when the two sweeps span different windows ────────
+
+def _series(Ks, M0, amp):
+    """A convergent series with a 1/K tail, as a stand-in for a real sweep."""
+    return [M0 + amp / k for k in Ks]
+
+
+def test_truncation_term_is_measured_on_the_shared_window():
+    """The alt-LPN sweep is shorter, and the term must still isolate truncation.
+
+    Raising the particle-number cut by one qqbar pair multiplies the basis by
+    17-23x, so that sweep stops well below the top of the main window.  If the
+    two series were each extrapolated on their own K, the difference would
+    carry a *window* change as well as a truncation change, and the budget's
+    ``trunc`` column would silently absorb it.
+
+    Here both series have the identical limit and differ only in window, so an
+    honest truncation term is zero.
+    """
+    K = list(range(25, 72, 2))
+    K_alt = list(range(25, 50, 2))
+    base = _series(K, 10.0, 0.5)
+    alt = _series(K_alt, 10.0, 0.5)          # same physics, shorter sweep
+
+    bud = richardson_budget(K, base, 1.6, 3, n_terms=2,
+                            masses_alt_lpn=alt, K_codes_alt=K_alt)
+    assert bud["truncation"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_truncation_term_still_sees_a_real_shift():
+    """The complement: a genuine change in the limit must come through."""
+    K = list(range(25, 72, 2))
+    K_alt = list(range(25, 50, 2))
+    base = _series(K, 10.0, 0.5)
+    alt = _series(K_alt, 10.02, 0.5)         # limit moved by 0.02
+
+    bud = richardson_budget(K, base, 1.6, 3, n_terms=2,
+                            masses_alt_lpn=alt, K_codes_alt=K_alt)
+    assert bud["truncation"] == pytest.approx(0.02, rel=1e-3)
+
+
+def test_too_little_overlap_is_not_silently_zero():
+    """A non-overlapping alt sweep must not read as 'no truncation error'."""
+    bud = richardson_budget(list(range(51, 72, 2)), _series(range(51, 72, 2), 10.0, 0.5),
+                            1.6, 3, n_terms=2,
+                            masses_alt_lpn=_series(range(25, 32, 2), 10.0, 0.5),
+                            K_codes_alt=list(range(25, 32, 2)))
+    assert np.isnan(bud["truncation"])
+
+
+# ── the ensemble: contiguous windows, and never exponential again ──────────
+
+def _expected_windows(n, n_terms_set=(2, 3, 4), min_points=4, min_dof=1):
+    """Closed form for the contiguous-window count ``richardson_ensemble`` makes.
+
+    For each order the smallest admissible window is ``max(min_points,
+    nt + 1 + min_dof)``; a window of size s has ``n - s + 1`` placements.
+    """
+    total = 0
+    for nt in n_terms_set:
+        smallest = max(min_points, nt + 1 + min_dof)
+        total += sum(n - s + 1 for s in range(smallest, n + 1))
+    return total
+
+
+def test_ensemble_enumerates_contiguous_windows_not_subsets():
+    """The count is the definition, and it must stay polynomial in n.
+
+    This enumerated *every subset* until it was measured: 3 x 2^24 ~ 5e7 fits
+    for a 2K = 25-71 series, which never returns -- ``figures.figure_fits``
+    simply hung, and read as a crash rather than as an algorithm.  The same bug
+    was in ``richardson_stability``.
+
+    Pinning the exact count catches a revert to subsets immediately: at n = 24
+    contiguous gives 631, subsets would give ~5e7.
+    """
+    from dlcq.observables import richardson_ensemble
+
+    mg, N = 1.6, 3
+    a = endpoint_exponent(mg, N)
+    Ks = np.arange(25, 72, 2, dtype=float)          # 24 points, the real window
+    Kp = Ks / 2.0
+    exact = 5.0 + 0.7 / Kp + 0.3 / Kp ** (1 + a)
+
+    ens = richardson_ensemble(Ks, exact, mg, N)
+    assert len(ens) == _expected_windows(len(Ks)) == 631
+
+    # Data generated from the fit form itself, so every window must recover the
+    # same limit -- the ensemble is enumerating choices, not fitting noise.
+    M0s = np.array([m for _, _, m in ens])
+    assert np.allclose(M0s, 5.0, atol=1e-6)
+
+
+def test_ensemble_stays_cheap_at_the_full_window():
+    """A wall-clock guard: exponential enumeration cannot pass this."""
+    import time
+    from dlcq.observables import richardson_ensemble
+
+    mg, N = 0.1, 3
+    Ks = np.arange(25, 72, 2, dtype=float)
+    Kp = Ks / 2.0
+    exact = 1.0 + 0.5 / Kp + 0.2 / Kp ** 2
+
+    t = time.time()
+    ens = richardson_ensemble(Ks, exact, mg, N)
+    elapsed = time.time() - t
+    assert len(ens) == 631
+    assert elapsed < 10.0, f"ensemble took {elapsed:.1f}s -- enumeration regressed"

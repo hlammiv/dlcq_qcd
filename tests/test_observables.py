@@ -178,7 +178,12 @@ def test_richardson_stability_is_tiny_for_an_exact_series():
     Kp = Ks / 2.0
     exact = 5.0 + 0.7 / Kp + 0.3 / Kp ** (1 + a)
     M0, spread, nwin = richardson_stability(Ks, exact, mg, N, n_terms=2)
-    assert nwin > 5
+    # Contiguous sub-windows [i, j) with at least min_points=4 points, the full
+    # window excluded: sizes 4 and 5 give 3 + 2 = 5.  Pinned exactly rather than
+    # bounded, because the count *is* the definition -- this used to enumerate
+    # every subset (21 here, 2^n in general, which never returns at the 24
+    # points of a 2K = 25-71 series).
+    assert nwin == 5
     assert abs(M0 - 5.0) < 1e-8
     assert spread < 1e-8
 
