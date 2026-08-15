@@ -63,7 +63,7 @@ ISTMAX_BG = 9523   # array size for gprbig intermediate arrays
 MXTRMS   = 12552   # max terms in color contraction arrays
 MAXEP    = 9523    # max epsilon permutations
 IVCTMX   = 75      # max eigenvectors to print
-NCOL_MAX = 6       # max colors for baryon flavor perms
+NCOL_MAX = 12      # max colors for baryon flavor perms (a baryon has N quarks)
 NPRM_BAR = 1001    # max baryon flavor perms
 NPRM_MES = 101     # max meson flavor perms
 MAXK_CLF = 130     # max momentum in CLFACT
@@ -418,6 +418,12 @@ def ibarfl(params, flavtab):
     """Generate flavor permutations for baryons."""
     N = params.N
     NF = params.NF
+    # A baryon carries N quarks, so mbarfl's second axis must reach N.  This
+    # runs for meson jobs too, so the cap binds at every B.
+    if N > NCOL_MAX:
+        raise RuntimeError(
+            f"Overflow in MBARFL: N = {N} colors needed, NCOL_MAX = {NCOL_MAX}. "
+            f"Raise NCOL_MAX in qcdf.py.")
     flavtab.mbarfl[:] = 0
 
     # Generate all NF^N permutations (no Fermi restriction on flavor alone)
