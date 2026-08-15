@@ -547,10 +547,38 @@ by pushing `m/g` down, because GMOR is exact only as `m/g → 0`. Scanning
 | 0.025 | 0.8840 | 0.9992 | 1.0095 | 1.0127 |
 | **0.0125** | 0.8610 | **0.9946** | **1.0023** | **1.0048** |
 
-**At N = 3, 4, 5 the ratio converges to 1 within 0.5%**, and the chiral exponent
-goes with it — 1.005, 1.008, 1.009 on the last pair, against GMOR's 1. The
-apparent "drift up" with N seen at `m/g = 0.05` (1.022, 1.031, 1.033) was the
-`O(μ²)` correction, and it vanishes as it should.
+**Read with the extrapolation bar, this is a two-parameter law, not a ratio
+sitting on 1** — and it is worth being careful here, because "converges to 1
+within 0.5%" is what this table looks like and is not what it says.
+
+At fixed `m/g` the ratio does **not** sit at 1. With the ensemble bar (fit
+orders × contiguous sub-windows, 68% half-width) at `m/g = 0.0125`:
+N=3 → 0.9942 ± 0.0027, N=4 → 1.0020 ± 0.0017, N=5 → **1.0046 ± 0.0012**, i.e.
+N=5 is **3.8σ above 1**, and the N-trend is still rising. Extrapolating in
+`1/N²` over N = 3,4,5 gives `r_∞ = 1.0105 ± 0.0024` — 4.4σ high. Taken alone
+that reads as a failure to converge.
+
+It is not, because the residual is proportional to `m/g`:
+
+| m/g | large-N ratio − 1 | dev/(m/g) |
+|---|---|---|
+| 0.1 | 0.0803 ± 0.0041 | 0.803 |
+| 0.05 | 0.0399 ± 0.0041 | 0.798 |
+| 0.025 | 0.0204 ± 0.0034 | 0.816 |
+| 0.0125 | 0.0105 ± 0.0024 | 0.840 |
+
+Fitting `dev = B + A·(m/g)` gives **B = 0.0005 ± 0.0025, 0.2σ from zero**, with
+χ²/dof = 0.01 and slope 0.797. The quadratic alternative `B + A·(m/g)²` is
+excluded — intercept 6.9σ from zero, χ²/dof = 4.35. So
+
+```
+M² / GMOR  =  1 + 0.80 (m/g)      (large N)
+```
+
+and the double limit `N → ∞` then `m/g → 0` reaches 1 to within 0.25%. A
+*relative* `O(μ)` correction is exactly what should be there, since Eq. (7) is
+only the leading term of the mass expansion. The chiral exponent agrees
+independently: 1.005, 1.008, 1.009 at N = 3,4,5 on the last coupling pair.
 
 Standard, on the same data:
 
@@ -563,16 +591,19 @@ The ratio **halves every time `m/g` halves** — the signature of `M² ∝ m²`
 against GMOR's `M² ∝ m` — with exponent 1.986–1.993. It is not converging to
 GMOR; it is diverging from it at a fixed rate.
 
-**N = 2 is the one exception, and it is expected.** GMOR as used here (his
-Eq. 7) is a *large-N* result, so N = 2 is where it should fail worst; and N = 2
-is special anyway, its "meson" and "baryon" being the same state by
-pseudo-reality — which this code reproduces to four digits and which Hamer
-observed independently. The −14% residual at N = 2 is a finite-N deviation of
-the formula, not evidence against the Hamiltonian.
+**N = 2 is the one exception, and it separates cleanly into exponent and
+coefficient.** Its ratio moves *away* from 1 (1.0605 → 0.8619) and does not
+converge. But its chiral *exponent* still goes to 1 (1.036 on the last pair) —
+so what fails at N = 2 is Eq. (7)'s coefficient `2π/√3`, which is a large-N
+result, not the GMOR scaling itself. N = 2 is also special on its own terms, its
+"meson" and "baryon" being the same state by pseudo-reality — which this code
+reproduces to four digits and which Hamer observed independently. The −14% is a
+finite-N deviation of the formula, not evidence against the Hamiltonian.
 
-This is the third independent meson anchor, and the sharpest, because it is a
-*limit* rather than a single number: parameter-free, checked at four couplings
-and four colours, converging.
+This is the third independent meson anchor, and the sharpest, because what is
+confirmed is a *law with an intercept* — `1 + 0.80(m/g)`, intercept consistent
+with zero at 0.2σ, linear form preferred over quadratic at 6.9σ — rather than a
+single ratio eyeballed against 1.
 
 #### External anchors: what exists, and what each one can settle
 
