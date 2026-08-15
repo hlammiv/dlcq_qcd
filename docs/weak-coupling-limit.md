@@ -532,6 +532,48 @@ opens as it must if the chiral exponents differ (1.93 standard, 1.03 improved):
 Improved also barely moves across the window — drift 0.0–2.6% against standard's
 14–21% — so ≤3.5% of its answer is extrapolated, against 15–35% for standard.
 
+#### GMOR in the chiral limit, N = 2..5: improved converges, standard does not
+
+The GMOR check was first run at a single coupling, where a ratio away from 1
+mixes two effects — the `O(μ²)` correction to GMOR and finite `N`. They separate
+by pushing `m/g` down, because GMOR is exact only as `m/g → 0`. Scanning
+`m/g = 0.1, 0.05, 0.025, 0.0125` at `N = 2,3,4,5` (`data/gmor_scan/`,
+2K = 26–70, LPN = 4), `M²(K→∞) / GMOR`:
+
+| m/g | N=2 | N=3 | N=4 | N=5 |
+|---|---|---|---|---|
+| 0.1 | 1.0595 | 1.0893 | 1.0875 | 1.0834 |
+| 0.05 | 0.9386 | 1.0219 | 1.0311 | 1.0333 |
+| 0.025 | 0.8840 | 0.9992 | 1.0095 | 1.0127 |
+| **0.0125** | 0.8610 | **0.9946** | **1.0023** | **1.0048** |
+
+**At N = 3, 4, 5 the ratio converges to 1 within 0.5%**, and the chiral exponent
+goes with it — 1.005, 1.008, 1.009 on the last pair, against GMOR's 1. The
+apparent "drift up" with N seen at `m/g = 0.05` (1.022, 1.031, 1.033) was the
+`O(μ²)` correction, and it vanishes as it should.
+
+Standard, on the same data:
+
+| m/g | N=2 | N=3 | N=4 | N=5 |
+|---|---|---|---|---|
+| 0.1 | 0.7303 | 0.6175 | 0.5370 | 0.4819 |
+| **0.0125** | 0.1021 | 0.0847 | 0.0715 | **0.0632** |
+
+The ratio **halves every time `m/g` halves** — the signature of `M² ∝ m²`
+against GMOR's `M² ∝ m` — with exponent 1.986–1.993. It is not converging to
+GMOR; it is diverging from it at a fixed rate.
+
+**N = 2 is the one exception, and it is expected.** GMOR as used here (his
+Eq. 7) is a *large-N* result, so N = 2 is where it should fail worst; and N = 2
+is special anyway, its "meson" and "baryon" being the same state by
+pseudo-reality — which this code reproduces to four digits and which Hamer
+observed independently. The −14% residual at N = 2 is a finite-N deviation of
+the formula, not evidence against the Hamiltonian.
+
+This is the third independent meson anchor, and the sharpest, because it is a
+*limit* rather than a single number: parameter-free, checked at four couplings
+and four colours, converging.
+
 #### External anchors: what exists, and what each one can settle
 
 Four independent checks now bear on the improved Hamiltonian. Two are decisive,
