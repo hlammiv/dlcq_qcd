@@ -303,8 +303,15 @@ def _mass_series(provider, N, B, mg, K_codes, msq_units=False, lpn=None):
     lam = float(mg_to_lambda(mg))
     Ks, masses = [], []
     for K in K_codes:
-        r = provider.get(N, 1, B, K, lam, -1.0,
-                         sweep_lpn(N, B) if lpn is None else lpn)
+        # Levels only.  A cached result keeps ``Z`` dense despite it being
+        # 0.014% non-zero, so ``get`` turns an 8 MB file into ~700 MB in memory
+        # -- and a Richardson series wants nothing from a run but its spectrum.
+        # Providers without the light path (the Fortran one) fall back to
+        # ``get``, which is what this used to do unconditionally.
+        args = (N, 1, B, K, lam, -1.0,
+                sweep_lpn(N, B) if lpn is None else lpn)
+        r = (provider.spectrum(*args) if hasattr(provider, "spectrum")
+             else provider.get(*args))
         if r.n_eigenvalues == 0:
             continue
         phys = physical_indices(r)
@@ -736,7 +743,8 @@ def figure_fits(provider, source, K_lo=25, K_hi=35, lpn=None,
 
 
 def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
-                  N_values=(2, 3, 4), n_terms=2, alt_lpn_delta=2):
+                  N_values=(2, 3, 4), n_terms=2, alt_lpn_delta=2,
+                  alt_K_hi=49):
     """Table I with a full error budget, one line per entry.
 
     Each entry carries all four components rather than a single quoted number:
@@ -790,12 +798,20 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
                 if len(Ks) < 4:
                     continue
                 base = sweep_lpn(N, B) if lpn is None else lpn
-                _, ms_alt = _mass_series(provider, N, B, mg, grid,
-                                         msq_units=True,
-                                         lpn=base + alt_lpn_delta)
-                alt = ms_alt if len(ms_alt) == len(ms) else None
+                # The alt-LPN series gets its own, shorter grid.  One extra
+                # qqbar pair multiplies the basis by 17-23x -- 482,320 states
+                # against 27,377 for the N=4 baryon at 2K=70 -- so sweeping it
+                # to the top of the main window is days of compute for a term
+                # already measured to shrink with K.  ``richardson_budget``
+                # compares the two on the K they share.
+                alt_grid = _K_grid(B, N, K_lo, min(K_hi, alt_K_hi))
+                Ks_alt, ms_alt = _mass_series(provider, N, B, mg, alt_grid,
+                                              msq_units=True,
+                                              lpn=base + alt_lpn_delta)
+                alt = ms_alt if len(ms_alt) >= 4 else None
                 bud = richardson_budget(Ks, ms, mg, N, n_terms=n_terms,
-                                        masses_alt_lpn=alt)
+                                        masses_alt_lpn=alt,
+                                        K_codes_alt=Ks_alt if alt else None)
                 row = paper.get((q, N, mg))
                 pv, pe = row if row else (float("nan"), float("nan"))
                 diff = abs(pv - bud["M0"])
@@ -838,6 +854,14 @@ def main(argv=None):
     ap.add_argument("--fig", nargs="+", type=int, default=None,
                     help="figure numbers (default: the cheap ones, 1 3 4 5 6)")
     ap.add_argument("--table1", action="store_true")
+    ap.add_argument("--budget", action="store_true",
+                    help="Table I with its full error budget; API-only until now")
+    ap.add_argument("--alt-K-hi", type=int, default=49,
+                    help="top of the LPN+2 sweep the truncation term uses. One "
+                         "extra qqbar pair multiplies the basis 17-23x (482,320 "
+                         "states for the N=4 baryon at 2K=70), so this stays "
+                         "well below --table1-window; the two series are "
+                         "compared on the K they share")
     ap.add_argument("--fits", action="store_true",
                     help="diagnostic: the Richardson fit behind every Table I entry")
     ap.add_argument("--table1-window", nargs=2, type=int, metavar=("LO", "HI"),
@@ -902,6 +926,12 @@ def main(argv=None):
         print(f"Table I fits [{args.source}]:")
         figure_fits(provider, args.source,
                     K_lo=args.table1_window[0], K_hi=args.table1_window[1])
+
+    if args.budget:
+        print(f"Table I error budget [{args.source}]:")
+        table1_budget(provider, args.source,
+                      K_lo=args.table1_window[0], K_hi=args.table1_window[1],
+                      alt_K_hi=args.alt_K_hi)
 
 
 if __name__ == "__main__":

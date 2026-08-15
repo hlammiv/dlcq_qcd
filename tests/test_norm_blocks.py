@@ -35,6 +35,13 @@ import qcdf_opt as opt                                   # noqa: E402
 from dlcq.dataset import BlockDiagonal                        # noqa: E402
 from dlcq.read_python import config_block_labels, run_python   # noqa: E402
 
+# Every test here drives the solver end to end -- 5 run_python/provider calls
+# across this file -- so the whole module is the slow tier.  Without this,
+# ``pytest -m "not slow"`` still runs them: it took 30 minutes and was killed by
+# a timeout, against seconds for the genuinely fast tests.
+pytestmark = pytest.mark.slow
+
+
 
 # (N, B, 2K) -- mesons and baryons, SU(2)/SU(3)/SU(4), kept small.
 CASES = [(3, 1, 21), (3, 1, 25), (3, 0, 20), (2, 1, 22), (4, 1, 16)]

@@ -39,7 +39,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from dlcq.figures import _K_grid, _mass_series, _load_paper_table1
-from dlcq.observables import (richardson_evaluate, richardson_extrapolate,
+from dlcq.observables import (richardson_budget, richardson_evaluate, richardson_extrapolate,
                               richardson_holdout)
 from dlcq.providers import PythonProvider
 
@@ -74,6 +74,30 @@ def panel(ax, prov, q, N, B, mg, paper, lo=25, hi=49):
     _, _, coeffs, _ = richardson_extrapolate(
         Ks, ms, mg, N, n_terms=N_TERMS, return_fit=True)
     grid_K = np.linspace(Ks.min(), 4000.0, 600)
+
+    # The band on the *curve*, not just at the endpoint: refit keeping 2, 3 and
+    # 4 correction terms and take the envelope.  That is the ``form`` component
+    # of the budget -- which dominates it 7-18x -- shown as a function of K
+    # rather than collapsed to a number at the axis.
+    #
+    # It is narrow where the data sit and fans out across the gap to 1/K = 0,
+    # which is the honest picture of an extrapolation: the alternatives agree
+    # on what was measured and disagree about where it is going.
+    curves = []
+    for nt in (2, 3, 4):
+        try:
+            _, _, c, _ = richardson_extrapolate(Ks, ms, mg, N, n_terms=nt,
+                                                return_fit=True)
+            y = richardson_evaluate(c, mg, N, grid_K, n_terms=nt)
+            if np.all(np.isfinite(y)):
+                curves.append(y)
+        except Exception:                                   # noqa: BLE001
+            pass
+    if len(curves) > 1:
+        stack = np.vstack(curves)
+        ax.fill_between(2.0 / grid_K, stack.min(axis=0), stack.max(axis=0),
+                        color=C_FIT, alpha=0.16, lw=0, zorder=1)
+
     ax.plot(2.0 / grid_K, richardson_evaluate(coeffs, mg, N, grid_K,
                                               n_terms=N_TERMS),
             "-", color=C_FIT, lw=2, zorder=2)
@@ -87,15 +111,34 @@ def panel(ax, prov, q, N, B, mg, paper, lo=25, hi=49):
                                            n_terms=N_TERMS),
             "--", color=C_HOLD, lw=2, zorder=3)
 
+    # The published value and what the paper quotes beside it.  That quantity
+    # is the magnitude of its last Richardson term, **not** a 1-sigma error
+    # bar -- docs/table1-units.md is explicit about this -- so it is drawn as a
+    # band and labelled as what it is.  Drawing it as an error bar would invite
+    # a chi-squared that the number does not support.
     if paper is not None:
-        ax.axhline(paper, color=INK_2, lw=1, ls=":", zorder=1)
+        pv, pe = paper if isinstance(paper, (tuple, list)) else (paper, None)
+        if pe:
+            ax.axhspan(pv - pe, pv + pe, color=INK_2, alpha=0.10, lw=0,
+                       zorder=0)
+        ax.axhline(pv, color=INK_2, lw=1, ls=":", zorder=1)
 
     ax.plot(x[:-N_HOLD], ms[:-N_HOLD], "o", color=INK, ms=5,
             mfc="white", mew=1.5, zorder=4)
     ax.plot(x[-N_HOLD:], actual, "s", color=C_HOLD, ms=8,
             mfc="white", mew=2, zorder=6)
     ax.plot(2.0 / K_held, pred, "x", color=C_HOLD, ms=9, mew=2, zorder=5)
-    ax.plot([0], [M0], "*", color=C_FIT, ms=15, zorder=7)
+
+    # Our own band, from the measured budget rather than the last-term rule:
+    # form (spread over how many correction terms are kept) dominates it by
+    # 7-18x, which is why the star can sit far from the published value while
+    # both are "within errors".
+    bud = richardson_budget(Ks, ms, mg, N, n_terms=N_TERMS)
+    ours = bud.get("total")
+    if ours and np.isfinite(ours):
+        ax.errorbar([0], [M0], yerr=[ours], fmt="none", ecolor=C_FIT,
+                    elinewidth=2, capsize=4, capthick=2, zorder=7)
+    ax.plot([0], [M0], "*", color=C_FIT, ms=15, zorder=8)
 
     extrap = (M0 - ms[-1]) / abs(M0) if M0 else float("nan")
     ax.set_title(f"{q} SU({N})   m/g = {mg:g}", fontsize=9, color=INK, pad=4)
@@ -120,8 +163,28 @@ def panel(ax, prov, q, N, B, mg, paper, lo=25, hi=49):
     return M0
 
 
-def main():
-    prov = PythonProvider(ncpus=8, assembly="exact", policy="fortran")
+def main(argv=None):
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--K-lo", type=int, default=25)
+    ap.add_argument("--K-hi", type=int, default=49,
+                    help="top of the Richardson window; the solver reaches 71 "
+                         "at the Table I truncation")
+    ap.add_argument("--tag", default="",
+                    help="suffix for the output filename, so a wider window "
+                         "does not overwrite the 25-49 figure")
+    # The cache tag is md5("{assembly}:{policy}[:{solver}]"), so these are not
+    # cosmetic: pointed at the wrong namespace this plots a different basis
+    # from the table beside it, or recomputes 800 solves that already exist.
+    ap.add_argument("--assembly", default="exact")
+    ap.add_argument("--policy", default="fortran",
+                    help="must match the sweep that filled the cache; "
+                         "'blockwise' is what reaches 2K=71")
+    ap.add_argument("--solver", default="dense")
+    ap.add_argument("--ncpus", type=int, default=8)
+    args = ap.parse_args(argv)
+    prov = PythonProvider(ncpus=args.ncpus, assembly=args.assembly,
+                          policy=args.policy, solver=args.solver)
     paper = _load_paper_table1()
     entries = [("mes", 2, 0, 1.6), ("mes", 3, 0, 1.6), ("bar", 3, 1, 1.6),
                ("mes", 2, 0, 0.1), ("mes", 3, 0, 0.1), ("bar", 3, 1, 0.1)]
@@ -129,7 +192,8 @@ def main():
     fig, axes = plt.subplots(2, 3, figsize=(10.5, 6.2))
     for ax, (q, N, B, mg) in zip(axes.ravel(), entries):
         ref = paper.get((q, N, mg))
-        panel(ax, prov, q, N, B, mg, ref[0] if ref else None)
+        panel(ax, prov, q, N, B, mg, ref if ref else None,
+              lo=args.K_lo, hi=args.K_hi)
 
     for ax in axes[-1]:
         ax.set_xlabel(r"$1/K_{\rm paper}$", fontsize=8.5, color=INK_2)
@@ -144,23 +208,26 @@ def main():
         plt.Line2D([], [], marker="x", ls="none", color=C_HOLD, mew=2, ms=9,
                    label="held out (predicted)"),
         plt.Line2D([], [], color=C_FIT, lw=2, label="fit on all K"),
+        plt.Rectangle((0, 0), 1, 1, fc=C_FIT, alpha=0.16, ec="none",
+                      label="fit band: 2, 3, 4 correction terms"),
         plt.Line2D([], [], color=C_HOLD, lw=2, ls="--", label="fit on low K only"),
         plt.Line2D([], [], marker="*", ls="none", color=C_FIT, ms=13,
-                   label=r"$M^2(K\to\infty)$"),
-        plt.Line2D([], [], color=INK_2, lw=1, ls=":", label="published value"),
+                   label=r"$M^2(K\to\infty)$ $\pm$ budget"),
+        plt.Line2D([], [], color=INK_2, lw=1, ls=":",
+                   label=r"published value $\pm$ its own last term"),
     ]
-    fig.legend(handles=handles, loc="lower center", ncol=7, frameon=False,
+    fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False,
                fontsize=8, bbox_to_anchor=(0.5, -0.005),
                labelcolor=INK_2, handletextpad=0.5, columnspacing=1.4)
 
     fig.suptitle("Richardson fits, tested against K the fit never saw  "
-                 "(2K = 25-49)", fontsize=11, color=INK)
+                 f"(2K = {args.K_lo}-{args.K_hi})", fontsize=11, color=INK)
     fig.tight_layout(rect=(0, 0.05, 1, 0.97))
 
     outdir = ROOT / "figures"
     outdir.mkdir(exist_ok=True)
     for ext in ("png", "pdf"):
-        p = outdir / f"extrapolation_holdout_python.{ext}"
+        p = outdir / f"extrapolation_holdout_python{args.tag}.{ext}"
         fig.savefig(p, dpi=170 if ext == "png" else None,
                     bbox_inches="tight", facecolor="white")
         print(f"  saved {p}")

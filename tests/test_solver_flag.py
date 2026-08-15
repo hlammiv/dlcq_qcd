@@ -40,6 +40,13 @@ from dlcq.observables import require_physical_index            # noqa: E402
 from dlcq.providers import PythonProvider, _tag                # noqa: E402
 from dlcq.read_python import _solve_eigen, run_python          # noqa: E402
 
+# Every test here drives the solver end to end -- 10 run_python/provider calls
+# across this file -- so the whole module is the slow tier.  Without this,
+# ``pytest -m "not slow"`` still runs them: it took 30 minutes and was killed by
+# a timeout, against seconds for the genuinely fast tests.
+pytestmark = pytest.mark.slow
+
+
 BASE = dict(N=3, NF=1, B=1, K_code=15, rlamb=0.3325, cutoff=-1.0, LPN=0,
             ncpus=4, assembly="exact", policy="blockwise")
 
