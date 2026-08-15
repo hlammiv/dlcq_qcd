@@ -285,6 +285,47 @@ _ARRAYS = ("rmq", "iflv", "state_len", "state_types", "state_moms",
            "c_orig")
 
 
+@dataclass(frozen=True)
+class Spectrum:
+    """Just the levels of a cached run, without inflating the rest of it.
+
+    ``Z`` is stored dense.  It is 0.014% non-zero at 2K=71, so an 8.1 MB file
+    on disk becomes 689 MB in memory the instant it is read -- and the Richardson
+    sweeps, ``figures.table1`` and ``tools/plot_holdout.py`` alike, use nothing
+    from a result but ``eigenvalues`` and ``rlamb``.  Reading one Table I panel
+    was costing ~700 MB per K.
+
+    ``spurious_zero_modes`` needs exactly these two fields, so this duck-types
+    into :func:`~dlcq.observables.physical_indices` unchanged.
+
+    The real fix is to store ``Z`` sparsely, which is a schema change; this
+    removes the cost from every caller that never wanted ``Z`` in the first
+    place.
+    """
+    eigenvalues: np.ndarray
+    rlamb: float
+    n_orth: int = 0
+
+    @property
+    def n_eigenvalues(self) -> int:
+        return 0 if self.eigenvalues is None else int(self.eigenvalues.size)
+
+    @property
+    def spectrum_is_truncated(self) -> bool:
+        return bool(self.n_orth) and self.n_eigenvalues < self.n_orth
+
+
+def read_spectrum(path) -> Spectrum:
+    """Read only the spectrum of a cached result.  See :class:`Spectrum`."""
+    import h5py
+
+    with h5py.File(Path(path), "r") as f:
+        ev = f["eigenvalues"][:] if "eigenvalues" in f else np.zeros(0)
+        return Spectrum(eigenvalues=np.asarray(ev),
+                        rlamb=float(f.attrs["rlamb"]),
+                        n_orth=int(f.attrs.get("n_orth", 0)))
+
+
 def save(result: DLCQResult, path) -> Path:
     """Write a :class:`DLCQResult` to HDF5, atomically.
 

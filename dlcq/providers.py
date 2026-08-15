@@ -14,7 +14,7 @@ import hashlib
 import subprocess
 from pathlib import Path
 
-from .dataset import DLCQResult, load, save
+from .dataset import DLCQResult, Spectrum, load, read_spectrum, save
 
 __all__ = ["Provider", "PythonProvider", "FortranProvider"]
 
@@ -92,6 +92,30 @@ class PythonProvider(Provider):
                             nev=self.nev)
         save(result, path)
         return result
+
+    def spectrum(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0):
+        """The levels only, reading ~700 MB less per cached point than ``get``.
+
+        A cached result stores ``Z`` densely even though it is 0.014% non-zero,
+        so ``get`` inflates an 8 MB file to ~700 MB to hand back a 48-element
+        spectrum.  Every Richardson consumer -- the sweeps, ``table1``,
+        ``plot_holdout`` -- wants only the levels.
+
+        Falls back to a full solve on a cache miss, so this is a read
+        optimisation and never changes what gets computed.
+        """
+        extra = f"{self.assembly}:{self.policy}"
+        if self.solver != "dense":
+            extra += f":{self.solver}"
+        if self.nev is not None:
+            extra += f":k{self.nev}"
+        path = self.cache_dir / (
+            _tag(N, NF, B, K_code, rlamb, cutoff, LPN, extra=extra) + ".h5")
+        if path.exists():
+            return read_spectrum(path)
+        r = self.get(N, NF, B, K_code, rlamb, cutoff, LPN)
+        return Spectrum(eigenvalues=r.eigenvalues, rlamb=r.rlamb,
+                        n_orth=getattr(r, "n_orth", 0))
 
 
 class FortranProvider(Provider):
