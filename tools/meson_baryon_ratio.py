@@ -55,15 +55,17 @@ from dlcq.units import meson_baryon_ratio_bosonization  # noqa: E402
 
 
 def discover(directory: Path, pattern: str):
-    """{N: path} for files matching e.g. 'improved_N*.csv' or 'bar_improved_N*.csv'."""
-    out = {}
+    """All files matching e.g. 'improved_N*.csv'.
+
+    A **list**, not a dict keyed by N.  Keying by N silently dropped data: the
+    weak-coupling sweep (``improved_N5.csv``) and its strong-coupling companion
+    (``sc_mes_N5.csv``) share N, so one overwrote the other and the coupling
+    range collapsed to whichever was merged last.
+    """
     if not directory.is_dir():
-        return out
-    for p in sorted(directory.glob(pattern)):
-        m = re.search(r"_N(\d+)\.csv$", p.name)
-        if m:
-            out[int(m.group(1))] = p
-    return dict(sorted(out.items()))
+        return []
+    return [p for p in sorted(directory.glob(pattern))
+            if re.search(r"_N(\d+)\.csv$", p.name)]
 
 
 def read_series(path: Path):
@@ -136,15 +138,15 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     ham = args.hamiltonian
-    mes_files = discover(Path(args.mes_dir), f"{ham}_N*.csv")
-    mes_files.update(discover(Path(args.mes_dir), f"sc_mes_N*.csv"))
-    bar_files = discover(Path(args.bar_dir), f"bar_{ham}_N*.csv")
-    bar_files.update(discover(Path(args.bar_dir), f"sc_bar_N*.csv"))
+    mes_files = (discover(Path(args.mes_dir), f"{ham}_N*.csv")
+                 + discover(Path(args.mes_dir), "sc_mes_N*.csv"))
+    bar_files = (discover(Path(args.bar_dir), f"bar_{ham}_N*.csv")
+                 + discover(Path(args.bar_dir), "sc_bar_N*.csv"))
 
     mes, bar = {}, {}
-    for p in mes_files.values():
+    for p in mes_files:
         mes.update(read_series(p))
-    for p in bar_files.values():
+    for p in bar_files:
         bar.update(read_series(p))
     if not mes or not bar:
         print(f"need both channels: {len(mes)} meson and {len(bar)} baryon series"
