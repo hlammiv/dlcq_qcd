@@ -692,8 +692,8 @@ where most of this document's retractions happened.
 2. **The meson/baryon ratio recovers the bosonization parameter.** It descends
    monotonically from constituent counting `2/N` at strong coupling onto
    `2 sin(pi nu / 2)`, `nu = 1/(2N-1)`, in the chiral limit, at N = 5,6,7,8 —
-   within 0.4% and improving with N, converged in the Fock cutoff, against
-   15–19% for counting. The standard Hamiltonian never departs from `2/N`.
+   within 0.4% at every colour, converged in the Fock cutoff, against 15–19% for
+   counting. The standard Hamiltonian never departs from `2/N`.
 3. **Ratios and scaling converge at completely different rates.** The same `nu`
    read from the chiral exponent gives ~0.011 flat in `N`, because in this
    window that quantity measures the O(m/g) transient, not `nu`. AFKX see the
@@ -1082,12 +1082,20 @@ subtraction, in the sector where its corrections are largest.
 | 5 | −6.31% | +0.02% | **−0.41%** |
 | 6 | −6.26% | −0.02% | **−0.16%** |
 | 7 | −6.19% | −0.03% | **+0.04%** |
+| 8 | — | −0.14% | **+0.31%** |
 
 The first qq̄ pair moves the ratio ~6.2% at every N; the second moves it 0.43%,
-0.14%, 0.07% — converging, and converging *faster* as N grows. The sub-0.1%
-agreements at valence+2 (which the scan uses) are fortuitously precise; the
-converged statement is **within 0.4%, improving with N**, against 15–19% for
-counting.
+0.14%, 0.07%, 0.45%. The sub-0.1% agreements at valence+2 (which the main scan
+uses) are fortuitously precise — that is where the sequence happens to cross.
+**The converged statement is agreement within 0.4% at every colour**, against
+15–19% for counting.
+
+Two caveats on that 0.4%, both against over-reading it. The valence+4 residuals
+run −0.41, −0.16, +0.04, +0.31% — a *systematic drift crossing zero near N = 7*,
+not random scatter, so there is either a residual truncation effect varying with
+N or a real small deviation from `2 sin(pi nu / 2)`. And the N=8 baryon rests on
+6 momentum points (2K = 12…22) against 9–10 for the others, making it the least
+controlled extrapolation of the four.
 
 **This is the first external-facing check the improved baryons have passed.**
 They have no anchor at N ≥ 3 — Hamer's SU(2) "baryon" is his meson by
