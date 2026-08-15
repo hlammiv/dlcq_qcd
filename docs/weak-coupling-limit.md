@@ -743,6 +743,83 @@ artefact — but `thooft.py` solves the **large-N** 't Hooft equation, which can
 exhibit a finite-N_c anomalous exponent by construction. It is therefore no
 evidence at all on the present question, and must not be reused for it.
 
+#### The blindness is real, but it is not about zero modes
+
+The hypothesis floated above — that antiperiodic DLCQ cannot see `1/(2N_c−1)`
+because it has no zero modes and no condensate — is **wrong on its stated
+grounds**, and the true reason is narrower, provable, and about this code rather
+than about light-front quantisation.
+
+Wrong on two counts. Anand, Fitzpatrick, Katz & Xin (arXiv:2111.00021) quantise
+on a null plane at N_c = 3 with a trivial Fock vacuum and no zero modes and
+*do* resolve the sine-Gordon IR; and the condensate attribution was backwards —
+the anomalous exponent corresponds to a condensate that **vanishes** as
+`m_q^{1/(2N_c−1)}`, whereas `α = 1` is the statement that needs a *constant*
+condensate.
+
+The real reason, verified here to `1e-13`: **in the valence meson sector `N_c`
+enters the Hamiltonian only through `C_F`.** Writing `H = m²A + g²C_F B` with
+`A`, `B` independent of `N_c` and `N_f` on an `N_c`-free basis,
+
+```
+M² / (g² C_F)  =  F(u),        u = (m/g)² / C_F
+```
+
+is a single universal curve. Measured at 2K = 20, LPN = 2, for
+N_c = 2, 3, 4, 5, 8 and both Hamiltonians, at u = 0.05, 0.01, 0.002, the spread
+across all five colours is **2e-14 to 4e-13**. Eq. (26)'s `a` does depend on
+`N_c`, but only through the same `u` (`units.endpoint_exponent` has
+`rhs = π(m/g)²/C_F`), so it is a reparametrisation, not independent information.
+
+A single universal curve admits exactly **one** chiral-limit exponent. So the
+valence meson sector cannot return an `N_c`-dependent α whatever the physics is,
+and **our flat α = 1.01 is forced by the construction rather than measured.** It
+is not evidence against DFS. What breaks the collapse is only the higher Fock
+content (LPN = 4 shifts M² by 1–2.5%), and that moves α by **+0.011** across
+N_c = 3→8 against DFS's required **−0.133** — wrong sign, and an order of
+magnitude too small to discriminate.
+
+This also retires an argument made earlier in this session: that "the code sees
+finite-N structure in the coefficient, so any blindness would have to be specific
+to the anomalous dimension". The coefficient's `N_c` dependence is real but comes
+from the sub-leading Fock sectors, and it is far too weak to carry the exponent.
+
+#### The ratio and the exponent are the same parameter
+
+`units.meson_baryon_ratio_bosonization` returns `2 sin[π/(2(2N−1))]`. With
+`ν = 1/(2N_c−1)` that is `2 sin(πν/2)`, and the bosonization exponent is
+`α = 1 + ν`. Verified identical at N_c = 2,3,4,5. **These are two readings of one
+number, not two independent tests of bosonization** — agreement of the mass ratio
+to ~10% (which the paper reports) and the chiral exponent stand or fall together.
+
+#### What the finite-N_c literature actually says
+
+Two independent determinations exist at N_c = 3, and both agree with α → 1:
+
+* **AFKX (arXiv:2111.00021)**, lightcone conformal truncation: local exponents
+  1.235 → 1.050 → **1.002** as `m_q` falls 0.5 → 0.1 → 0.02 → 0.001, descending
+  monotonically toward 1. At `m_q = 0.02`, α = 1.2 predicts M² = 0.11487 against
+  0.06333 measured — a factor 1.81.
+* **Kochergin (arXiv:2405.04031)**, 1/N-corrected 't Hooft perturbation theory,
+  states in print that bosonization does not give the correct scaling — and that
+  he does not know why.
+
+So the numerical consensus is against DFS's finite-N_c exponent, the mechanism of
+its failure is unexplained by anyone including the authors who found it, and
+**every** determination in existence — AFKX, Kochergin, this repo — is quantised
+on a null plane with a trivial vacuum. That single shared assumption is the one
+the anomalous exponent is about, which is why "unresolved" remains the honest
+verdict rather than "DFS is wrong".
+
+**What would settle it:** an *equal-time* determination of `M²(m_q)` at N_c = 2,
+N_f = 1 over at least a decade in `m_q/g` — Hamiltonian-lattice DMRG/MPS. N_c = 2
+maximally discriminates (4/3 against 1, a 33% split) and is the cheapest
+non-abelian case. The companion observable `⟨ψ̄ψ⟩ ~ m_q^{1/3}` versus constant is
+the same claim. No such calculation exists; the only equal-time data is Hamer
+1982, whose ±0.2 bars admit α ∈ [−2.0, +5.4]. **Nothing in the light-front
+literature can break the tie, because the tie is about light-front
+quantisation.**
+
 **A caution on the measured baryon exponent itself.** The improved eigenvalue in
 the chiral region is, at the K this repo reaches, close to a linear map of the
 Eq. (26) exponent `b` that is *fed in as input* and satisfies `b ∝ m/g`. To that
