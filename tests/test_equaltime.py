@@ -83,3 +83,18 @@ def test_hamiltonian_is_hermitian():
     for n in (6, 8):
         H = hamiltonian(n, 3.0, 0.2)
         assert abs((H - H.T.conj())).max() < 1e-12
+
+
+@pytest.mark.parametrize("L,x,mg", [(8, 2.0, 0.0), (8, 4.0, 0.3),
+                                    (10, 2.0, 0.0), (10, 4.0, 0.3)])
+def test_mpo_reproduces_ed(L, x, mg):
+    """The MPO must equal the ED build exactly.
+
+    This is the hopping term's only check -- the analytic ``x = 0`` tests above
+    pin the electric weights, the electric constant and the mass term, but say
+    nothing about the hop.  Machine precision or it is wrong.
+    """
+    from equaltime.schwinger_mps import ground_state
+    ed = float(spectrum(L, x, mg, k=1)[0])
+    dmrg, _, _ = ground_state(L, x, mg, chi=256)
+    assert dmrg == pytest.approx(ed, abs=1e-9)
