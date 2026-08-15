@@ -135,20 +135,78 @@ def test_unknown_hamiltonian_is_rejected_before_any_work():
                    hamiltonian="magic")
 
 
-def test_improved_refuses_more_than_two_partons():
-    """A valence baryon has no partner momentum fixed by conservation."""
-    with pytest.raises(ValueError, match="two-parton"):
-        run_python(N=3, NF=1, B=1, K_code=15, rlamb=0.3325, LPN=3, ncpus=2,
+@pytest.mark.parametrize("N,B,K,LPN", [(3, 1, 15, 3), (3, 1, 21, 3),
+                                       (4, 1, 16, 4), (3, 0, 12, 0),
+                                       (3, 1, 15, 5)])
+def test_improved_runs_beyond_two_partons(N, B, K, LPN):
+    """L >= 3, including a mixed-Fock basis (LPN=0 is *no* truncation)."""
+    r = run_python(N=N, NF=1, B=B, K_code=K, rlamb=0.3325, LPN=LPN, ncpus=2,
                    assembly="exact", policy="blockwise",
                    hamiltonian="improved")
+    assert r.eigenvalues.size > 0
+    assert np.all(np.isfinite(r.eigenvalues))
 
 
-def test_improved_refuses_an_untruncated_basis():
-    """LPN=0 means *no* truncation, not valence only -- an easy mistake."""
-    with pytest.raises(ValueError, match="two-parton"):
-        run_python(N=3, NF=1, B=0, K_code=12, rlamb=0.3325, LPN=0, ncpus=2,
-                   assembly="exact", policy="blockwise",
-                   hamiltonian="improved")
+@pytest.mark.parametrize("N,B,K,LPN", [(3, 0, 10, 2), (3, 1, 15, 3),
+                                       (4, 1, 16, 4), (3, 1, 15, 5),
+                                       (3, 0, 12, 0), (5, 1, 15, 5)])
+def test_sigma_reduces_per_state_at_zero_exponent(N, B, K, LPN):
+    """``sigma_imp == sigma_std`` at b = 0, for every L, exactly.
+
+    Stronger than the Hamiltonian-level gate: it pins the reduction on each
+    state separately, which is what makes the correction a safe drop-in rather
+    than a coincidence of sums.
+    """
+    from dlcq.endpoint import state_sigmas
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = N, 1, B, K, 0.3325
+    p.cutoff, p.LPN = -1.0, LPN
+    p.iflv[0] = N * B
+    st = base.StateData()
+    base.qcdsta(p, st, base.PermTables(), base.FlavorTables())
+    n = st.numsta
+    std, imp = state_sigmas(st.mstate, st.mstinf[:n].copy(), n, N, 0.0, K)
+    assert np.max(np.abs(imp - std)) < 1e-13
+
+
+def test_directed_kernel_reduces_partner_independently():
+    """``J^(k;l)|_{b=0} = S(k)`` for every partner -- the reduction's root."""
+    from dlcq.endpoint import directed_pair_kernel
+
+    def S(k):
+        return sum(1.0 / n ** 2 for n in range(1, (k - 1) // 2 + 1))
+
+    worst = 0.0
+    for k in range(1, 40, 2):
+        for l in range(1, 40 - k, 2):
+            worst = max(worst, abs(directed_pair_kernel(k, l, 0.0) - S(k)))
+    assert worst < 1e-14
+
+
+def test_matrix_level_matches_the_validated_two_body_path():
+    """The general form must reproduce the selfen-swap it generalises.
+
+    ``improved_selfen`` is validated against van de Sande's exact
+    ``M^2/g^2 = 0.779141``; this ties the L >= 3 machinery to that anchor.
+    """
+    from dlcq.endpoint import state_sigmas
+    N, K, b = 3, 24, 0.0844
+    std_t, _ = _ham(N, 0, K, 2, opt.compute_selfen(N))
+    swap, _ = _ham(N, 0, K, 2, improved_selfen(N, K, b))
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = N, 1, 0, K, 0.3325
+    p.cutoff, p.LPN = -1.0, 2
+    st = base.StateData()
+    base.qcdsta(p, st, base.PermTables(), base.FlavorTables())
+    n = st.numsta
+    mi = st.mstinf[:n].copy()
+    norm = opt.build_matrices(0, st.mstate, mi, n, N, 1, 0, K,
+                              opt.compute_selfen(N), p.cbreak, 4,
+                              backend="thread")[2]
+    sd, si = state_sigmas(st.mstate, mi, n, N, b, K)
+    matrix_level = std_t + norm @ np.diag(si - sd)
+    scale = max(np.max(np.abs(swap)), 1e-300)
+    assert np.max(np.abs(swap - matrix_level)) / scale < 1e-13
 
 
 # ── the physics ───────────────────────────────────────────────────────────

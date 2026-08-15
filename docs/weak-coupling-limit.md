@@ -426,31 +426,38 @@ in K halves the bar, and 2K = 71 at the Table I truncation costs 21 s
 (`next-steps.md` §1). At `m/g = 0.2` it is marginal. Below that it is hopeless,
 and in exactly the region where the grid does not resolve the physics anyway.
 
-## Implemented: improved DLCQ, two-body sector
+## Implemented: improved DLCQ
 
 `hamiltonian="improved"` on `run_python` / `PythonProvider`, `--hamiltonian
 improved` on the CLI. Off by default; the reference path is untouched and
 bit-identical.
 
-**It needed no kernel change.** In the two-parton sector the partner momentum is
-fixed by conservation — `k` pairs with `K_code − k` and nothing else — so the
-improved self-inertia is still a function of a *single* momentum, exactly like
-the standard `selfen` table. `qcdf_kernels.hamqcd_nb` takes `selfen` as an
-argument, so the whole modification is **a different array**, built by
-`dlcq/endpoint.improved_selfen`. Nothing in the hot path, the colour algebra or
-the bit-identity wall moves.
+**It needed no kernel change.** The self-energy enters the Hamiltonian as
+`Norm · diag(σ)` — measured exactly, at every parton number — so replacing
+`σ_std` by `σ_imp` is a single matrix addition after the existing build.
+Nothing in the hot path, the colour algebra or the bit-identity wall moves.
 
-The construction rests on an identity. Since `k` and `j` are both odd, `|k−j|`
-runs over the even integers `{2..k−1} ∪ {2..K−k−1}`, so
+The improved per-state scalar is built from a *directed* pair kernel, one
+parton's share of the endpoint sum with a given partner (`P = k + l`):
 
 ```
-Σ_{j odd ≠ k} 4/(k−j)²  =  selfen_raw(k) + selfen_raw(K−k)
+J^(k; l) = Σ_{j odd, 0<j<k} (j(P−j)/(k·l))^b · 4/(k−j)²  +  I_b(k/P)/P
+σ_imp(s) = Σ_a  C_F/(L−1) · Σ_{c≠a} J^(k_a; k_c)
 ```
 
-— the pair's two one-body self-inertias. The improvement inserts the weight
-`w_j/w_k` into that sum and adds `I(k/K_code)/K_paper`, then splits the
-(symmetric) total evenly between the pair's two partons so the solver's
-per-parton accumulation reproduces it.
+At `b = 0` the weight is 1 and, since `k` and `j` are both odd, `k−j` runs over
+the even integers `2..k−1`, so `J^(k;l) → S(k)` **independently of the
+partner** — and `σ_imp → σ_std` exactly, per parton rather than merely per
+state. That is what makes it a safe drop-in, and it is the gate the tests run
+first.
+
+The `C_F/(L−1)` weight is not arbitrary in valence sectors: for a colour singlet
+`Σ_a T_a = 0` gives `Σ_{c≠a}(−T_a·T_c) = C_F` per parton, and when all pairs sit
+in the same channel that forces `C_F/(L−1)` each — matching the measured
+`c_qq = (N+1)/2N` for N = 2…6. Where pairs are *not* colour-equivalent
+(Fock-extended sectors carrying more than one colour singlet, i.e. Table I's
+`LPN = valence+2`) it is a scalar stand-in for the matrix `−T_a·T_c`; measured
+effect ~3e-3 in M/g. See `docs/next-steps.md`.
 
 **Measured, N = 3 meson at m/g = 0.1**, over 2K = 10–70, with bars from an
 ensemble of fit form × contiguous sub-window (each family using the exponents
@@ -474,17 +481,18 @@ rather than of a fit. This is the one non-circular demonstration that the `m²`
 artifact becomes the physical `m¹` — the operator changed, not the fit basis
 (contrast the trap recorded above).
 
-**Restricted to two partons, and it raises otherwise** — because a `selfen`
-table indexed by one momentum cannot express a partner-dependent `σ`, not
-because anything breaks. Use `LPN=2` for a meson; note `LPN=0` means *no*
-truncation, not valence only.
+**It runs at every parton number**, valence baryons included. The N=3 valence
+baryon (`LPN=3`) at m/g = 0.1 over 2K = 15–45: standard drifts **25.8%**,
+improved **4.5%**; a plain 1/K fit has residual 1.1e-5 against standard's
+3.5e-4; and the chiral exponent goes **1.958 → 1.045** at 2K=21 and
+**1.952 → 1.037** at 2K=33 — closer to the physical 1 than the meson manages.
 
 An earlier revision of this section claimed the underlying identity "fails by
-8.3e-01 at three partons". **That was wrong**, and the error was mine: the test
-behind it compared the self-energy against an *unweighted* row sum of the
-exchange, which is only valid where the norm matrix is the identity — true in
-the meson valence sector and nowhere else. The correct, norm-weighted statement
-holds at every L:
+8.3e-01 at three partons", and restricted the flag on that basis. **That was
+wrong**, and the error was mine: the test behind it compared the self-energy
+against an *unweighted* row sum of the exchange, which is only valid where the
+norm matrix is the identity — true in the meson valence sector and nowhere
+else. The correct, norm-weighted statement holds at every L:
 
 ```
 D ≡ H(selfen) − H(selfen=0)  =  diag(σ_std) · Norm
@@ -498,7 +506,14 @@ identical parton content — so any replacement enters as `Norm · diag(σ_new)`
 needs only a per-state scalar. The `8.3e-01` was the `(5,5,5)` state's `1 − 1/6`
 with `6 = Norm_ii/L!`: a normalisation number, not physics.
 
-So L ≥ 3 is reachable, and `docs/next-steps.md` §4 carries the derived formula.
+**What is still open.** The colour weight is derived only where pairs are
+colour-equivalent, which covers valence sectors but *not* `LPN = valence+2` —
+exactly Table I's truncation. Until that is settled with the true `−T_a·T_c`
+inside `clfact`, carry ~3e-3 in M/g as a systematic there. And there is no
+independently known L ≥ 3 answer, so correctness at L ≥ 3 rests on standard and
+improved meeting in the continuum rather than on an exact reference; the
+two-body sector, which does have one (van de Sande's 0.779141, reproduced to
+5.5e-4), is what anchors the construction.
 
 ## Zero modes: a separate question, and more tractable than it first looks
 

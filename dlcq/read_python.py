@@ -599,6 +599,9 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         raise ValueError(
             f"unknown hamiltonian {hamiltonian!r}; use 'standard' or "
             f"'improved' (dlcq/endpoint.py, docs/weak-coupling-limit.md)")
+    if hamiltonian == "improved":
+        # The correction multiplies the weeded norm, so it has to exist.
+        keep_norm = True
     if solver == "sparse" and (assembly, policy) != ("exact", "blockwise"):
         raise ValueError(
             f"solver='sparse' supports assembly='exact' with "
@@ -643,28 +646,6 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
                           eigenvalues=np.array([]))
 
     mstinf = states.mstinf[:numsta_pre].copy()
-
-    if hamiltonian == "improved":
-        # Applied by swapping the ``selfen`` table rather than touching the
-        # kernel, which only works while the partner momentum is fixed by
-        # conservation -- i.e. two partons.  Checked here rather than assumed,
-        # because LPN=0 means *no* truncation, not valence only, so an
-        # innocent-looking call lands in a mixed-Fock basis.
-        parton_counts = sorted({int(mstinf[s, 1]) for s in range(numsta_pre)})
-        if parton_counts != [2]:
-            raise ValueError(
-                f"hamiltonian='improved' supports two-parton states only; this "
-                f"basis has parton counts {parton_counts}. Use LPN=2 for a "
-                f"meson. Beyond two partons the subtraction depends on which "
-                f"partner a parton is paired with, which a selfen table indexed "
-                f"by a single momentum cannot express; it needs a partner-"
-                f"indexed table instead. See dlcq/endpoint.py and "
-                f"docs/next-steps.md.")
-        from .endpoint import improved_selfen
-        from .units import lambda_to_mg, endpoint_exponent
-        selfen = improved_selfen(N, K_code,
-                                 endpoint_exponent(lambda_to_mg(rlamb), N),
-                                 mxslfn=len(selfen))
 
     # Block labels from the state list, not by thresholding the matrix: the
     # latter costs two more dense n x n temporaries on top of a norm that is
@@ -777,6 +758,22 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         use_h0_shortcut = False
         ham0, ham, _ = base.clrdis(1, p, states, selfen, ncpus=ncpus)
         ham = ham[:numsta, :numsta]
+
+    if hamiltonian == "improved":
+        # The self-energy enters as ``Norm @ diag(sigma)`` -- measured exactly,
+        # at every parton number -- so the endpoint subtraction is one addition
+        # here rather than a kernel change.  Applied on the weeded basis, where
+        # ``ham`` and ``hnorm_w`` agree.
+        from .endpoint import apply_sigma_correction, state_sigmas
+        from .units import endpoint_exponent, lambda_to_mg
+        if hnorm_w is None:
+            raise ValueError(
+                "hamiltonian='improved' needs the weeded norm; it is what the "
+                "self-energy multiplies. Call with keep_norm=True.")
+        b_end = endpoint_exponent(lambda_to_mg(rlamb), N)
+        sig_std, sig_imp = state_sigmas(states.mstate, mstinf_w[:numsta],
+                                        numsta, N, b_end, K_code)
+        ham = apply_sigma_correction(ham, hnorm_w, sig_imp - sig_std)
 
     # ── NUHAM, then combine free + interacting ──
     #
