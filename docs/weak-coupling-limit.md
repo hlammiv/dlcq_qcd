@@ -583,13 +583,44 @@ is imaginary and the formula is undefined. Every Table I entry is NF = 1. It
 first becomes real at N = 2 flavours in the symmetric representation
 (`C₂ = 3.75`, isospin 3/2) for `N_c` = 2 or 3.
 
-**But its structure raises a real question about the baryons.** Both terms are
-linear in `m`, so DFS has `M_B ∝ m` where GMOR has `M_meson ∝ √m` — a chiral
-exponent of **2** for baryons against **1** for mesons. Neither Hamiltonian here
-produces any such difference: improved gives ≈1.06 for mesons *and* baryons,
-standard ≈1.95 for both. Improved is right for mesons by GMOR; whether it is
-right for baryons is exactly what no anchor has yet settled, and it is where its
-corrections are largest.
+**Its structure predicts a meson/baryon split, and that has now been tested.**
+Both terms are linear in `m`, so DFS has `M_B ∝ m` where GMOR has
+`M_meson ∝ √m` — chiral exponent **2** for baryons against **1** for mesons.
+
+Run in the one channel where DFS is defined (NF = 2, `iflv = [3,0]`, isospin
+3/2, `C₂ = 3.75`, N_c = 3), measuring `d ln M² / d ln(m/g)` toward the chiral
+limit:
+
+| pair | improved | standard |
+|---|---|---|
+| 0.1 → 0.2 | 1.066 | 1.753 |
+| 0.05 → 0.1 | 1.066 | 1.929 |
+| **0.025 → 0.05** | **1.037** | **1.981** |
+
+**Standard converges to DFS's 2 within 1%; improved converges to 1.04.** NF = 1
+gives the same exponents (1.037 / 1.982), so this is not a flavour artefact.
+
+That completes an uncomfortable pattern:
+
+| | prediction | improved | standard |
+|---|---|---|---|
+| meson | GMOR: **1** | **1.06** ✓ | 1.93 ✗ |
+| baryon | DFS: **2** | 1.04 ✗ | **1.98** ✓ |
+
+Improved forces every channel to ≈1.04 and standard forces every channel to
+≈1.98; neither distinguishes a meson from a baryon, and the two analytic results
+say they should differ.
+
+**Consequence: the improved baryon entries are not trustworthy.** The meson
+result keeps its two decisive anchors, so the "published weak-coupling entries
+are low by 2.5–5x" claim must be split — defensible for the meson columns,
+unsupported for the baryon ones, which is where the corrections are largest
+(bar N=4 at m/g = 0.05 moves 0.53 to 2.25).
+
+The suspicion worth deriving rather than sweeping: a subtraction built from the
+*one-parton* endpoint `x -> 0` may impose a universal exponent by construction,
+which is right when the chiral behaviour is governed by a single parton going
+soft and wrong when it is not.
 
 #### The external check, which is what makes this assertable
 
