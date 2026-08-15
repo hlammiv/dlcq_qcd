@@ -1143,6 +1143,43 @@ pseudo-reality — and their corrections are the largest anywhere (bar N=4 at
 `m/g = 0.05` moves 0.53 → 2.25). The `m/g = 1.6 → 2/N` limit is forced by
 physics alone, and they reproduce it.
 
+### The ratio/scaling split is physical, not an artefact of the meson collapse
+
+The natural reading of "the meson exponent cannot see `N_c`" is that the split
+between the ratio (which finds `nu`) and the exponent (which does not) is just
+the `C_F` collapse. **It is not.** The baryon channel does not collapse, and its
+chiral exponent behaves exactly like the meson's.
+
+Improved baryon, local exponent `d ln(M²/g²) / d ln(m/g)`, on the smallest pair
+(`m/g` 3.9e-4 → 2.0e-4):
+
+| N | measured | bosonization `1+nu` | 't Hooft | exclusion |
+|---|---|---|---|---|
+| 5 | 1.0002 ± 0.0044 | 1.1111 | 1.0000 | **−25σ** |
+| 6 | 1.0002 ± 0.0022 | 1.0909 | 1.0000 | **−41σ** |
+| 7 | 1.0002 ± 0.0040 | 1.0769 | 1.0000 | **−19σ** |
+
+and it converges monotonically — 1.0035, 1.0018, 1.0009, 1.0004, 1.0002 at N=5
+as `m/g` halves — with no sign of turning upward. The improved *meson* exponent
+does the same thing to higher precision (1.0001 ± 0.0001), but that one is
+forced: `M² = g²C_F F(u)` makes the exponent a function of `u` alone, so it must
+tend to one N-independent number. The baryon carries no such constraint.
+
+**So the same channel gives `nu = 1/(2N-1)` to sub-percent in its mass ratio and
+`nu = 0.0002` in its scaling, from the same runs at the same couplings.** That is
+the AFKX pattern — sine-Gordon spectrum ratios with 't Hooft mass scaling at the
+same data point — reproduced here in a different observable and across three
+colours. Ratios and scaling are simply not converging on the same timescale, and
+the split survives in the one channel where neither answer is structurally
+imposed.
+
+**What this does *not* establish.** The crossover scale quoted earlier,
+`m_q ~ 1.7e-4`, was computed at N_c = 3 from Kochergin's coefficients in his
+normalisation. It has *not* been recomputed for N = 5,6,7 in this repo's units,
+so "we have measured through the crossover and seen no turn" is **not** a
+supported claim — only "we have reached `m/g = 2e-4` and seen no turn". Whether
+that is above or below the relevant scale for these colours is open.
+
 ### The ratio is stable to `m/g = 2e-4`, through the crossover scale
 
 The bosonization agreement was established at `m/g >= 0.0125`. Since `b -> 0` as
