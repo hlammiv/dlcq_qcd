@@ -900,12 +900,54 @@ def richardson_budget(K_codes, masses, mg, N, n_terms=4,
 
     err_num = abs(M0) * 1e-12
 
-    parts = [p for p in (err_form, err_window, err_trunc, err_num)
-             if p is not None and np.isfinite(p)]
+    # ``endpoint`` -- the systematic the fit cannot see.
+    #
+    # form/window/truncation are all *conditional on the basis*: they ask how
+    # much M(0) moves across orders, windows and Fock cutoffs given that
+    # ``{1, K^-1, K^-(1+a), ...}`` describes the series.  None of them can see
+    # that the grid never samples the region carrying the physics.  That is why
+    # a fit with visible curvature returns a confident 7.7% bar on a number
+    # measured to be ~1500x low.
+    #
+    # The size of that miss is known.  The m^2 term contributes
+    # ``m^2 * int x^(2a-1) dx`` near the endpoint, whose true value is 1/(2a);
+    # a grid reaching only ``x_min = 1/K_code`` evaluates ``(1-K^-2a)/(2a)``.
+    # So the captured fraction is ``1 - K^-2a`` and the uplift to the true value
+    # is ``1/captured - 1``.
+    #
+    # Used as an *error*, not a correction, and the distinction is the whole
+    # point.  Correcting the central value would need the model to be right, and
+    # it is not: fitting ``M^2 = A(1-K^-b)`` with b free returns ``b/2a``
+    # anywhere from 0.32 to 4.2 (see "what does not work"), so the flattening it
+    # produces is a two-parameter fit absorbing a smooth curve.  Bounding the
+    # error only needs the model to get the *size* right, and it does -- against
+    # the improved Hamiltonian at m/g = 1.95e-4 it predicts 956x where the
+    # measured ratio is 1462x, i.e. correct to ~1.5x.
+    #
+    # It is ONE-SIDED: the true mass is larger, never smaller.  Folding a
+    # one-sided systematic into a symmetric quadrature is a compromise, taken
+    # because omitting it is worse -- it quotes +-7.7% on a number that is three
+    # orders low.  ``total_fit`` keeps the old fit-only quadrature so the two are
+    # comparable.  Above the validity boundary (``2a ln K >~ 1``) this term is
+    # negligible; below it, it dominates, which is the correct signal that the
+    # calculation is outside its domain rather than merely uncertain.
+    try:
+        a_end = endpoint_exponent(mg, N)
+        captured = 1.0 - float(max(K_codes)) ** (-2.0 * a_end)
+        err_end = abs(M0) * (1.0 / captured - 1.0) if captured > 0 else float("nan")
+    except Exception:
+        err_end = float("nan")
+
+    fit_parts = [p for p in (err_form, err_window, err_trunc, err_num)
+                 if p is not None and np.isfinite(p)]
+    total_fit = (float(np.sqrt(np.sum(np.square(fit_parts))))
+                 if fit_parts else float("nan"))
+    parts = fit_parts + ([err_end] if np.isfinite(err_end) else [])
     total = float(np.sqrt(np.sum(np.square(parts)))) if parts else float("nan")
     return {"M0": float(M0), "last_term": float(last), "form": err_form,
             "window": float(err_window), "truncation": float(err_trunc),
-            "numerical": err_num, "total": total}
+            "numerical": err_num, "endpoint": err_end,
+            "total_fit": total_fit, "total": total}
 
 
 def thooft_valence_limit(x, N, B=1):
