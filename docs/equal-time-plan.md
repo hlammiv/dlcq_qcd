@@ -83,6 +83,34 @@ the observable most exposed to boundary effects. Fujikura & Hidaka use VUMPS on
 exactly this model for exactly this reason. Alternatives if needed:
 `MPSKit.jl`, `ITensorInfiniteMPS.jl` (both Julia).
 
+### Verified by reading the papers, not the search results
+
+* **No code is released by any of them.** arXiv:2501.18301 has no code- or
+  data-availability statement in body, footnotes or acknowledgements; its only
+  tooling remark is *"We rely upon existing methods defined in the ITensors.jl
+  package [49] to construct and optimize the MPS and MPOs needed for this
+  study."* Same for Bañuls and for Fujikura & Hidaka.
+* **LSH is nearest-neighbour**, quoting arXiv:2501.18301 directly: *"The LSH
+  Hamiltonian comprises at most nearest-neighbor interactions, allowing a compact
+  matrix-product-operator (MPO) representation."* That is the decisive fact for
+  cost — it makes the model a stock TeNPy `CouplingMPOModel`, days of work rather
+  than a week of hand-written 6j recoupling.
+* **Its cutoff is one parameter**: *"the infinite-dimensional Hilbert space
+  associated with the gauge bosons must be truncated... restrict the loop
+  quantum number to `n_l(r) ≤ n_l,max`, leading to a local physical
+  Hilbert-space dimension of `4(n_l,max+1)`."* A single extrapolation, against
+  the irrep basis's non-local recoupling.
+
+### The three choices, which are not alternatives
+
+`LSH` is a *basis*; `VUMPS` is an *algorithm*. The plan uses both:
+
+| choice | decision | why |
+|---|---|---|
+| basis | **LSH** | nearest-neighbour ⇒ compact MPO; extends to **SU(3)**; published MPS precedent. Costs one cutoff `n_l,max` |
+| algorithm | **VUMPS** (`tenpy.algorithms.vumps`) | infinite volume by construction, so the boundary-field choice and the baryon's whole-chain sensitivity never arise |
+| build vs borrow | **build**, after asking | nothing public exists; but LSH being local makes building cheap |
+
 **Therefore, before writing anything: ask.** Requesting code from Bañuls/Kühn or
 Fujikura/Hidaka is ordinary practice and would collapse Phase 2 — the week of
 recoupling algebra — into running an existing implementation at smaller `m/g`.
