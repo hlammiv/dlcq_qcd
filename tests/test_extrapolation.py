@@ -157,6 +157,21 @@ def test_unknown_basis_is_an_error():
                                0.4, 3, basis="magic")
 
 
+def test_asking_past_the_exponent_ladder_is_an_error():
+    """Eq. (27) supplies five correction terms; a sixth must not be invented.
+
+    This used to slice a six-entry list, so ``n_terms`` of 5, 6 and 9 all
+    returned the *same* five-term fit -- identical columns, identical M0, no
+    warning.  An order scan run past the ladder then looked converged when it
+    had only stopped changing the model.
+    """
+    Kp = K_GRID / 2.0
+    assert _richardson_design(Kp, 0.3, 5, "paper")[0].shape[1] == 6
+    for bad in (6, 9):
+        with pytest.raises(ValueError, match="exceeds"):
+            _richardson_design(Kp, 0.3, bad, "paper")
+
+
 # ── exponent-free estimates ───────────────────────────────────────────────
 #
 # These exist to referee the Eq. (27) fits, so they are tested against series

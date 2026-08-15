@@ -315,7 +315,18 @@ def _richardson_design(Kp, a, n_terms, basis="paper"):
     :func:`richardson_evaluate` instead.
     """
     Kp = np.asarray(Kp, dtype=float)
-    base = [0.0, 1.0, 1.0 + a, 2.0, 2.0 + a, 3.0][: n_terms + 1]
+    #: The exponent ladder Eq. (27) supplies.  It runs out at five correction
+    #: terms, and asking for more used to *silently* return the same five-term
+    #: fit -- ``n_terms=9`` and ``n_terms=5`` gave identical columns, identical
+    #: M0, and no warning, so an order scan run past the ladder looked like it
+    #: had converged when it had merely stopped changing the model.
+    LADDER = [0.0, 1.0, 1.0 + a, 2.0, 2.0 + a, 3.0]
+    if n_terms > len(LADDER) - 1:
+        raise ValueError(
+            f"n_terms={n_terms} exceeds the {len(LADDER) - 1} correction terms "
+            f"Eq. (27) provides; extending the fit needs a derived exponent, "
+            f"not a longer slice")
+    base = LADDER[: n_terms + 1]
 
     if basis == "paper":
         seen, uniq = set(), []
@@ -756,7 +767,8 @@ def richardson_curve(coeffs, exponents, inv_K):
     return y
 
 
-def richardson_budget(K_codes, masses, mg, N, n_terms=2, n_terms_set=(2, 3, 4),
+def richardson_budget(K_codes, masses, mg, N, n_terms=4,
+                      n_terms_set=(2, 3, 4, 5),
                       min_points=4, masses_alt_lpn=None, K_codes_alt=None):
     """Full error budget for one extrapolated mass.
 
@@ -764,13 +776,73 @@ def richardson_budget(K_codes, masses, mg, N, n_terms=2, n_terms_set=(2, 3, 4),
 
     ``form``
         Spread of M(0) over the number of correction terms kept, on the full
-        window.  **This dominates** -- 7-18x the window term at every point
-        tested -- because the data sit at 1/K ~ 0.06 while the answer is at
-        1/K = 0, so the curvature across the gap is set by the assumed series.
+        window.  **This dominates**, and at weak coupling it is irreducible.
+
+        It runs to five terms -- the whole Eq. (27) ladder -- rather than
+        stopping at four, because M(0) does not converge in the order: mes N=4
+        at m/g = 0.1 gives 0.409, 0.435, 0.458, 0.474 for n_terms = 2, 3, 4, 5,
+        each term still moving it by ~3%.  Quoting a spread over {2,3,4} while
+        fitting at 4 would put the bar *below* the shift the next admissible
+        term produces.
+
+        Nor does any criterion pick the order.  Held-out K selects the largest
+        order offered, every time (4 of {2,3,4} on 2K = 25-49; 5 of {2,3,4,5}
+        on 25-71; 30/30 both) -- it holds out 2K = 67-71 while fitting 25-65,
+        which is near-interpolation, so flexibility always wins it.  The chiral
+        criterion runs the other way and prefers 2: Eq. (16) forces M^2 -> 0 at
+        m/g = 0 with ``d ln M^2 / d ln(mg) -> 1.9968`` (tools/joint_fit.py), and
+        the mean ``|alpha - 2|`` of the extrapolated masses over the 0.05-0.1
+        pair is 0.087, 0.098, 0.110, 0.119 for n_terms = 2, 3, 4, 5.  Two sound
+        criteria disagreeing is what an undetermined model order looks like.
+
+        The cause is that the window is pre-asymptotic, and measurably so.  The
+        increments decay as ``K^-(1+a)`` at weak coupling -- matching Eq. (26)'s
+        ``a`` to 0.004-0.04 for m/g <= 0.2, where Eq. (27) assumes ``K^-2``,
+        which is what they actually do only at m/g >= 0.8.  Extrapolating the
+        local exponent as ``p(K) = p_inf + c/K`` puts ``p_inf`` on ``1+a`` to
+        0.003-0.047, against 0.8-0.99 away from 2.
+
+        Taken at face value that makes the remainder ``K^-a`` -- a term the
+        basis ``{1, K^-1, K^-(1+a), K^-2, ...}`` does not contain, and one that
+        barely decays: at m/g = 0.05, a = 0.036 and ``K^-a`` moves 3.6% across
+        the whole window.  **But that reading cannot be right**, and the chiral
+        limit is what rules it out.  Fitting the ``K^-a`` column explicitly (a
+        fixed at its Eq. (26) value, so the solve stays linear) returns limits
+        3-4x the published values, and summing the fitted increment power law
+        with a Hurwitz zeta returns much the same.  Both wreck the chiral test:
+        mean ``|alpha - 2|`` goes to 0.87 and 1.35 respectively, against 0.11
+        for Eq. (27) at four terms.  Since ``M^2 ~ (m/g)^2`` is solid --
+        measured here at fixed K as 1.945-1.954 over the 0.05-0.1 pair and
+        flat in K (1.9537, 1.9497, 1.9450 at 2K = 35, 49, 69) -- the ``K^-a``
+        law must turn over past 2K = 71.
+
+        So the increment exponent is a *local* one that has not reached its
+        asymptote, Eq. (27) is right about where the series ends up, and what
+        cannot be pinned down is the shape of the approach across the gap --
+        which is exactly the order of the fit.  Hence ``form``, and hence its
+        irreducibility.
+
+        The gap being fitted across is not small: at m/g <= 0.2, **15-35% of
+        M(0) lies beyond 2K = 70** -- equivalently the extrapolation adds
+        17-54% to the last computed point (mes N=4 at m/g = 0.05: 0.08554 at
+        2K = 70 against M(0) = 0.1226).  See docs/weak-coupling-limit.md.
     ``window``
         Spread over sub-windows at fixed order (:func:`richardson_stability`).
         Honest but narrow: every sub-window shares the same form over the same
         range, so it cannot see the term above.
+
+        Adding it in quadrature to ``form`` is not double counting at weak
+        coupling, though the two are strongly correlated (``window/form`` sits
+        at 0.42-0.48 across all 15 entries).  Measured against the full
+        (order x sub-window) ensemble, quadrature/joint = 0.997-1.05 for
+        m/g <= 0.2, so it reproduces the joint spread rather than inflating it.
+        At strong coupling it *does* over-count, by 1.29 at m/g = 1.6.
+
+        Do not try to shrink it with a validity floor on the window set.
+        Raising the floor from 2K >= 25 to >= 49 shrinks the spread 3.5x but
+        walks the central value monotonically by ~7x the shrunken bar (bar N=3
+        at m/g = 0.1: 1.0668 -> 1.1045 against a spread going 0.0203 -> 0.0057),
+        which hides the systematic instead of removing it.
     ``truncation``
         Sensitivity to the particle-number cut, from ``masses_alt_lpn`` if
         given.  Measured at ~1e-4 -- raising ``sweep_lpn`` by a whole qqbar

@@ -355,7 +355,21 @@ N_TERMS_MIN_POINTS = 8
 
 
 def _terms_for(n_points):
-    """Correction terms a window of ``n_points`` supports."""
+    """Correction terms a window of ``n_points`` supports.
+
+    Keys off the point count only, which is right across Table I's own coupling
+    range but **not beyond it**.  The Eq. (27) basis degenerates at *both* ends
+    of the endpoint exponent: ``a -> 0`` in the chiral limit (documented in
+    ``observables._richardson_design``) and ``a -> 1`` as ``m/g`` grows, where
+    ``1+a -> 2`` and ``2+a -> 3`` go near-parallel to columns already present.
+    Condition number runs 1.7e5 at m/g = 3 to 1.0e7 at 24, and against the known
+    free-quark limit for the N=3 baryon at m/g = 24 (truth 9) the fits give
+    9.157 at two terms, 10.752 at four and **-5.438 at five**.
+
+    So pass ``n_terms=2`` explicitly whenever ``a > 0.95``.  Table I is safe --
+    a = 0.909 at m/g = 1.6, where two through five terms agree to five digits --
+    but any sweep past m/g ~ 3 is not.  See docs/weak-coupling-limit.md.
+    """
     return N_TERMS if n_points >= N_TERMS_MIN_POINTS else 2
 
 
@@ -743,7 +757,7 @@ def figure_fits(provider, source, K_lo=25, K_hi=35, lpn=None,
 
 
 def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
-                  N_values=(2, 3, 4), n_terms=2, alt_lpn_delta=2,
+                  N_values=(2, 3, 4), n_terms=None, alt_lpn_delta=2,
                   alt_K_hi=49):
     """Table I with a full error budget, one line per entry.
 
@@ -754,6 +768,14 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
 
     Written as a separate routine so ``table1`` keeps reproducing the published
     table in the published units, unchanged.
+
+    ``n_terms=None`` takes the order from :func:`_terms_for`, exactly as
+    ``table1`` does.  It used to default to a hardcoded 2 that no caller
+    overrode -- the CLI never passed the argument -- so this table quoted a
+    *different central value* from the Table I beside it: mes N=2 at m/g = 0.1
+    came out 0.3617 here against 0.3943 there, a 9% gap on a quoted bar of
+    0.015.  The two must agree, and the fit that is published is the one whose
+    error is being budgeted.
     """
     from .observables import richardson_budget
 
@@ -765,13 +787,23 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
 
     with open(out, "w") as fh:
         fh.write("TABLE I with a full error budget.\n")
+        order = (f"{n_terms}" if n_terms is not None
+                 else f"{N_TERMS} where the window supports it "
+                      f"(>= {N_TERMS_MIN_POINTS} points), else 2")
         fh.write(f"Solver: {source}.  Richardson over 2K = {K_lo}-{K_hi}, "
-                 f"Eq. (27), {n_terms} correction terms.\n")
+                 f"Eq. (27), {order} correction terms -- the same fit "
+                 f"table1 publishes.\n")
         fh.write("Units: M^2/(m^2 + g^2/pi), as Table I actually tabulates "
                  "(docs/table1-units.md).\n\n")
         fh.write("Components, added in quadrature:\n")
-        fh.write("  form   spread over the number of correction terms (2..4)  "
-                 "-- DOMINANT\n")
+        fh.write("  form   spread over the number of correction terms (2..5, "
+                 "the whole Eq. (27)\n"
+                 "         ladder) -- DOMINANT, and irreducible at weak "
+                 "coupling: M(0) does not\n"
+                 "         converge in the order, and held-out K and the "
+                 "chiral limit pick\n"
+                 "         opposite ends of the range.  See "
+                 "observables.richardson_budget.\n")
         fh.write("  wind   spread over sub-windows at fixed order\n")
         fh.write("  trunc  change when the particle-number cut is raised by "
                  "one qqbar pair\n")
@@ -783,8 +815,9 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
                  "comparison is 'd/pt': |paper-ours| in units of the PAPER's "
                  "term, which should be\n<= 1.  'd/ours' is the same "
                  "difference in units of our own error; it is routinely\n"
-                 "large simply because our error is up to 38x smaller, and on "
-                 "its own it does NOT\nindicate disagreement.\n\n")
+                 "large simply because our error is smaller -- by 1.1-22x at "
+                 "m/g <= 0.2 and up to 92x\nat m/g >= 0.8 -- and on its own it "
+                 "does NOT indicate disagreement.\n\n")
         hdr = (f"{'case':>8} {'m/g':>5} {'ours':>10} {'+-tot':>9} "
                f"{'form':>9} {'wind':>9} {'trunc':>9} "
                f"{'paper':>9} {'pterm':>8} {'d/pt':>6} {'d/ours':>7} {'ok':>3}")
@@ -797,6 +830,7 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
                                       msq_units=True, lpn=lpn)
                 if len(Ks) < 4:
                     continue
+                nt = _terms_for(len(Ks)) if n_terms is None else n_terms
                 base = sweep_lpn(N, B) if lpn is None else lpn
                 # The alt-LPN series gets its own, shorter grid.  One extra
                 # qqbar pair multiplies the basis by 17-23x -- 482,320 states
@@ -809,7 +843,7 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
                                               msq_units=True,
                                               lpn=base + alt_lpn_delta)
                 alt = ms_alt if len(ms_alt) >= 4 else None
-                bud = richardson_budget(Ks, ms, mg, N, n_terms=n_terms,
+                bud = richardson_budget(Ks, ms, mg, N, n_terms=nt,
                                         masses_alt_lpn=alt,
                                         K_codes_alt=Ks_alt if alt else None)
                 row = paper.get((q, N, mg))
