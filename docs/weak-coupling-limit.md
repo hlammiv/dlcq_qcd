@@ -506,14 +506,52 @@ identical parton content — so any replacement enters as `Norm · diag(σ_new)`
 needs only a per-state scalar. The `8.3e-01` was the `(5,5,5)` state's `1 − 1/6`
 with `6 = Norm_ii/L!`: a normalisation number, not physics.
 
-**What is still open.** The colour weight is derived only where pairs are
-colour-equivalent, which covers valence sectors but *not* `LPN = valence+2` —
-exactly Table I's truncation. Until that is settled with the true `−T_a·T_c`
-inside `clfact`, carry ~3e-3 in M/g as a systematic there. And there is no
-independently known L ≥ 3 answer, so correctness at L ≥ 3 rests on standard and
-improved meeting in the continuum rather than on an exact reference; the
-two-body sector, which does have one (van de Sande's 0.779141, reproduced to
-5.5e-4), is what anchors the construction.
+### Do not regenerate Table I with the current colour weight
+
+**The `C_F/(L−1)` weight is derived only where every pair is colour-equivalent.**
+For a colour singlet `Σ_a T_a = 0` forces `Σ_{c≠a}(−T_a·T_c) = C_F` per parton,
+and when all pairs sit in the same channel that fixes each at `C_F/(L−1)`. That
+covers the valence sectors — `LPN=2` meson, `LPN=3` baryon — where there is no
+freedom and the results above stand.
+
+It does **not** cover `LPN = valence+2`, which is Table I's truncation for all
+thirty entries. There the true weight is the matrix `−T_a·T_c`, and a scalar
+cannot be right. Measured, by running weight schemes that all satisfy the b=0
+reduction exactly (pair weights summing to 1 per parton, so nothing in the
+derivation distinguishes them):
+
+| channel | LPN | m/g | uniform | momentum-weighted | inverse-momentum | spread |
+|---|---|---|---|---|---|---|
+| bar N=3 | 5 | 0.10 | 2.047 | 0.492 | 3.446 | **144%** |
+| bar N=3 | 5 | 0.40 | 7.725 | 5.206 | 9.663 | 58% |
+| mes N=2 | 4 | 0.10 | 0.591 | 0.465 | 0.612 | 25% |
+| mes N=2 | 4 | 0.40 | 2.628 | 2.583 | 2.646 | 2.4% |
+
+So the Fock-extended numbers are not merely uncertain, they are **undetermined**
+— a factor of seven apart between two equally admissible choices at m/g = 0.1.
+Note also what this implies about the improved-vs-standard gap on those sectors
+(2.7× at bar N=3): that gap is a property of the chosen weight, not a physics
+prediction.
+
+Why the sensitivity is so large when `σ_imp/σ_std` never exceeds 1.28: the
+interaction annihilates the chiral zero mode, so the lowest eigenvalue is a
+small residual of large cancelling terms and a modest change in the diagonal
+moves it a long way. That is the same near-cancellation that makes the
+weak-coupling limit hard in the first place.
+
+**The prerequisite is therefore the exact `−T_a·T_c`**, which needs no new
+colour machinery: `clfact`'s `nops=4` path already *is* `Σ_a T^a_{ij}T^a_{kl}`
+(`nct=1` carries the `0.5`, `nct=2` the `−0.5/N`), so what is required is
+invoking it at zero momentum transfer per parton pair. The gate is ready and
+sharp — `Σ_{c≠a}(−T_a·T_c) = C_F` per parton must come out exactly, and it
+already rejected a first attempt whose operator patterns were guessed rather
+than read (mesons returned `−1/N` instead of `+C_F`, baryons carried an
+uncorrected state norm).
+
+There is also no independently known L ≥ 3 answer, so correctness there will
+rest on standard and improved meeting in the continuum rather than on an exact
+reference. The two-body sector, which does have one, is what anchors the whole
+construction.
 
 ## Zero modes: a separate question, and more tractable than it first looks
 
