@@ -287,3 +287,93 @@ def test_improved_converges_far_faster_in_K():
     assert drift["standard"] > 0.25
     assert drift["improved"] < 0.05
     assert drift["improved"] < drift["standard"] / 5
+
+
+# ── exact colour weights ──────────────────────────────────────────────────
+
+@pytest.mark.parametrize("N,B,K,LPN", [(3, 1, 15, 3), (3, 1, 21, 3),
+                                       (4, 1, 16, 4), (5, 1, 15, 5),
+                                       (3, 0, 10, 2), (2, 0, 12, 2),
+                                       (3, 1, 15, 5), (3, 0, 12, 0),
+                                       (6, 1, 18, 6)])
+def test_colour_weights_satisfy_the_singlet_identity(N, B, K, LPN):
+    """``sum_{c != a} <-T_a . T_c> == C_F`` for every parton, exactly.
+
+    This is what ``sum_a T_a = 0`` forces on a colour singlet, and it is the
+    gate the whole extraction hangs on: it is what makes the ``b = 0``
+    reduction automatic rather than something to be arranged.
+
+    It also caught every error on the way in.  The vertex patterns have to be
+    the real ones -- H1 for qq, H2 for qbar-qbar, and H7's *t-channel*
+    structure A for q-qbar (H3-H6 are pair creation/annihilation and carry no
+    self-inertia partner).  And the multiplicity has to key on
+    ``(type, momentum, flavour)``: keying on momentum alone passes every
+    baryon and fails exactly the meson states where a quark and an antiquark
+    share a momentum but remain distinguishable.
+    """
+    from dlcq.endpoint import pair_colour_weights
+
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = N, 1, B, K, 0.3325
+    p.cutoff, p.LPN = -1.0, LPN
+    p.iflv[0] = N * B
+    st = base.StateData()
+    base.qcdsta(p, st, base.PermTables(), base.FlavorTables())
+    n = st.numsta
+    if n == 0:
+        pytest.skip("no states")
+    selfen = base.compute_selfen(p)
+    CF = (N * N - 1.0) / (2.0 * N)
+
+    worst = 0.0
+    for s in range(min(n, 12)):
+        L = int(st.mstinf[s, 1])
+        if L < 2:
+            continue
+        loc = int(st.mstinf[s, 0]) - 1
+        w = pair_colour_weights(base, p, st.mstate, loc, L, selfen)
+        for a in range(L):
+            worst = max(worst, abs(w[a].sum() - CF))
+    assert worst < 1e-12, f"singlet identity violated by {worst:.3e}"
+
+
+@pytest.mark.parametrize("N,B,K,LPN", [(3, 1, 15, 3), (4, 1, 16, 4),
+                                       (3, 1, 15, 5), (5, 1, 15, 5)])
+def test_exact_weights_keep_the_zero_exponent_reduction(N, B, K, LPN):
+    """The gate must survive the switch from the scalar to the operator."""
+    from dlcq.endpoint import state_sigmas
+
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = N, 1, B, K, 0.3325
+    p.cutoff, p.LPN = -1.0, LPN
+    p.iflv[0] = N * B
+    st = base.StateData()
+    base.qcdsta(p, st, base.PermTables(), base.FlavorTables())
+    n = st.numsta
+    selfen = base.compute_selfen(p)
+    std, imp = state_sigmas(st.mstate, st.mstinf[:n].copy(), n, N, 0.0, K,
+                            base=base, params=p, selfen=selfen)
+    assert np.max(np.abs(imp - std)) < 1e-12
+
+
+def test_exact_weights_agree_with_uniform_in_valence_sectors():
+    """Where every pair is colour-equivalent the scalar is exact, so both agree.
+
+    A valence baryon has all pairs in the same channel, which is precisely when
+    ``sum_a T_a = 0`` forces ``-T_a . T_c = C_F/(L-1)``.
+    """
+    from dlcq.endpoint import state_sigmas
+
+    N, B, K, LPN, b = 3, 1, 21, 3, 0.0844
+    p = base.Params()
+    p.N, p.NF, p.B, p.K, p.rlamb = N, 1, B, K, 0.3325
+    p.cutoff, p.LPN = -1.0, LPN
+    p.iflv[0] = N * B
+    st = base.StateData()
+    base.qcdsta(p, st, base.PermTables(), base.FlavorTables())
+    n = st.numsta
+    selfen = base.compute_selfen(p)
+    _, exact = state_sigmas(st.mstate, st.mstinf[:n].copy(), n, N, b, K,
+                            base=base, params=p, selfen=selfen)
+    _, scalar = state_sigmas(st.mstate, st.mstinf[:n].copy(), n, N, b, K)
+    assert np.max(np.abs(exact - scalar)) / np.max(np.abs(scalar)) < 1e-12

@@ -155,6 +155,101 @@ def pair_kernel_table(K_code, b):
     return T
 
 
+#: Vertex patterns for the *number-conserving* instantaneous exchange, read off
+#: ``qcdf.hamqcd``.  Each entry is (quark occupations, antiquark occupations,
+#: clfact index pattern) for the four operator slots.
+#:
+#: H3-H6 are pair creation/annihilation, not scattering, so they carry no
+#: self-inertia partner and are absent here.  H7 has two flavour structures; the
+#: one that pairs with the self-energy is the *t-channel* A
+#: (``ka = k4-k3, kb = k2-k1``, vanishing at zero momentum transfer), not the
+#: annihilation structure B, which survives there but is a different graph.
+_VERTEX = {
+    "qq":   ([-1, -1, 1, 1], [0, 0, 0, 0], (0, 3, 1, 2)),      # H1
+    "qbqb": ([0, 0, 0, 0], [-1, -1, 1, 1], (2, 1, 3, 0)),      # H2
+    "qqb":  ([0, 0, -1, 1], [-1, 1, 0, 0], (1, 3, 2, 0)),      # H7 structure A
+}
+
+
+def pair_colour_weights(base, params, mstate, loc, L, selfen):
+    """``<-T_a . T_c>`` for every parton pair of one state, normalised to C_F.
+
+    Returns ``w[a][c]`` with ``sum_{c != a} w[a][c] == C_F`` exactly, which is
+    what ``sum_a T_a = 0`` requires of a colour singlet and what makes the
+    ``b = 0`` reduction to ``sigma_std`` automatic.
+
+    No new colour machinery: ``clfact``'s ``nops=4`` path already *is*
+    ``sum_a T^a_ij T^a_kl`` (``nct=1`` carries the 0.5, ``nct=2`` the -0.5/N).
+    Calling it with the annihilated and created momenta equal gives the forward
+    operator.
+
+    Two bookkeeping facts, both found the hard way and both cancelled by the
+    normalisation rather than corrected by hand:
+
+    * ``clfact`` returns an *un-normalised* matrix element, so it carries the
+      state norm ``Norm_ii``;
+    * it sums over indistinguishable partons -- including at the queried
+      momentum -- so it carries the multiplicity of the parton's own
+      ``(type, momentum, flavour)``.
+
+    Dividing by the row sum removes both, which is why this needs neither the
+    norm nor a multiplicity count.  The identity that they *were* the only two
+    factors is what ``tests/test_endpoint`` pins.
+    """
+    import numpy as _np
+
+    keys = [(int(mstate[loc, j]), int(mstate[loc + 2, j]),
+             int(mstate[loc + 3, j])) for j in range(L)]
+    mat = mstate[loc:loc + 4, :L].astype(int)
+    matc = base.conj_state(L, mat)
+
+    def raw(a, c):
+        ta, tc = keys[a][0], keys[c][0]
+        ka, kc = keys[a][1], keys[c][1]
+        fa, fc = keys[a][2], keys[c][2]
+        if ta == 1 and tc == 1:
+            occ_b, occ_d, idx = _VERTEX["qq"]
+            moms, flavs = [ka, kc, ka, kc], [fa, fc, fa, fc]
+        elif ta != 1 and tc != 1:
+            occ_b, occ_d, idx = _VERTEX["qbqb"]
+            moms, flavs = [ka, kc, ka, kc], [fa, fc, fa, fc]
+        else:
+            occ_b, occ_d, idx = _VERTEX["qqb"]
+            kq, kqb = (ka, kc) if ta == 1 else (kc, ka)
+            fq, fqb = (fa, fc) if ta == 1 else (fc, fa)
+            moms, flavs = [kqb, kqb, kq, kq], [fqb, fqb, fq, fq]
+        lng = 4 + 2 * L
+        mx = _np.zeros((4, lng), dtype=int)
+        mx[:, :L] = mat
+        mx[:, L + 4:] = matc
+        mx[0, L:L + 4] = occ_b
+        mx[1, L:L + 4] = occ_d
+        mx[2, L:L + 4] = moms
+        mx[3, L:L + 4] = flavs
+        return base.clfact_compute(*idx, mx, L, L, 4, params, selfen)
+
+    CF = (params.N * params.N - 1.0) / (2.0 * params.N)
+    w = _np.zeros((L, L))
+    for a in range(L):
+        seen, tot = {}, 0.0
+        for c in range(L):
+            if c == a:
+                continue
+            if keys[c] not in seen:
+                seen[keys[c]] = raw(a, c)
+                tot += seen[keys[c]]
+        if tot == 0.0:
+            continue
+        cnt = {}
+        for c in range(L):
+            if c != a:
+                cnt[keys[c]] = cnt.get(keys[c], 0) + 1
+        for c in range(L):
+            if c != a:
+                w[a, c] = CF * seen[keys[c]] / (cnt[keys[c]] * tot)
+    return w
+
+
 def apply_sigma_correction(ham, norm, delta):
     """``ham + Norm @ diag(delta)``, preserving whatever container each is in.
 
@@ -197,7 +292,8 @@ def apply_sigma_correction(ham, norm, delta):
     return ham + corr
 
 
-def state_sigmas(mstate, mstinf, numsta, N, b, K_code, table=None):
+def state_sigmas(mstate, mstinf, numsta, N, b, K_code, table=None,
+                 base=None, params=None, selfen=None):
     """``(sigma_std, sigma_imp)`` per basis state, for the matrix-level form.
 
     The standard self-inertia is a one-body scalar at every parton number --
@@ -211,17 +307,15 @@ def state_sigmas(mstate, mstinf, numsta, N, b, K_code, table=None):
 
         sigma_imp(s) = sum_a  C_F/(L-1) * sum_{c != a} J^(k_a; k_c)
 
-    The ``C_F/(L-1)`` weight is not an arbitrary choice wherever the pairs are
-    colour-equivalent, which covers every valence sector.  For a colour singlet
-    ``sum_a T_a = 0`` gives ``sum_{c != a} (-T_a . T_c) = C_F`` per parton, and
-    when all pairs sit in the same channel that forces ``C_F/(L-1)`` each.
-    Checked against the measured exchange coefficients: ``c_qq = (N+1)/2N`` for
-    N = 2..6 equals ``C_F/(L-1)`` at ``L = N``.
+    ``w_ac`` is the exact ``<-T_a . T_c>`` when ``base``/``params``/``selfen``
+    are supplied (:func:`pair_colour_weights`), and falls back to the scalar
+    ``C_F/(L-1)`` otherwise.
 
-    Where pairs are *not* colour-equivalent -- Fock-extended sectors carrying
-    more than one colour singlet, which is exactly Table I's ``LPN =
-    valence+2`` -- the scalar stands in for the matrix ``-T_a . T_c`` and is an
-    ansatz.  Measured effect there: ~3e-3 in M/g.  See docs/next-steps.md.
+    **Use the exact weights.** The scalar is right only where every pair is
+    colour-equivalent, which covers valence sectors but not Table I's
+    ``LPN = valence+2``.  Measured there, weight schemes that all satisfy the
+    ``b = 0`` reduction spread the answer by up to 144% -- the Fock-extended
+    numbers are undetermined, not approximate, without the true operator.
 
     ``sigma_imp`` reduces to ``sigma_std`` exactly at ``b = 0``, per parton, not
     merely per state, because ``J^(k;l)|_{b=0} = S(k)`` independently of ``l``.
@@ -231,19 +325,39 @@ def state_sigmas(mstate, mstinf, numsta, N, b, K_code, table=None):
     CF = (N * N - 1.0) / (2.0 * N)
     std = np.zeros(numsta)
     imp = np.zeros(numsta)
+
+    # sigma is a function of the state's (type, momentum, flavour) multiset,
+    # which is exactly what config_block_labels keys the norm blocks on -- so
+    # compute it once per block, not once per state.  That is what keeps the
+    # exact colour weights cheap: L <= 6 across all of Table I
+    # (sweep_lpn = min(valence+2, 10)), and there are far fewer blocks than
+    # states (119 against 189 at 2K=21).
+    cache = {}
     for s in range(numsta):
         loc = int(mstinf[s, 0]) - 1
         L = int(mstinf[s, 1])
-        ks = [int(mstate[loc + 2, j]) for j in range(L)]
-        std[s] = CF * sum(_S(k) for k in ks)
-        if L < 2:
-            imp[s] = std[s]
+        key = tuple(sorted(
+            (int(mstate[loc, j]), int(mstate[loc + 2, j]),
+             int(mstate[loc + 3, j])) for j in range(L)))
+        hit = cache.get(key)
+        if hit is not None:
+            std[s], imp[s] = hit
             continue
-        tot = 0.0
-        for a, ka in enumerate(ks):
-            share = sum(table[ka, kc] for c, kc in enumerate(ks) if c != a)
-            tot += share / (L - 1.0)
-        imp[s] = CF * tot
+
+        ks = [int(mstate[loc + 2, j]) for j in range(L)]
+        sd = CF * sum(_S(k) for k in ks)
+        if L < 2:
+            si = sd
+        else:
+            if params is None:
+                w = np.full((L, L), CF / (L - 1.0))
+                np.fill_diagonal(w, 0.0)
+            else:
+                w = pair_colour_weights(base, params, mstate, loc, L, selfen)
+            si = float(sum(w[a, c] * table[ks[a], ks[c]]
+                           for a in range(L) for c in range(L) if c != a))
+        cache[key] = (sd, si)
+        std[s], imp[s] = sd, si
     return std, imp
 
 

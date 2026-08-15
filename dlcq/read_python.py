@@ -781,7 +781,8 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         from .units import endpoint_exponent, lambda_to_mg
         b_end = endpoint_exponent(lambda_to_mg(rlamb), N)
         sig_std, sig_imp = state_sigmas(states.mstate, mstinf_w[:numsta],
-                                        numsta, N, b_end, K_code)
+                                        numsta, N, b_end, K_code,
+                                        base=base, params=p, selfen=selfen)
         dsigma = sig_imp - sig_std
         if not used_blocks:
             if hnorm_w is None:

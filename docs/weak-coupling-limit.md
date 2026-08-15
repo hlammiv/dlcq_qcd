@@ -506,7 +506,45 @@ identical parton content — so any replacement enters as `Norm · diag(σ_new)`
 needs only a per-state scalar. The `8.3e-01` was the `(5,5,5)` state's `1 − 1/6`
 with `6 = Norm_ii/L!`: a normalisation number, not physics.
 
-### Do not regenerate Table I with the current colour weight
+### The colour weight, and why it is now exact
+
+**Resolved.** `state_sigmas` uses the true `w_ac = ⟨−T_a·T_c⟩`, extracted from
+`clfact` — whose `nops=4` path already *is* `Σ_a T^a_{ij}T^a_{kl}` — by calling
+it at zero momentum transfer per parton pair. The gate is
+`Σ_{c≠a}⟨−T_a·T_c⟩ = C_F`, which `Σ_a T_a = 0` forces on a colour singlet, and
+it holds to **0.00e+00** across N = 2…6, B = 0 and 1, L = 2…6, valence and
+Fock-extended, on 1,300+ partons. Because the identity holds exactly, the b=0
+reduction to `σ_std` is automatic rather than arranged.
+
+Three things had to be right together, and each was found by the gate rather
+than by reasoning:
+
+* **the vertex patterns** — H1 for qq, H2 for q̄q̄, and H7's *t-channel*
+  structure A for qq̄ (`clfact(1,3,2,0)`, slots `[d̄_ann, d̄_cre, b_ann, b_cre]`).
+  H3–H6 are pair creation/annihilation and carry no self-inertia partner; an
+  invented qq̄ pattern returned the `−1/N` Fierz piece of a graph that does not
+  exist;
+* **normalisation** — `clfact` returns an un-normalised element carrying
+  `Norm_ii`;
+* **multiplicity keyed on `(type, momentum, flavour)`** — `clfact` sums over
+  indistinguishable partons, including at the queried momentum. Keying on
+  momentum alone passes every baryon and fails exactly the meson states where a
+  quark and an antiquark share a momentum but stay distinguishable.
+
+Normalising each parton's weights to sum to `C_F` makes both `Norm_ii` and the
+multiplicity cancel, so the implementation needs neither.
+
+**The ansatz turned out to be nearly right, which was not knowable in advance.**
+Against the exact operator, `C_F/(L−1)` is off by 0.06% (bar N=3 at m/g = 0.10
+and 0.40) and 0.21% (mes N=2 at m/g = 0.10). An earlier revision of this section
+called the Fock-extended numbers "undetermined" on the strength of a 144% spread
+across weight schemes. That spread is real, but it measures the width of the
+*admissible* space, not the uncertainty: the schemes probing it
+(momentum-weighted, inverse-momentum) are arbitrary, and the physical answer sits
+essentially on uniform. The honest statement is that the space was wide and the
+answer was near its middle.
+
+### Historical: why the scalar weight was only ever justified in valence sectors
 
 **The `C_F/(L−1)` weight is derived only where every pair is colour-equivalent.**
 For a colour singlet `Σ_a T_a = 0` forces `Σ_{c≠a}(−T_a·T_c) = C_F` per parton,
