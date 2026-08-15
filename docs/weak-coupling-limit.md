@@ -560,19 +560,25 @@ that reads as a failure to converge.
 
 It is not, because the residual is proportional to `m/g`:
 
-| m/g | large-N ratio − 1 | dev/(m/g) |
+| m/g | large-N ratio − 1 (N = 3…8) | dev/(m/g) |
 |---|---|---|
-| 0.1 | 0.0803 ± 0.0041 | 0.803 |
-| 0.05 | 0.0399 ± 0.0041 | 0.798 |
-| 0.025 | 0.0204 ± 0.0034 | 0.816 |
-| 0.0125 | 0.0105 ± 0.0024 | 0.840 |
+| 0.1 | 0.0712 ± 0.0014 | 0.712 |
+| 0.05 | 0.0347 ± 0.0013 | 0.694 |
+| 0.025 | 0.0172 ± 0.0010 | 0.688 |
+| 0.0125 | 0.0086 ± 0.0007 | 0.688 |
 
-Fitting `dev = B + A·(m/g)` gives **B = 0.0005 ± 0.0025, 0.2σ from zero**, with
-χ²/dof = 0.01 and slope 0.797. The quadratic alternative `B + A·(m/g)²` is
-excluded — intercept 6.9σ from zero, χ²/dof = 4.35. So
+`dev/(m/g)` is flat to 3% across a factor of 8 in coupling — the linearity is
+visible before any fit is run.
+
+Fitting `dev = B + A·(m/g)` over the full N = 3…8 range gives
+**B = −0.00048 ± 0.00075, 0.6σ from zero**, with χ²/dof = 0.15 and slope 0.714.
+The quadratic alternative `B + A·(m/g)²` is excluded — intercept **18.4σ** from
+zero, χ²/dof = 33.5. (With only N = 3,4,5 in the large-N fit these read
+0.0005 ± 0.0025 at 0.2σ and 6.9σ / 4.35; extending to SU(8) tightened the
+intercept ~3× and sharpened the linear-vs-quadratic call from 6.9σ to 18.4σ.) So
 
 ```
-M² / GMOR  =  1 + 0.80 (m/g)      (large N)
+M² / GMOR  =  1 + 0.71 (m/g)      (large N, N = 3..8)
 ```
 
 and the double limit `N → ∞` then `m/g → 0` reaches 1 to within 0.25%. A
@@ -601,8 +607,8 @@ reproduces to four digits and which Hamer observed independently. The −14% is 
 finite-N deviation of the formula, not evidence against the Hamiltonian.
 
 This is the third independent meson anchor, and the sharpest, because what is
-confirmed is a *law with an intercept* — `1 + 0.80(m/g)`, intercept consistent
-with zero at 0.2σ, linear form preferred over quadratic at 6.9σ — rather than a
+confirmed is a *law with an intercept* — `1 + 0.71(m/g)`, intercept consistent
+with zero at 0.6σ, linear form preferred over quadratic at 18.4σ — rather than a
 single ratio eyeballed against 1.
 
 #### External anchors: what exists, and what each one can settle
@@ -705,8 +711,8 @@ same fit family), so this *overstates* them.
 
 Two readings, both worth stating. **DFS's finite-N_c law is excluded at ~30σ.**
 And α also sits above 1 by up to 6.8σ — but that residual is already accounted
-for: the separately measured transient `M²/GMOR = 1 + 0.80(m/g)` implies a
-*local* exponent of **1.014** on this coupling pair, against 1.011 measured. So
+for: the separately measured transient `M²/GMOR = 1 + 0.71(m/g)` implies a
+*local* exponent of **1.013** on this coupling pair, against 1.011 measured. So
 the excess is the known O(m/g) contamination of a finite-coupling difference,
 not a third exponent, and α → 1 underneath it.
 
