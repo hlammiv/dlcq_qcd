@@ -111,14 +111,14 @@ exactly this model for exactly this reason. Alternatives if needed:
 | algorithm | **VUMPS** (`tenpy.algorithms.vumps`) | infinite volume by construction, so the boundary-field choice and the baryon's whole-chain sensitivity never arise |
 | build vs borrow | **build**, after asking | nothing public exists; but LSH being local makes building cheap |
 
-**Therefore, before writing anything: ask.** Requesting code from Bañuls/Kühn or
-Fujikura/Hidaka is ordinary practice and would collapse Phase 2 — the week of
-recoupling algebra — into running an existing implementation at smaller `m/g`.
-Their papers answer a different question with the same machinery, so there is no
-competitive reason for them to decline. That is the cheapest path by a wide
-margin and should be exhausted first.
+### Decided
 
-If that fails, the phases below are the from-scratch route.
+* **Build it here.** No approach to the authors — nothing public exists, and LSH
+  being nearest-neighbour makes building it cheap enough that borrowing is not
+  worth the dependency on someone else's timeline.
+* **`physics-tenpy` is an accepted dependency**, the first beyond
+  numpy/scipy/numba/matplotlib/h5py/pillow/pytest. It carries both the DMRG and
+  the VUMPS engines, so one dependency covers finite and infinite volume.
 
 ## The physics being discretised
 
