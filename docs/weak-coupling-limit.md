@@ -312,9 +312,14 @@ mode and the gluon zero mode is the one at issue. And any such run would no
 longer be comparable to `fortran/qcdf.f`, which is antiperiodic and zero-mode-free
 throughout, so the bit-identical anchor would not cover it.
 
-## Reproducing
+## The data
 
-The fine `m/g` grid is not in the repo. Regenerate per channel with:
+Every number above comes from **`data/chiral_grid_msq.csv`** — all five
+channels, `m/g` = 0.025 to 1.6 (and to 24 for mes N=2 and bar N=3), 2K = 25–69
+at the Table I truncation, 1446 rows. It supersets `data/joint_fit_msq.csv`,
+which is kept because `tools/joint_fit.py` takes it by name.
+
+To regenerate or extend:
 
 ```
 python tools/large_k_sweep.py --N <N> --B <B> --K-lo 25 --K-hi 69 \
@@ -323,5 +328,4 @@ python tools/large_k_sweep.py --N <N> --B <B> --K-lo 25 --K-hi 69 \
 
 `--nev 12` is verified to give the identical ground state to a full solve
 (0.3012878408 at mes N=2, 2K = 68, `m/g = 0.1`), and it is cheap: bar N=4 at
-2K = 68 is ~10 s, the mesons ~1 s. `data/joint_fit_msq.csv` already holds the
-N=3 baryon on this grid.
+2K = 68 is ~10 s, the mesons ~1 s.
