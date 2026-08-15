@@ -17,6 +17,24 @@ weak-coupling entries of Table I converge to something other than the physical
 continuum limit, and that the uncertainty quoted on them cannot be reduced by
 better fitting.
 
+**The document has two halves.** The first diagnoses that grid artefact and
+implements van de Sande's published cure (hep-ph/9605409) behind
+`hamiltonian="improved"`, validated against his exact two-body value to `5.5e-4`
+and against GMOR as a law, `M²/GMOR = 1 + 0.71(m/g)` with intercept
+`−0.0005 ± 0.0008`. Both of those anchors are **large-N**.
+
+The second half — ["Finite `N_c`"](#finite-n_c-what-this-code-can-and-cannot-see)
+— asks what happens at the colours Table I actually uses, and the short answer is
+that most of what this code measures there is structurally incapable of carrying
+the physics in question. `N_c` enters the valence meson Hamiltonian *only*
+through `C_F`, so its whole spectrum collapses onto one universal curve and its
+chiral exponent is forced, not measured. The baryon channel does not collapse,
+and its meson/baryon mass ratio recovers the bosonization parameter
+`nu = 1/(2N-1)` to within 0.4%. Read that section's summary before quoting any
+finite-`N_c` number from this document, and its "Withdrawn" table before
+repeating an argument from it — several confident claims here were retracted, and
+the exponent-based "30σ exclusion" of bosonization was one of them.
+
 ## What is measured
 
 The increments of `M²(K)` are a clean power law, and the power is not the one
@@ -532,7 +550,192 @@ opens as it must if the chiral exponents differ (1.93 standard, 1.03 improved):
 Improved also barely moves across the window — drift 0.0–2.6% against standard's
 14–21% — so ≤3.5% of its answer is extrapolated, against 15–35% for standard.
 
-#### GMOR in the chiral limit, N = 2..5: improved converges, standard does not
+### The colour weight, and why it is now exact
+
+**Resolved.** `state_sigmas` uses the true `w_ac = ⟨−T_a·T_c⟩`, extracted from
+`clfact` — whose `nops=4` path already *is* `Σ_a T^a_{ij}T^a_{kl}` — by calling
+it at zero momentum transfer per parton pair. The gate is
+`Σ_{c≠a}⟨−T_a·T_c⟩ = C_F`, which `Σ_a T_a = 0` forces on a colour singlet, and
+it holds to **0.00e+00** across N = 2…6, B = 0 and 1, L = 2…6, valence and
+Fock-extended, on 1,300+ partons. Because the identity holds exactly, the b=0
+reduction to `σ_std` is automatic rather than arranged.
+
+Three things had to be right together, and each was found by the gate rather
+than by reasoning:
+
+* **the vertex patterns** — H1 for qq, H2 for q̄q̄, and H7's *t-channel*
+  structure A for qq̄ (`clfact(1,3,2,0)`, slots `[d̄_ann, d̄_cre, b_ann, b_cre]`).
+  H3–H6 are pair creation/annihilation and carry no self-inertia partner; an
+  invented qq̄ pattern returned the `−1/N` Fierz piece of a graph that does not
+  exist;
+* **normalisation** — `clfact` returns an un-normalised element carrying
+  `Norm_ii`;
+* **multiplicity keyed on `(type, momentum, flavour)`** — `clfact` sums over
+  indistinguishable partons, including at the queried momentum. Keying on
+  momentum alone passes every baryon and fails exactly the meson states where a
+  quark and an antiquark share a momentum but stay distinguishable.
+
+Normalising each parton's weights to sum to `C_F` makes both `Norm_ii` and the
+multiplicity cancel, so the implementation needs neither.
+
+**The ansatz turned out to be nearly right, which was not knowable in advance.**
+Against the exact operator, `C_F/(L−1)` is off by 0.06% (bar N=3 at m/g = 0.10
+and 0.40) and 0.21% (mes N=2 at m/g = 0.10). An earlier revision of this section
+called the Fock-extended numbers "undetermined" on the strength of a 144% spread
+across weight schemes. That spread is real, but it measures the width of the
+*admissible* space, not the uncertainty: the schemes probing it
+(momentum-weighted, inverse-momentum) are arbitrary, and the physical answer sits
+essentially on uniform. The honest statement is that the space was wide and the
+answer was near its middle.
+
+### Pair creation needs no subtraction, and do not "test" that with a K^-2β fit
+
+Only the number-conserving exchange carries the endpoint singularity. `brack`
+returns `4/L²` **only when `L + M = 0`**, so momentum conservation pins each
+kernel's denominator:
+
+| vertex | kind | written as | forced to equal |
+|---|---|---|---|
+| H1, H2, H7A | exchange | `k4−k2`, `k2−k4`, `k4−k3` | another *difference* — can reach one grid spacing |
+| H3, H5, H7B | pair creation | `k4+k1`, `k1+k3`, `k4+k2` | a *sum* of momenta |
+| H4, H6 | pair creation | `k1−k3`, `k2−k3` | `−(k4+k2)`, `−(k1+k4)` — **also sums** |
+
+H4 and H6 look like differences but the constraint pins them to sums, so every
+pair-creation kernel is bounded below by a sum of positive momenta. Only the
+exchange reaches the grid spacing, and only it has a self-energy partner to
+cancel against. That is the whole argument, and it needs no numerics.
+
+**The tempting numerical check is a trap.** Refitting the improved series with a
+`K^{-2β}` component allowed, to see whether any endpoint error survives, looks
+damning: the residual falls 7–25× and `M(0)` shifts 1.5% in valence sectors but
+7.7% (bar N=3, LPN=5) and 22% (mes N=2, LPN=4 at m/g = 0.05) in Fock-extended
+ones — exactly where pair creation is active.
+
+It is an artifact. Run the same test in the two-body sector, where the exact
+answer is known:
+
+```
+1/K only        M0 = 0.995553   resid 4.4e-06   err vs exact  +6.3e-04
++ K^-2b allowed M0 = 0.991663   resid 1.8e-07   err vs exact  -3.3e-03
+```
+
+The residual improves **25×** while the answer gets **5× worse**. At small β the
+`K^{-2β}` column is nearly constant and so nearly degenerate with the intercept
+— the same degeneracy that makes standard DLCQ unextrapolable in the first
+place. It absorbs residual and corrupts `M(0)`. Extrapolate improved output in a
+**plain 1/K series**, per van de Sande's Eq. (14), and nothing else.
+
+### Historical: why the scalar weight was only ever justified in valence sectors
+
+**The `C_F/(L−1)` weight is derived only where every pair is colour-equivalent.**
+For a colour singlet `Σ_a T_a = 0` forces `Σ_{c≠a}(−T_a·T_c) = C_F` per parton,
+and when all pairs sit in the same channel that fixes each at `C_F/(L−1)`. That
+covers the valence sectors — `LPN=2` meson, `LPN=3` baryon — where there is no
+freedom and the results above stand.
+
+It does **not** cover `LPN = valence+2`, which is Table I's truncation for all
+thirty entries. There the true weight is the matrix `−T_a·T_c`, and a scalar
+cannot be right. Measured, by running weight schemes that all satisfy the b=0
+reduction exactly (pair weights summing to 1 per parton, so nothing in the
+derivation distinguishes them):
+
+| channel | LPN | m/g | uniform | momentum-weighted | inverse-momentum | spread |
+|---|---|---|---|---|---|---|
+| bar N=3 | 5 | 0.10 | 2.047 | 0.492 | 3.446 | **144%** |
+| bar N=3 | 5 | 0.40 | 7.725 | 5.206 | 9.663 | 58% |
+| mes N=2 | 4 | 0.10 | 0.591 | 0.465 | 0.612 | 25% |
+| mes N=2 | 4 | 0.40 | 2.628 | 2.583 | 2.646 | 2.4% |
+
+So the Fock-extended numbers are not merely uncertain, they are **undetermined**
+— a factor of seven apart between two equally admissible choices at m/g = 0.1.
+Note also what this implies about the improved-vs-standard gap on those sectors
+(2.7× at bar N=3): that gap is a property of the chosen weight, not a physics
+prediction.
+
+Why the sensitivity is so large when `σ_imp/σ_std` never exceeds 1.28: the
+interaction annihilates the chiral zero mode, so the lowest eigenvalue is a
+small residual of large cancelling terms and a modest change in the diagonal
+moves it a long way. That is the same near-cancellation that makes the
+weak-coupling limit hard in the first place.
+
+**The prerequisite is therefore the exact `−T_a·T_c`**, which needs no new
+colour machinery: `clfact`'s `nops=4` path already *is* `Σ_a T^a_{ij}T^a_{kl}`
+(`nct=1` carries the `0.5`, `nct=2` the `−0.5/N`), so what is required is
+invoking it at zero momentum transfer per parton pair. The gate is ready and
+sharp — `Σ_{c≠a}(−T_a·T_c) = C_F` per parton must come out exactly, and it
+already rejected a first attempt whose operator patterns were guessed rather
+than read (mesons returned `−1/N` instead of `+C_F`, baryons carried an
+uncorrected state norm).
+
+There is also no independently known L ≥ 3 answer, so correctness there will
+rest on standard and improved meeting in the continuum rather than on an exact
+reference. The two-body sector, which does have one, is what anchors the whole
+construction.
+
+## Finite `N_c`: what this code can and cannot see
+
+Everything above concerns the *large-N* limit, where the improved Hamiltonian is
+anchored twice over — van de Sande's exact two-body value to `5.5e-4`, and GMOR
+as a law, `M²/GMOR = 1 + 0.71(m/g)` with intercept `−0.0005 ± 0.0008`. This
+section is about finite `N_c`, where one competing analytic claim exists and
+where most of this document's retractions happened.
+
+**The four things established, in order of how load-bearing they are:**
+
+1. **The valence meson sector is blind to `N_c` by construction.** `N_c` enters
+   the Hamiltonian only through `C_F`, so `M²/(g²C_F) = F(u)` with
+   `u = (m/g)²/C_F` is one universal curve — verified to `2e-14` for the ground
+   state and to *seven digits* for the excited-state ratio, at N = 2…8. One
+   curve admits one exponent, so a flat chiral `alpha` there is forced, not
+   measured. **Baryons do not collapse** (spread 1.8), and are the only channel
+   here carrying finite-`N_c` information.
+2. **The meson/baryon ratio recovers the bosonization parameter.** It descends
+   monotonically from constituent counting `2/N` at strong coupling onto
+   `2 sin(pi nu / 2)`, `nu = 1/(2N-1)`, in the chiral limit, at N = 5,6,7,8 —
+   within 0.4% and improving with N, converged in the Fock cutoff, against
+   15–19% for counting. The standard Hamiltonian never departs from `2/N`.
+3. **Ratios and scaling converge at completely different rates.** The same `nu`
+   read from the chiral exponent gives ~0.011 flat in `N`, because in this
+   window that quantity measures the O(m/g) transient, not `nu`. AFKX see the
+   identical split at N_c = 3: sine-Gordon spectrum ratios, 't Hooft scaling, at
+   the same data point.
+4. **The scaling question is open and nobody has been near it.** The
+   bosonization/'t Hooft crossover sits at `m_q ~ 1.7e-4`; no calculation by any
+   method has gone below `m_q ~ 10⁻³` at finite `N_c`.
+
+Claims **withdrawn** during this work are collected at the end of the section
+rather than deleted, because the reasons they failed are reusable.
+
+
+### The external check, which is what makes this assertable
+
+Everything above is internal consistency or the two-body anchor. Van de Sande's
+Eq. (7) is neither: `M² = 2πgμ/√3` is the GMOR law of the continuum theory, with
+no free parameters. Mapping his units onto the repo (`M²/g² = (M/g)²/c`,
+`μ²/g² = (m/g)²/c`, `c = (N²−1)/2Nπ`) predicts the repo eigenvalue outright:
+
+| channel | m/g | GMOR | improved | ratio | standard | ratio |
+|---|---|---|---|---|---|---|
+| mes N=2 | 0.05 | 0.2762 | 0.2593 | **0.94** | 0.0792 | 0.29 |
+| mes N=3 | 0.05 | 0.3683 | 0.3764 | **1.02** | 0.0848 | 0.23 |
+| mes N=4 | 0.05 | 0.4368 | 0.4504 | **1.03** | 0.0851 | 0.20 |
+| mes N=4 | 0.10 | 0.8536 | 0.9283 | **1.09** | 0.3277 | 0.38 |
+
+Improved lands within 3–9% of the continuum law with nothing fitted; standard is
+off by 3–5× and worsening as m/g falls. This is the first external anchor at
+Table I's own truncation.
+
+**So the published weak-coupling entries are low by roughly 2.5–5×**, because
+standard DLCQ converges to the grid artifact this document is about.
+
+Three caveats worth keeping attached. GMOR is a large-N result, so N=4 is the
+meaningful comparison and N=2's 0.94 is expected to drift. It is a *meson* law
+and says nothing directly about the baryon entries, which carry the largest
+corrections and still have no independent anchor. And the improved chiral
+exponent is 1.03–1.14 rather than exactly 1, consistent with the few-percent
+GMOR gap and worth understanding rather than dismissing.
+
+### GMOR in the chiral limit, N = 2..5: improved converges, standard does not
 
 The GMOR check was first run at a single coupling, where a ratio away from 1
 mixes two effects — the `O(μ²)` correction to GMOR and finite `N`. They separate
@@ -611,7 +814,7 @@ confirmed is a *law with an intercept* — `1 + 0.71(m/g)`, intercept consistent
 with zero at 0.6σ, linear form preferred over quadratic at 18.4σ — rather than a
 single ratio eyeballed against 1.
 
-#### External anchors: what exists, and what each one can settle
+### External anchors: what exists, and what each one can settle
 
 Four independent checks now bear on the improved Hamiltonian. Two are decisive,
 two are consistent but not discriminating, and one more exists that cannot be
@@ -743,7 +946,7 @@ artefact — but `thooft.py` solves the **large-N** 't Hooft equation, which can
 exhibit a finite-N_c anomalous exponent by construction. It is therefore no
 evidence at all on the present question, and must not be reused for it.
 
-#### The blindness is real, but it is not about zero modes
+### The blindness is real, but it is not about zero modes
 
 The hypothesis floated above — that antiperiodic DLCQ cannot see `1/(2N_c−1)`
 because it has no zero modes and no condensate — is **wrong on its stated
@@ -805,34 +1008,7 @@ finite-N structure in the coefficient, so any blindness would have to be specifi
 to the anomalous dimension". The coefficient's `N_c` dependence is real but comes
 from the sub-leading Fock sectors, and it is far too weak to carry the exponent.
 
-#### The ratio and the exponent are the same parameter
-
-`units.meson_baryon_ratio_bosonization` returns `2 sin[π/(2(2N−1))]`. With
-`ν = 1/(2N_c−1)` that is `2 sin(πν/2)`, and the bosonization exponent is
-`α = 1 + ν`. Verified identical at N_c = 2,3,4,5. **These are two readings of one
-number, not two independent tests of bosonization** — agreement of the mass ratio
-to ~10% (which the paper reports) and the chiral exponent stand or fall together.
-
-#### What the finite-N_c literature actually says
-
-Two independent determinations exist at N_c = 3, and both agree with α → 1:
-
-* **AFKX (arXiv:2111.00021)**, lightcone conformal truncation: local exponents
-  1.235 → 1.050 → **1.002** as `m_q` falls 0.5 → 0.1 → 0.02 → 0.001, descending
-  monotonically toward 1. At `m_q = 0.02`, α = 1.2 predicts M² = 0.11487 against
-  0.06333 measured — a factor 1.81.
-* **Kochergin (arXiv:2405.04031)**, 1/N-corrected 't Hooft perturbation theory,
-  states in print that bosonization does not give the correct scaling — and that
-  he does not know why.
-
-So the numerical consensus is against DFS's finite-N_c exponent, the mechanism of
-its failure is unexplained by anyone including the authors who found it, and
-**every** determination in existence — AFKX, Kochergin, this repo — is quantised
-on a null plane with a trivial vacuum. That single shared assumption is the one
-the anomalous exponent is about, which is why "unresolved" remains the honest
-verdict rather than "DFS is wrong".
-
-#### The meson sector is blind to `nu` in *every* observable, not just the exponent
+### The meson sector is blind to `nu` in *every* observable, not just the exponent
 
 The `C_F` collapse is a statement about the Hamiltonian (`H = m²A + g²C_F B`), so
 it forces the **whole spectrum** to collapse, not just the ground state. Then no
@@ -863,7 +1039,15 @@ structure lives in the higher Fock sectors**, and the baryon channel is the only
 place this code can see it, because the baryon is the only sector that does not
 collapse.
 
-#### The meson/baryon ratio recovers the bosonization parameter
+### The ratio and the exponent are the same parameter
+
+`units.meson_baryon_ratio_bosonization` returns `2 sin[π/(2(2N−1))]`. With
+`ν = 1/(2N_c−1)` that is `2 sin(πν/2)`, and the bosonization exponent is
+`α = 1 + ν`. Verified identical at N_c = 2,3,4,5. **These are two readings of one
+number, not two independent tests of bosonization** — agreement of the mass ratio
+to ~10% (which the paper reports) and the chiral exponent stand or fall together.
+
+### The meson/baryon ratio recovers the bosonization parameter
 
 `M_meson/M_baryon` needs the baryon, which (unlike the meson) does **not**
 collapse in `C_F` — so unlike the chiral exponent it can carry `N_c`. Improved
@@ -911,7 +1095,7 @@ pseudo-reality — and their corrections are the largest anywhere (bar N=4 at
 `m/g = 0.05` moves 0.53 → 2.25). The `m/g = 1.6 → 2/N` limit is forced by
 physics alone, and they reproduce it.
 
-#### Why our two readings of the same parameter disagreed by 10x
+### Why our two readings of the same parameter disagreed by 10x
 
 Bosonization is one parameter, `nu = 1/(2N-1)`, and this repo measures it two
 ways: the chiral exponent `alpha = 1 + nu`, and the meson/baryon mass ratio
@@ -956,7 +1140,26 @@ about bosonization. What survives is that in the accessible window ratios have
 converged and scaling has not, and no measurement by any method has yet gone
 below `m_q ~ 10⁻³`.
 
-#### The equal-time measurement exists, and it favours bosonization
+### What the finite-N_c literature actually says
+
+Two independent determinations exist at N_c = 3, and both agree with α → 1:
+
+* **AFKX (arXiv:2111.00021)**, lightcone conformal truncation: local exponents
+  1.235 → 1.050 → **1.002** as `m_q` falls 0.5 → 0.1 → 0.02 → 0.001, descending
+  monotonically toward 1. At `m_q = 0.02`, α = 1.2 predicts M² = 0.11487 against
+  0.06333 measured — a factor 1.81.
+* **Kochergin (arXiv:2405.04031)**, 1/N-corrected 't Hooft perturbation theory,
+  states in print that bosonization does not give the correct scaling — and that
+  he does not know why.
+
+So the numerical consensus is against DFS's finite-N_c exponent, the mechanism of
+its failure is unexplained by anyone including the authors who found it, and
+**every** determination in existence — AFKX, Kochergin, this repo — is quantised
+on a null plane with a trivial vacuum. That single shared assumption is the one
+the anomalous exponent is about, which is why "unresolved" remains the honest
+verdict rather than "DFS is wrong".
+
+### The equal-time measurement exists, and it favours bosonization
 
 Bañuls, Cichy, Cirac, Jansen & Kühn, PRX **7**, 041046 (2017),
 [arXiv:1707.06434](https://arxiv.org/abs/1707.06434) — (1+1)d SU(2), N_f = 1
@@ -974,32 +1177,7 @@ cite Steinhardt for the 2/3. (Verified against the paper's full text — an
 earlier reading of this work as *lattice-spacing* scaling rather than chiral
 scaling was wrong.)
 
-#### Three corrections to arguments made earlier in this document
-
-1. **There is no U(1)_A anomaly for SU(N) in 2d.** The abelian axial anomaly is
-   `∝ ε^{μν} tr F_{μν}`, which vanishes for SU(N). So the N_f = 1 meson *is*
-   exactly massless at `m_q = 0` and the chiral-exponent framing is sound.
-   Measured: `c_IR = 1.04` against the free-boson `c = 1` (Fujikura & Hidaka,
-   arXiv:2605.17183, equal-time VUMPS), the flow to WZW confirmed on the lattice
-   with overlap fermions for `(N_c,N_f) = (2,1), (3,1)`
-   (Karthik–Narayanan–Narayanan, arXiv:2312.13929), and a `c = 1` plateau in
-   AFKX's own c-function.
-2. **The Schwinger model is not the N = 1 member of this family.** `2N/(2N−1)`
-   at N=1 gives 2, and the Schwinger boson is *massive* at `m_q = 0`
-   (`M = e/√π`) — but that is the *gauged abelian* anomaly generating
-   `−(e²/2π)φ²`, a term absent when `tr F = 0`. So this is not a falsification.
-   **The correct structural check is the two-flavour Schwinger model**, where
-   the identical logic `M ~ m^{1/(2−Δ)}` gives `m^{2/3}` — and *that* is
-   confirmed by equal-time DMRG (Dempsey–Klebanov–Pufu–Zan arXiv:2206.05308 and
-   several tensor-network follow-ups). The framework passes its one clean
-   equal-time test.
-3. **Coleman's theorem makes `α = 1` untenable asymptotically.** GMOR
-   (`M²f_π² ∝ m_q⟨ψ̄ψ⟩`) with `α = 1` *requires* `⟨ψ̄ψ⟩ → const ≠ 0`, which
-   Coleman forbids at finite N (large N evades it; Zhitnitsky's
-   `⟨ψ̄ψ⟩ = −N_c/√12` is a large-N statement). So the exponent **must** leave 1
-   at small enough mass.
-
-#### The reconciliation: a crossover below everything computed
+### The reconciliation: a crossover below everything computed
 
 The light-front numerics are not wrong either. AFKX's `M² = 0.0031251` at
 `m_q = 2^-10` sits on the 't Hooft line `M² = (2π/√3)m_q·(1−1/N²) = 0.003149`
@@ -1028,155 +1206,45 @@ extent `α ≈ 1` is that input propagated, not an independent dynamical
 measurement — which is a further reason not to read the baryon 1.04 as
 confirmation of anything.
 
-#### The external check, which is what makes this assertable
+### Withdrawn during this investigation
 
-Everything above is internal consistency or the two-body anchor. Van de Sande's
-Eq. (7) is neither: `M² = 2πgμ/√3` is the GMOR law of the continuum theory, with
-no free parameters. Mapping his units onto the repo (`M²/g² = (M/g)²/c`,
-`μ²/g² = (m/g)²/c`, `c = (N²−1)/2Nπ`) predicts the repo eigenvalue outright:
+Collected rather than deleted; the reasons these failed are reusable, and three
+of them were retracted only after a check that could have gone either way.
 
-| channel | m/g | GMOR | improved | ratio | standard | ratio |
-|---|---|---|---|---|---|---|
-| mes N=2 | 0.05 | 0.2762 | 0.2593 | **0.94** | 0.0792 | 0.29 |
-| mes N=3 | 0.05 | 0.3683 | 0.3764 | **1.02** | 0.0848 | 0.23 |
-| mes N=4 | 0.05 | 0.4368 | 0.4504 | **1.03** | 0.0851 | 0.20 |
-| mes N=4 | 0.10 | 0.8536 | 0.9283 | **1.09** | 0.3277 | 0.38 |
+| claim | why it failed |
+|---|---|
+| DFS predicts baryon exponent **2** against GMOR's 1 | three transcription errors — the Casimir bracket is *outside* the radical (their own decuplet/octet = 1.41 fixes it), their `N` is `N_f − 1`, and `m` is a generated scale `m_q^{1/(1+P)}`, not the quark mass. Corrected, DFS predicts one channel-universal exponent and **no** meson/baryon split |
+| "DFS is excluded at ~30σ" | measured with the chiral exponent, which in this window reads the O(m/g) transient rather than `nu`. Not evidence about bosonization either way |
+| "The published meson/baryon ratio confirms bosonization to 5–7%" | at `m/g ≥ 0.4` constituent counting `2/N` fits *better*, and the two laws are exactly degenerate at N=2 |
+| "antiperiodic DLCQ cannot see `nu` because it has no zero modes/condensate" | wrong on its stated grounds — AFKX quantise on a null plane with a trivial vacuum and *do* resolve the sine-Gordon IR; and the anomalous exponent goes with a condensate that *vanishes*, so `alpha = 1` is what needs a constant one. The real reason is the `C_F` collapse |
+| "The U(1)_A anomaly may make the chiral-exponent framing ill-posed" | there is no axial anomaly for SU(N) in 2d (`ε^{μν} tr F_{μν} = 0`). The N_f=1 meson *is* massless at `m_q = 0`, measured (`c_IR = 1.04`) |
+| "The Schwinger model falsifies `2N/(2N−1)` at N=1" | the Schwinger model is not the N=1 member — its boson is massive because the *gauged abelian* anomaly generates `−(e²/2π)φ²`, absent when `tr F = 0`. The two-flavour Schwinger model is the right check, and it passes |
+| ratio agrees with bosonization to 0.02–0.2% | fixed-cutoff coincidence at valence+2. Converged value is within 0.4%, improving with N |
 
-Improved lands within 3–9% of the continuum law with nothing fitted; standard is
-off by 3–5× and worsening as m/g falls. This is the first external anchor at
-Table I's own truncation.
+### Three corrections to arguments made earlier in this document
 
-**So the published weak-coupling entries are low by roughly 2.5–5×**, because
-standard DLCQ converges to the grid artifact this document is about.
-
-Three caveats worth keeping attached. GMOR is a large-N result, so N=4 is the
-meaningful comparison and N=2's 0.94 is expected to drift. It is a *meson* law
-and says nothing directly about the baryon entries, which carry the largest
-corrections and still have no independent anchor. And the improved chiral
-exponent is 1.03–1.14 rather than exactly 1, consistent with the few-percent
-GMOR gap and worth understanding rather than dismissing.
-
-### The colour weight, and why it is now exact
-
-**Resolved.** `state_sigmas` uses the true `w_ac = ⟨−T_a·T_c⟩`, extracted from
-`clfact` — whose `nops=4` path already *is* `Σ_a T^a_{ij}T^a_{kl}` — by calling
-it at zero momentum transfer per parton pair. The gate is
-`Σ_{c≠a}⟨−T_a·T_c⟩ = C_F`, which `Σ_a T_a = 0` forces on a colour singlet, and
-it holds to **0.00e+00** across N = 2…6, B = 0 and 1, L = 2…6, valence and
-Fock-extended, on 1,300+ partons. Because the identity holds exactly, the b=0
-reduction to `σ_std` is automatic rather than arranged.
-
-Three things had to be right together, and each was found by the gate rather
-than by reasoning:
-
-* **the vertex patterns** — H1 for qq, H2 for q̄q̄, and H7's *t-channel*
-  structure A for qq̄ (`clfact(1,3,2,0)`, slots `[d̄_ann, d̄_cre, b_ann, b_cre]`).
-  H3–H6 are pair creation/annihilation and carry no self-inertia partner; an
-  invented qq̄ pattern returned the `−1/N` Fierz piece of a graph that does not
-  exist;
-* **normalisation** — `clfact` returns an un-normalised element carrying
-  `Norm_ii`;
-* **multiplicity keyed on `(type, momentum, flavour)`** — `clfact` sums over
-  indistinguishable partons, including at the queried momentum. Keying on
-  momentum alone passes every baryon and fails exactly the meson states where a
-  quark and an antiquark share a momentum but stay distinguishable.
-
-Normalising each parton's weights to sum to `C_F` makes both `Norm_ii` and the
-multiplicity cancel, so the implementation needs neither.
-
-**The ansatz turned out to be nearly right, which was not knowable in advance.**
-Against the exact operator, `C_F/(L−1)` is off by 0.06% (bar N=3 at m/g = 0.10
-and 0.40) and 0.21% (mes N=2 at m/g = 0.10). An earlier revision of this section
-called the Fock-extended numbers "undetermined" on the strength of a 144% spread
-across weight schemes. That spread is real, but it measures the width of the
-*admissible* space, not the uncertainty: the schemes probing it
-(momentum-weighted, inverse-momentum) are arbitrary, and the physical answer sits
-essentially on uniform. The honest statement is that the space was wide and the
-answer was near its middle.
-
-### Pair creation needs no subtraction, and do not "test" that with a K^-2β fit
-
-Only the number-conserving exchange carries the endpoint singularity. `brack`
-returns `4/L²` **only when `L + M = 0`**, so momentum conservation pins each
-kernel's denominator:
-
-| vertex | kind | written as | forced to equal |
-|---|---|---|---|
-| H1, H2, H7A | exchange | `k4−k2`, `k2−k4`, `k4−k3` | another *difference* — can reach one grid spacing |
-| H3, H5, H7B | pair creation | `k4+k1`, `k1+k3`, `k4+k2` | a *sum* of momenta |
-| H4, H6 | pair creation | `k1−k3`, `k2−k3` | `−(k4+k2)`, `−(k1+k4)` — **also sums** |
-
-H4 and H6 look like differences but the constraint pins them to sums, so every
-pair-creation kernel is bounded below by a sum of positive momenta. Only the
-exchange reaches the grid spacing, and only it has a self-energy partner to
-cancel against. That is the whole argument, and it needs no numerics.
-
-**The tempting numerical check is a trap.** Refitting the improved series with a
-`K^{-2β}` component allowed, to see whether any endpoint error survives, looks
-damning: the residual falls 7–25× and `M(0)` shifts 1.5% in valence sectors but
-7.7% (bar N=3, LPN=5) and 22% (mes N=2, LPN=4 at m/g = 0.05) in Fock-extended
-ones — exactly where pair creation is active.
-
-It is an artifact. Run the same test in the two-body sector, where the exact
-answer is known:
-
-```
-1/K only        M0 = 0.995553   resid 4.4e-06   err vs exact  +6.3e-04
-+ K^-2b allowed M0 = 0.991663   resid 1.8e-07   err vs exact  -3.3e-03
-```
-
-The residual improves **25×** while the answer gets **5× worse**. At small β the
-`K^{-2β}` column is nearly constant and so nearly degenerate with the intercept
-— the same degeneracy that makes standard DLCQ unextrapolable in the first
-place. It absorbs residual and corrupts `M(0)`. Extrapolate improved output in a
-**plain 1/K series**, per van de Sande's Eq. (14), and nothing else.
-
-### Historical: why the scalar weight was only ever justified in valence sectors
-
-**The `C_F/(L−1)` weight is derived only where every pair is colour-equivalent.**
-For a colour singlet `Σ_a T_a = 0` forces `Σ_{c≠a}(−T_a·T_c) = C_F` per parton,
-and when all pairs sit in the same channel that fixes each at `C_F/(L−1)`. That
-covers the valence sectors — `LPN=2` meson, `LPN=3` baryon — where there is no
-freedom and the results above stand.
-
-It does **not** cover `LPN = valence+2`, which is Table I's truncation for all
-thirty entries. There the true weight is the matrix `−T_a·T_c`, and a scalar
-cannot be right. Measured, by running weight schemes that all satisfy the b=0
-reduction exactly (pair weights summing to 1 per parton, so nothing in the
-derivation distinguishes them):
-
-| channel | LPN | m/g | uniform | momentum-weighted | inverse-momentum | spread |
-|---|---|---|---|---|---|---|
-| bar N=3 | 5 | 0.10 | 2.047 | 0.492 | 3.446 | **144%** |
-| bar N=3 | 5 | 0.40 | 7.725 | 5.206 | 9.663 | 58% |
-| mes N=2 | 4 | 0.10 | 0.591 | 0.465 | 0.612 | 25% |
-| mes N=2 | 4 | 0.40 | 2.628 | 2.583 | 2.646 | 2.4% |
-
-So the Fock-extended numbers are not merely uncertain, they are **undetermined**
-— a factor of seven apart between two equally admissible choices at m/g = 0.1.
-Note also what this implies about the improved-vs-standard gap on those sectors
-(2.7× at bar N=3): that gap is a property of the chosen weight, not a physics
-prediction.
-
-Why the sensitivity is so large when `σ_imp/σ_std` never exceeds 1.28: the
-interaction annihilates the chiral zero mode, so the lowest eigenvalue is a
-small residual of large cancelling terms and a modest change in the diagonal
-moves it a long way. That is the same near-cancellation that makes the
-weak-coupling limit hard in the first place.
-
-**The prerequisite is therefore the exact `−T_a·T_c`**, which needs no new
-colour machinery: `clfact`'s `nops=4` path already *is* `Σ_a T^a_{ij}T^a_{kl}`
-(`nct=1` carries the `0.5`, `nct=2` the `−0.5/N`), so what is required is
-invoking it at zero momentum transfer per parton pair. The gate is ready and
-sharp — `Σ_{c≠a}(−T_a·T_c) = C_F` per parton must come out exactly, and it
-already rejected a first attempt whose operator patterns were guessed rather
-than read (mesons returned `−1/N` instead of `+C_F`, baryons carried an
-uncorrected state norm).
-
-There is also no independently known L ≥ 3 answer, so correctness there will
-rest on standard and improved meeting in the continuum rather than on an exact
-reference. The two-body sector, which does have one, is what anchors the whole
-construction.
+1. **There is no U(1)_A anomaly for SU(N) in 2d.** The abelian axial anomaly is
+   `∝ ε^{μν} tr F_{μν}`, which vanishes for SU(N). So the N_f = 1 meson *is*
+   exactly massless at `m_q = 0` and the chiral-exponent framing is sound.
+   Measured: `c_IR = 1.04` against the free-boson `c = 1` (Fujikura & Hidaka,
+   arXiv:2605.17183, equal-time VUMPS), the flow to WZW confirmed on the lattice
+   with overlap fermions for `(N_c,N_f) = (2,1), (3,1)`
+   (Karthik–Narayanan–Narayanan, arXiv:2312.13929), and a `c = 1` plateau in
+   AFKX's own c-function.
+2. **The Schwinger model is not the N = 1 member of this family.** `2N/(2N−1)`
+   at N=1 gives 2, and the Schwinger boson is *massive* at `m_q = 0`
+   (`M = e/√π`) — but that is the *gauged abelian* anomaly generating
+   `−(e²/2π)φ²`, a term absent when `tr F = 0`. So this is not a falsification.
+   **The correct structural check is the two-flavour Schwinger model**, where
+   the identical logic `M ~ m^{1/(2−Δ)}` gives `m^{2/3}` — and *that* is
+   confirmed by equal-time DMRG (Dempsey–Klebanov–Pufu–Zan arXiv:2206.05308 and
+   several tensor-network follow-ups). The framework passes its one clean
+   equal-time test.
+3. **Coleman's theorem makes `α = 1` untenable asymptotically.** GMOR
+   (`M²f_π² ∝ m_q⟨ψ̄ψ⟩`) with `α = 1` *requires* `⟨ψ̄ψ⟩ → const ≠ 0`, which
+   Coleman forbids at finite N (large N evades it; Zhitnitsky's
+   `⟨ψ̄ψ⟩ = −N_c/√12` is a large-N statement). So the exponent **must** leave 1
+   at small enough mass.
 
 ## Zero modes: a separate question, and more tractable than it first looks
 
