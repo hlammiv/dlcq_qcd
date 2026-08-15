@@ -52,35 +52,50 @@ class PythonProvider(Provider):
     name = "python"
 
     def __init__(self, ncpus=1, assembly="exact", policy="fortran",
-                 cache_dir=None, backend=None, solver="dense", nev=None):
+                 cache_dir=None, backend=None, solver="dense", nev=None,
+                 hamiltonian="standard"):
         self.ncpus = ncpus
         self.assembly = assembly
         self.policy = policy
         self.backend = backend
         self.solver = solver
         self.nev = nev
+        self.hamiltonian = hamiltonian
         self.cache_dir = Path(cache_dir or _ROOT / "runs" / "python_cache")
 
-    def get(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0) -> DLCQResult:
-        from .read_python import run_python
+    def _extra(self) -> str:
+        """The cache-tag discriminator for this provider's settings.
 
-        # Extend the tag only for non-default values.  ``solver`` must be in it
-        # -- unlike ``backend``, an iterative solve is not bit-identical, so
-        # caching across it would silently mix results -- but appending
-        # ":dense" unconditionally would change the hash for every existing
-        # file: md5("exact:fortran")[:8] is "31275504", the suffix on the great
-        # majority of runs/python_cache, several GB representing hours of
-        # compute.  ``nev`` likewise, since a 40-level result is a different
-        # object from a full one.  And no "a cached k=100 satisfies a k=40
-        # request" rule: the lowest 40 of a 100-vector Lanczos are not the same
-        # bits as a 40-vector one, which is the same argument that puts
-        # ``solver`` in the tag at all.
+        Extend the tag only for non-default values.  ``solver`` must be in it
+        -- unlike ``backend``, an iterative solve is not bit-identical, so
+        caching across it would silently mix results -- but appending
+        ":dense" unconditionally would change the hash for every existing
+        file: md5("exact:fortran")[:8] is "31275504", the suffix on the great
+        majority of runs/python_cache, several GB representing hours of
+        compute.  ``nev`` likewise, since a 40-level result is a different
+        object from a full one.  And no "a cached k=100 satisfies a k=40
+        request" rule: the lowest 40 of a 100-vector Lanczos are not the same
+        bits as a 40-vector one, which is the same argument that puts
+        ``solver`` in the tag at all.  ``hamiltonian`` the same again: the
+        improved path solves a different operator.
+
+        The order is frozen and append-only.  ``get`` and ``spectrum`` used to
+        build this string separately, which meant a flag added to one of them
+        would send ``spectrum`` to a different file than ``get`` wrote.
+        """
         extra = f"{self.assembly}:{self.policy}"
         if self.solver != "dense":
             extra += f":{self.solver}"
         if self.nev is not None:
             extra += f":k{self.nev}"
-        tag = _tag(N, NF, B, K_code, rlamb, cutoff, LPN, extra=extra)
+        if self.hamiltonian != "standard":
+            extra += f":{self.hamiltonian}"
+        return extra
+
+    def get(self, N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0) -> DLCQResult:
+        from .read_python import run_python
+
+        tag = _tag(N, NF, B, K_code, rlamb, cutoff, LPN, extra=self._extra())
         path = self.cache_dir / f"{tag}.h5"
         if path.exists():
             return load(path)
@@ -89,7 +104,7 @@ class PythonProvider(Provider):
                             cutoff=cutoff, LPN=LPN, ncpus=self.ncpus,
                             policy=self.policy, assembly=self.assembly,
                             backend=self.backend, solver=self.solver,
-                            nev=self.nev)
+                            nev=self.nev, hamiltonian=self.hamiltonian)
         save(result, path)
         return result
 
@@ -104,13 +119,9 @@ class PythonProvider(Provider):
         Falls back to a full solve on a cache miss, so this is a read
         optimisation and never changes what gets computed.
         """
-        extra = f"{self.assembly}:{self.policy}"
-        if self.solver != "dense":
-            extra += f":{self.solver}"
-        if self.nev is not None:
-            extra += f":k{self.nev}"
         path = self.cache_dir / (
-            _tag(N, NF, B, K_code, rlamb, cutoff, LPN, extra=extra) + ".h5")
+            _tag(N, NF, B, K_code, rlamb, cutoff, LPN, extra=self._extra())
+            + ".h5")
         if path.exists():
             return read_spectrum(path)
         r = self.get(N, NF, B, K_code, rlamb, cutoff, LPN)

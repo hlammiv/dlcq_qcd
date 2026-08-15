@@ -920,6 +920,12 @@ def main(argv=None):
     ap.add_argument("--nev", type=int, default=None,
                     help="keep only the lowest N eigenpairs (default: all for "
                          "dense, 40 for sparse)")
+    ap.add_argument("--hamiltonian", choices=["standard", "improved"],
+                    default="standard",
+                    help="'improved' applies van de Sande's endpoint "
+                         "subtraction (hep-ph/9605409); two-parton sectors "
+                         "only, so it needs --lpn 2. See "
+                         "docs/weak-coupling-limit.md")
     ap.add_argument("--allow-run", action="store_true",
                     help="let the Fortran provider launch missing runs")
     args = ap.parse_args(argv)
@@ -938,7 +944,8 @@ def main(argv=None):
         from .providers import PythonProvider
         provider = PythonProvider(ncpus=args.ncpus, assembly=args.assembly,
                                   policy=args.policy, backend=args.backend,
-                                  solver=args.solver, nev=args.nev)
+                                  solver=args.solver, nev=args.nev,
+                                  hamiltonian=args.hamiltonian)
     else:
         from .providers import FortranProvider
         provider = FortranProvider(allow_run=args.allow_run,

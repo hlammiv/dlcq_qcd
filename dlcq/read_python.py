@@ -521,7 +521,8 @@ def weed_spectral(hnorm, mstinf, numsta, threshold=0.5):
 def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
                rmq=None, iflv=None, ncpus=1, policy="fortran",
                assembly="exact", prefer_opt=True, backend=None,
-               solver="dense", nev=None, keep_norm=True) -> DLCQResult:
+               solver="dense", nev=None, keep_norm=True,
+               hamiltonian="standard") -> DLCQResult:
     """Run the Python DLCQ solver and return a :class:`DLCQResult`.
 
     Parameters
@@ -558,6 +559,26 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         knob and results stay cache-compatible across it.  ``None`` takes
         ``QCDF_BACKEND`` from the environment, else the default.
 
+    hamiltonian : {"standard", "improved"}
+        ``"standard"`` (default) is the reference path and is bit-identical to
+        what this code has always produced.
+
+        ``"improved"`` applies van de Sande's endpoint subtraction
+        (`hep-ph/9605409 <https://arxiv.org/abs/hep-ph/9605409>`_) to the
+        self-induced inertia, which removes the ``K^-2b`` error that makes the
+        weak-coupling limit unreachable -- see ``docs/weak-coupling-limit.md``
+        and :mod:`dlcq.endpoint`.  Measured against his exact ``M^2/g^2 =
+        0.779141``: standard DLCQ reaches 0.413 at K = 100, improved reaches
+        0.771 at K = **10**.
+
+        **Two-parton sectors only**, and it raises otherwise.  There the
+        partner momentum is fixed by conservation, so the subtraction stays a
+        function of one momentum and is applied by swapping the ``selfen``
+        table.  With three or more partons it depends on which partner a parton
+        is paired with, and the identity this rests on -- measured exact to
+        1e-16 at two partons -- fails by 8.3e-01 at three.  Use ``LPN=2`` for a
+        meson.
+
     ``rlamb`` is taken literally.  Do not derive it from m/g when comparing
     against a Fortran run: the input files use 0.3325 while
     ``mg_to_lambda(1.6)`` is 0.3325495, and that 1.5e-5 difference moves
@@ -574,6 +595,10 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         raise ValueError(f"unknown solver {solver!r}; use 'dense' or 'sparse'")
     if nev is not None and nev < 1:
         raise ValueError(f"nev must be at least 1, got {nev}")
+    if hamiltonian not in ("standard", "improved"):
+        raise ValueError(
+            f"unknown hamiltonian {hamiltonian!r}; use 'standard' or "
+            f"'improved' (dlcq/endpoint.py, docs/weak-coupling-limit.md)")
     if solver == "sparse" and (assembly, policy) != ("exact", "blockwise"):
         raise ValueError(
             f"solver='sparse' supports assembly='exact' with "
@@ -618,6 +643,27 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
                           eigenvalues=np.array([]))
 
     mstinf = states.mstinf[:numsta_pre].copy()
+
+    if hamiltonian == "improved":
+        # Applied by swapping the ``selfen`` table rather than touching the
+        # kernel, which only works while the partner momentum is fixed by
+        # conservation -- i.e. two partons.  Checked here rather than assumed,
+        # because LPN=0 means *no* truncation, not valence only, so an
+        # innocent-looking call lands in a mixed-Fock basis.
+        parton_counts = sorted({int(mstinf[s, 1]) for s in range(numsta_pre)})
+        if parton_counts != [2]:
+            raise ValueError(
+                f"hamiltonian='improved' supports two-parton states only; this "
+                f"basis has parton counts {parton_counts}. Use LPN=2 for a "
+                f"meson. The subtraction depends on which partner a parton is "
+                f"paired with once there are three or more, and the identity it "
+                f"rests on -- exact to 1e-16 at two partons -- fails by 8.3e-01 "
+                f"at three. See dlcq/endpoint.py.")
+        from .endpoint import improved_selfen
+        from .units import lambda_to_mg, endpoint_exponent
+        selfen = improved_selfen(N, K_code,
+                                 endpoint_exponent(lambda_to_mg(rlamb), N),
+                                 mxslfn=len(selfen))
 
     # Block labels from the state list, not by thresholding the matrix: the
     # latter costs two more dense n x n temporaries on top of a norm that is
@@ -827,6 +873,7 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
                     "weeding_policy": policy, "assembly": assembly,
                     "ncpus": ncpus,
                     "eigensolver": solver, "nev": nev,
+                    "hamiltonian": hamiltonian,
                     "backend": backend or os.environ.get("QCDF_BACKEND")
                     or getattr(opt, "DEFAULT_BACKEND", "process")},
         numsta_pre=numsta_pre, numsta_post=numsta, n_orth=int(n_orth),

@@ -426,6 +426,63 @@ in K halves the bar, and 2K = 71 at the Table I truncation costs 21 s
 (`next-steps.md` §1). At `m/g = 0.2` it is marginal. Below that it is hopeless,
 and in exactly the region where the grid does not resolve the physics anyway.
 
+## Implemented: improved DLCQ, two-body sector
+
+`hamiltonian="improved"` on `run_python` / `PythonProvider`, `--hamiltonian
+improved` on the CLI. Off by default; the reference path is untouched and
+bit-identical.
+
+**It needed no kernel change.** In the two-parton sector the partner momentum is
+fixed by conservation — `k` pairs with `K_code − k` and nothing else — so the
+improved self-inertia is still a function of a *single* momentum, exactly like
+the standard `selfen` table. `qcdf_kernels.hamqcd_nb` takes `selfen` as an
+argument, so the whole modification is **a different array**, built by
+`dlcq/endpoint.improved_selfen`. Nothing in the hot path, the colour algebra or
+the bit-identity wall moves.
+
+The construction rests on an identity. Since `k` and `j` are both odd, `|k−j|`
+runs over the even integers `{2..k−1} ∪ {2..K−k−1}`, so
+
+```
+Σ_{j odd ≠ k} 4/(k−j)²  =  selfen_raw(k) + selfen_raw(K−k)
+```
+
+— the pair's two one-body self-inertias. The improvement inserts the weight
+`w_j/w_k` into that sum and adds `I(k/K_code)/K_paper`, then splits the
+(symmetric) total evenly between the pair's two partons so the solver's
+per-parton accumulation reproduces it.
+
+**Measured, N = 3 meson at m/g = 0.1**, over 2K = 10–70, with bars from an
+ensemble of fit form × contiguous sub-window (each family using the exponents
+appropriate to it — `K^{-2β}` powers for standard per his Eq. (13), plain `1/K`
+for improved per Eq. (14)):
+
+| | M(0) | bar | at 2K=70 | extrapolation supplies |
+|---|---|---|---|---|
+| standard | 0.7792 | ±0.0679 (8.7%) | 0.329 | **58%** |
+| improved | 0.8296 | **±0.0003 (0.04%)** | 0.827 | **0.3%** |
+
+They **agree** (0.7σ), and the improved bar is ~200× tighter. That is the whole
+point: the gain is not a moved central value, it is that almost nothing is left
+to extrapolate. Standard drifts 48% across that K range; improved drifts 2.4%.
+
+**And it fixes the chiral exponent.** `M² ∝ (m/g)^α` with α = 1 physically
+(GMOR; his Eq. 7). Standard returns 1.954, 1.951, 1.946 at 2K = 30, 40, 60 —
+the artifact this document is about. Improved returns **1.0696, 1.0688,
+1.0678**: near 1 and *stable in K*, so it is a property of the computed masses
+rather than of a fit. This is the one non-circular demonstration that the `m²`
+artifact becomes the physical `m¹` — the operator changed, not the fit basis
+(contrast the trap recorded above).
+
+**Restricted to two partons, and it raises otherwise.** The identity that makes
+the array swap valid holds only there: measured, `diag(self-energy) = −Σ_j
+H_exchange[i,j]` is exact to 1e-16 at two partons and fails by 8.3e-01 at three.
+Use `LPN=2` for a meson — note `LPN=0` means *no* truncation, not valence only.
+Extending to L ≥ 3, which is where Table I's baryons and all its higher Fock
+sectors live, needs the pair-dependent form and is unsolved: van de Sande's
+Eq. (17) is written for a quark–antiquark pair and gives a valence baryon no
+self-inertia at all.
+
 ## Zero modes: a separate question, and more tractable than it first looks
 
 Zero modes are **not** the cause of anything in §"Consequence 1" — the continuum
