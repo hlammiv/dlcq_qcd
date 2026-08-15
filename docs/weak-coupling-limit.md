@@ -1103,6 +1103,38 @@ pseudo-reality — and their corrections are the largest anywhere (bar N=4 at
 `m/g = 0.05` moves 0.53 → 2.25). The `m/g = 1.6 → 2/N` limit is forced by
 physics alone, and they reproduce it.
 
+### The ratio is stable to `m/g = 2e-4`, through the crossover scale
+
+The bosonization agreement was established at `m/g >= 0.0125`. Since `b -> 0` as
+`m/g -> 0` and the improved Hamiltonian reduces to standard exactly at `b = 0`,
+the obvious worry is that the agreement is a finite-`b` effect that unwinds in
+the deep chiral limit. Six further halvings, to `m/g = 1.95e-4` — below
+Kochergin's bosonization/'t Hooft crossover at `~1.7e-4` — say otherwise:
+
+| m/g | N=5 improved | dev from `2sin(πν/2)` | N=6 improved | dev | standard N=5 / N=6 |
+|---|---|---|---|---|---|
+| 6.25e-3 | 0.3480 | +0.21% | 0.2846 | +0.00% | 0.4366 / 0.3651 |
+| 1.56e-3 | 0.3484 | +0.32% | 0.2848 | +0.06% | 0.4366 / 0.3651 |
+| 3.91e-4 | 0.3485 | +0.35% | 0.2848 | +0.08% | 0.4366 / 0.3651 |
+| 1.95e-4 | 0.3485 | +0.36% | 0.2849 | +0.08% | 0.4366 / 0.3651 |
+
+Flat to better than 0.15% across a factor of 32 in coupling (64 counting from
+0.0125). **The agreement is not a finite-`b` artefact.**
+
+**And the two Hamiltonians do not converge as `b -> 0`** — the reasoning behind
+that worry was wrong. Standard is equally stable, but locks onto 0.4366 and
+0.3651, roughly 9% *above* constituent counting rather than on it. The two
+diverge from each other like `1/(m/g)`, because standard carries `M² ∝ m²` and
+improved `M² ∝ m`: at `m/g = 1.95e-4` the improved meson is `1.93e-3` against
+standard's `1.32e-6`, a factor of 1500. Identical Hamiltonians at exactly
+`b = 0` does not imply identical answers as `b -> 0`.
+
+Numerical floor, for anyone extending this: the binding constraint is the `λ`
+parameterisation, `λ = 1/sqrt(1 + π(m/g)²)`. At `m/g = 2e-4`, `λ = 0.99999994`
+and the `m/g` round trip is good to `5e-10`; a decade lower would spend the rest
+of the mantissa. Eq. (26)'s root-find is well behaved throughout — `a/(m/g)`
+holds at 0.6308 (N=5) to four digits over the whole range.
+
 ### Why our two readings of the same parameter disagreed by 10x
 
 Bosonization is one parameter, `nu = 1/(2N-1)`, and this repo measures it two
