@@ -180,101 +180,98 @@ def main(argv=None):
 
     N, ch = args.N, args.channel
     d = Path(args.data_dir)
-    imp = read(d / f"{ch}_improved_N{N}.csv")
-    std = read(d / f"{ch}_standard_N{N}.csv")
+    rows = [("improved", read(d / f"{ch}_improved_N{N}.csv"), "C0", "s"),
+            ("standard", read(d / f"{ch}_standard_N{N}.csv"), "k", "o")]
     pap = paper_values()
-    mgs = sorted(set(imp) | set(std), reverse=True)
+    mgs = sorted(set().union(*[set(r[1]) for r in rows]), reverse=True)
     if not mgs:
         print(f"no data under {d}")
         return 1
+    mgs = mgs[:6]
 
-    nsel = min(len(mgs), 6)
-    ncol = 3
-    nrow = int(np.ceil(nsel / ncol))
-    fig, axes = plt.subplots(nrow, ncol, figsize=(4.3 * ncol, 3.9 * nrow),
+    # One row per Hamiltonian, linear y scaled to that panel.  They differ by up
+    # to 1500x, so a shared axis compresses each fit into a flat line and hides
+    # the only thing the figure is for -- the shape of the extrapolation.
+    fig, axes = plt.subplots(len(rows), len(mgs),
+                             figsize=(3.05 * len(mgs), 3.3 * len(rows)),
                              squeeze=False)
-    for ic, mg in enumerate(mgs[:nsel]):
-        ax = axes[ic // ncol][ic % ncol]
-        seen = []
-        for data, col, mk, lbl in ((std, "k", "o", "standard"),
-                                   (imp, "C0", "s", "improved")):
+    for ir, (ham, data, col, mk) in enumerate(rows):
+        for ic, mg in enumerate(mgs):
+            ax = axes[ir][ic]
             g = data.get(mg)
             if not g or len(g) < 5:
+                ax.text(0.5, 0.5, "no data", ha="center", va="center",
+                        transform=ax.transAxes, fontsize=8, color="0.5")
+                ax.set_xticks([]); ax.set_yticks([])
                 continue
             ks = sorted(g)
             y = np.array([g[k] for k in ks])
             inv = 2.0 / np.array(ks, float)
             grid = np.linspace(0, inv.max() * 1.04, 300)
-            res = extrapolate(g, mg, N, lbl, grid)
+            res = extrapolate(g, mg, N, ham, grid)
             if res is None:
                 continue
             m0, tot, form, point, curves = res
             if len(curves):
-                lo = np.min(curves, axis=0); hi = np.max(curves, axis=0)
-                ax.fill_between(grid, lo, hi, color=col, alpha=0.15, lw=0, zorder=1)
-            if len(curves):
-                ax.plot(grid, curves[0], "-", color=col, lw=1.0, alpha=0.85,
-                        zorder=3)
-            ax.errorbar(inv, y, yerr=y * POINT_REL, fmt=mk, color=col, ms=3.4,
-                        elinewidth=0.8, capsize=1.5, zorder=4, label=lbl)
-            ax.errorbar([0], [m0], yerr=[tot], fmt=mk, color=col, ms=8,
-                        capsize=4, elinewidth=1.6, markeredgecolor="w",
-                        markeredgewidth=0.9, zorder=7)
-            seen += [y.min(), m0 + tot]
-        q = "mes" if ch == "mes" else "bar"
-        pv = pap.get((q, N, mg))
-        if pv:
-            ax.axhspan(pv[0] - pv[1], pv[0] + pv[1], color="C2", alpha=0.18, zorder=0)
-            ax.axhline(pv[0], color="C2", lw=1.1, ls="--", zorder=2, label="paper")
-            seen += [pv[0]]
-        ax.set_yscale("log")
-        if seen:
-            ax.set_ylim(min(seen) * 0.6, max(seen) * 1.8)
-        ax.set_xlim(left=-0.003)
-        a = endpoint_exponent(mg, N)
-        ax.set_title(f"m/g={mg:.3g}\n$a$={a:.2e}, grid sees "
-                     f"{100*(1-70.0**(-2*a)):.2f}%", fontsize=8)
-        ax.tick_params(labelsize=7)
-        if ic // ncol == nrow - 1:
-            ax.set_xlabel(r"$1/K$", fontsize=9)
-        if ic % ncol == 0:
-            ax.set_ylabel(r"$M^2/(m^2+g^2/\pi)$", fontsize=9)
-        if ic == 0:
-            ax.legend(fontsize=8, loc="center right", framealpha=0.95)
-    for k in range(nsel, nrow * ncol):
-        axes[k // ncol][k % ncol].axis("off")
+                ax.plot(grid, curves[0], "-", color=col, lw=1.0, alpha=0.85, zorder=3)
+            ax.errorbar(inv, y, yerr=y * POINT_REL, fmt=mk, color=col, ms=3.6,
+                        elinewidth=0.8, capsize=1.5, zorder=4)
+            ax.errorbar([0], [m0], yerr=[tot], fmt=mk, color=col, ms=8, capsize=4,
+                        elinewidth=1.7, markeredgecolor="w", markeredgewidth=0.9,
+                        zorder=7)
+            seen = [y.min(), y.max(), m0 - tot, m0 + tot]
+            pv = pap.get((ch, N, mg))
+            if pv:
+                ax.axhspan(pv[0] - pv[1], pv[0] + pv[1], color="C2", alpha=0.18,
+                           zorder=0)
+                ax.axhline(pv[0], color="C2", lw=1.1, ls="--", zorder=2)
+                seen += [pv[0] - pv[1], pv[0] + pv[1]]
+            lo, hi = min(seen), max(seen)
+            pad = 0.10 * (hi - lo) if hi > lo else abs(hi) * 0.05 + 1e-300
+            ax.set_ylim(lo - pad, hi + pad)
+            ax.set_xlim(left=-0.035 * inv.max())
+            ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 3))
+            a = endpoint_exponent(mg, N)
+            ax.set_title(f"{ham}   m/g={mg:.3g}\n"
+                         f"$M(0)$={m0:.4g}$\\pm${100*tot/m0:.1f}%   "
+                         f"grid sees {100*(1-70.0**(-2*a)):.2f}%", fontsize=7.5)
+            ax.tick_params(labelsize=6.5)
+            if ir == len(rows) - 1:
+                ax.set_xlabel(r"$1/K$", fontsize=8.5)
+            if ic == 0:
+                ax.set_ylabel(r"$M^2/(m^2+g^2/\pi)$", fontsize=8.5)
 
     chan = "meson" if ch == "mes" else "baryon"
-    note = ("Table I has no SU(5) entries (its colours are N=2,3,4) and its "
-            "smallest coupling is m/g=0.05, so no published value exists at any "
-            "of these points."
-            if not any(pap.get((ch, N, m)) for m in mgs[:ncol])
-            else "green = published Table I value with its quoted last term")
+    note = ("Table I has no SU(%d) entries (its colours are N=2,3,4, smallest "
+            "coupling m/g=0.05), so no published value exists here." % N
+            if not any(pap.get((ch, N, m)) for m in mgs)
+            else "green dashed = published Table I value with its quoted last term")
     fig.suptitle(
-        f"SU({N}) {chan}: K-extrapolation at small m/g — standard (black) vs "
-        f"improved (blue), log scale, they differ by up to 1500x.\n"
-        f"Point bars = 1e-4 reproducibility floor; the $M(0)$ bar adds the "
-        f"fit-form ensemble and that floor in quadrature.\n{note}", fontsize=10)
+        f"SU({N}) {chan}: K-extrapolation at small m/g.  Separate rows because the "
+        f"two differ by up to 1500x — on shared axes each fit flattens to a line.\n"
+        f"Improved extrapolated in a plain 1/K series (van de Sande Eq. 14), "
+        f"standard in the Eq. (27) ladder; using either basis on the other is wrong.\n"
+        f"Point bars = 1e-4 reproducibility floor; $M(0)$ bar = fit-form ensemble "
+        f"and that floor in quadrature.  {note}", fontsize=9)
     fig.tight_layout()
-    fig.subplots_adjust(top=0.88 if nrow > 1 else 0.80)
+    fig.subplots_adjust(top=0.84)
     out = args.out or str(ROOT / "figures" / f"tiny_mg_fits_{ch}_N{N}")
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     for ext in ("png", "pdf"):
-        fig.savefig(f"{out}.{ext}", dpi=150)
+        fig.savefig(f"{ext}".join([out + ".", ""]), dpi=150)
         print(f"  saved {out}.{ext}")
 
-    # numeric companion, so the bars are readable as numbers too
-    print(f"\n  {'m/g':>10} {'ham':>9} {'M(0)':>13} {'total':>11} "
+    print(f"\n  {'m/g':>10} {'ham':>9} {'M(0)':>13} {'total':>11} {'rel':>7} "
           f"{'form':>11} {'point':>11}")
-    for mg in mgs[:ncol]:
-        for data, lbl in ((std, "standard"), (imp, "improved")):
+    for mg in mgs:
+        for ham, data, _, _ in rows:
             g = data.get(mg)
             if not g or len(g) < 5:
                 continue
-            r = extrapolate(g, mg, N, lbl)
+            r = extrapolate(g, mg, N, ham)
             if r:
-                print(f"  {mg:10.3e} {lbl:>9} {r[0]:13.6e} {r[1]:11.2e} "
-                      f"{r[2]:11.2e} {r[3]:11.2e}")
+                print(f"  {mg:10.3e} {ham:>9} {r[0]:13.6e} {r[1]:11.2e} "
+                      f"{100*r[1]/r[0]:6.2f}% {r[2]:11.2e} {r[3]:11.2e}")
     return 0
 
 
