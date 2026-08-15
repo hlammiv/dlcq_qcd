@@ -618,7 +618,7 @@ mistaken for strong ones during this work.
 | GMOR (his Eq. 7) | `M² = 2πgμ/√3`, parameter-free, large-N **meson** | improved **1.03**, standard **0.20** — decisive |
 | Hamer 1982, meson | SU(2) finite-lattice, **with quoted errors** | both ≤0.7σ; direction favours improved |
 | Hamer 1982, baryon | same table, SU(2) baryon | both ≤0.7σ; direction favours improved |
-| Date–Frishman–Sonnenschein 1987 | bosonized **baryon** mass formula | **undefined at NF=1** — see below |
+| Date–Frishman–Sonnenschein 1987 | bosonized mass formula, `α = 2N_c/(2N_c−1)` | **failed at finite N_c** (1.01 measured vs 1.20) — see below |
 
 **Hamer's actual error bars matter, and are much wider than the figure suggests.**
 Table 1 of Nucl. Phys. B195, 503 gives both columns on our own coupling grid:
@@ -642,67 +642,88 @@ meson come out identical to four digits at every coupling, reproducing Hamer's
 own observation that "the ratio of the baryon mass to the meson mass is
 consistent with 1 everywhere". For N = 2 both are two-quark states.
 
-**The one anchor that would reach genuine N ≥ 3 baryons does not apply.** Date,
+**The DFS baryon formula: three transcription errors, now corrected.** Date,
 Frishman & Sonnenschein (Nucl. Phys. B283, 365) derive, by non-abelian
-bosonization at strong coupling, their Eq. (4.1):
+bosonization at strong coupling, their Eq. (4.1). An earlier revision of this
+document transcribed it as
 
 ```
-E = 4m√(2N_c/π) + √(½)·m·√( (π/N_c)³ [ C₂ − N_c²·N/(2(N+1)) ] )
+WRONG:  E = 4m√(2N_c/π) + √(½)·m·√( (π/N_c)³ [ C₂ − N_c²·N/(2(N+1)) ] )
 ```
 
-with `N` the number of **flavours** and `C₂` the flavour Casimir. At NF = 1 the
-flavour group is trivial, `C₂ = 0`, and the bracket is `−N_c²/4 < 0` — the root
-is imaginary and the formula is undefined. Every Table I entry is NF = 1. It
-first becomes real at N = 2 flavours in the symmetric representation
-(`C₂ = 3.75`, isospin 3/2) for `N_c` = 2 or 3.
+and concluded from it that DFS predicts baryon exponent **2** against GMOR's
+**1** for mesons. That conclusion is **withdrawn**. Three things were wrong:
 
-**Its structure predicts a meson/baryon split, and that has now been tested.**
-Both terms are linear in `m`, so DFS has `M_B ∝ m` where GMOR has
-`M_meson ∝ √m` — chiral exponent **2** for baryons against **1** for mesons.
+1. **The Casimir bracket sits OUTSIDE the radical**, not inside:
+   `E = 4m√(2N_c/π) + √(½)·m·√((π/N_c)³)·[C₂ − N_c²N/(2(N+1))]`.
+   This is settled by DFS themselves, not a judgement call: they quote a
+   decuplet/octet ratio of **1.41** on the same page, and bracket-outside gives
+   **1.4112** while bracket-inside gives 1.2374.
+2. **`N` in DFS is `N_f − 1`**, not the flavour count. Their flavour index runs
+   `i = 1..N+1`; and they describe `N = 2, N_c = 3` as "decuplet to octet",
+   which is SU(3) *flavour*, i.e. three flavours.
+3. **`m` is not the quark mass.** It is a dynamically generated scale defined
+   under their Eq. (2.11), `m ∝ m_q^{1/(1+P)}` with
+   `P(N_c,N_f) = (N_c²−1)/(N_c(N_c+N_f))`. So "linear in `m`" is *not*
+   "linear in `m_q`". A one-line check settles it: were `m` the quark mass, the
+   strong-coupling baryon mass `4m√(2N_c/π)` would carry no coupling at all.
 
-Run in the one channel where DFS is defined (NF = 2, `iflv = [3,0]`, isospin
-3/2, `C₂ = 3.75`, N_c = 3), measuring `d ln M² / d ln(m/g)` toward the chiral
-limit:
+**Consequences of the correction.** NF = 1 is perfectly well defined — the
+bracket is exactly `0`, giving `E = 4m√(2N_c/π)`, not an imaginary root. And
+since after bosonization the effective action carries exactly *one* dimensionful
+parameter `m`, every mass is a pure number times `m`: **DFS predicts no
+meson/baryon split at all.** The prediction is a single channel-universal
+exponent
 
-| pair | improved | standard |
-|---|---|---|
-| 0.1 → 0.2 | 1.066 | 1.753 |
-| 0.05 → 0.1 | 1.066 | 1.929 |
-| **0.025 → 0.05** | **1.037** | **1.981** |
+```
+α_DFS = 2/(1 + P(N_c,N_f))   =   2N_c/(2N_c − 1)   at N_f = 1
+```
 
-**Improved converges to 1.04 where DFS predicts 2.** NF = 1 gives the same
-exponents (1.037 / 1.982), so this is not a flavour artefact.
+— 1.333 at N_c = 2, **1.200** at N_c = 3, 1.111 at N_c = 5, and **→ 1 as
+N_c → ∞**, i.e. it *reduces to GMOR* in the large-N limit where GMOR is derived.
+Independent support: Frishman & Sonnenschein, Phys. Rept. 223 (1993) 309 quote
+`M ∝ m_q^{N_c/(2N_c−1)}`, and Steinhardt's `ν = 2/3` at N_c = 2 is the same
+`α = 4/3`.
 
-**Standard's 1.981 is not a pass.** Standard returns α ≈ 2 in *every* channel,
-including the meson channel where GMOR proves the answer is 1 — that is the grid
-artefact this whole document is about, and `dlcq/thooft.py` reproduces it in a
-continuum solver with no grid, no `K` and no Fock truncation. Its agreement with
-DFS here is the artefact value coinciding with a physical one, and carries no
-information about baryons. The experiment is one-sided: it is evidence against
-improved, not evidence for standard.
+**The corrected anchor is then failed in the meson channel, where improved was
+supposed to be validated.** Measured on the improved data, in physical units
+(`M²/g² = M²_code·((m/g)² + 1/π)`), against the corrected law:
 
-So:
-
-| | prediction | improved | standard |
+| N_c | α (0.0125→0.025) | α_DFS = 2N_c/(2N_c−1) | gap |
 |---|---|---|---|
-| meson | GMOR: **1** | **1.06** ✓ | 1.93 ✗ (artefact) |
-| baryon | DFS: **2** | 1.04 ✗ | 1.98 — artefact, uninformative |
+| 2 | 1.038 | 1.333 | −0.295 |
+| 3 | 1.007 | 1.200 | −0.193 |
+| 4 | 1.010 | 1.143 | −0.133 |
+| 5 | 1.011 | 1.111 | −0.100 |
+| 6 | 1.012 | 1.091 | −0.079 |
+| 7 | 1.011 | 1.077 | −0.065 |
+| 8 | 1.011 | 1.067 | −0.055 |
 
-Improved forces every channel to ≈1.04; standard forces every channel to ≈1.98
-for reasons already known to be unphysical. Neither distinguishes a meson from a
-baryon, and DFS says they should differ.
+**DFS requires `α` to fall by 0.133 from N_c = 3 to N_c = 8. The measured change
+is +0.005** — flat. The gap closes only because DFS itself tends to 1; improved
+agrees with it exactly where DFS coincides with GMOR, and nowhere else.
 
-**Consequence: the improved baryon entries are unvalidated, and one analytic
-result argues against them.** The meson
-result keeps its two decisive anchors, so the "published weak-coupling entries
-are low by 2.5–5x" claim must be split — defensible for the meson columns,
-unsupported for the baryon ones, which is where the corrections are largest
-(bar N=4 at m/g = 0.05 moves 0.53 to 2.25).
+**So the state of the baryon question is different from what was recorded, and
+worse.** There is no meson/baryon split to fail, so "improved fails DFS for
+baryons" is withdrawn along with the prediction that generated it. What replaces
+it is a sharper and more uncomfortable question: **two analytic results disagree
+at finite N_c** — GMOR says `α = 1`, bosonization says `α = 2N_c/(2N_c−1)` — they
+agree only as `N_c → ∞`, and improved DLCQ lands on 1 in every channel. Nothing
+in this work adjudicates which is right at N_c = 3.
 
-The suspicion worth deriving rather than sweeping: a subtraction built from the
-*one-parton* endpoint `x -> 0` may impose a universal exponent by construction,
-which is right when the chiral behaviour is governed by a single parton going
-soft and wrong when it is not.
+One structural argument, offered and not refuted, cuts against DLCQ rather than
+against the subtraction: the anomalous exponent `1/(2N_c−1)` arises from the
+condensate/WZW sector, and this code uses antiperiodic boundary conditions with
+no fermion zero modes and no vacuum structure. If that is where the correction
+lives, **no** DLCQ variant here — standard or improved — can produce it, and the
+flat 1.01 is a property of the framework, not evidence about the Hamiltonian.
+
+**A caution on the measured baryon exponent itself.** The improved eigenvalue in
+the chiral region is, at the K this repo reaches, close to a linear map of the
+Eq. (26) exponent `b` that is *fed in as input* and satisfies `b ∝ m/g`. To that
+extent `α ≈ 1` is that input propagated, not an independent dynamical
+measurement — which is a further reason not to read the baryon 1.04 as
+confirmation of anything.
 
 #### The external check, which is what makes this assertable
 
