@@ -532,6 +532,65 @@ opens as it must if the chiral exponents differ (1.93 standard, 1.03 improved):
 Improved also barely moves across the window — drift 0.0–2.6% against standard's
 14–21% — so ≤3.5% of its answer is extrapolated, against 15–35% for standard.
 
+#### External anchors: what exists, and what each one can settle
+
+Four independent checks now bear on the improved Hamiltonian. Two are decisive,
+two are consistent but not discriminating, and one more exists that cannot be
+applied here at all. Listing them together because the weak ones were twice
+mistaken for strong ones during this work.
+
+| anchor | what it is | verdict |
+|---|---|---|
+| van de Sande exact, two-body | polynomial-basis solution of the 't Hooft equation, `M²/g² = 0.779141` at β = 0.1 | improved to **5.5e-4** — decisive |
+| GMOR (his Eq. 7) | `M² = 2πgμ/√3`, parameter-free, large-N **meson** | improved **1.03**, standard **0.20** — decisive |
+| Hamer 1982, meson | SU(2) finite-lattice, **with quoted errors** | both ≤0.7σ; direction favours improved |
+| Hamer 1982, baryon | same table, SU(2) baryon | both ≤0.7σ; direction favours improved |
+| Date–Frishman–Sonnenschein 1987 | bosonized **baryon** mass formula | **undefined at NF=1** — see below |
+
+**Hamer's actual error bars matter, and are much wider than the figure suggests.**
+Table 1 of Nucl. Phys. B195, 503 gives both columns on our own coupling grid:
+
+| m/g | M_B/g | M_meson/g |
+|---|---|---|
+| 0.05 | 0.25 ± 0.2 | 0.30 ± 0.2 |
+| 0.10 | 0.40 ± 0.2 | 0.45 ± 0.2 |
+| 0.20 | 0.65 ± 0.15 | 0.65 ± 0.15 |
+| 0.40 | 1.05 ± 0.10 | 1.08 ± 0.07 |
+| 0.80 | 1.90 ± 0.05 | 1.92 ± 0.03 |
+| 1.60 | 3.50 ± 0.05 | 3.51 ± 0.02 |
+
+±0.2 on 0.30 is ±67%. An earlier revision of this work read points off Fig. 8(a)
+instead and assigned them a ~1.8% *digitisation* bar, which manufactured an
+apparent 5σ tension at m/g = 0.2. With Hamer's own errors everything sits inside
+0.7σ and the tension does not exist. **Use Table 1, not the figure.**
+
+Worth noting as an independent structural check: our SU(2) baryon and SU(2)
+meson come out identical to four digits at every coupling, reproducing Hamer's
+own observation that "the ratio of the baryon mass to the meson mass is
+consistent with 1 everywhere". For N = 2 both are two-quark states.
+
+**The one anchor that would reach genuine N ≥ 3 baryons does not apply.** Date,
+Frishman & Sonnenschein (Nucl. Phys. B283, 365) derive, by non-abelian
+bosonization at strong coupling, their Eq. (4.1):
+
+```
+E = 4m√(2N_c/π) + √(½)·m·√( (π/N_c)³ [ C₂ − N_c²·N/(2(N+1)) ] )
+```
+
+with `N` the number of **flavours** and `C₂` the flavour Casimir. At NF = 1 the
+flavour group is trivial, `C₂ = 0`, and the bracket is `−N_c²/4 < 0` — the root
+is imaginary and the formula is undefined. Every Table I entry is NF = 1. It
+first becomes real at N = 2 flavours in the symmetric representation
+(`C₂ = 3.75`, isospin 3/2) for `N_c` = 2 or 3.
+
+**But its structure raises a real question about the baryons.** Both terms are
+linear in `m`, so DFS has `M_B ∝ m` where GMOR has `M_meson ∝ √m` — a chiral
+exponent of **2** for baryons against **1** for mesons. Neither Hamiltonian here
+produces any such difference: improved gives ≈1.06 for mesons *and* baryons,
+standard ≈1.95 for both. Improved is right for mesons by GMOR; whether it is
+right for baryons is exactly what no anchor has yet settled, and it is where its
+corrections are largest.
+
 #### The external check, which is what makes this assertable
 
 Everything above is internal consistency or the two-body anchor. Van de Sande's
