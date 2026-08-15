@@ -453,6 +453,35 @@ But it fails its own falsification test: fitting `M² = A(1 − K_code^{-b})` wi
 on 1. The flattening is a two-parameter fit absorbing a smooth monotone curve,
 not the model being right. Do not use it to correct DLCQ numbers.
 
+### The practical K ceiling is 2K = 100, and crossing it corrupts silently
+
+Measured, meson LPN=4, N=5, m/g=0.1, sparse solver, both Hamiltonians:
+
+| 2K | standard M² | improved M² | time (std/imp) | RSS |
+|---|---|---|---|---|
+| 70 | 0.331120 | 1.053159 | 1.1 / 0.9 s | 0.4 GB |
+| 90 | 0.345307 | 1.052067 | 3.9 / 2.7 s | 1.1 GB |
+| **100** | **0.351212** | **1.051555** | 9.3 / 6.1 s | 1.9 GB |
+| 102 | **−70.47** | **−55.84** | 12.6 / 7.0 s | 2.4 GB |
+| 120 | **−199.73** | **−195.35** | 6.1 / 9.1 s | 4.3 GB |
+
+So 2K = 100 is reachable in seconds and ~2 GB — the old "memory wall at 2K = 37"
+applied to the dense solver and is long gone. Past 100, two spurious negative
+eigenvalues appear *below* the physical spectrum, which is otherwise intact:
+at 2K = 102 the states above them (1.254, 1.258, 1.265, 1.275) still match
+2K = 100's. That is the failure mode `docs/fortran-color-overflow.md` describes.
+
+`qcdf_opt.py:892` already resizes `kpxloc`/`kpmloc` per run, so the KPX heap
+smash documented there is fixed; this is the colour path, and it is **not**
+guarded. `tools/large_k_sweep.py` filters via `observables.physical_indices`,
+so sweeps are protected; a bare `run_python` call is not.
+
+**One parity trap worth recording**, because it cost a probe: mesons need *even*
+`K_code` (an even number of partons, each of odd momentum) and baryons need
+`K_code ≡ N (mod 2)`. Wrong parity returns zero states in ~0.1 s rather than an
+error, which is easy to mistake for a fast run. `figures._K_grid(B, N, lo, hi)`
+gets this right; hand-written K lists often do not.
+
 ## What the DLCQ code can still do
 
 Not reach smaller `m/g` — but two things worth having.
