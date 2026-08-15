@@ -773,7 +773,28 @@ across all five colours is **2e-14 to 4e-13**. Eq. (26)'s `a` does depend on
 
 A single universal curve admits exactly **one** chiral-limit exponent. So the
 valence meson sector cannot return an `N_c`-dependent α whatever the physics is,
-and **our flat α = 1.01 is forced by the construction rather than measured.** It
+and **our flat α = 1.01 is forced by the construction rather than measured.**
+
+**Baryons do not collapse, and that is the important corollary.** The same test
+at valence baryon (B=1, LPN=N), improved, N = 3,4,5:
+
+| u | mesons | baryons |
+|---|---|---|
+| 0.05 | 0.63619302 ×3, spread **1.9e-14** | 1.561 / 2.832 / 4.416, spread **1.8** |
+| 0.01 | 0.23817308 ×3, spread **5.2e-14** | 0.591 / 1.072 / 1.668, spread **1.8** |
+
+Nor is the baryon spread trivial quark-counting: `M_B ∝ N` would give successive
+`M²/(g²C_F)` ratios of 1.26 and 1.22, against 1.81 and 1.56 measured. So the
+**baryon sector is the only part of this calculation carrying genuine finite-`N_c`
+information**, and the meson α is silent by construction.
+
+This cuts both ways. The improved baryons are the most valuable numbers here —
+the only ones that can see the physics in dispute — and the least validated:
+no external anchor exists for N ≥ 3 (Hamer's SU(2) "baryon" is the same state as
+his meson by pseudo-reality), and the corrections are largest there (bar N=4 at
+`m/g = 0.05` moves 0.53 → 2.25). The first genuine constraint on them is the
+strong-coupling limit of the meson/baryon ratio, which **must** approach `2/N` at
+`m/g = 1.6` where masses are quark-mass dominated. It
 is not evidence against DFS. What breaks the collapse is only the higher Fock
 content (LPN = 4 shifts M² by 1–2.5%), and that moves α by **+0.011** across
 N_c = 3→8 against DFS's required **−0.133** — wrong sign, and an order of
