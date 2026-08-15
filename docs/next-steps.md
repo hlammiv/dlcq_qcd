@@ -298,12 +298,28 @@ truncation by exactly this move, modifying the basis according to the quark
 mass following 't Hooft's endpoint analysis.
 
 The hard part here is that DLCQ's basis is a *momentum grid*, not a function
-basis, so this is not a drop-in: it changes what a "state" is. A cheaper first
-experiment that needs no new formalism is `dlcq/thooft.py` — swap its uniform
-grid for an `x^a`-weighted one and see whether the chiral exponent moves from 2
-toward the physical 1. That solver is 120 lines, has an exact benchmark (0,
-5.8817, 14.1429 at `m = 0`), and its failure to converge is documented and
-reproducible. **Do that before touching the DLCQ path.**
+basis, so this is not a drop-in: it changes what a "state" is. And note that the
+graded-mesh alternative is **not** available on the DLCQ path — `x = k/K` follows
+from quantizing momentum in a periodic box, not from a discretization choice.
+
+So start in `dlcq/thooft.py`, where a mesh *is* a free choice. Two steps, in
+order:
+
+1. **Graded mesh.** Replace the uniform grid with a geometric one reaching
+   `x_min ~ 10⁻²⁵`. The cell-wise exact treatment of the principal value
+   generalizes directly — `P∫ dy/(y−x)²` over a cell is
+   `1/(x−y⁺) − 1/(x−y⁻)` for any cell width — and the diagonal is still fixed by
+   the sum rule that the kernel annihilates a constant. `weak-coupling-limit.md`
+   costs this: ~571 nodes at `m/g = 0.05` against `4e23` for a uniform mesh, and
+   2284 nodes at `m/g = 0.0125` against `3e94`. Expected outcome: `M²` plateaus
+   under refinement where it currently climbs ~7% per doubling, and the chiral
+   exponent falls from 2 toward 1.
+2. **`x^a`-weighted basis**, if step 1 confirms the mechanism. ~30 coefficients,
+   spectral convergence, endpoint exact by construction.
+
+That solver is 120 lines, has an exact benchmark (0, 5.8817, 14.1429 at
+`m = 0`), and its failure to converge is documented and reproducible — so step 1
+is cheap and falsifiable. **Do it before touching the DLCQ path.**
 
 ## 5. Zero modes — real, measurable, and not what §4 is about
 

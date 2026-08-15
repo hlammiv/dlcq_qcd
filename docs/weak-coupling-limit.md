@@ -252,15 +252,63 @@ point count and would hand back 4. Table I's own range is safe — `a = 0.909` a
 past `m/g ≈ 3` is not. The confluent basis does not help here: its
 `partner_of = {2:1, 4:3}` pairs `1+a` with `1`, which is the `a → 0` merger.
 
-## What would actually work
+## What would actually work, and what it would cost
 
-Not more K, and not a better fit. The endpoint region has to be *represented*
-rather than resolved — i.e. `x^a` built into the basis instead of approximated
-on a uniform grid. This is the established fix: Anand, Fitzpatrick, Katz and Xin
+Not more K, and not a better fit.
+
+The cost is quantifiable, because the failure has a one-parameter model. The
+endpoint integral is `∫₀¹ x^{2a−1}dx = 1/(2a)`, and a mesh reaching down to
+`x_min = δ` captures `1 − δ^{2a}` of it. For a uniform mesh `δ = 1/n`, so the
+captured fraction is `1 − n^{-2a}` — which approaches 1 only for `n ≫ e^{1/2a}`.
+
+That model accounts for essentially all of the observed non-convergence.
+Dividing the `thooft.py` values by their captured fraction at `m/g = 0.05`:
+
+```
+n =  200   M² = 0.03585   captured 0.3612   M²/captured = 0.09927
+n =  400        0.03912            0.3975                 0.09840
+n =  800        0.04234            0.4319                 0.09804
+n = 1600        0.04550            0.4642                 0.09802
+n = 3200        0.04861            0.4947                 0.09826
+```
+
+`M²` moves 36% across that range; `M²/captured` moves **1.3%**. Applying the
+same correction at two couplings and re-measuring the chiral exponent between
+`m/g = 0.0125` and `0.05` moves it from **1.979 to 1.151** — 83% of the way from
+the grid artifact to GMOR's 1. (Treat this as a diagnostic, not a result: it is a
+heuristic one-parameter rescaling, and the residual — 7% scatter at
+`m/g = 0.0125`, and 1.151 rather than 1.000 — is the part it does not explain.)
+
+The scaling then says what each fix buys. Nodes needed to capture 99% of the
+endpoint integral, N = 3 baryon:
+
+| m/g | `a` | `x_min` needed | uniform | geometric (10%/cell) | `x^a` basis |
+|---|---|---|---|---|---|
+| 0.40 | 0.326 | 8.6e-4 | 1.2e3 | 74 | ~30 |
+| 0.20 | 0.168 | 1.1e-6 | 9.2e5 | 144 | ~30 |
+| 0.10 | 0.084 | 1.4e-12 | 7.0e11 | 286 | ~30 |
+| 0.05 | 0.042 | 2.3e-24 | 4.4e23 | 571 | ~30 |
+| 0.025 | 0.021 | 5.3e-48 | 1.9e47 | 1142 | ~30 |
+| 0.0125 | 0.011 | 2.9e-95 | 3.4e94 | 2284 | ~30 |
+
+A **graded mesh** turns a cost exponential in `1/a` into one linear in it — a few
+thousand nodes spans ninety-five decades — and makes the problem merely hard.
+A **basis with `x^a` in it** removes the requirement entirely: after factoring
+the singular behaviour the remainder is analytic, so convergence is spectral and
+the endpoint is exact by construction rather than resolved.
+
+This is why the established fix is a basis change and not a finer grid. Anand,
+Fitzpatrick, Katz and Xin
 ([arXiv:2111.00021](https://arxiv.org/abs/2111.00021)) restore convergence at
 quark masses far below the strong-coupling scale in lightcone conformal
 truncation by modifying the basis according to the quark mass, motivated by
 't Hooft's endpoint analysis.
+
+**Note what does not transfer to DLCQ.** The graded-mesh option exists only for
+`thooft.py`. In DLCQ `x = k/K` is not a numerical choice — it follows from
+quantizing momentum in a periodic box, which is exactly what makes the Fock
+basis finite at fixed `K⁺`. There is no non-uniform spacing of `k` to be had, so
+on that path the basis change is the *only* option.
 
 ## Zero modes: a separate question, and more tractable than it first looks
 
