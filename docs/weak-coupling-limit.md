@@ -832,6 +832,51 @@ on a null plane with a trivial vacuum. That single shared assumption is the one
 the anomalous exponent is about, which is why "unresolved" remains the honest
 verdict rather than "DFS is wrong".
 
+#### Why our two readings of the same parameter disagreed by 10x
+
+Bosonization is one parameter, `nu = 1/(2N-1)`, and this repo measures it two
+ways: the chiral exponent `alpha = 1 + nu`, and the meson/baryon mass ratio
+`r = 2 sin(pi nu / 2)`. They disagreed violently — and the resolution is not
+that either is wrong.
+
+| N | nu from ratio | nu from exponent | `1/(2N-1)` |
+|---|---|---|---|
+| 5 | 0.1112 | 0.0112 | 0.1111 |
+| 6 | 0.0908 | 0.0114 | 0.0909 |
+| 7 | 0.0768 | 0.0114 | 0.0769 |
+| 8 | 0.0666 | 0.0112 | 0.0667 |
+
+The ratio recovers `1/(2N-1)` to four decimals. The exponent column does not
+move with N at all, which is the giveaway: any `1/N`-corrected law must vary.
+
+**The exponent's "nu" converges to zero, not to 0.1111.** At N=5, as `m/g` falls
+it reads 0.0683, 0.0290, 0.0113 — roughly `∝ m/g`. That is the separately
+measured O(m/g) transient (`M²/GMOR = 1 + 0.71(m/g)`), not `nu`. Meanwhile
+ratio-nu reads 0.1118, 0.1112, 0.1111 and is converged by `m/g = 0.05`.
+
+**So the two are not both measurements of `nu`.** `r = 2 sin(pi nu / 2)` is a
+statement about the *shape* of the spectrum, fixed by `β²` throughout the scaling
+regime. `alpha = 1 + nu` is a statement about the *overall scale*, and only holds
+below the crossover at `m_q ~ 1.7e-4` — 70x below our smallest coupling. Above
+it, `alpha -> 1` is the correct 't Hooft answer, which is what we measure, more
+emphatically the smaller `m/g` gets.
+
+The `C_F` collapse is a *second*, independent reason the meson exponent cannot
+show `N_c` dependence — but it is not the main one. Even an unblinded exponent
+would read ~1 in this window.
+
+**AFKX see the same split, at the same data point.** Their `m₂/m₁ = 1.90421`
+matches the sine-Gordon `sin(π/5)/sin(π/10) = 1.90211` to 0.1%, while their mass
+gap sits on the 't Hooft line to 0.8%. Spectrum ratios sine-Gordon, absolute
+scaling 't Hooft — two independent methods, one pattern.
+
+**Consequence for how this document reads its own results.** The "~30σ exclusion
+of DFS" recorded earlier came from the exponent, i.e. from a quantity that in
+this window measures the transient rather than `nu`. It is withdrawn as evidence
+about bosonization. What survives is that in the accessible window ratios have
+converged and scaling has not, and no measurement by any method has yet gone
+below `m_q ~ 10⁻³`.
+
 #### The equal-time measurement exists, and it favours bosonization
 
 Bañuls, Cichy, Cirac, Jansen & Kühn, PRX **7**, 041046 (2017),
