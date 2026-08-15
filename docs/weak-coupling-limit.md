@@ -832,6 +832,54 @@ on a null plane with a trivial vacuum. That single shared assumption is the one
 the anomalous exponent is about, which is why "unresolved" remains the honest
 verdict rather than "DFS is wrong".
 
+#### The meson/baryon ratio recovers the bosonization parameter
+
+`M_meson/M_baryon` needs the baryon, which (unlike the meson) does **not**
+collapse in `C_F` — so unlike the chiral exponent it can carry `N_c`. Improved
+Hamiltonian, `tools/meson_baryon_ratio.py`:
+
+| N | m/g=1.6 | 0.4 | 0.05 | 0.0125 | `2sin(πν/2)` | `2/N` |
+|---|---|---|---|---|---|---|
+| 2 | 1.0000 | 1.0006 | — | — | 1.0000 | 1.0000 |
+| 3 | 0.6562 | 0.6364 | — | — | 0.6180 | 0.6667 |
+| 4 | 0.4869 | 0.4640 | — | — | 0.4450 | 0.5000 |
+| 5 | 0.3865 | 0.3643 | 0.3476 | **0.3477** | 0.3473 | 0.4000 |
+| 6 | 0.3192 | 0.2993 | 0.2848 | **0.2844** | 0.2846 | 0.3333 |
+| 7 | 0.2764 | 0.2538 | 0.2412 | **0.2406** | 0.2411 | 0.2857 |
+| 8 | — | 0.2204 | 0.2091 | **0.2089** | 0.2091 | 0.2500 |
+
+A monotone descent from constituent counting at strong coupling — where the
+quark masses dominate and nothing else is possible — onto the bosonization value
+in the chiral limit. `N = 2` returns `1.0000 ± 0.0006`, the pseudo-reality
+identity, as a free pipeline check. (The `m/g = 1.6` entries at N = 7, 8 carry
+bars of ±0.08 and ±0.098 and are not usable; the strong-coupling baryon
+extrapolation degrades at large N.)
+
+**The standard Hamiltonian sits on `2/N` at every coupling** (0.7–1.0σ) and never
+departs. So this is a direct consequence of the van de Sande endpoint
+subtraction, in the sector where its corrections are largest.
+
+**Fock convergence**, the check that could have killed it — deviation from
+`2sin(πν/2)` at `m/g = 0.025`:
+
+| N | valence | valence+2 | valence+4 |
+|---|---|---|---|
+| 5 | −6.31% | +0.02% | **−0.41%** |
+| 6 | −6.26% | −0.02% | **−0.16%** |
+| 7 | −6.19% | −0.03% | **+0.04%** |
+
+The first qq̄ pair moves the ratio ~6.2% at every N; the second moves it 0.43%,
+0.14%, 0.07% — converging, and converging *faster* as N grows. The sub-0.1%
+agreements at valence+2 (which the scan uses) are fortuitously precise; the
+converged statement is **within 0.4%, improving with N**, against 15–19% for
+counting.
+
+**This is the first external-facing check the improved baryons have passed.**
+They have no anchor at N ≥ 3 — Hamer's SU(2) "baryon" is his meson by
+pseudo-reality — and their corrections are the largest anywhere (bar N=4 at
+`m/g = 0.05` moves 0.53 → 2.25). The `m/g = 1.6 → 2/N` limit is forced by
+physics alone, and they reproduce it.
+
 #### Why our two readings of the same parameter disagreed by 10x
 
 Bosonization is one parameter, `nu = 1/(2N-1)`, and this repo measures it two
