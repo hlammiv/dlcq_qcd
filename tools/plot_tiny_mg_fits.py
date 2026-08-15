@@ -62,6 +62,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+from dlcq.observables import (richardson_curve,  # noqa: E402
+                              richardson_extrapolate)
 from dlcq.units import endpoint_exponent  # noqa: E402
 
 POINT_REL = 1.0e-4          # docs/basis-dependence.md reproducibility floor
@@ -104,8 +106,15 @@ def curve(c, grid):
     return c[0] + sum(c[i + 1] * Kp ** -(i + 1.0) for i in range(len(c) - 1))
 
 
-def extrapolate(series, grid=None, draws=200):
+def extrapolate(series, mg, N, ham, grid=None, draws=200):
     """``M(0)``, its total bar, and the ensemble's full-window curves.
+
+    **Each Hamiltonian is extrapolated in the basis it needs.**  Improved
+    converges in a plain ``1/K`` series (van de Sande Eq. 14); standard needs the
+    Eq. (27) ladder carrying ``K^-(1+a)``.  Using ``1/K`` on standard output is
+    documented as wrong in both directions, and it is not a harmless choice: at
+    ``m/g = 1.95e-4`` it gives an 8.4% order spread against the ladder's 17.1%,
+    so it silently halves the quoted uncertainty and biases ``M(0)`` low.
 
     Two error sources, combined in quadrature:
       * **form** -- spread over fit orders x contiguous sub-windows;
@@ -116,26 +125,47 @@ def extrapolate(series, grid=None, draws=200):
     n = len(ks)
     if n < 5:
         return None
+    improved = (ham == "improved")
+    orders = (2, 3, 4) if improved else (2, 3, 4, 5)
+
+    def one(kk, yy, order):
+        if improved:
+            return fit_1k(kk, yy, order)[0]
+        return richardson_extrapolate(kk, yy, mg, N, n_terms=order)[0]
+
     vals, curves = [], []
-    Kg = None if grid is None else grid
-    for order in (2, 3, 4):
+    for order in orders:
         for i in range(n):
             for j in range(i + max(5, order + 2), n + 1):
-                c = fit_1k(ks[i:j], y[i:j], order)
-                if c[0] <= 0:
+                try:
+                    v = one(ks[i:j], y[i:j], order)
+                except Exception:
                     continue
-                vals.append(c[0])
-                if Kg is not None and i == 0 and j == n and order == 3:
-                    curves.append(curve(c, Kg))
+                if v <= 0:
+                    continue
+                vals.append(v)
+                if grid is not None and i == 0 and j == n and order == 3:
+                    if improved:
+                        curves.append(curve(fit_1k(ks, y, 3), grid))
+                    else:
+                        try:
+                            _, _, co, ex = richardson_extrapolate(
+                                ks, y, mg, N, n_terms=3, return_fit=True)
+                            curves.append(richardson_curve(co, ex, grid))
+                        except Exception:
+                            pass
     if not vals:
         return None
     a = np.array(vals)
     m0 = float(np.median(a))
     form = float(0.5 * (np.percentile(a, 84) - np.percentile(a, 16)))
-    # propagate the per-point floor through the same fit
-    pert = [fit_1k(ks, y * (1.0 + RNG.normal(0, POINT_REL, n)), 3)[0]
-            for _ in range(draws)]
-    point = float(np.std(pert))
+    pert = []
+    for _ in range(draws):
+        try:
+            pert.append(one(ks, y * (1.0 + RNG.normal(0, POINT_REL, n)), 3))
+        except Exception:
+            pass
+    point = float(np.std(pert)) if pert else 0.0
     return m0, float(np.hypot(form, point)), form, point, np.array(curves)
 
 
@@ -175,15 +205,16 @@ def main(argv=None):
             y = np.array([g[k] for k in ks])
             inv = 2.0 / np.array(ks, float)
             grid = np.linspace(0, inv.max() * 1.04, 300)
-            res = extrapolate(g, grid)
+            res = extrapolate(g, mg, N, lbl, grid)
             if res is None:
                 continue
             m0, tot, form, point, curves = res
             if len(curves):
                 lo = np.min(curves, axis=0); hi = np.max(curves, axis=0)
                 ax.fill_between(grid, lo, hi, color=col, alpha=0.15, lw=0, zorder=1)
-            ax.plot(grid, curve(fit_1k(ks, y), grid), "-", color=col, lw=1.0,
-                    alpha=0.85, zorder=3)
+            if len(curves):
+                ax.plot(grid, curves[0], "-", color=col, lw=1.0, alpha=0.85,
+                        zorder=3)
             ax.errorbar(inv, y, yerr=y * POINT_REL, fmt=mk, color=col, ms=3.4,
                         elinewidth=0.8, capsize=1.5, zorder=4, label=lbl)
             ax.errorbar([0], [m0], yerr=[tot], fmt=mk, color=col, ms=8,
@@ -240,7 +271,7 @@ def main(argv=None):
             g = data.get(mg)
             if not g or len(g) < 5:
                 continue
-            r = extrapolate(g)
+            r = extrapolate(g, mg, N, lbl)
             if r:
                 print(f"  {mg:10.3e} {lbl:>9} {r[0]:13.6e} {r[1]:11.2e} "
                       f"{r[2]:11.2e} {r[3]:11.2e}")
