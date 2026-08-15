@@ -689,15 +689,26 @@ Independent support: Frishman & Sonnenschein, Phys. Rept. 223 (1993) 309 quote
 supposed to be validated.** Measured on the improved data, in physical units
 (`M²/g² = M²_code·((m/g)² + 1/π)`), against the corrected law:
 
-| N_c | α (0.0125→0.025) | α_DFS = 2N_c/(2N_c−1) | gap |
-|---|---|---|---|
-| 2 | 1.038 | 1.333 | −0.295 |
-| 3 | 1.007 | 1.200 | −0.193 |
-| 4 | 1.010 | 1.143 | −0.133 |
-| 5 | 1.011 | 1.111 | −0.100 |
-| 6 | 1.012 | 1.091 | −0.079 |
-| 7 | 1.011 | 1.077 | −0.065 |
-| 8 | 1.011 | 1.067 | −0.055 |
+| N_c | α (0.0125→0.025) | vs GMOR's 1 | α_DFS = 2N_c/(2N_c−1) | vs DFS |
+|---|---|---|---|---|
+| 2 | 1.0381 ± 0.0169 | +2.3σ | 1.3333 | −17.5σ |
+| 3 | 1.0064 ± 0.0065 | +1.0σ | 1.2000 | **−30.0σ** |
+| 4 | 1.0102 ± 0.0042 | +2.4σ | 1.1429 | −31.6σ |
+| 5 | 1.0112 ± 0.0031 | +3.6σ | 1.1111 | −32.3σ |
+| 6 | 1.0114 ± 0.0024 | +4.7σ | 1.0909 | −32.8σ |
+| 7 | 1.0114 ± 0.0020 | +5.8σ | 1.0769 | −33.3σ |
+| 8 | 1.0112 ± 0.0017 | +6.8σ | 1.0667 | **−33.6σ** |
+
+Bars are the ensemble 68% half-width propagated through the log-ratio, treating
+the two couplings as independent; they are positively correlated (same K window,
+same fit family), so this *overstates* them.
+
+Two readings, both worth stating. **DFS's finite-N_c law is excluded at ~30σ.**
+And α also sits above 1 by up to 6.8σ — but that residual is already accounted
+for: the separately measured transient `M²/GMOR = 1 + 0.80(m/g)` implies a
+*local* exponent of **1.014** on this coupling pair, against 1.011 measured. So
+the excess is the known O(m/g) contamination of a finite-coupling difference,
+not a third exponent, and α → 1 underneath it.
 
 **DFS requires `α` to fall by 0.133 from N_c = 3 to N_c = 8. The measured change
 is +0.005** — flat. The gap closes only because DFS itself tends to 1; improved
@@ -717,6 +728,14 @@ condensate/WZW sector, and this code uses antiperiodic boundary conditions with
 no fermion zero modes and no vacuum structure. If that is where the correction
 lives, **no** DLCQ variant here — standard or improved — can produce it, and the
 flat 1.01 is a property of the framework, not evidence about the Hamiltonian.
+
+**And the zero-mode dismissal recorded earlier in this document does not cover
+this.** "Consequence 1" argues *this is not the missing zero-mode sector*, on the
+grounds that `dlcq/thooft.py` reproduces α = 2 with no truncation. That argument
+is sound for what it addressed — the **standard** Hamiltonian's α = 2 grid
+artefact — but `thooft.py` solves the **large-N** 't Hooft equation, which cannot
+exhibit a finite-N_c anomalous exponent by construction. It is therefore no
+evidence at all on the present question, and must not be reused for it.
 
 **A caution on the measured baryon exponent itself.** The improved eigenvalue in
 the chiral region is, at the K this repo reaches, close to a linear map of the
