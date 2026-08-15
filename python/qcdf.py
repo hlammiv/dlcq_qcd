@@ -60,7 +60,12 @@ LKPXMX   = 80000   # max permutations in KPX
 MXKMX    = 100     # max total momentum in KPX
 ISTMAX_SM = 6902   # array size for gprmx intermediate arrays
 ISTMAX_BG = 9523   # array size for gprbig intermediate arrays
-MXTRMS   = 12552   # max terms in color contraction arrays (pure-Python path)
+# Colour-contraction capacity for the pure-Python clfact/bredce path.  The
+# improved (van de Sande) Hamiltonian reaches this path through
+# dlcq.endpoint.pair_colour_weights and needs far more terms than the inherited
+# Fortran value at large N: an N=7 baryon overflows it at 2K=7.  Override with
+# DLCQ_MXTRMS.  Distinct from MXTRM below, which serves the njit/opt kernels.
+MXTRMS   = int(os.environ.get("DLCQ_MXTRMS", "12552"))
 
 # Colour-contraction capacity for the njit/opt kernels.  Distinct from MXTRMS
 # above: that one belongs to the pure-Python reference path, this one to the
@@ -1063,7 +1068,7 @@ def clfact_compute(ic1, ic2, ic3, ic4, mx, llt, lrt, nops, params, selfen):
                     # Create new terms by permuting
                     for j in range(ntrms):
                         lpo += 1
-                        if lpo > MXTRMS:
+                        if lpo > idel0.shape[0]:
                             raise RuntimeError("NTRMS exceeded MXTRMS in clfact")
                         idel0[lpo - 1, :lng] = idel0[j, :lng]
                         resl0[lpo - 1] = -resl0[j]
@@ -1078,7 +1083,7 @@ def clfact_compute(ic1, ic2, ic3, ic4, mx, llt, lrt, nops, params, selfen):
                 for imlt in range(ntrms):
                     resl0[imlt] *= float(nsbar)
             ntrms *= (nperm_arr[id_, 0] + 2 - nsbar)
-            if ntrms > MXTRMS:
+            if ntrms > idel0.shape[0]:
                 raise RuntimeError("NTRMS exceeded MXTRMS in clfact")
 
     ntrms0 = ntrms
@@ -1210,7 +1215,7 @@ def clfact_compute(ic1, ic2, ic3, ic4, mx, llt, lrt, nops, params, selfen):
                             # Extra permutation terms (only for N>2)
                             for j2 in range(1, nprms_ep):
                                 ntpr += 1
-                                if ntpr > MXTRMS:
+                                if ntpr > idelt.shape[0]:
                                     raise RuntimeError("NTPR exceeded MXTRMS in bredce")
                                 reslt[ntpr - 1] = reslt[nt] * float(ibrpm[j2, N - 1])
                                 idelt[ntpr - 1, :lng] = idelt[nt, :lng]
