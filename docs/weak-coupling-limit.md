@@ -544,6 +544,43 @@ across weight schemes. That spread is real, but it measures the width of the
 essentially on uniform. The honest statement is that the space was wide and the
 answer was near its middle.
 
+### Pair creation needs no subtraction, and do not "test" that with a K^-2β fit
+
+Only the number-conserving exchange carries the endpoint singularity. `brack`
+returns `4/L²` **only when `L + M = 0`**, so momentum conservation pins each
+kernel's denominator:
+
+| vertex | kind | written as | forced to equal |
+|---|---|---|---|
+| H1, H2, H7A | exchange | `k4−k2`, `k2−k4`, `k4−k3` | another *difference* — can reach one grid spacing |
+| H3, H5, H7B | pair creation | `k4+k1`, `k1+k3`, `k4+k2` | a *sum* of momenta |
+| H4, H6 | pair creation | `k1−k3`, `k2−k3` | `−(k4+k2)`, `−(k1+k4)` — **also sums** |
+
+H4 and H6 look like differences but the constraint pins them to sums, so every
+pair-creation kernel is bounded below by a sum of positive momenta. Only the
+exchange reaches the grid spacing, and only it has a self-energy partner to
+cancel against. That is the whole argument, and it needs no numerics.
+
+**The tempting numerical check is a trap.** Refitting the improved series with a
+`K^{-2β}` component allowed, to see whether any endpoint error survives, looks
+damning: the residual falls 7–25× and `M(0)` shifts 1.5% in valence sectors but
+7.7% (bar N=3, LPN=5) and 22% (mes N=2, LPN=4 at m/g = 0.05) in Fock-extended
+ones — exactly where pair creation is active.
+
+It is an artifact. Run the same test in the two-body sector, where the exact
+answer is known:
+
+```
+1/K only        M0 = 0.995553   resid 4.4e-06   err vs exact  +6.3e-04
++ K^-2b allowed M0 = 0.991663   resid 1.8e-07   err vs exact  -3.3e-03
+```
+
+The residual improves **25×** while the answer gets **5× worse**. At small β the
+`K^{-2β}` column is nearly constant and so nearly degenerate with the intercept
+— the same degeneracy that makes standard DLCQ unextrapolable in the first
+place. It absorbs residual and corrupts `M(0)`. Extrapolate improved output in a
+**plain 1/K series**, per van de Sande's Eq. (14), and nothing else.
+
 ### Historical: why the scalar weight was only ever justified in valence sectors
 
 **The `C_F/(L−1)` weight is derived only where every pair is colour-equivalent.**
