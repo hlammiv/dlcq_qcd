@@ -86,6 +86,46 @@ n = 3200         3.1e-4            0.04861
 continuum. Both methods are blind to `x ≲ e^{-1/a}`, and neither is converging
 to the physical answer at accessible resolution.
 
+### The artefact in one line: the grid replaces `1/(2a)` by `ln K`
+
+The `m²` term contributes `m² ∫ φ²(1/x + 1/(1−x)) dx`, which near the endpoint is
+`∫ x^{2a−1} dx`. Its whole value is `1/(2a)`; a grid whose smallest momentum
+fraction is `x_min = 1/K_code` evaluates `(1 − K^{−2a})/(2a)` instead. As
+`a → 0` that second expression **saturates at `ln K`** while the first diverges:
+
+| m/g | a | true `1/(2a)` | grid sees | captured | x below which half the weight lies |
+|---|---|---|---|---|---|
+| 0.8 | 0.465 | 1.076 | 1.055 | 98.07% | 4.7e-1 |
+| 0.05 | 0.0315 | 15.86 | 3.727 | 23.50% | 1.7e-5 |
+| 0.0125 | 0.0079 | 63.41 | 4.109 | 6.48% | 8.1e-20 |
+| 1.95e-4 | 1.23e-4 | 4058 | 4.246 | **0.105%** | **1e-1222** |
+
+(`ln 70 = 4.248`, which is what the third column is converging to.) So
+
+```
+true:  M² ~ m²·1/(2a) ~ m²/a ~ m·g   (a ∝ m/g)   ->  alpha = 1
+grid:  M² ~ m²·ln K                              ->  alpha = 2
+```
+
+That is the whole artefact. At `m/g = 0.8` the two agree to 2%; at
+`m/g = 1.95e-4` they differ by 956x, which accounts for the measured 1462x
+between the standard and improved meson masses there to within 1.5x.
+
+**"A larger K" does not fix it, in a way worth being precise about.** The
+remainder falls as `K^{-a}`, so halving it needs `2K ~ 10^2443` at
+`m/g = 1.95e-4` — against `2K ~ 4.4` at `m/g = 0.8`. Standard is not *wrong in
+principle*; its `K → ∞` limit is the right one. It is unreachable, which at
+these couplings is the same thing.
+
+**And the K-extrapolation gives no warning.** `figures/tiny_mg_fits_N5.png`
+(`tools/plot_tiny_mg_fits.py`) shows both Hamiltonians' fits at four small
+couplings: improved adds 0.3–6% past the last computed point, standard ~20–22%,
+and standard's curves are smooth, well determined, and *identical in shape*
+across a factor of 8 in `m/g`. Nothing inside the extrapolation reveals that its
+answer is three orders of magnitude low. That is why the fit-quality diagnostics
+and the error budget built on them cannot detect this, and why it needed an
+external anchor to find.
+
 ## Consequence 1 — the chiral exponent is wrong, and it is not zero modes
 
 `M²` in Table I's units scales as `(m/g)^α` with **α → 2**, measured at fixed K
