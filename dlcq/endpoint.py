@@ -33,11 +33,27 @@ argument and never needs to know.
 
 That is why :func:`improved_selfen` returns something with the same shape and
 units as ``qcdf_opt.compute_selfen``, and why ``hamiltonian="improved"`` is
-restricted to sectors where every state has two partons.  For three or more
-partons the subtraction genuinely depends on which partner a parton is paired
-with, and the reduction that makes this work no longer holds -- measured, the
-identity ``diag(self-energy) = -sum_j H_exchange[i,j]`` is exact to 1e-16 for
-two partons and fails by 8.3e-01 for three.
+restricted to sectors where every state has two partons: with three or more,
+``sigma`` depends on *which partner* a parton is paired with, and a table
+indexed by a single momentum cannot express that.  The restriction is a limit
+of this representation, not of the physics.
+
+**It is not that anything breaks at three partons.**  An earlier version of
+this module said the underlying identity failed there, on the strength of a
+test that compared the self-energy against an *unweighted* row sum of the
+exchange.  That test was wrong: it is only valid where the norm matrix is the
+identity, which happens to be true in the meson valence sector and nowhere
+else.  What actually holds, measured to 1e-16 relative at L = 2, 3, 4, 5 and in
+mixed sectors up to L = 8 including the untruncated basis, is the
+*norm-weighted* statement
+
+    D  ==  diag(sigma_std) @ Norm,    sigma_std(s) = C_F sum_{partons p} S(k_p)
+
+with ``C_F = (N^2-1)/(2N)`` and ``S(k) = sum_{n=1}^{(k-1)/2} 1/n^2``.  So the
+self-energy stays a one-body scalar at every L, and ``Norm_ij`` is non-zero
+only between states of identical parton content.  Extending to L >= 3 therefore
+needs a partner-indexed table passed alongside ``selfen``, not a different
+``selfen``; see ``docs/next-steps.md``.
 
 Validation
 ----------

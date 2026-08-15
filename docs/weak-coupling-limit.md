@@ -474,14 +474,31 @@ rather than of a fit. This is the one non-circular demonstration that the `m²`
 artifact becomes the physical `m¹` — the operator changed, not the fit basis
 (contrast the trap recorded above).
 
-**Restricted to two partons, and it raises otherwise.** The identity that makes
-the array swap valid holds only there: measured, `diag(self-energy) = −Σ_j
-H_exchange[i,j]` is exact to 1e-16 at two partons and fails by 8.3e-01 at three.
-Use `LPN=2` for a meson — note `LPN=0` means *no* truncation, not valence only.
-Extending to L ≥ 3, which is where Table I's baryons and all its higher Fock
-sectors live, needs the pair-dependent form and is unsolved: van de Sande's
-Eq. (17) is written for a quark–antiquark pair and gives a valence baryon no
-self-inertia at all.
+**Restricted to two partons, and it raises otherwise** — because a `selfen`
+table indexed by one momentum cannot express a partner-dependent `σ`, not
+because anything breaks. Use `LPN=2` for a meson; note `LPN=0` means *no*
+truncation, not valence only.
+
+An earlier revision of this section claimed the underlying identity "fails by
+8.3e-01 at three partons". **That was wrong**, and the error was mine: the test
+behind it compared the self-energy against an *unweighted* row sum of the
+exchange, which is only valid where the norm matrix is the identity — true in
+the meson valence sector and nowhere else. The correct, norm-weighted statement
+holds at every L:
+
+```
+D ≡ H(selfen) − H(selfen=0)  =  diag(σ_std) · Norm
+σ_std(s) = C_F · Σ_{partons p} S(k_p),  C_F = (N²−1)/2N,  S(k) = Σ_{n≤(k−1)/2} 1/n²
+```
+
+Verified here to 1e-16…5e-18 relative at L = 2, 3, 4, 5 and in mixed sectors up
+to L = 8, including the untruncated basis. Two consequences: the self-energy
+stays a **one-body scalar** at every L, and `Norm_ij ≠ 0` only between states of
+identical parton content — so any replacement enters as `Norm · diag(σ_new)` and
+needs only a per-state scalar. The `8.3e-01` was the `(5,5,5)` state's `1 − 1/6`
+with `6 = Norm_ii/L!`: a normalisation number, not physics.
+
+So L ≥ 3 is reachable, and `docs/next-steps.md` §4 carries the derived formula.
 
 ## Zero modes: a separate question, and more tractable than it first looks
 

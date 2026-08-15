@@ -574,10 +574,10 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         **Two-parton sectors only**, and it raises otherwise.  There the
         partner momentum is fixed by conservation, so the subtraction stays a
         function of one momentum and is applied by swapping the ``selfen``
-        table.  With three or more partons it depends on which partner a parton
-        is paired with, and the identity this rests on -- measured exact to
-        1e-16 at two partons -- fails by 8.3e-01 at three.  Use ``LPN=2`` for a
-        meson.
+        table.  With three or more partons it depends on *which partner* a
+        parton is paired with, which a table indexed by one momentum cannot
+        express -- a limit of the representation, not of the physics.  Use
+        ``LPN=2`` for a meson.
 
     ``rlamb`` is taken literally.  Do not derive it from m/g when comparing
     against a Fortran run: the input files use 0.3325 while
@@ -655,10 +655,11 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
             raise ValueError(
                 f"hamiltonian='improved' supports two-parton states only; this "
                 f"basis has parton counts {parton_counts}. Use LPN=2 for a "
-                f"meson. The subtraction depends on which partner a parton is "
-                f"paired with once there are three or more, and the identity it "
-                f"rests on -- exact to 1e-16 at two partons -- fails by 8.3e-01 "
-                f"at three. See dlcq/endpoint.py.")
+                f"meson. Beyond two partons the subtraction depends on which "
+                f"partner a parton is paired with, which a selfen table indexed "
+                f"by a single momentum cannot express; it needs a partner-"
+                f"indexed table instead. See dlcq/endpoint.py and "
+                f"docs/next-steps.md.")
         from .endpoint import improved_selfen
         from .units import lambda_to_mg, endpoint_exponent
         selfen = improved_selfen(N, K_code,
