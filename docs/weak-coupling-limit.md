@@ -811,14 +811,70 @@ on a null plane with a trivial vacuum. That single shared assumption is the one
 the anomalous exponent is about, which is why "unresolved" remains the honest
 verdict rather than "DFS is wrong".
 
-**What would settle it:** an *equal-time* determination of `M²(m_q)` at N_c = 2,
-N_f = 1 over at least a decade in `m_q/g` — Hamiltonian-lattice DMRG/MPS. N_c = 2
-maximally discriminates (4/3 against 1, a 33% split) and is the cheapest
-non-abelian case. The companion observable `⟨ψ̄ψ⟩ ~ m_q^{1/3}` versus constant is
-the same claim. No such calculation exists; the only equal-time data is Hamer
-1982, whose ±0.2 bars admit α ∈ [−2.0, +5.4]. **Nothing in the light-front
-literature can break the tie, because the tie is about light-front
-quantisation.**
+#### The equal-time measurement exists, and it favours bosonization
+
+Bañuls, Cichy, Cirac, Jansen & Kühn, PRX **7**, 041046 (2017),
+[arXiv:1707.06434](https://arxiv.org/abs/1707.06434) — (1+1)d SU(2), N_f = 1
+staggered, gauge field eliminated exactly by Gauss' law, MPS/DMRG. Their Table 1
+fits the vector mass gap against the **quark mass** over `m/g ∈ [0.1, 0.4]`:
+
+| j_max | ν in `M ~ (m/g)^ν` |
+|---|---|
+| 1 | 0.781(93)(65) |
+| 3/2 | **0.700(29)(11)** |
+| 2 | 0.700(29)(12) |
+
+So `α = 2ν = 1.40`: **+1.07σ from bosonization's 2/3, +6.45σ from α = 1**. They
+cite Steinhardt for the 2/3. (Verified against the paper's full text — an
+earlier reading of this work as *lattice-spacing* scaling rather than chiral
+scaling was wrong.)
+
+#### Three corrections to arguments made earlier in this document
+
+1. **There is no U(1)_A anomaly for SU(N) in 2d.** The abelian axial anomaly is
+   `∝ ε^{μν} tr F_{μν}`, which vanishes for SU(N). So the N_f = 1 meson *is*
+   exactly massless at `m_q = 0` and the chiral-exponent framing is sound.
+   Measured: `c_IR = 1.04` against the free-boson `c = 1` (Fujikura & Hidaka,
+   arXiv:2605.17183, equal-time VUMPS), the flow to WZW confirmed on the lattice
+   with overlap fermions for `(N_c,N_f) = (2,1), (3,1)`
+   (Karthik–Narayanan–Narayanan, arXiv:2312.13929), and a `c = 1` plateau in
+   AFKX's own c-function.
+2. **The Schwinger model is not the N = 1 member of this family.** `2N/(2N−1)`
+   at N=1 gives 2, and the Schwinger boson is *massive* at `m_q = 0`
+   (`M = e/√π`) — but that is the *gauged abelian* anomaly generating
+   `−(e²/2π)φ²`, a term absent when `tr F = 0`. So this is not a falsification.
+   **The correct structural check is the two-flavour Schwinger model**, where
+   the identical logic `M ~ m^{1/(2−Δ)}` gives `m^{2/3}` — and *that* is
+   confirmed by equal-time DMRG (Dempsey–Klebanov–Pufu–Zan arXiv:2206.05308 and
+   several tensor-network follow-ups). The framework passes its one clean
+   equal-time test.
+3. **Coleman's theorem makes `α = 1` untenable asymptotically.** GMOR
+   (`M²f_π² ∝ m_q⟨ψ̄ψ⟩`) with `α = 1` *requires* `⟨ψ̄ψ⟩ → const ≠ 0`, which
+   Coleman forbids at finite N (large N evades it; Zhitnitsky's
+   `⟨ψ̄ψ⟩ = −N_c/√12` is a large-N statement). So the exponent **must** leave 1
+   at small enough mass.
+
+#### The reconciliation: a crossover below everything computed
+
+The light-front numerics are not wrong either. AFKX's `M² = 0.0031251` at
+`m_q = 2^-10` sits on the 't Hooft line `M² = (2π/√3)m_q·(1−1/N²) = 0.003149`
+to **0.8%**. Both facts survive if the anomalous exponent takes over below the
+computed window. With Kochergin's normalisation at N=3, `M²_bos = 18.2 m^1.2`
+crosses `M²_tHooft = 3.22 m` at
+
+```
+m_q ~ 1.7e-4        -- a factor ~6 below the smallest mass anyone has computed
+```
+
+Above that crossing bosonization *overshoots* (33% in M² at `m_q = 10⁻³`), which
+is what the measured local slope 1.002 excludes. **Nobody has looked below
+`m_q ~ 10⁻³` at finite N by any method.** That is the experiment that decides it.
+
+The cleanest discriminator remains unmeasured at finite N: `⟨ψ̄ψ⟩(m_q)` must be
+flat if `α = 1` and go as `m_q^{1/(2N−1)}` — at N=2, `m^{1/3}` — if the RG is
+right. The DMRG machinery exists (Fujikura–Hidaka; Hayata–Hidaka–Nishimura,
+arXiv:2311.11643, SU(2) *and* SU(3), N_f=1) and simply never went below
+`m/g = 0.5`.
 
 **A caution on the measured baryon exponent itself.** The improved eigenvalue in
 the chiral region is, at the K this repo reaches, close to a linear map of the
