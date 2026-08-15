@@ -45,7 +45,8 @@ from dlcq.read_python import run_python
 from dlcq.units import mg_to_lambda
 
 
-FIELDS = ["N", "B", "mg", "LPN", "K_code", "n_pre", "n_orth", "msq", "seconds"]
+FIELDS = ["N", "B", "mg", "LPN", "K_code", "n_pre", "n_orth", "msq", "seconds",
+          "hamiltonian"]
 
 
 def _flush(rows, out):
@@ -62,7 +63,8 @@ def _flush(rows, out):
         w.writerows(rows)
 
 
-def series(N, B, mg, K_lo, K_hi, lpn, nev, ncpus, out_rows, verbose=True):
+def series(N, B, mg, K_lo, K_hi, lpn, nev, ncpus, out_rows, verbose=True,
+           hamiltonian="standard"):
     lam = float(mg_to_lambda(mg))
     Ks, ms = [], []
     for K in _K_grid(B, N, K_lo, K_hi):
@@ -71,7 +73,7 @@ def series(N, B, mg, K_lo, K_hi, lpn, nev, ncpus, out_rows, verbose=True):
             r = run_python(N=N, NF=1, B=B, K_code=K, rlamb=lam, cutoff=-1.0,
                            LPN=lpn, ncpus=ncpus, assembly="exact",
                            policy="blockwise", solver="sparse", nev=nev,
-                           keep_norm=False)
+                           keep_norm=False, hamiltonian=hamiltonian)
         except Exception as exc:                    # OOM, overflow, whatever
             if verbose:
                 print(f"    2K={K:<4} FAILED {type(exc).__name__}: "
@@ -83,7 +85,8 @@ def series(N, B, mg, K_lo, K_hi, lpn, nev, ncpus, out_rows, verbose=True):
         m = float(r.eigenvalues[phys[0]])
         Ks.append(K)
         ms.append(m)
-        out_rows.append(dict(N=N, B=B, mg=mg, LPN=lpn, K_code=K,
+        out_rows.append(dict(hamiltonian=hamiltonian,
+                             N=N, B=B, mg=mg, LPN=lpn, K_code=K,
                              n_pre=r.numsta_pre, n_orth=r.n_orth, msq=m,
                              seconds=round(time.time() - t, 2)))
         if verbose:
@@ -103,6 +106,11 @@ def main(argv=None):
                     help="default: sweep_lpn and sweep_lpn+2")
     ap.add_argument("--nev", type=int, default=12)
     ap.add_argument("--ncpus", type=int, default=8)
+    ap.add_argument("--hamiltonian", choices=["standard", "improved"],
+                    default="standard",
+                    help="'improved' applies van de Sande's endpoint "
+                         "subtraction (hep-ph/9605409); see "
+                         "docs/weak-coupling-limit.md")
     ap.add_argument("--out", default=str(ROOT / "runs" / "large_k_sweep.csv"))
     args = ap.parse_args(argv)
 
@@ -116,7 +124,8 @@ def main(argv=None):
                 for lpn in lpns:
                     print(f"  LPN={lpn}", flush=True)
                     got[lpn] = series(N, B, mg, args.K_lo, args.K_hi, lpn,
-                                      args.nev, args.ncpus, rows)
+                                      args.nev, args.ncpus, rows,
+                                      hamiltonian=args.hamiltonian)
                     _flush(rows, args.out)
                 # The comparison this exists for.
                 for lpn, (Ks, ms) in got.items():
