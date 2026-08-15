@@ -21,9 +21,9 @@ from numba import njit
 from qcdf import (
     Params, StateData, PermTables, FlavorTables,
     lpnsub, qcdsta, NMSTMX, NMXFR,
-    prmx, prmm, ibarfl, imesfl, minmom, iodev,
+    prmx, prmm, ibarfl, imesfl, minmom, iodev, MXTRM,
 )
-MXTRM = 200000; MXLNG = 54; MXP = 25
+MXLNG = 54; MXP = 25
 # MXLNG = 2*MXP + 4 (max right state + max operators + max left state)
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -169,12 +169,12 @@ def clfact(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K):
                         # Must stay in lockstep with the same guard in
                         # qcdf_kernels.clfact_nb: the two paths sharing MXTRM is
                         # exactly why they agreed bit-for-bit on a wrong answer.
-                        if lpo>=MXTRM:
+                        if lpo >= idel0.shape[0]:
                             raise OverflowError(
                                 "colour contraction exceeded MXTRM terms; the "
-                                "result would be silently wrong. Raise MXTRM in "
-                                "BOTH qcdf_opt.py and qcdf_kernels.py (they must "
-                                "match), or reduce the particle-number cutoff LPN.")
+                                "result would be silently wrong. Raise it with "
+                                "the DLCQ_MXTRM environment variable (see MXTRM "
+                                "in qcdf.py), or reduce the cutoff LPN.")
                         idel0[lpo,:lng]=idel0[j,:lng]; resl0[lpo]=-resl0[j]
                         idel0[lpo,ip1]=idel0[j,ip2]; idel0[lpo,ip2]=idel0[j,ip1]
                         v1,v2=idel0[j,ip2],idel0[j,ip1]
@@ -260,13 +260,13 @@ def clfact(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K):
                                 idelt[nt, nb2[j1]] = nb1[j1]
                             # Additional permutations (only for N>2)
                             for j2 in range(1, nprms_ep):
-                                if ntpr >= MXTRM:
+                                if ntpr >= idelt.shape[0]:
                                     raise OverflowError(
                                         "colour contraction exceeded MXTRM "
                                         "terms; the result would be silently "
-                                        "wrong. Raise MXTRM in BOTH qcdf_opt.py "
-                                        "and qcdf_kernels.py (they must match), "
-                                        "or reduce LPN.")
+                                        "wrong. Raise it with the DLCQ_MXTRM "
+                                        "environment variable (see MXTRM in "
+                                        "qcdf.py), or reduce LPN.")
                                 reslt[ntpr] = reslt[nt] * float(ibrpm[j2, N-1])
                                 idelt[ntpr, :lng] = idelt[nt, :lng]
                                 for j4 in range(N-1):

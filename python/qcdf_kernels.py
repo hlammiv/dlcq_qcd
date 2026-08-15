@@ -36,9 +36,8 @@ from __future__ import annotations
 import numpy as np
 from numba import njit
 
-from qcdf import gprbig_array, psign, MXNP
+from qcdf import gprbig_array, psign, MXNP, MXTRM
 
-MXTRM = 200000
 MXLNG = 54          # 2 * MXP + 4
 MXP = 25
 
@@ -371,7 +370,16 @@ def clfact_nb(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K,
                     nsbar += 1
                 else:
                     for j in range(ntrms):
-                        if lpo >= MXTRM:
+                        if lpo >= idel0.shape[0]:
+                            # Guard on the buffer's ACTUAL length, not on the
+                            # MXTRM global.  numba freezes globals at compile
+                            # time and ``cache=True`` does not notice MXTRM
+                            # changing, so a kernel compiled at a high cap can be
+                            # reused against buffers Python allocated at a low
+                            # one.  njit does not bounds check, so that combination
+                            # writes past the end of the array -- a far worse bug
+                            # than the overflow this guard exists to catch.
+                            # Reading .shape[0] is free and always correct.
                             # Silently returning 0.0 here produced a norm matrix
                             # that was not positive semidefinite (N=4, B=1,
                             # 2K=20: a state's own norm came out 150048 against
@@ -381,9 +389,9 @@ def clfact_nb(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K,
                             # backend-equality tests could not see it.
                             raise OverflowError(
                                 "colour contraction exceeded MXTRM terms; the "
-                                "result would be silently wrong. Raise MXTRM in "
-                                "BOTH qcdf_kernels.py and qcdf_opt.py (they must "
-                                "match), or reduce the particle-number cutoff LPN.")
+                                "result would be silently wrong. Raise it with "
+                                "the DLCQ_MXTRM environment variable (see MXTRM "
+                                "in qcdf.py), or reduce the cutoff LPN.")
                         for t in range(lng):
                             idel0[lpo, t] = idel0[j, t]
                         resl0[lpo] = -resl0[j]
@@ -492,7 +500,9 @@ def clfact_nb(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K,
                             for j1 in range(N - 1):
                                 idelt[nt, nb2[j1]] = nb1[j1]
                             for j2 in range(1, nprms_ep):
-                                if ntpr >= MXTRM:
+                                if ntpr >= idelt.shape[0]:
+                                    # Buffer length, not the MXTRM global -- see
+                                    # the note on the other guard above.
                                     # ``break`` here left a *partial sum*, which
                                     # is how wrong non-zero values arose rather
                                     # than obvious zeros.  See the note on the
@@ -500,9 +510,9 @@ def clfact_nb(ic1, ic2, ic3, ic4, mx, lng, llt, lrt, nops, N, NF, B, K,
                                     raise OverflowError(
                                         "colour contraction exceeded MXTRM "
                                         "terms; the result would be silently "
-                                        "wrong. Raise MXTRM in BOTH "
-                                        "qcdf_kernels.py and qcdf_opt.py (they "
-                                        "must match), or reduce LPN.")
+                                        "wrong. Raise it with the DLCQ_MXTRM "
+                                        "environment variable (see MXTRM in "
+                                        "qcdf.py), or reduce LPN.")
                                 reslt[ntpr] = reslt[nt] * float(ibrpm[j2, N - 1])
                                 for t in range(lng):
                                     idelt[ntpr, t] = idelt[nt, t]

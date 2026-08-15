@@ -60,7 +60,19 @@ LKPXMX   = 80000   # max permutations in KPX
 MXKMX    = 100     # max total momentum in KPX
 ISTMAX_SM = 6902   # array size for gprmx intermediate arrays
 ISTMAX_BG = 9523   # array size for gprbig intermediate arrays
-MXTRMS   = 12552   # max terms in color contraction arrays
+MXTRMS   = 12552   # max terms in color contraction arrays (pure-Python path)
+
+# Colour-contraction capacity for the njit/opt kernels.  Distinct from MXTRMS
+# above: that one belongs to the pure-Python reference path, this one to the
+# hot kernels, and they are NOT interchangeable.  Defined here so both
+# qcdf_kernels and qcdf_opt read one value -- they used to declare it
+# separately, and the overflow message had to tell you to raise it in *both*.
+#
+# Cost is small even when large: np.zeros hands back lazy zero pages and the
+# kernels only touch rows 0..ntrms, so resident memory tracks the actual term
+# count rather than the cap.  Raise via DLCQ_MXTRM for large-N baryons, where
+# the epsilon tensor needs N! permutations (8! = 40320 against 7! = 5040).
+MXTRM = int(os.environ.get("DLCQ_MXTRM", "200000"))
 MAXEP    = 9523    # max epsilon permutations
 IVCTMX   = 75      # max eigenvectors to print
 NCOL_MAX = 12      # max colors for baryon flavor perms (a baryon has N quarks)
