@@ -506,6 +506,60 @@ identical parton content — so any replacement enters as `Norm · diag(σ_new)`
 needs only a per-state scalar. The `8.3e-01` was the `(5,5,5)` state's `1 − 1/6`
 with `6 = Norm_ii/L!`: a normalisation number, not physics.
 
+### Table I under the improved Hamiltonian
+
+Run over Table I's own grid — five channels, six couplings, 2K = 25–71, at the
+published truncation `LPN = sweep_lpn = valence+2`. Data in
+`data/improved_table1_msq.csv`; the standard-Hamiltonian companion is
+`data/chiral_grid_msq.csv`. Improved values are a plain 1/K extrapolation with
+the bar from an ensemble over orders × contiguous sub-windows; standard values
+are `richardson_budget` at four Eq. (27) terms.
+
+| channel | m/g | improved | standard | paper | imp vs std |
+|---|---|---|---|---|---|
+| mes N=2 | 1.60 | 4.3139 ± 0.0001 | 4.3139 ± 0.0001 | 4.314 | 0.0σ |
+| mes N=2 | 0.10 | 0.5725 ± 0.0037 | 0.3938 ± 0.0198 | 0.380 | 8.9σ |
+| mes N=2 | 0.05 | 0.2595 ± 0.0023 | 0.1089 ± 0.0070 | 0.100 | 20.4σ |
+| mes N=4 | 0.05 | 0.4502 ± 0.0013 | 0.1224 ± 0.0091 | 0.120 | 35.8σ |
+| bar N=3 | 0.05 | 0.9694 ± 0.0045 | 0.2858 ± 0.0242 | 0.310 | 27.7σ |
+| bar N=4 | 0.05 | 2.2482 ± 0.0063 | 0.5322 ± 0.0457 | 0.420 | 37.2σ |
+
+**They agree exactly where standard is trustworthy and diverge exactly where it
+is not.** At m/g ≥ 0.8 every channel agrees to 0.0–0.6σ. Below that the gap
+opens as it must if the chiral exponents differ (1.93 standard, 1.03 improved):
+1.45× at m/g = 0.1 rising to 2.38× at 0.05.
+
+Improved also barely moves across the window — drift 0.0–2.6% against standard's
+14–21% — so ≤3.5% of its answer is extrapolated, against 15–35% for standard.
+
+#### The external check, which is what makes this assertable
+
+Everything above is internal consistency or the two-body anchor. Van de Sande's
+Eq. (7) is neither: `M² = 2πgμ/√3` is the GMOR law of the continuum theory, with
+no free parameters. Mapping his units onto the repo (`M²/g² = (M/g)²/c`,
+`μ²/g² = (m/g)²/c`, `c = (N²−1)/2Nπ`) predicts the repo eigenvalue outright:
+
+| channel | m/g | GMOR | improved | ratio | standard | ratio |
+|---|---|---|---|---|---|---|
+| mes N=2 | 0.05 | 0.2762 | 0.2593 | **0.94** | 0.0792 | 0.29 |
+| mes N=3 | 0.05 | 0.3683 | 0.3764 | **1.02** | 0.0848 | 0.23 |
+| mes N=4 | 0.05 | 0.4368 | 0.4504 | **1.03** | 0.0851 | 0.20 |
+| mes N=4 | 0.10 | 0.8536 | 0.9283 | **1.09** | 0.3277 | 0.38 |
+
+Improved lands within 3–9% of the continuum law with nothing fitted; standard is
+off by 3–5× and worsening as m/g falls. This is the first external anchor at
+Table I's own truncation.
+
+**So the published weak-coupling entries are low by roughly 2.5–5×**, because
+standard DLCQ converges to the grid artifact this document is about.
+
+Three caveats worth keeping attached. GMOR is a large-N result, so N=4 is the
+meaningful comparison and N=2's 0.94 is expected to drift. It is a *meson* law
+and says nothing directly about the baryon entries, which carry the largest
+corrections and still have no independent anchor. And the improved chiral
+exponent is 1.03–1.14 rather than exactly 1, consistent with the few-percent
+GMOR gap and worth understanding rather than dismissing.
+
 ### The colour weight, and why it is now exact
 
 **Resolved.** `state_sigmas` uses the true `w_ac = ⟨−T_a·T_c⟩`, extracted from
