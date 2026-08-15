@@ -56,6 +56,33 @@ Checked directly rather than inferred from citations:
 | `gcataldi96/ed-lgt` | **404** — gone or private. Only the Zenodo archive (record 11145318) survives. ED only in any case. |
 | `tenpy/tenpy` | healthy and active (493 stars). General library, no gauge-theory model. |
 
+**A better basis than the one above: loop-string-hadron (LSH).** Raychowdhury &
+Stryker, PRD **101**, 114502 (arXiv:1812.07554) — a *local*, manifestly
+gauge-invariant description in terms of loop, string and hadron degrees of
+freedom. It applies to **SU(2) and SU(3)**, to **open and periodic** boundaries,
+and in 1+1d and higher, and it has been built into an MPS ansatz already:
+Mathew, Gupta, Kadam, Bapat, Stryker, Davoudi & Raychowdhury, arXiv:2501.18301
+("Tensor-network toolbox for probing dynamics of non-Abelian gauge theories"),
+plus arXiv:2603.24698 for (1+1)d SU(2) string breaking and arXiv:2407.19181
+extending LSH to SU(3).
+
+This matters because LSH is **local**: it removes the non-local recoupling that
+makes the Gauss-constrained irrep basis a week of hand algebra, and it gives a
+route to SU(3) — i.e. to N_c = 3, which is where Table I and AFKX live — instead
+of stopping at SU(2). It carries a bosonic occupation cutoff to extrapolate in,
+which the exact-elimination basis does not, but that is a far more tractable
+systematic than hand-written 6j symbols.
+
+**And TeNPy already implements VUMPS** (`tenpy.algorithms.vumps`,
+`SingleSiteVUMPSEngine` / `TwoSiteVUMPSEngine`), so the calculation can be done
+directly in infinite volume. That **eliminates rather than mitigates** the two
+open-boundary concerns: the left-boundary electric-field choice (which is a
+physical background-field/θ choice, not a convention) and the finite-chain
+sensitivity of the baryon, which is a whole-chain colour singlet and therefore
+the observable most exposed to boundary effects. Fujikura & Hidaka use VUMPS on
+exactly this model for exactly this reason. Alternatives if needed:
+`MPSKit.jl`, `ITensorInfiniteMPS.jl` (both Julia).
+
 **Therefore, before writing anything: ask.** Requesting code from Bañuls/Kühn or
 Fujikura/Hidaka is ordinary practice and would collapse Phase 2 — the week of
 recoupling algebra — into running an existing implementation at smaller `m/g`.
@@ -119,6 +146,10 @@ Validation targets, all published:
 * Local Hilbert space: staggered site holds 0, 1 (two colours), or 2 quarks →
   4 states/site, times the incoming irrep label.
 * Two routes, and the first is preferred:
+  * **loop-string-hadron** (arXiv:1812.07554, MPS version arXiv:2501.18301) —
+    *preferred*: local, manifestly gauge invariant, extends to SU(3), and has a
+    published MPS implementation to follow.  Costs a bosonic cutoff to
+    extrapolate in;
   * **exact elimination in the irrep basis** (Bañuls / arXiv:2511.00154) — no
     truncation error at all, at the cost of writing the recoupling by hand;
   * **Kogut–Susskind with `j ≤ j_max`** — simpler to write, but Bañuls found
