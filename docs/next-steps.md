@@ -1,11 +1,11 @@
 # Open threads
 
-Five, in the order they are worth taking. Each is written to be started cold.
+Six, in the order they are worth taking. Each is written to be started cold.
 §1 has since been **built**, and is kept because what it measured overturned
-several of its own premises — including one this file asserted twice. §4 and §5
-came out of `weak-coupling-limit.md` and are the live ones; §4 is the only lever
-left on the weak-coupling column, and §5 is a separate question that is often
-confused with it.
+several of its own premises — including one this file asserted twice. §4-§6
+came out of `weak-coupling-limit.md`. §4 is the published fix and the one to
+start with; §5 is the heavier alternative; §6 is a separate question that is
+often confused with both.
 
 Everything here was established by measurement; the supporting numbers are in
 `performance.md`, `table1-units.md` and `baryon-higher-fock.md`. Note
@@ -36,24 +36,31 @@ Reach, measured end to end:
 
 It said **"there is no incremental path — 2K ≳ 48 is the only lever"**, on the
 strength of 25–35 → 25–37 giving a median error reduction of 1.00×. That
-measurement was made at `n_terms=4`; Table I actually runs at `n_terms=2`
-(`figures.py`). At the model in use, widening 25–35 → 25–49 improves **26 of 30**
-entries, median **1.208×**.
+measurement was made at `n_terms=4` against a Table I that then ran at
+`n_terms=2`. At the model in use *at the time*, widening 25–35 → 25–49 improves
+**26 of 30** entries, median **1.208×**. (Both now run at `N_TERMS = 4`; the
+`n_terms=2` default in `table1_budget` was a defect, fixed in f3c5bf4.)
 
 What replaces it is a sharper statement. The binding constraint at weak coupling
-is not K, it is the Eq. (27) basis going degenerate as `a → 0`:
+is not K, it is the Eq. (27) basis missing the term that actually controls the
+convergence as `a → 0`:
 
-- convergence rate is the endpoint exponent, `p ≈ 1 + a` — measured 1.985
-  against 1+a = 1.845 at m/g = 1.6, and 1.061 against 1.084 at m/g = 0.1
+- the endpoint term is `K^{-2a}`, and Eq. (27)'s basis
+  `{1, K⁻¹, K^-(1+a), …}` does not contain it. That is van de Sande's result
+  ([hep-ph/9605409](https://arxiv.org/abs/hep-ph/9605409)) and it is what
+  `weak-coupling-limit.md` is about. The local increment slope suggests `1+a`
+  rather than `1+2a`, but the window is too short to separate them.
 - so at m/g = 0.1 the tail bound falls only as `K^-0.06`, and **halving the
   bracket would need K × 84,000**
 - a different fitting *basis* does not help: the confluent parametrization spans
-  the same space and leaves `M₀` identical to 1.1e-14
+  the same space and leaves `M₀` identical to 1.1e-14, and refitting in
+  `K^{-2a}` powers is circular — measured, see the same doc
 
-M²(m/g = 0.1) ≈ 1.01 with ~12% model spread; four separate attempts failed to
-reduce it. **More K is still worth having** — it steadily reduces how much of
-each answer is fitted rather than measured (27% at m/g = 0.2 at the top of the
-old window) — but it will not close weak coupling, and no amount of it will.
+**More K is still worth having, but only above `m/g ≈ 0.4`**, where the
+remainder goes as `K^-0.55` or steeper and a factor of 2–3.5 in K halves it.
+Below `m/g ≈ 0.15` the grid does not resolve the endpoint at all, and no amount
+of K closes it. `weak-coupling-limit.md` has the boundary and the per-coupling
+factors.
 
 ### What the staging turned out to be
 
@@ -282,7 +289,47 @@ spline "zeros" that are not in its own data. Work from the markers.
 
 ---
 
-## 4. An `x^a`-adapted basis — the only lever left at weak coupling
+## 4. Improved DLCQ — the published fix, and it applies to the DLCQ path
+
+**Start here, not with the basis rewrite below.** Van de Sande
+([hep-ph/9605409](https://arxiv.org/abs/hep-ph/9605409)) diagnosed this exact
+problem in 1996 and published a cure that modifies the *Hamiltonian* rather than
+the basis, so it keeps everything DLCQ is good for — orthogonal basis, sparse
+matrix, matrix elements with no integrals to evaluate.
+
+The move is to add and subtract a term so the kernel vanishes when both momenta
+are near an endpoint. His Eq. (12) replaces the off-diagonal sum with
+
+```
+g² Ψᵢ I(i/K) + g² K Σ_{j≠i} [ Ψᵢ ((j(K−j))/(i(K−i)))^β − Ψⱼ ] / (i−j)²
+I(x) = ∫dy [1 − (y(1−y)/(x(1−x)))^β] / (x−y)²
+```
+
+with `β` the endpoint exponent — our `a`, already available exactly from
+`units.endpoint_exponent`.
+
+**Why this is promising for precisely our case.** Van de Sande notes that for
+small μ improved DLCQ is near-exact for the *lowest* state already at K = 10,
+and calls it "a fortuitous accident: for small μ, the lowest eigenfunction is
+Ψ(x) ≈ x^β(1−x)^β," so the correction term nearly annihilates. That accident is
+exactly Table I — the lightest state at weak coupling. The entries this repo
+cannot currently determine are the ones the fix should nail. (Excited states
+improve too, but by less; see his Fig. 4.)
+
+**What is genuinely new work.** His derivation is for the two-body 't Hooft
+equation at large N. Ours is a multi-particle Fock space at finite N with
+baryons, so the endpoint weight has to be generalized — each parton carries its
+own `x`, and what plays the role of `((j(K−j))/(i(K−i)))^β` for an L-parton
+state needs deriving. The change lands in the instantaneous/Coulomb matrix
+elements, i.e. `hamqcd` and `clfact` in `python/qcdf.py`, which is the hot path.
+He claims the method "can be easily applied to other theories and large
+numerical calculations" but demonstrates only on 't Hooft.
+
+**Do not** try to shortcut this by refitting existing data in a `K^{-2β}` basis.
+That is measured, circular, and documented under "Do not use the convergence law
+as a fitting basis" in `weak-coupling-limit.md`.
+
+## 5. An `x^a`-adapted basis — the heavier alternative
 
 Read `weak-coupling-limit.md` first; this entry is its consequence. The
 weak-coupling column is limited by the momentum grid failing to resolve
@@ -321,10 +368,10 @@ That solver is 120 lines, has an exact benchmark (0, 5.8817, 14.1429 at
 `m = 0`), and its failure to converge is documented and reproducible — so step 1
 is cheap and falsifiable. **Do it before touching the DLCQ path.**
 
-## 5. Zero modes — real, measurable, and not what §4 is about
+## 6. Zero modes — real, measurable, and not what §4 or §5 is about
 
-Keep these separate. Zero modes are *not* the cause of the weak-coupling
-problem: the continuum solver in `thooft.py` has no zero-mode truncation and
+Keep this separate from §4 and §5. Zero modes are *not* the cause of the
+weak-coupling problem: the continuum solver in `thooft.py` has no zero-mode truncation and
 reproduces the same artifact. But they are a genuine omission — DLCQ here uses
 antiperiodic quarks and drops the gluon zero mode — and the effect is not small.
 Müller, Kalloniatis and Pauli

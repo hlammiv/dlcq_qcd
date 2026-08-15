@@ -252,6 +252,77 @@ point count and would hand back 4. Table I's own range is safe — `a = 0.909` a
 past `m/g ≈ 3` is not. The confluent basis does not help here: its
 `partner_of = {2:1, 4:3}` pairs `1+a` with `1`, which is the `a → 0` merger.
 
+## This was known in 1996, and there is a published fix
+
+Everything above was found independently, but it is not new. Brett van de Sande,
+*Convergence of Discretized Light Cone Quantization in the small mass limit*
+([hep-ph/9605409](https://arxiv.org/abs/hep-ph/9605409)), diagnoses the same
+thing and proposes a cure. Four points from it bear directly on this repo.
+
+**The mechanism, confirmed.** "The source of this slow convergence comes from
+the end-point behavior of the wavefunction which is handled poorly by DLCQ" —
+and "the DLCQ bound state equation does not make use of our knowledge of the
+endpoint behavior."
+
+**The convergence law.** DLCQ eigenvalues converge as powers of `1/K^{2β}` from
+the endpoint regions, *plus* powers of `1/K` from the `1/(x−y)²` singularity.
+His fit at β = 0.1 is
+
+```
+M² = 0.779141 − 1.25943/K^{2β} + 1.15609/K^{4β} − 1.01505/K^{6β} + …
+```
+
+against an exact 0.77914. **Eq. (27)'s basis has the Coulomb `K⁻¹` piece but no
+`K^{-2β}` term at all** — which is exactly the missing column identified above,
+now with its correct exponent (`2β`, not the `β` that the local increment slope
+suggests).
+
+**The true chiral law.** His Eq. (7): `M² = 2πgμ/√3 + O(μ²)` — *linear* in the
+quark mass, confirming GMOR and confirming that DLCQ's `M² ∝ m²` is an artifact.
+He says so outright: the DLCQ results "have an incorrect functional form for M²
+versus μ in the small μ limit." Also worth noting, his Eq. (6) gives
+`β = (μ√3/gπ)(1 − μ/(10g²) + …)`, the same odd-series structure derived above
+from Eq. (26).
+
+**The fix — "improved DLCQ."** Add and subtract a term so the integrand vanishes
+when both `x` and `y` are near an endpoint. The discretized form, his Eq. (12),
+replaces the off-diagonal sum with
+
+```
+g² Ψᵢ I(i/K)  +  g² K Σ_{j≠i} [ Ψᵢ ((j(K−j))/(i(K−i)))^β − Ψⱼ ] / (i−j)²
+```
+
+with `I(x) = ∫dy [1 − (y(1−y)/(x(1−x)))^β] / (x−y)²` evaluated exactly. This is
+a change to the *Hamiltonian*, not to the fit.
+
+### Do not use the convergence law as a fitting basis on this K range
+
+The obvious shortcut — refit our existing data in `{1, K^{-2β}, K^{-4β}, K^{-6β}}`
+— appears to work spectacularly, moving the chiral exponent from 1.85–1.95 to
+0.95–1.29 across all five channels, against a truth of 1. **It is an artifact.**
+Fed a synthetic series with chiral exponent exactly 2 and a pure `K⁻¹`
+K-dependence carrying no endpoint physics at all, the same fit returns **0.33**
+(N=2) and **−0.54** (N=3), where Eq. (27) correctly recovers 2.0000.
+
+The reason is degeneracy. At `2β = 0.042`, `K^{-2β}` runs only from 0.898 to
+0.861 across the whole window, so `{1, K^{-2β}, K^{-4β}, …}` is a set of
+near-identical constants; condition numbers reach `1e7`, and the fitted
+intercept drifts with `β` and hence with `m/g`. Where `β` is O(1) the basis is
+well conditioned and behaves: at `m/g` = 0.8 and 1.6 it agrees with Eq. (27) to
+~0.2% and both match the published values.
+
+The leverage boundary is quantitative. For `K^{-2β}` to fall to 0.5 — the point
+at which a fit can see it at all — needs `K`:
+
+| m/g | 0.4 | 0.2 | 0.1 | 0.05 | 0.025 |
+|---|---|---|---|---|---|
+| K needed | 2.9 | 7.9 | **61** | 3.6e3 | 1.3e7 |
+
+against our `K_paper ≤ 34.5`. Van de Sande demonstrates at β = 0.1 — comparable
+to our `m/g ≈ 0.2` — with K up to ~100. So his law is right, and it is precisely
+*why* this K range cannot determine `M(0)` at weak coupling; it is not a way to
+extract it.
+
 ## What would actually work, and what it would cost
 
 Not more K, and not a better fit.
