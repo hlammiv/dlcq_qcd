@@ -1,11 +1,12 @@
 # Findings
 
-Six documents. Each records something that **changes how the paper's output must
+Ten documents. Each records something that **changes how the paper's output must
 be read** — not implementation notes, and not a log of what was tried.
 
 Start with `figure-validation.md` if you want to know whether the reproduction
 worked; with `basis-dependence.md` or `fortran-color-overflow.md` if you intend
-to run `qcdf.f` yourself.
+to run `qcdf.f` yourself; with `weak-coupling-limit.md` before quoting or trying
+to improve any weak-coupling number.
 
 ## What was reproduced
 
@@ -30,6 +31,20 @@ precision loss down to float16.
 despite column headers reading `M_mes/g`. Figs. 7 and 8 plot `M/g`. Two
 conventions, one paper; comparing across them without converting is a factor of
 several.
+
+**[weak-coupling-limit.md](weak-coupling-limit.md)** — at `m/g ≲ 0.2` the
+momentum grid cannot resolve the region the physics lives in. The wavefunction
+goes as `x^a` with `a → 0`, so the endpoint region is `x ≲ e^{-1/a}` — `5e-11` at
+`m/g = 0.05` — against a grid whose smallest `x` is `1/K ≈ 1/35`. The slow K
+convergence, the fit-order ambiguity that dominates the error budget, and a
+chiral scaling `M² ∝ m²` where the physical answer is `M² ∝ m` are all that one
+fact. Proved with a *continuum* solver sharing no code with the DLCQ path, which
+fails identically. Also: why the weak-coupling bar cannot be tightened and the
+six ways that were tried and measured dead; a joint fit that puts the
+per-coupling values 1–2σ high in all five channels; a limit form good to ~1% over
+three decades in `m/g`; and a basis degeneracy at the *heavy* end that returns a
+negative `M²`. **Read before quoting or trying to improve any weak-coupling
+number.**
 
 **[inferred-K.md](inferred-K.md)** — the paper never states K for Figs. 3 and 4,
 and never for Fig. 6(d) either. All three can be read off the plots, because

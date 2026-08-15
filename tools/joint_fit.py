@@ -12,6 +12,24 @@ would need K x 84,000.  A different fitting *basis* cannot help either: the
 confluent basis spans the same space and leaves M0 identical to 1.1e-14.  The
 only remaining lever is a change of model.
 
+**Range matters, and this was first judged on the wrong one.**  Run to
+``--mg-max 0.45`` the fit looks like a failure: 93% spread over acceptable
+variants at the top coupling, worse than fitting each coupling separately.  That
+is the ``(m/g)^2`` limit form breaking down, not the joint idea failing.  Scored
+toward the chiral end instead it improves monotonically -- ``|alpha - 2|`` of
+0.113, 0.052, 0.016 at ``--mg-max`` 0.45, 0.35, 0.25 -- and at 0.15 it puts the
+per-coupling Eq. (27) values **1-2 sigma high in all five Table I channels**,
+21/25 below and 15/25 outside their own total bar.  So prefer a small
+``--mg-max``, and read docs/weak-coupling-limit.md before quoting either number:
+both are extrapolating inside a pre-asymptotic window, and the ``mg^2`` anchor
+is an anchor to the grid artifact rather than to the physical chiral limit.
+
+The limit series here is a polynomial in ``m/g``, which is *why* large
+``--mg-max`` fails: ``R = M^2/(m^2+g^2/pi)`` saturates at ``n_q^2`` (free
+quarks) and no polynomial can.  A rational form in ``t = (m/g)^2`` with that
+limit imposed holds to ~1% over m/g = 0.025-24; it is not wired in here because
+it makes the solve nonlinear.  See the same doc.
+
 The anchor, and why it is allowed
 ---------------------------------
 Eq. (16): at m/g = 0 the lightest state is exactly zero **for any N, B and K**.

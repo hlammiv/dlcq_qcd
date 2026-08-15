@@ -1,8 +1,11 @@
 # Open threads
 
-Three, in the order they are worth taking. Each is written to be started cold.
+Five, in the order they are worth taking. Each is written to be started cold.
 §1 has since been **built**, and is kept because what it measured overturned
-several of its own premises — including one this file asserted twice.
+several of its own premises — including one this file asserted twice. §4 and §5
+came out of `weak-coupling-limit.md` and are the live ones; §4 is the only lever
+left on the weak-coupling column, and §5 is a separate question that is often
+confused with it.
 
 Everything here was established by measurement; the supporting numbers are in
 `performance.md`, `table1-units.md` and `baryon-higher-fock.md`. Note
@@ -276,6 +279,58 @@ Two, both of which cost earlier revisions of this file some credibility:
 Do **not** re-derive from the drawn curves. They are cubic splines through very
 few points and the thesis says so itself; panel (c)'s valence curve has two
 spline "zeros" that are not in its own data. Work from the markers.
+
+---
+
+## 4. An `x^a`-adapted basis — the only lever left at weak coupling
+
+Read `weak-coupling-limit.md` first; this entry is its consequence. The
+weak-coupling column is limited by the momentum grid failing to resolve
+`φ ~ x^a` near the endpoints, where the relevant scale is `x ≲ e^{-1/a}`
+(`5e-11` at `m/g = 0.05`). Nothing about K, the fit form, or the error budget
+addresses that — six approaches were tried and measured dead. The fix is to
+*represent* the endpoint rather than resolve it: build `x^a` into the basis.
+
+This is established practice elsewhere. Anand, Fitzpatrick, Katz and Xin
+([arXiv:2111.00021](https://arxiv.org/abs/2111.00021)) restore convergence at
+quark masses far below the strong-coupling scale in lightcone conformal
+truncation by exactly this move, modifying the basis according to the quark
+mass following 't Hooft's endpoint analysis.
+
+The hard part here is that DLCQ's basis is a *momentum grid*, not a function
+basis, so this is not a drop-in: it changes what a "state" is. A cheaper first
+experiment that needs no new formalism is `dlcq/thooft.py` — swap its uniform
+grid for an `x^a`-weighted one and see whether the chiral exponent moves from 2
+toward the physical 1. That solver is 120 lines, has an exact benchmark (0,
+5.8817, 14.1429 at `m = 0`), and its failure to converge is documented and
+reproducible. **Do that before touching the DLCQ path.**
+
+## 5. Zero modes — real, measurable, and not what §4 is about
+
+Keep these separate. Zero modes are *not* the cause of the weak-coupling
+problem: the continuum solver in `thooft.py` has no zero-mode truncation and
+reproduces the same artifact. But they are a genuine omission — DLCQ here uses
+antiperiodic quarks and drops the gluon zero mode — and the effect is not small.
+Müller, Kalloniatis and Pauli
+([hep-th/9803204](https://arxiv.org/abs/hep-th/9803204)) find **21% shifts** in
+the lowest bound-state masses of 2D SU(2) Yang–Mills with adjoint scalars once
+zero-mode wavefunctions are included.
+
+It is more tractable than the naive picture suggests. Do not add `k = 0` to the
+Fock basis — at fixed `K⁺` that is infinite-dimensional. The dynamical zero
+modes are a few *collective* variables; drop the constrained ones and they are
+governed by an infinite square-well potential, whose wavefunctions tensor onto
+the existing basis, multiplying the matrix dimension by the levels retained.
+Formalism: Pauli–Kalloniatis–Pinsky
+([hep-th/9403038](https://arxiv.org/abs/hep-th/9403038),
+[hep-th/9509020](https://arxiv.org/abs/hep-th/9509020)).
+
+What is genuinely new work: the published implementations are SU(2) pure glue
+and adjoint scalar matter, **not** SU(N) with fundamental quarks and baryon
+number, so the zero-mode/non-zero-mode Hamiltonian matrix elements have to be
+derived for this case. Gauge fixing needs revisiting too — `A₋ = 0` is not
+available. The eigensolver, colour algebra and state generator all survive
+unchanged, and the quark antiperiodicity can stay.
 
 ---
 

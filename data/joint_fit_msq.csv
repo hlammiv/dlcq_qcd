@@ -1,10 +1,18 @@
 # M^2 of the N=3 baryon ground state on a (m/g, K) grid.
 #
-# The input to the joint (m/g, K) extrapolation in tools/joint_fit.py, whose
-# result was negative: tying the couplings together fits *worse* than fitting
-# each separately, everywhere above m/g = 0.04.  Kept because reproducing a
-# negative result needs its data, and because the grid is the widest K reach
-# the solver has been run over (2K = 25..69 at the Table I truncation).
+# The input to the joint (m/g, K) extrapolation in tools/joint_fit.py.
+#
+# That fit was first recorded as a negative result -- tying the couplings
+# together fits *worse* than fitting each separately, everywhere above
+# m/g = 0.04.  **That verdict was reached on the wrong range and is now
+# withdrawn.**  It was scored over m/g <= 0.45, where the (m/g)^2 limit form is
+# already breaking down (93% variant spread at the top coupling).  Restricted
+# to the chiral region the fit behaves quite differently, and puts the
+# per-coupling Eq. (27) values 1-2 sigma high in all five Table I channels.
+# See docs/weak-coupling-limit.md.
+#
+# The grid is also the widest K reach the solver has been run over
+# (2K = 25..69 at the Table I truncation).
 #
 # Units: M^2 in m^2 + g^2/pi, the same convention as refs/table1.csv.
 # Grid: 10 couplings x 12 K, complete -- no missing cells.
