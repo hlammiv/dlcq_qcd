@@ -832,6 +832,37 @@ on a null plane with a trivial vacuum. That single shared assumption is the one
 the anomalous exponent is about, which is why "unresolved" remains the honest
 verdict rather than "DFS is wrong".
 
+#### The meson sector is blind to `nu` in *every* observable, not just the exponent
+
+The `C_F` collapse is a statement about the Hamiltonian (`H = m²A + g²C_F B`), so
+it forces the **whole spectrum** to collapse, not just the ground state. Then no
+meson observable — scaling or ratio — can carry `N_c`. Tested on the
+excited-state ratio at matched `u = (m/g)²/C_F`:
+
+| u | N=3 | N=5 | N=8 | sine-Gordon `2cos(πν/2)` |
+|---|---|---|---|---|
+| 0.02 | 2.624551 | 2.624551 | 2.624551 | 1.902 / 1.970 / 1.989 |
+| 0.005 | 3.619510 | 3.619510 | 3.619510 | 1.902 / 1.970 / 1.989 |
+
+Identical to seven digits across three colours, where sine-Gordon needs a 4.6%
+spread. And the DLCQ ratio **diverges** as `u → 0` (2.62 → 3.62) where the
+sine-Gordon breather ratio is finite: the valence meson is the 't Hooft tower,
+whose pion goes massless while the excited states stay finite, whereas
+sine-Gordon breathers all scale together. That is exactly right, because the
+valence meson sector *is* the 't Hooft equation with `g² → g²C_F`.
+
+**Why this matters for reading AFKX.** Their sine-Gordon evidence at N_c = 3 is
+`m₂/m₁ = 1.90421` against `2cos(πν/2) = 1.90211`. That cannot come from a
+valence-truncated spectrum — LCT carries the full Fock space. It matches this
+repo's own finding that the ratio needs the higher sectors: the first qq̄ pair
+moves the meson/baryon ratio 6.2%, and only then does it land on
+`2 sin(πν/2)`.
+
+So the unified picture is: **valence = 't Hooft = no `nu`; the bosonization
+structure lives in the higher Fock sectors**, and the baryon channel is the only
+place this code can see it, because the baryon is the only sector that does not
+collapse.
+
 #### The meson/baryon ratio recovers the bosonization parameter
 
 `M_meson/M_baryon` needs the baryon, which (unlike the meson) does **not**
