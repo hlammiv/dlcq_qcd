@@ -171,7 +171,56 @@ _VERTEX = {
 }
 
 
-def pair_colour_weights(base, params, mstate, loc, L, selfen):
+_SCRATCH = {}
+_EPSB = {}
+
+
+def _clfact_caller(base, params, selfen):
+    """The fastest available ``clfact`` for these parameters.
+
+    ``base.clfact_compute`` is the pure-Python reference, and it was the only
+    one this module reached until now.  That is why the improved path overflowed
+    ``MXTRMS`` -- the pure-Python cap -- rather than ``MXTRM``, and why it ran
+    ~560x slower than standard at *identical* basis size: an N=7 baryon at
+    2K=15 with 18 states took 112 s against 0.2 s.  The cost is L^2 colour
+    contractions per config block, each expanding ``N!`` epsilon permutations
+    (5040 at N=7, 40320 at N=8), executed in Python.
+
+    ``qcdf_kernels.clfact_nb`` is the same algorithm under njit.  Buffers are
+    cached per ``(NF, K)`` and the epsilon table per ``N``.  One shared
+    ``Scratch`` is safe because :func:`state_sigmas` is a single-threaded loop;
+    the per-thread rule in ``Scratch``'s docstring is about the parallel
+    assembly path, which does not come through here.
+
+    Falls back to the reference implementation if the njit build is absent, so
+    the improved path keeps working without numba.
+    """
+    def _reference(idx, mx, L):
+        return base.clfact_compute(*idx, mx, L, L, 4, params, selfen)
+
+    try:
+        from qcdf_kernels import Scratch, clfact_nb, epsb_table
+    except ImportError:
+        return _reference
+
+    N, NF, K, B = params.N, params.NF, params.K, params.B
+    if (NF, K) not in _SCRATCH:
+        _SCRATCH[(NF, K)] = Scratch(NF, K)
+    if N not in _EPSB:
+        _EPSB[N] = epsb_table(N)
+    nprms_ep, ibrpm = _EPSB[N]
+    buf = _SCRATCH[(NF, K)].clfact_args()
+
+    def _fast(idx, mx, L):
+        lng = 4 + 2 * L
+        return clfact_nb(idx[0], idx[1], idx[2], idx[3],
+                         np.ascontiguousarray(mx[:, :lng], dtype=np.int32),
+                         lng, L, L, 4, N, NF, B, K, nprms_ep, ibrpm, *buf)
+
+    return _fast
+
+
+def pair_colour_weights(base, params, mstate, loc, L, selfen, caller=None):
     """``<-T_a . T_c>`` for every parton pair of one state, normalised to C_F.
 
     Returns ``w[a][c]`` with ``sum_{c != a} w[a][c] == C_F`` exactly, which is
@@ -226,8 +275,10 @@ def pair_colour_weights(base, params, mstate, loc, L, selfen):
         mx[1, L:L + 4] = occ_d
         mx[2, L:L + 4] = moms
         mx[3, L:L + 4] = flavs
-        return base.clfact_compute(*idx, mx, L, L, 4, params, selfen)
+        return caller(idx, mx, L)
 
+    if caller is None:
+        caller = _clfact_caller(base, params, selfen)
     CF = (params.N * params.N - 1.0) / (2.0 * params.N)
     w = _np.zeros((L, L))
     for a in range(L):
@@ -333,6 +384,9 @@ def state_sigmas(mstate, mstinf, numsta, N, b, K_code, table=None,
     # (sweep_lpn = min(valence+2, 10)), and there are far fewer blocks than
     # states (119 against 189 at 2K=21).
     cache = {}
+    # Resolve the colour kernel once: building the njit closure per call would
+    # re-fetch the scratch buffers for every block.
+    caller = None if params is None else _clfact_caller(base, params, selfen)
     for s in range(numsta):
         loc = int(mstinf[s, 0]) - 1
         L = int(mstinf[s, 1])
@@ -353,7 +407,8 @@ def state_sigmas(mstate, mstinf, numsta, N, b, K_code, table=None,
                 w = np.full((L, L), CF / (L - 1.0))
                 np.fill_diagonal(w, 0.0)
             else:
-                w = pair_colour_weights(base, params, mstate, loc, L, selfen)
+                w = pair_colour_weights(base, params, mstate, loc, L, selfen,
+                                        caller=caller)
             si = float(sum(w[a, c] * table[ks[a], ks[c]]
                            for a in range(L) for c in range(L) if c != a))
         cache[key] = (sd, si)
