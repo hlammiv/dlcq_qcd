@@ -597,21 +597,30 @@ limit:
 | 0.05 → 0.1 | 1.066 | 1.929 |
 | **0.025 → 0.05** | **1.037** | **1.981** |
 
-**Standard converges to DFS's 2 within 1%; improved converges to 1.04.** NF = 1
-gives the same exponents (1.037 / 1.982), so this is not a flavour artefact.
+**Improved converges to 1.04 where DFS predicts 2.** NF = 1 gives the same
+exponents (1.037 / 1.982), so this is not a flavour artefact.
 
-That completes an uncomfortable pattern:
+**Standard's 1.981 is not a pass.** Standard returns α ≈ 2 in *every* channel,
+including the meson channel where GMOR proves the answer is 1 — that is the grid
+artefact this whole document is about, and `dlcq/thooft.py` reproduces it in a
+continuum solver with no grid, no `K` and no Fock truncation. Its agreement with
+DFS here is the artefact value coinciding with a physical one, and carries no
+information about baryons. The experiment is one-sided: it is evidence against
+improved, not evidence for standard.
+
+So:
 
 | | prediction | improved | standard |
 |---|---|---|---|
-| meson | GMOR: **1** | **1.06** ✓ | 1.93 ✗ |
-| baryon | DFS: **2** | 1.04 ✗ | **1.98** ✓ |
+| meson | GMOR: **1** | **1.06** ✓ | 1.93 ✗ (artefact) |
+| baryon | DFS: **2** | 1.04 ✗ | 1.98 — artefact, uninformative |
 
-Improved forces every channel to ≈1.04 and standard forces every channel to
-≈1.98; neither distinguishes a meson from a baryon, and the two analytic results
-say they should differ.
+Improved forces every channel to ≈1.04; standard forces every channel to ≈1.98
+for reasons already known to be unphysical. Neither distinguishes a meson from a
+baryon, and DFS says they should differ.
 
-**Consequence: the improved baryon entries are not trustworthy.** The meson
+**Consequence: the improved baryon entries are unvalidated, and one analytic
+result argues against them.** The meson
 result keeps its two decisive anchors, so the "published weak-coupling entries
 are low by 2.5–5x" claim must be split — defensible for the meson columns,
 unsupported for the baryon ones, which is where the corrections are largest
