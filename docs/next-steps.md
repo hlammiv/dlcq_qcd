@@ -260,7 +260,8 @@ more than the article, and most of it has never been checked:
 
 | source | what it is | why it is worth doing |
 |---|---|---|
-| **thesis figs. 19, 20, 22** | meson four-quark contribution **as a function of K** | the only published K-scan of a higher-Fock structure function anywhere in this work. It measures the K-dependence of the conversion instead of inferring it. Even-channel, so it cannot settle the odd-channel question above — but it is the only direct probe there is |
+| **thesis fig. 22 + Table 5** | **SU(2)** meson four-quark contribution at 2K = 14 and 20 | the only published K-scan of a higher-Fock structure function anywhere in this work. It measures the K-dependence of the conversion instead of inferring it. Even-channel, so it cannot settle the odd-channel question above — but it is the only direct probe there is. **N = 2 only** |
+| **thesis figs. 19, 20** | four-quark contribution as a function of **N** — fig. 20 is **U(N)**, not SU(N) | an untouched published *N*-scan and U(N)-scan, not the K-scan an earlier revision of this table claimed. Corrected after reading the thesis pages: the captions read "as a Function of N", and the body text puts the K-scan in fig. 22 alone ("at 2K equal to 14 and 20 for both the weakly and strongly coupled SU(2) meson"). The thesis OCR renders both N and K as `A'`, which is how the two got conflated |
 | thesis figs. 14, 16 | meson 4q and two-baryon 8q at **strong** coupling | free regression targets; the weak-coupling versions already reproduce |
 | thesis fig. 15(b), (c) | 2nd and 3rd baryon, five-quark, m/g = 0.1, 2K = 21 | two more states at the second coupling; 15(a) is done (§2.1.5) |
 | thesis figs. 13(b)–(e) | 2nd–5th B = 2 states | already flagged in §1.1 |
