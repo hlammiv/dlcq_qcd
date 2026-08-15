@@ -272,12 +272,18 @@ n = 1600        0.04550            0.4642                 0.09802
 n = 3200        0.04861            0.4947                 0.09826
 ```
 
-`M²` moves 36% across that range; `M²/captured` moves **1.3%**. Applying the
-same correction at two couplings and re-measuring the chiral exponent between
-`m/g = 0.0125` and `0.05` moves it from **1.979 to 1.151** — 83% of the way from
-the grid artifact to GMOR's 1. (Treat this as a diagnostic, not a result: it is a
-heuristic one-parameter rescaling, and the residual — 7% scatter at
-`m/g = 0.0125`, and 1.151 rather than 1.000 — is the part it does not explain.)
+`M²` moves 36% across that range; `M²/captured` moves **1.3%**. That collapse is
+a real test of the *n*-dependence, and it passes.
+
+**Do not use it to "correct" the chiral exponent.** An earlier revision of this
+document reported that applying the same rescaling moved the exponent from 1.979
+to 1.151, and read that as evidence for the mechanism. It is not. For small `a`,
+`1 − n^{-2a} ≈ 2a·ln n`, so the correction factor goes as `1/a ∝ g/m` and
+mechanically subtracts about 1 from *any* exponent. Feeding it a synthetic
+series that is exactly `C·(m/g)²` with no `n`-dependence at all returns a
+"corrected exponent" of 1.17 — indistinguishable from what the real data give.
+The rescaling tests convergence in the grid parameter and nothing about the
+quark-mass dependence.
 
 The scaling then says what each fix buys. Nodes needed to capture 99% of the
 endpoint integral, N = 3 baryon:
@@ -309,6 +315,45 @@ truncation by modifying the basis according to the quark mass, motivated by
 quantizing momentum in a periodic box, which is exactly what makes the Fock
 basis finite at fixed `K⁺`. There is no non-uniform spacing of `k` to be had, so
 on that path the basis change is the *only* option.
+
+Nor does the captured-fraction *correction* transfer. DLCQ has the same
+`x_min = 1/K_code` structure, so `M²/(1 − K_code^{-2a})` is the obvious thing to
+try, and it does flatten the K-dependence (15–19% raw spread down to 0.3–5%).
+But it fails its own falsification test: fitting `M² = A(1 − K_code^{-b})` with
+`b` free returns `b/2a` anywhere from **0.32 to 4.2**, with no sign of settling
+on 1. The flattening is a two-parameter fit absorbing a smooth monotone curve,
+not the model being right. Do not use it to correct DLCQ numbers.
+
+## What the DLCQ code can still do
+
+Not reach smaller `m/g` — but two things worth having.
+
+**A validity boundary, from two independent directions.** The endpoint integral
+is captured to O(1) only when `2a·ln K_code ≳ 1`. At 2K = 70 that puts the
+threshold at `m/g` = 0.105 (mes N=2), 0.140 (N=3, bar N=3), 0.166 (N=4, bar
+N=4). Independently, the chirally-anchored joint fit and the per-coupling fit
+agree at `m/g = 0.15` (0.02–0.64 bars) and diverge below it (1.0–2.1 bars). Two
+unrelated criteria landing on `m/g ≈ 0.15` is the boundary worth quoting:
+**Table I's `m/g` = 0.1 and 0.05 entries are grid-limited in every channel**,
+and the 0.2 entry is marginal.
+
+**More K, but only above it.** "More K is dead" is a weak-coupling statement and
+does not generalize. The remainder goes as `K^-(p−1)` with `p` the measured
+increment exponent, so the K factor needed to halve it is:
+
+| m/g | `p_∞` | remainder | K factor to halve |
+|---|---|---|---|
+| 1.60 | 1.974 | `K^-0.974` | **2.0** |
+| 0.80 | 1.893 | `K^-0.893` | **2.2** |
+| 0.40 | 1.554 | `K^-0.554` | **3.5** |
+| 0.20 | 1.215 | `K^-0.215` | 25 |
+| 0.10 | 1.067 | `K^-0.067` | 3.1e4 |
+| 0.05 | 1.017 | `K^-0.017` | 5.1e17 |
+
+So at `m/g ≥ 0.4` the sparse solver's reach is a real lever — a factor of 2–3.5
+in K halves the bar, and 2K = 71 at the Table I truncation costs 21 s
+(`next-steps.md` §1). At `m/g = 0.2` it is marginal. Below that it is hopeless,
+and in exactly the region where the grid does not resolve the physics anyway.
 
 ## Zero modes: a separate question, and more tractable than it first looks
 
