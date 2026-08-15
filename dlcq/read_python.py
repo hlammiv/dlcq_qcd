@@ -599,9 +599,6 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         raise ValueError(
             f"unknown hamiltonian {hamiltonian!r}; use 'standard' or "
             f"'improved' (dlcq/endpoint.py, docs/weak-coupling-limit.md)")
-    if hamiltonian == "improved":
-        # The correction multiplies the weeded norm, so it has to exist.
-        keep_norm = True
     if solver == "sparse" and (assembly, policy) != ("exact", "blockwise"):
         raise ValueError(
             f"solver='sparse' supports assembly='exact' with "
@@ -759,21 +756,40 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
         ham0, ham, _ = base.clrdis(1, p, states, selfen, ncpus=ncpus)
         ham = ham[:numsta, :numsta]
 
+    # ── the endpoint subtraction ──
+    #
+    # The self-energy enters as ``Norm @ diag(sigma)`` -- measured exactly, at
+    # every parton number -- so swapping ``sigma_std`` for ``sigma_imp`` is one
+    # addition rather than a kernel change.
+    #
+    # ``sigma`` is constant on a configuration block, because
+    # ``config_block_labels`` keys on the multiset of (type, momentum, flavour)
+    # and ``sigma`` depends only on the momenta.  So on the blockwise path,
+    # where every column of ``Z`` lives inside one block and ``Z^T N Z = I``,
+    #
+    #     Z^T (N diag(dsigma)) Z  =  diag(dsigma)
+    #
+    # exactly -- the same argument as the ``H0 = D N`` shortcut below.  That is
+    # worth having: it turns an n^2 matrix addition that would also destroy the
+    # sparsity of ``ham`` into a diagonal add on the projected matrix, and it
+    # means the norm is never needed, so ``keep_norm=False`` stays available.
+    # Off that path ``Z`` is global and the shortcut does not hold, but the
+    # dense norm exists there anyway.
+    dsigma = None
     if hamiltonian == "improved":
-        # The self-energy enters as ``Norm @ diag(sigma)`` -- measured exactly,
-        # at every parton number -- so the endpoint subtraction is one addition
-        # here rather than a kernel change.  Applied on the weeded basis, where
-        # ``ham`` and ``hnorm_w`` agree.
         from .endpoint import apply_sigma_correction, state_sigmas
         from .units import endpoint_exponent, lambda_to_mg
-        if hnorm_w is None:
-            raise ValueError(
-                "hamiltonian='improved' needs the weeded norm; it is what the "
-                "self-energy multiplies. Call with keep_norm=True.")
         b_end = endpoint_exponent(lambda_to_mg(rlamb), N)
         sig_std, sig_imp = state_sigmas(states.mstate, mstinf_w[:numsta],
                                         numsta, N, b_end, K_code)
-        ham = apply_sigma_correction(ham, hnorm_w, sig_imp - sig_std)
+        dsigma = sig_imp - sig_std
+        if not used_blocks:
+            if hnorm_w is None:
+                raise ValueError(
+                    "hamiltonian='improved' off the blockwise path needs the "
+                    "weeded norm; use policy='blockwise', or keep_norm=True.")
+            ham = apply_sigma_correction(ham, hnorm_w, dsigma)
+            dsigma = None                      # consumed pre-projection
 
     # ── NUHAM, then combine free + interacting ──
     #
@@ -793,6 +809,16 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
 
     hnu = _project(ham)
     del ham
+
+    if dsigma is not None:
+        # diag(dsigma) per column, read off the block each column occupies --
+        # the same representative-row trick the H0 shortcut uses below.
+        Zc = Z.tocsc()
+        first = Zc.indices[Zc.indptr[:-1]]
+        if sparse.issparse(hnu):
+            hnu = (hnu + sparse.diags(dsigma[first])).tocsr()
+        else:
+            hnu = hnu + np.diag(dsigma[first])
 
     if use_h0_shortcut:
         # diag(D) per column, D read off the block each column occupies.

@@ -135,6 +135,41 @@ def test_unknown_hamiltonian_is_rejected_before_any_work():
                    hamiltonian="magic")
 
 
+@pytest.mark.parametrize("N,B,K,LPN", [(3, 0, 16, 2), (3, 1, 15, 3),
+                                       (3, 1, 15, 5), (4, 1, 16, 4),
+                                       (2, 0, 12, 0)])
+def test_block_shortcut_equals_the_matrix_form(N, B, K, LPN):
+    """``Z^T (N diag(dsigma)) Z == diag(dsigma)`` on the blockwise path.
+
+    ``sigma`` is constant on a configuration block (``config_block_labels``
+    keys on the multiset of (type, momentum, flavour), and sigma depends only
+    on the momenta), and every column of a blockwise ``Z`` lives in one block
+    with ``Z^T N Z = I``.  So the correction collapses to a diagonal add after
+    projection -- no norm, no n^2 addition, no sparsity destroyed.
+
+    Off that path ``Z`` is global and the argument fails, so there the
+    correction is applied to ``ham`` against the dense norm.  The two must
+    agree, and that is what this pins.
+    """
+    kw = dict(N=N, NF=1, B=B, K_code=K, rlamb=0.3325, LPN=LPN, ncpus=2,
+              assembly="exact", hamiltonian="improved")
+    fast = run_python(policy="blockwise", **kw)
+    ref = run_python(policy="fortran", **kw)
+    m = min(fast.eigenvalues.size, ref.eigenvalues.size)
+    scale = max(abs(float(fast.eigenvalues[0])), 1e-300)
+    assert np.max(np.abs(fast.eigenvalues[:m] - ref.eigenvalues[:m])) / scale < 1e-11
+
+
+@pytest.mark.parametrize("N,B,K,LPN", [(3, 1, 15, 3), (3, 1, 21, 5)])
+def test_improved_does_not_need_the_norm_kept(N, B, K, LPN):
+    """``keep_norm=False`` must stay available -- the norm is the memory wall."""
+    kw = dict(N=N, NF=1, B=B, K_code=K, rlamb=0.3325, LPN=LPN, ncpus=2,
+              assembly="exact", policy="blockwise", hamiltonian="improved")
+    a = run_python(keep_norm=True, **kw)
+    b = run_python(keep_norm=False, **kw)
+    assert np.array_equal(a.eigenvalues, b.eigenvalues)
+
+
 @pytest.mark.parametrize("N,B,K,LPN", [(3, 1, 15, 3), (3, 1, 21, 3),
                                        (4, 1, 16, 4), (3, 0, 12, 0),
                                        (3, 1, 15, 5)])
