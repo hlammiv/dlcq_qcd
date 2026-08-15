@@ -29,6 +29,42 @@ And it measures **both** observables with one machinery, so it tests this repo's
 meson/baryon ratio result (`2 sin(pi nu / 2)` to 0.4%) as well as the exponent —
 not just the half we disagree with.
 
+## What already exists, and the gap it leaves
+
+The model has been simulated three times. **None of them computed the thing in
+question**, and none ships code.
+
+| work | method | what it covers | quark masses |
+|---|---|---|---|
+| Bañuls et al., arXiv:1707.06434 | MPS, SU(2), N_f=1 | the only published chiral-exponent fit, `nu = 0.700(31)` | `m/g ∈ [0.1, 0.4]` — a factor of **4** |
+| Fujikura & Hidaka, arXiv:2605.17183 | **VUMPS**, SU(2), N_f=1 | `c_IR = 1.04` at `m = 0`; baryon masses | `m/g = 0, 0.5, 1.0` |
+| Hayata, Hidaka & Nishimura, arXiv:2311.11643 | MPS, SU(2) **and SU(3)**, N_f=1 | finite-density EoS, condensate vs density | `m/g = 0.5, 1.0` |
+
+So the chiral region is essentially untouched: the only non-zero masses ever run
+below `m/g = 0.1` are Bañuls' four-fold window, and the only `m = 0` point is a
+CFT identification (`c_IR`), not a scaling measurement. **Nobody has run a decade
+in `m/g`**, which is exactly where the crossover question lives.
+
+### Public code: there is none for the SU(N) basis
+
+Checked directly rather than inferred from citations:
+
+| repo | state |
+|---|---|
+| `falquez/GCB_SUN_LGT` — "Gauss constrained basis for SU(N) LGT with Tensor Networks" | **not an implementation.** Six files: README, two plotting scripts, two data files, a PDF. The 1.3 MB is the paper. |
+| `epv180502/openSU2LGT` | Julia, 0 stars, first pushed 2026-08-11. Too new to rely on; worth reading. |
+| `gcataldi96/ed-lgt` | **404** — gone or private. Only the Zenodo archive (record 11145318) survives. ED only in any case. |
+| `tenpy/tenpy` | healthy and active (493 stars). General library, no gauge-theory model. |
+
+**Therefore, before writing anything: ask.** Requesting code from Bañuls/Kühn or
+Fujikura/Hidaka is ordinary practice and would collapse Phase 2 — the week of
+recoupling algebra — into running an existing implementation at smaller `m/g`.
+Their papers answer a different question with the same machinery, so there is no
+competitive reason for them to decline. That is the cheapest path by a wide
+margin and should be exhausted first.
+
+If that fails, the phases below are the from-scratch route.
+
 ## The physics being discretised
 
 Kogut–Susskind, one spatial dimension, staggered fermions, open boundaries:
