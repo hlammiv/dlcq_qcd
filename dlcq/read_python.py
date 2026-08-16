@@ -915,8 +915,16 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
     # the figures, dataset.save -- assumes that.  Densifying Z here confines the
     # sparse form to the arithmetic above, where it earns its keep; making the
     # stored form block-sparse is a schema change and belongs with Stage 2.
+    #
+    # Past a size threshold Z is dropped instead: densifying the 446,235-state
+    # meson basis at 2K=100, LPN=6 would need 1.45 TiB, AFTER the eigensolve
+    # and c_orig (the fields the figures actually read) had already succeeded.
+    # A parse without matrices already yields Z=None, so consumers handle it.
     if sparse.issparse(Z):
-        Z = Z.toarray()
+        if Z.shape[0] * Z.shape[1] > 2_000_000_000:      # ~16 GB dense
+            Z = None
+        else:
+            Z = Z.toarray()
 
     # ── Fock content of the surviving basis ──
     lengths = mstinf_w[:numsta, 1].astype(int)

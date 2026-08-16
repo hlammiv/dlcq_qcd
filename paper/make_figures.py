@@ -254,7 +254,7 @@ def fig5():
     # overlay until that frame mapping is re-validated against our units.
     states = [(0, 1e3, "fig5a"), (1, 1e2, "fig5b"), (2, 1e2, "fig5c"),
               ("first-4q", 1e4, None)]
-    rows = [("a", provider_1990(), 24, 0), ("b", provider_2026(40), 60, 6)]
+    rows = [("a", provider_1990(), 24, 0), ("b", provider_2026(40), 100, 6)]
     fig, axes = plt.subplots(2, 4, figsize=(14, 7))
     for (row, prov, K, LPN), axrow in zip(rows, axes):
         r = require_cached(prov, 3, 1, 0, K, lam, LPN=LPN)
@@ -334,7 +334,7 @@ def fig6():
         (2, 1, 1e2, "fig6c", 3, 5), (0, 2, 5e2, "fig6d", 6, 8),
     ]
     rows = [("a", provider_1990(), {1: (21, 0), 2: (24, 0)}, True),
-            ("b", None, {1: (69, 5), 2: (50, 8)}, False)]
+            ("b", None, {1: (99, 5), 2: (50, 8)}, False)]
     for (row, prov, kmap, overlay), axrow in zip(rows, axes):
         for (w, B, mult, dig, npv, nph), ax in zip(specs, axrow):
             K, LPN = kmap[B]

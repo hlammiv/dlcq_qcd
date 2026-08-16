@@ -49,12 +49,12 @@ for mg in (MG_WEAK, MG_STRONG):
                  ("mg", mg)))
 
 # Fig. 5, 2026 panel: meson excitations with 4q content, 2K = 60.
-RUNS.append(("fig5", dict(N=3, NF=1, B=0, K_code=60, LPN=6, nev=40),
+RUNS.append(("fig5", dict(N=3, NF=1, B=0, K_code=100, LPN=6, nev=40),
              ("mg", MG_WEAK)))
 
 # Fig. 6, 2026 panels: baryon states (also serves thesis fig 24 splitting),
 # and the two-baryon state with its 8-parton sector.
-RUNS.append(("fig6_bar", dict(N=3, NF=1, B=1, K_code=69, LPN=5, nev=12),
+RUNS.append(("fig6_bar", dict(N=3, NF=1, B=1, K_code=99, LPN=5, nev=12),
              ("mg", MG_WEAK)))
 RUNS.append(("fig6_B2", dict(N=3, NF=1, B=2, K_code=50, LPN=8, nev=8),
              ("mg", MG_WEAK)))
