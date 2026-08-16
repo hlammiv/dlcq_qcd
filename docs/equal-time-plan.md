@@ -236,6 +236,44 @@ structure has to be carried explicitly in the local Hilbert space rather than by
 the symmetry machinery. That is what makes Phase 2 a real piece of work and
 Phase 1 nearly free.
 
+## Phase 1 result: the pipeline reproduces `1/sqrt(pi)` to 0.06%
+
+Twelve points at fixed physical volume `Lg = L/sqrt(x)`, `Lg` in {30,45,60},
+`x` in {16,36,64,100}, `L` up to 600, plus `x` = 144 and 196 at `Lg = 45`.
+
+**Continuum `M/g = 0.56451` against `1/sqrt(pi) = 0.56419`, +0.06%.**
+
+Both limits are controlled, and both forms were *measured* rather than assumed:
+
+* **volume: `A + B/Lg^2`.** Successive differences at fixed `x` have ratio
+  0.354, 0.353, 0.353, 0.353 across all four `x` — against 0.350 predicted by
+  `1/Lg^2` and 0.500 by `1/Lg`. This is just the boson's momentum quantisation
+  in a box, `sqrt(M^2 + (pi/L)^2) ~ M + pi^2/(2 M L^2)`.
+* **spacing: `A + B/sqrt(x)`**, the staggered form. It fits with max residual
+  3.8e-5 where `1/x` fits 70x worse, and the intercept is stable as the range
+  extends: 0.56878, 0.56875, 0.56873 at `Lg = 45` for `x` up to 100, 144, 196.
+
+Systematics checked and excluded: **MPS truncation** — `M/g` = 0.609922,
+0.609919, 0.609919, 0.609919 at `chi` = 60, 100, 160, 240, converged to six
+digits; and **the `x` range** — extending to `x = 196` moves the extrapolation by
+5e-5.
+
+**Two wrong readings on the way there, both recorded because the failure modes
+recur.** An earlier scan varied `L` and `x` independently, which put the largest
+finite-volume error on the *finest* lattice and made two estimators of the same
+limit disagree by 9%; its apparent 0.36% agreement was a coincidence of two
+uncontrolled extrapolations. Then, having fixed the volume, fitting `A + B/Lg`
+instead of `A + B/Lg^2` over-corrected to −0.86%, and the power-law drift was
+misread as an open-boundary pathology requiring VUMPS. It was ordinary
+particle-in-a-box quantisation. **The form of an extrapolation is a measurement,
+not a modelling choice** — in both cases the data said which power, and reading
+it off took one line.
+
+So the conventions are confirmed end to end: `x = 1/(ag)^2`,
+`mu = 2(m/g)sqrt(x)`, `L_n = sum_{k<=n}[S^z_k + (-1)^k/2]`, and
+`M/g = dW/(2 sqrt(x))` — the last of which no fixed-`x` analytic check can see,
+and which is what this scan was for.
+
 ## Phases
 
 ### Phase 1 — the Schwinger model, U(1). Validates everything, and is itself a result.
