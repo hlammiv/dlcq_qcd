@@ -35,8 +35,7 @@ additivity:
 	    exit $$status )
 
 check:
-	$(PY) make_figures.py --check
-	@echo "gate scripts fill in as sections land (G1 literals, G2 captions)"
+	$(PY) check_gates.py
 
 clean:
 	rm -f main.aux main.bbl main.blg main.log main.out main.pdf

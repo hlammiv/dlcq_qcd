@@ -1,6 +1,6 @@
 {
-  "freeze": "v0test",
-  "git_head": "676fb78f25812ba87e12653cfcfcd010f552ee3d",
+  "freeze": "v1",
+  "git_head": "b24d2206bc10af17e1839ade60355947ea4a2a43",
   "weak_coupling_doc_blob": "b2a49a204c86d9174c8b3f4627571939825fb64a",
   "inputs": {
     "figures/table1_budget_2K25-71_python.txt": "bd246401f78c869a",
