@@ -249,11 +249,11 @@ def fig5():
     # the multiplier sits on the valence.  At 2026 resolutions "the 11th
     # state" is not the same physical state, so the last panel selects the
     # first 4q-dominant state by its Fock weight instead of by index.
-    # fig5d's digitized markers are calibrated to the panel's RIGHT-hand
-    # 0-12 axis (the dual-axis trap of docs/figure-validation.md §2), so no
-    # overlay until that frame mapping is re-validated against our units.
+    # fig5d convention, validated by tools/compare_panels.py at 5.3%/13.2%:
+    # the multiplier sits on the VALENCE (x1e4), the 4q sector is unscaled,
+    # and the comparison is q(x) alone.
     states = [(0, 1e3, "fig5a"), (1, 1e2, "fig5b"), (2, 1e2, "fig5c"),
-              ("first-4q", 1e4, None)]
+              ("first-4q", 1e4, "fig5d")]
     rows = [("a", provider_1990(), 24, 0), ("b", provider_2026(40), 100, 6)]
     fig, axes = plt.subplots(2, 4, figsize=(14, 7))
     for (row, prov, K, LPN), axrow in zip(rows, axes):
@@ -280,7 +280,8 @@ def fig5():
                 x, q2, _ = structure_function(r, idx, nparton=2)
                 _, q4, q4b = structure_function(r, idx, nparton=4)
                 if w == "first-4q":
-                    ax.plot(x, q4 + q4b, "o-", color=C_PRIMARY, markersize=3,
+                    # q alone, per the validated comparison convention.
+                    ax.plot(x, q4, "o-", color=C_PRIMARY, markersize=3,
                             linewidth=1.1, label="4q")
                     ax.plot(x, mult * q2, "s--", mfc="none",
                             color=C_SECONDARY, markersize=3, linewidth=1.1,
@@ -293,6 +294,12 @@ def fig5():
                             label=rf"4q $\times{mult:g}$")
             if dig and row == "a":
                 x, y, fill = digitized(dig)
+                if dig == "fig5d":
+                    # the trace's frame top sits at 12.58 and its json flags
+                    # suppressed in-plot blobs; points AT the frame edge are
+                    # blob/axis artifacts, not data markers.
+                    keep = y < 11.5
+                    x, y, fill = x[keep], y[keep], fill[keep]
                 for f in (True, False):
                     m = fill == f
                     ax.plot(x[m], y[m], "o" if f else "s", mfc="none",
