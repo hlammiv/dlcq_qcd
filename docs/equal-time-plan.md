@@ -274,6 +274,48 @@ So the conventions are confirmed end to end: `x = 1/(ag)^2`,
 `M/g = dW/(2 sqrt(x))` — the last of which no fixed-`x` analytic check can see,
 and which is what this scan was for.
 
+## The two-flavour test found a state-targeting problem, not the exponent
+
+The two-flavour capability test — does the pipeline resolve an *anomalous*
+exponent, `M ~ A m^{2/3} g^{1/3}` — came back measuring the wrong state.
+
+Four points at `x=16, Lg=25, L=100`, `m/g` = 0.4, 0.2, 0.1, 0.05:
+
+| m/g | M/g | local exponent |
+|---|---|---|
+| 0.4 | 2.47845 | |
+| 0.2 | 1.72350 | 0.524 |
+| 0.1 | 1.34856 | 0.354 |
+| 0.05 | 1.15819 | 0.220 |
+
+The local exponent *decreases toward zero*, so `M/g` tends to a constant rather
+than vanishing: `M/g = M0 + c(m/g)` fits with `M0 = 0.970`, and successive
+differences halve exactly (ratios 1.97, 2.01). That is a state which stays
+massive in the chiral limit — the **flavour-singlet eta**, continuum mass
+`sqrt(N_f/pi) = 0.798` (at `ag = 0.25` a ~20% lattice shift is expected). The
+massless pion would need `M/g -> 0`; at `m/g = 0.05` the 2/3 law predicts 0.273
+against 1.158 measured.
+
+**This is not a Hamiltonian error.** The `N_f = 1` reduction reproduces the
+one-flavour build to `0.00e+00` and ED to the same, so the flavour sum, the
+staggered background charge `N_f(-1)^k/2` and the constant are all right.
+
+It is a **state-targeting failure**, and a general one:
+orthogonality-constrained DMRG converged to the eta even at `m/g = 0.4`, where
+the pion should be lighter (1.09 against 2.48). Orthogonality to the ground
+state is not enough to reach a state in a different flavour sector when the
+Hamiltonian, the initial product state and the conserved charge are all flavour
+symmetric. This is exactly the contamination Bañuls needed an explicit penalty
+term for, and it is why their vector-mass extraction required one.
+
+**Consequences for Phase 2, which are larger than for Phase 1.** The SU(2)
+measurement wants the vector meson, sitting near a diquark of similar mass, in a
+theory with more sectors than this one. Nothing about "take the first excited
+state" is safe there. The fix is to target the sector deliberately — a quantum
+number the MPS conserves, or a penalty term — and the two-flavour Schwinger
+model is now the right place to develop and validate that, because the answer is
+known (`2/3`, amplitude `~2.008`) and the wrong answer is unmistakable.
+
 ## Phases
 
 ### Phase 1 — the Schwinger model, U(1). Validates everything, and is itself a result.

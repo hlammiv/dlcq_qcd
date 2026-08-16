@@ -52,7 +52,14 @@ continuum values, we tabulate them beside ours.  Precision Schwinger-model
 benchmarks~\cite{Banuls:2013jaa,Dempsey:2022nys} calibrate what tensor
 networks achieve at U(1); our own equal-time exact-diagonalization
 cross-checks reproduce them in our conventions
-(Appendix~\ref{app:data}).  No public code exists for any of the SU($N$)
+(Appendix~\ref{app:data}).  One caution attaches to excited-state
+comparisons specifically.  Orthogonality to lower states does not target a
+flavor or charge sector, and a variational sweep can converge to a heavier
+singlet while a lighter non-singlet exists --- a failure mode we have
+observed directly in a two-flavor test, and the reason
+Ref.~\cite{Banuls:2013jaa} builds dedicated machinery to identify vector
+and scalar excitations.  Excited-state identifications are checked here,
+not assumed.  No public code exists for any of the SU($N$)
 tensor-network calculations above.  The pipeline released with this paper
 is, to our knowledge, the first reproducible finite-$N$ spectrum code in
 either quantization.
