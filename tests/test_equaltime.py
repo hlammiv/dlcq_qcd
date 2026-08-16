@@ -115,3 +115,30 @@ def test_excited_state_dmrg_matches_ed(L, x):
     ed = spectrum(L, x, 0.0, k=2)
     want = gap_to_M_over_g(float(ed[1] - ed[0]), x)
     assert mass_gap(L, x, 0.0, chi=200) == pytest.approx(want, abs=1e-8)
+
+
+@pytest.mark.parametrize("L,x,mg", [(8, 2.0, 0.0), (10, 4.0, 0.3), (12, 4.0, 0.0)])
+def test_fast_mpo_matches_ed(L, x, mg):
+    """The hand-built bond-dimension-5 MPO must equal the ED build.
+
+    The chain of custody: this MPO -> ED -> analytic x=0 identities.  The
+    all-pairs build in ``schwinger_mps`` is validated the same way, so the two
+    MPOs are independently anchored rather than checked against each other.
+    """
+    from equaltime.schwinger_fast import ground_state
+    ed = float(spectrum(L, x, mg, k=1)[0])
+    got, _, _ = ground_state(L, x, mg, chi=200)
+    assert got == pytest.approx(ed, abs=1e-9)
+
+
+def test_fast_mpo_bond_dimension_is_five_regardless_of_L():
+    """The whole point: bond dimension must not grow with L.
+
+    ``w[k,l] = N-1-max(k,l)`` depends only on the right index, so the electric
+    term is a running sum and costs exactly one bond state.  Handing TeNPy
+    L(L-1)/2 separate couplings instead gives an MPO whose bond dimension grows
+    with L -- 46 minutes at L=64.
+    """
+    from equaltime.schwinger_fast import SchwingerFast
+    for L in (8, 24, 64):
+        assert max(SchwingerFast(L, 4.0, 0.1).H_MPO.chi) == 5

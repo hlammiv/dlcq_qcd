@@ -6,7 +6,7 @@
 %Control: page (0) single
 %Control: year (1) truncated
 %Control: production of eprint (0) enabled
-\begin{thebibliography}{21}%
+\begin{thebibliography}{48}%
 \makeatletter
 \providecommand \@ifxundefined [1]{%
  \@ifx{#1\undefined}
@@ -56,82 +56,404 @@
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {K.}~\bibnamefont
   {Hornbostel}}, \bibinfo {author} {\bibfnamefont {S.~J.}\ \bibnamefont
-  {Brodsky}},\ and\ \bibinfo {author} {\bibfnamefont {H.-C.}\ \bibnamefont
-  {Pauli}},\ }\bibfield  {title} {\bibinfo {title} {Light-cone-quantized {QCD}
-  in 1+1 dimensions},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
-  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {41}},\ \bibinfo
-  {pages} {3814} (\bibinfo {year} {1990})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Sazdjian}(2025)}]{Sazdjian:2025aa}%
+  {Brodsky}},\ and\ \bibinfo {author} {\bibfnamefont {H.~C.}\ \bibnamefont
+  {Pauli}},\ }\bibfield  {title} {\bibinfo {title} {{Light Cone Quantized QCD
+  in (1+1)-Dimensions}},\ }\href {https://doi.org/10.1103/PhysRevD.41.3814}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo
+  {volume} {41}},\ \bibinfo {pages} {3814} (\bibinfo {year}
+  {1990})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Pauli}\ and\ \citenamefont
+  {Brodsky}(1985{\natexlab{a}})}]{Pauli:1985pv}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.~C.}\ \bibnamefont
+  {Pauli}}\ and\ \bibinfo {author} {\bibfnamefont {S.~J.}\ \bibnamefont
+  {Brodsky}},\ }\bibfield  {title} {\bibinfo {title} {{Solving Field Theory in
+  One Space One Time Dimension}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.32.1993} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {32}},\ \bibinfo
+  {pages} {1993} (\bibinfo {year} {1985}{\natexlab{a}})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Pauli}\ and\ \citenamefont
+  {Brodsky}(1985{\natexlab{b}})}]{Pauli:1985ps}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.~C.}\ \bibnamefont
+  {Pauli}}\ and\ \bibinfo {author} {\bibfnamefont {S.~J.}\ \bibnamefont
+  {Brodsky}},\ }\bibfield  {title} {\bibinfo {title} {{Discretized Light Cone
+  Quantization: Solution to a Field Theory in One Space One Time Dimensions}},\
+  }\href {https://doi.org/10.1103/PhysRevD.32.2001} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {32}},\
+  \bibinfo {pages} {2001} (\bibinfo {year} {1985}{\natexlab{b}})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Eller}\ \emph {et~al.}(1987)\citenamefont {Eller},
+  \citenamefont {Pauli},\ and\ \citenamefont {Brodsky}}]{Eller:1986nt}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Eller}}, \bibinfo {author} {\bibfnamefont {H.~C.}\ \bibnamefont {Pauli}},\
+  and\ \bibinfo {author} {\bibfnamefont {S.~J.}\ \bibnamefont {Brodsky}},\
+  }\bibfield  {title} {\bibinfo {title} {{Discretized Light Cone Quantization:
+  The Massless and the Massive Schwinger Model}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.35.1493} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {35}},\ \bibinfo
+  {pages} {1493} (\bibinfo {year} {1987})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Brodsky}\ \emph {et~al.}(1993)\citenamefont
+  {Brodsky}, \citenamefont {McCartor}, \citenamefont {Pauli},\ and\
+  \citenamefont {Pinsky}}]{Brodsky:1992mp}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~J.}\ \bibnamefont
+  {Brodsky}}, \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {McCartor}},
+  \bibinfo {author} {\bibfnamefont {H.~C.}\ \bibnamefont {Pauli}},\ and\
+  \bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont {Pinsky}},\ }\bibfield
+   {title} {\bibinfo {title} {{The Challenge of light cone quantization of
+  gauge field theory}},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
+  {journal} {Part. World}\ }\textbf {\bibinfo {volume} {3}},\ \bibinfo {pages}
+  {109} (\bibinfo {year} {1993})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Brodsky}\ \emph {et~al.}(1998)\citenamefont
+  {Brodsky}, \citenamefont {Pauli},\ and\ \citenamefont
+  {Pinsky}}]{Brodsky:1997de}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~J.}\ \bibnamefont
+  {Brodsky}}, \bibinfo {author} {\bibfnamefont {H.-C.}\ \bibnamefont {Pauli}},\
+  and\ \bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont {Pinsky}},\
+  }\bibfield  {title} {\bibinfo {title} {{Quantum chromodynamics and other
+  field theories on the light cone}},\ }\href
+  {https://doi.org/10.1016/S0370-1573(97)00089-6} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rept.}\ }\textbf {\bibinfo {volume} {301}},\
+  \bibinfo {pages} {299} (\bibinfo {year} {1998})},\ \Eprint
+  {https://arxiv.org/abs/hep-ph/9705477} {arXiv:hep-ph/9705477} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Strauss}\ and\ \citenamefont
+  {Beyer}(2008)}]{Strauss:2008zx}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Strauss}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Beyer}},\ }\bibfield  {title} {\bibinfo {title} {{Light front QED(1+1) at
+  finite temperature}},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.101.100402} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {101}},\
+  \bibinfo {pages} {100402} (\bibinfo {year} {2008})},\ \Eprint
+  {https://arxiv.org/abs/0805.3147} {arXiv:0805.3147 [hep-th]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Strauss}\ and\ \citenamefont
+  {Beyer}(2009)}]{Strauss:2009zza}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Strauss}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Beyer}},\ }\bibfield  {title} {\bibinfo {title} {{Massive light-front
+  Schwinger model at finite temperature}},\ }\href
+  {https://doi.org/10.1016/j.ppnp.2008.12.027} {\bibfield  {journal} {\bibinfo
+  {journal} {Prog. Part. Nucl. Phys.}\ }\textbf {\bibinfo {volume} {62}},\
+  \bibinfo {pages} {535} (\bibinfo {year} {2009})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Krautgartner}\ \emph {et~al.}(1992)\citenamefont
+  {Krautgartner}, \citenamefont {Pauli},\ and\ \citenamefont
+  {Wolz}}]{Krautgartner:1991xz}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Krautgartner}}, \bibinfo {author} {\bibfnamefont {H.~C.}\ \bibnamefont
+  {Pauli}},\ and\ \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Wolz}},\
+  }\bibfield  {title} {\bibinfo {title} {{Positronium and heavy quarkonia as
+  testing case for discretized light cone quantization. 1.}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.45.3755} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {45}},\ \bibinfo
+  {pages} {3755} (\bibinfo {year} {1992})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Trittmann}(1997{\natexlab{a}})}]{Trittmann:1997up}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {U.}~\bibnamefont
+  {Trittmann}},\ }\bibfield  {title} {\bibinfo {title} {{Front form QED in
+  (3+1)-dimensions: The Spin multiplet structure of the positronium spectrum at
+  strong coupling}},\ }in\ \href@noop {} {\emph {\bibinfo {booktitle} {{New
+  Nonperturbative Methods and Quantization of the Light Cone}}}}\ (\bibinfo
+  {year} {1997})\ pp.\ \bibinfo {pages} {89--96},\ \Eprint
+  {https://arxiv.org/abs/hep-th/9706055} {arXiv:hep-th/9706055} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Trittmann}(1997{\natexlab{b}})}]{Trittmann:1997tt}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {U.}~\bibnamefont
+  {Trittmann}},\ }\bibfield  {title} {\bibinfo {title} {{On the role of the
+  annihilation channel in front form positronium}},\ }\href@noop {} {\
+  (\bibinfo {year} {1997}{\natexlab{b}})},\ \Eprint
+  {https://arxiv.org/abs/hep-th/9705072} {arXiv:hep-th/9705072} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Lamm}\ and\ \citenamefont
+  {Lebed}(2014)}]{Lamm:2013oga}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
-  {Sazdjian}},\ }\bibfield  {title} {\bibinfo {title} {Meson scattering and
-  tetraquarks in two-dimensional {QCD}},\ }\href@noop {} {\bibfield  {journal}
-  {\bibinfo  {journal} {Phys. Rev. D}\ } (\bibinfo {year} {2025})},\ \Eprint
-  {https://arxiv.org/abs/2504.19809} {arXiv:2504.19809} \BibitemShut {NoStop}%
+  {Lamm}}\ and\ \bibinfo {author} {\bibfnamefont {R.~F.}\ \bibnamefont
+  {Lebed}},\ }\bibfield  {title} {\bibinfo {title} {{True muonium $(\mu^+
+  \mu^-)$ on the light front}},\ }\href
+  {https://doi.org/10.1088/0954-3899/41/12/125003} {\bibfield  {journal}
+  {\bibinfo  {journal} {J. Phys. G}\ }\textbf {\bibinfo {volume} {41}},\
+  \bibinfo {pages} {125003} (\bibinfo {year} {2014})},\ \Eprint
+  {https://arxiv.org/abs/1311.3245} {arXiv:1311.3245 [hep-ph]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Lamm}\ and\ \citenamefont
+  {Lebed}(2016)}]{Lamm:2016ong}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
+  {Lamm}}\ and\ \bibinfo {author} {\bibfnamefont {R.~F.}\ \bibnamefont
+  {Lebed}},\ }\bibfield  {title} {\bibinfo {title} {{Nonperturbative True
+  Muonium on the Light Front with TMSWIFT}},\ }\href
+  {https://doi.org/10.1007/s00601-016-1075-3} {\bibfield  {journal} {\bibinfo
+  {journal} {Few Body Syst.}\ }\textbf {\bibinfo {volume} {57}},\ \bibinfo
+  {pages} {663} (\bibinfo {year} {2016})},\ \Eprint
+  {https://arxiv.org/abs/1601.05771} {arXiv:1601.05771 [hep-ph]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Burkardt}\ and\ \citenamefont
+  {Dalley}(2002)}]{Burkardt:2001jg}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Burkardt}}\ and\ \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Dalley}},\ }\bibfield  {title} {\bibinfo {title} {{The Relativistic bound
+  state problem in QCD: Transverse lattice methods}},\ }\href
+  {https://doi.org/10.1016/S0146-6410(02)00140-0} {\bibfield  {journal}
+  {\bibinfo  {journal} {Prog. Part. Nucl. Phys.}\ }\textbf {\bibinfo {volume}
+  {48}},\ \bibinfo {pages} {317} (\bibinfo {year} {2002})},\ \Eprint
+  {https://arxiv.org/abs/hep-ph/0112007} {arXiv:hep-ph/0112007} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Hiller}(2016)}]{Hiller:2016itl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~R.}\ \bibnamefont
+  {Hiller}},\ }\bibfield  {title} {\bibinfo {title} {{Nonperturbative
+  light-front Hamiltonian methods}},\ }\href
+  {https://doi.org/10.1016/j.ppnp.2016.06.002} {\bibfield  {journal} {\bibinfo
+  {journal} {Prog. Part. Nucl. Phys.}\ }\textbf {\bibinfo {volume} {90}},\
+  \bibinfo {pages} {75} (\bibinfo {year} {2016})},\ \Eprint
+  {https://arxiv.org/abs/1606.08348} {arXiv:1606.08348 [hep-ph]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Vary}\ \emph {et~al.}(2010)\citenamefont {Vary},
+  \citenamefont {Honkanen}, \citenamefont {Li}, \citenamefont {Maris},
+  \citenamefont {Brodsky}, \citenamefont {Harindranath}, \citenamefont
+  {de~Teramond}, \citenamefont {Sternberg}, \citenamefont {Ng},\ and\
+  \citenamefont {Yang}}]{Vary:2009gt}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~P.}\ \bibnamefont
+  {Vary}}, \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Honkanen}},
+  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Li}}, \bibinfo {author}
+  {\bibfnamefont {P.}~\bibnamefont {Maris}}, \bibinfo {author} {\bibfnamefont
+  {S.~J.}\ \bibnamefont {Brodsky}}, \bibinfo {author} {\bibfnamefont
+  {A.}~\bibnamefont {Harindranath}}, \bibinfo {author} {\bibfnamefont {G.~F.}\
+  \bibnamefont {de~Teramond}}, \bibinfo {author} {\bibfnamefont
+  {P.}~\bibnamefont {Sternberg}}, \bibinfo {author} {\bibfnamefont {E.~G.}\
+  \bibnamefont {Ng}},\ and\ \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont
+  {Yang}},\ }\bibfield  {title} {\bibinfo {title} {{Hamiltonian light-front
+  field theory in a basis function approach}},\ }\href
+  {https://doi.org/10.1103/PhysRevC.81.035205} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. C}\ }\textbf {\bibinfo {volume} {81}},\ \bibinfo
+  {pages} {035205} (\bibinfo {year} {2010})},\ \Eprint
+  {https://arxiv.org/abs/0905.1411} {arXiv:0905.1411 [nucl-th]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Li}\ \emph {et~al.}(2016)\citenamefont {Li},
+  \citenamefont {Maris}, \citenamefont {Zhao},\ and\ \citenamefont
+  {Vary}}]{Li:2015zda}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont
+  {Li}}, \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Maris}}, \bibinfo
+  {author} {\bibfnamefont {X.}~\bibnamefont {Zhao}},\ and\ \bibinfo {author}
+  {\bibfnamefont {J.~P.}\ \bibnamefont {Vary}},\ }\bibfield  {title} {\bibinfo
+  {title} {{Heavy Quarkonium in a Holographic Basis}},\ }\href
+  {https://doi.org/10.1016/j.physletb.2016.04.065} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Lett. B}\ }\textbf {\bibinfo {volume} {758}},\
+  \bibinfo {pages} {118} (\bibinfo {year} {2016})},\ \Eprint
+  {https://arxiv.org/abs/1509.07212} {arXiv:1509.07212 [hep-ph]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Trittmann}(2024)}]{Trittmann:2023dar}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {U.}~\bibnamefont
+  {Trittmann}},\ }\bibfield  {title} {\bibinfo {title} {{Solving
+  two-dimensional adjoint QCD with a basis-function approach}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.109.016004} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {109}},\ \bibinfo
+  {pages} {016004} (\bibinfo {year} {2024})},\ \Eprint
+  {https://arxiv.org/abs/2307.15212} {arXiv:2307.15212 [hep-th]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Bakker}\ \emph {et~al.}(2014)\citenamefont {Bakker}
+  \emph {et~al.}}]{Bakker:2013cea}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {B.~L.~G.}\
+  \bibnamefont {Bakker}} \emph {et~al.},\ }\bibfield  {title} {\bibinfo {title}
+  {{Light-Front Quantum Chromodynamics: A framework for the analysis of hadron
+  physics}},\ }\href {https://doi.org/10.1016/j.nuclphysbps.2014.05.004}
+  {\bibfield  {journal} {\bibinfo  {journal} {Nucl. Phys. B Proc. Suppl.}\
+  }\textbf {\bibinfo {volume} {251-252}},\ \bibinfo {pages} {165} (\bibinfo
+  {year} {2014})},\ \Eprint {https://arxiv.org/abs/1309.6333} {arXiv:1309.6333
+  [hep-ph]} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Kreshchuk}\ \emph {et~al.}(2022)\citenamefont
+  {Kreshchuk}, \citenamefont {Kirby}, \citenamefont {Goldstein}, \citenamefont
+  {Beauchemin},\ and\ \citenamefont {Love}}]{Kreshchuk:2020dla}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Kreshchuk}}, \bibinfo {author} {\bibfnamefont {W.~M.}\ \bibnamefont
+  {Kirby}}, \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Goldstein}},
+  \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Beauchemin}},\ and\
+  \bibinfo {author} {\bibfnamefont {P.~J.}\ \bibnamefont {Love}},\ }\bibfield
+  {title} {\bibinfo {title} {{Quantum simulation of quantum field theory in the
+  light-front formulation}},\ }\href
+  {https://doi.org/10.1103/PhysRevA.105.032418} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. A}\ }\textbf {\bibinfo {volume} {105}},\ \bibinfo
+  {pages} {032418} (\bibinfo {year} {2022})},\ \Eprint
+  {https://arxiv.org/abs/2002.04016} {arXiv:2002.04016 [quant-ph]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Kreshchuk}\ \emph {et~al.}(2021)\citenamefont
+  {Kreshchuk}, \citenamefont {Jia}, \citenamefont {Kirby}, \citenamefont
+  {Goldstein}, \citenamefont {Vary},\ and\ \citenamefont
+  {Love}}]{Kreshchuk:2020aiq}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Kreshchuk}}, \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Jia}},
+  \bibinfo {author} {\bibfnamefont {W.~M.}\ \bibnamefont {Kirby}}, \bibinfo
+  {author} {\bibfnamefont {G.}~\bibnamefont {Goldstein}}, \bibinfo {author}
+  {\bibfnamefont {J.~P.}\ \bibnamefont {Vary}},\ and\ \bibinfo {author}
+  {\bibfnamefont {P.~J.}\ \bibnamefont {Love}},\ }\bibfield  {title} {\bibinfo
+  {title} {{Simulating Hadronic Physics on NISQ devices using Basis Light-Front
+  Quantization}},\ }\href {https://doi.org/10.1103/PhysRevA.103.062601}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. A}\ }\textbf {\bibinfo
+  {volume} {103}},\ \bibinfo {pages} {062601} (\bibinfo {year} {2021})},\
+  \Eprint {https://arxiv.org/abs/2011.13443} {arXiv:2011.13443 [quant-ph]}
+  \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Li}\ \emph {et~al.}(2022)\citenamefont {Li},
+  \citenamefont {Guo}, \citenamefont {Lai}, \citenamefont {Liu}, \citenamefont
+  {Wang}, \citenamefont {Xing}, \citenamefont {Zhang},\ and\ \citenamefont
+  {Zhu}}]{Li:2021kcs}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Li}}, \bibinfo {author} {\bibfnamefont {X.}~\bibnamefont {Guo}}, \bibinfo
+  {author} {\bibfnamefont {W.~K.}\ \bibnamefont {Lai}}, \bibinfo {author}
+  {\bibfnamefont {X.}~\bibnamefont {Liu}}, \bibinfo {author} {\bibfnamefont
+  {E.}~\bibnamefont {Wang}}, \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
+  {Xing}}, \bibinfo {author} {\bibfnamefont {D.-B.}\ \bibnamefont {Zhang}},\
+  and\ \bibinfo {author} {\bibfnamefont {S.-L.}\ \bibnamefont {Zhu}} (\bibinfo
+  {collaboration} {QuNu}),\ }\bibfield  {title} {\bibinfo {title} {{Partonic
+  collinear structure by quantum computing}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.105.L111502} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {105}},\
+  \bibinfo {pages} {L111502} (\bibinfo {year} {2022})},\ \Eprint
+  {https://arxiv.org/abs/2106.03865} {arXiv:2106.03865 [hep-ph]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Lamm}(2026)}]{Lamm:2026vqz}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
+  {Lamm}},\ }\bibfield  {title} {\bibinfo {title} {{No Quantum Utility from
+  Hadron Masses? No, Quantum Utility from Hadron Masses!}},\ }\href@noop {} {\
+  (\bibinfo {year} {2026})},\ \Eprint {https://arxiv.org/abs/2603.00946}
+  {arXiv:2603.00946 [hep-lat]} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Sazdjian}(2025)}]{Sazdjian:2025mqg}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
+  {Sazdjian}},\ }\bibfield  {title} {\bibinfo {title} {{Meson scattering and
+  tetraquarks in two-dimensional QCD}},\ }\href
+  {https://doi.org/10.1103/fnk2-jj72} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {112}},\ \bibinfo
+  {pages} {054029} (\bibinfo {year} {2025})},\ \Eprint
+  {https://arxiv.org/abs/2504.19809} {arXiv:2504.19809 [hep-ph]} \BibitemShut
+  {NoStop}%
 \bibitem [{\citenamefont {Lucha}\ \emph {et~al.}(2017)\citenamefont {Lucha},
   \citenamefont {Melikhov},\ and\ \citenamefont {Sazdjian}}]{Lucha:2017gqq}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.}~\bibnamefont
   {Lucha}}, \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Melikhov}},\
   and\ \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Sazdjian}},\
-  }\bibfield  {title} {\bibinfo {title} {Tetraquark and two-meson states at
-  large $n_c$},\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal}
-  {Eur. Phys. J. C}\ }\textbf {\bibinfo {volume} {77}},\ \bibinfo {pages} {866}
-  (\bibinfo {year} {2017})},\ \Eprint {https://arxiv.org/abs/1710.08316}
-  {arXiv:1710.08316} \BibitemShut {NoStop}%
+  }\bibfield  {title} {\bibinfo {title} {{Tetraquark and two-meson states at
+  large $N_{\mathrm{c}}$}},\ }\href
+  {https://doi.org/10.1140/epjc/s10052-017-5437-x} {\bibfield  {journal}
+  {\bibinfo  {journal} {Eur. Phys. J. C}\ }\textbf {\bibinfo {volume} {77}},\
+  \bibinfo {pages} {866} (\bibinfo {year} {2017})},\ \Eprint
+  {https://arxiv.org/abs/1710.08316} {arXiv:1710.08316 [hep-ph]} \BibitemShut
+  {NoStop}%
 \bibitem [{\citenamefont {van~de Sande}(1996)}]{vandeSande:1996mc}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
-  {van~de Sande}},\ }\bibfield  {title} {\bibinfo {title} {Convergence of
-  discretized light-cone quantization in the small-mass limit},\ }\href@noop {}
-  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo
-  {volume} {54}},\ \bibinfo {pages} {6347} (\bibinfo {year} {1996})},\ \Eprint
+  {van~de Sande}},\ }\bibfield  {title} {\bibinfo {title} {{Convergence of
+  discretized light cone quantization in the small mass limit}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.54.6347} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {54}},\ \bibinfo
+  {pages} {6347} (\bibinfo {year} {1996})},\ \Eprint
   {https://arxiv.org/abs/hep-ph/9605409} {arXiv:hep-ph/9605409} \BibitemShut
   {NoStop}%
-\bibitem [{\citenamefont {'t~Hooft}(1974)}]{tHooft:1974hx}%
+\bibitem [{\citenamefont {'t~Hooft}(1974)}]{tHooft:1974pnl}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
-  {'t~Hooft}},\ }\bibfield  {title} {\bibinfo {title} {A two-dimensional model
-  for mesons},\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal}
-  {Nucl. Phys. B}\ }\textbf {\bibinfo {volume} {75}},\ \bibinfo {pages} {461}
-  (\bibinfo {year} {1974})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Hamer}(1982)}]{Hamer:1982nc}%
+  {'t~Hooft}},\ }\bibfield  {title} {\bibinfo {title} {{A Two-Dimensional Model
+  for Mesons}},\ }\href {https://doi.org/10.1016/0550-3213(74)90088-1}
+  {\bibfield  {journal} {\bibinfo  {journal} {Nucl. Phys. B}\ }\textbf
+  {\bibinfo {volume} {75}},\ \bibinfo {pages} {461} (\bibinfo {year}
+  {1974})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Lepage}\ \emph {et~al.}(1992)\citenamefont {Lepage},
+  \citenamefont {Magnea}, \citenamefont {Nakhleh}, \citenamefont {Magnea},\
+  and\ \citenamefont {Hornbostel}}]{Lepage:1992tx}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.~P.}\ \bibnamefont
+  {Lepage}}, \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont {Magnea}},
+  \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Nakhleh}}, \bibinfo
+  {author} {\bibfnamefont {U.}~\bibnamefont {Magnea}},\ and\ \bibinfo {author}
+  {\bibfnamefont {K.}~\bibnamefont {Hornbostel}},\ }\bibfield  {title}
+  {\bibinfo {title} {{Improved nonrelativistic QCD for heavy quark physics}},\
+  }\href {https://doi.org/10.1103/PhysRevD.46.4052} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {46}},\
+  \bibinfo {pages} {4052} (\bibinfo {year} {1992})},\ \Eprint
+  {https://arxiv.org/abs/hep-lat/9205007} {arXiv:hep-lat/9205007} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Follana}\ \emph {et~al.}(2007)\citenamefont
+  {Follana}, \citenamefont {Mason}, \citenamefont {Davies}, \citenamefont
+  {Hornbostel}, \citenamefont {Lepage}, \citenamefont {Shigemitsu},
+  \citenamefont {Trottier},\ and\ \citenamefont {Wong}}]{Follana:2006rc}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.}~\bibnamefont
+  {Follana}}, \bibinfo {author} {\bibfnamefont {Q.}~\bibnamefont {Mason}},
+  \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Davies}}, \bibinfo
+  {author} {\bibfnamefont {K.}~\bibnamefont {Hornbostel}}, \bibinfo {author}
+  {\bibfnamefont {G.~P.}\ \bibnamefont {Lepage}}, \bibinfo {author}
+  {\bibfnamefont {J.}~\bibnamefont {Shigemitsu}}, \bibinfo {author}
+  {\bibfnamefont {H.}~\bibnamefont {Trottier}},\ and\ \bibinfo {author}
+  {\bibfnamefont {K.}~\bibnamefont {Wong}} (\bibinfo {collaboration} {HPQCD,
+  UKQCD}),\ }\bibfield  {title} {\bibinfo {title} {{Highly improved staggered
+  quarks on the lattice, with applications to charm physics}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.75.054502} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {75}},\ \bibinfo
+  {pages} {054502} (\bibinfo {year} {2007})},\ \Eprint
+  {https://arxiv.org/abs/hep-lat/0610092} {arXiv:hep-lat/0610092} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Hamer}(1982)}]{Hamer:1981yq}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {C.~J.}\ \bibnamefont
-  {Hamer}},\ }\bibfield  {title} {\bibinfo {title} {{SU(2)} {Yang--Mills}
-  theory in (1+1) dimensions: A finite-lattice approach},\ }\href@noop {}
-  {\bibfield  {journal} {\bibinfo  {journal} {Nucl. Phys. B}\ }\textbf
-  {\bibinfo {volume} {195}},\ \bibinfo {pages} {503} (\bibinfo {year}
-  {1982})}\BibitemShut {NoStop}%
+  {Hamer}},\ }\bibfield  {title} {\bibinfo {title} {{SU(2) {Yang-Mills} Theory
+  in (1+1)-dimensions: A Finite Lattice Approach}},\ }\href
+  {https://doi.org/10.1016/0550-3213(82)90009-8} {\bibfield  {journal}
+  {\bibinfo  {journal} {Nucl. Phys. B}\ }\textbf {\bibinfo {volume} {195}},\
+  \bibinfo {pages} {503} (\bibinfo {year} {1982})}\BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Ambrosino}\ and\ \citenamefont
   {Komatsu}(2025)}]{Ambrosino:2023dik}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
   {Ambrosino}}\ and\ \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
-  {Komatsu}},\ }\bibfield  {title} {\bibinfo {title} {2d {QCD} and
-  integrability, part {I}: 't {Hooft} model},\ }\href@noop {} {\bibfield
-  {journal} {\bibinfo  {journal} {JHEP}\ }\textbf {\bibinfo {volume} {02}},\
-  \bibinfo {pages} {126}},\ \Eprint {https://arxiv.org/abs/2312.15598}
-  {arXiv:2312.15598} \BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Litvinov}\ \emph {et~al.}(2024)\citenamefont
-  {Litvinov} \emph {et~al.}}]{Litvinov:2024aa}%
+  {Komatsu}},\ }\bibfield  {title} {\bibinfo {title} {{2d QCD and
+  integrability. Part I. {\textquoteright}t Hooft model}},\ }\href
+  {https://doi.org/10.1007/JHEP02(2025)126} {\bibfield  {journal} {\bibinfo
+  {journal} {JHEP}\ }\textbf {\bibinfo {volume} {02}},\ \bibinfo {pages}
+  {126}},\ \Eprint {https://arxiv.org/abs/2312.15598} {arXiv:2312.15598
+  [hep-th]} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Litvinov}\ and\ \citenamefont
+  {Meshcheriakov}(2025)}]{Litvinov:2024riz}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
-  {Litvinov}} \emph {et~al.},\ }\bibfield  {title} {\bibinfo {title} {Meson
-  mass spectrum in {QCD}$_2$ 't {Hooft}'s model},\ }\href@noop {} {\bibfield
-  {journal} {\bibinfo  {journal} {Nucl. Phys. B}\ } (\bibinfo {year} {2024})},\
-  \Eprint {https://arxiv.org/abs/2409.11324} {arXiv:2409.11324} \BibitemShut
+  {Litvinov}}\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Meshcheriakov}},\ }\bibfield  {title} {\bibinfo {title} {{Meson mass
+  spectrum in QCD2 't Hooft's model}},\ }\href
+  {https://doi.org/10.1016/j.nuclphysb.2024.116766} {\bibfield  {journal}
+  {\bibinfo  {journal} {Nucl. Phys. B}\ }\textbf {\bibinfo {volume} {1010}},\
+  \bibinfo {pages} {116766} (\bibinfo {year} {2025})},\ \Eprint
+  {https://arxiv.org/abs/2409.11324} {arXiv:2409.11324 [hep-th]} \BibitemShut
   {NoStop}%
-\bibitem [{\citenamefont {Karthik}\ \emph {et~al.}(2023)\citenamefont
+\bibitem [{\citenamefont {Karthik}\ \emph {et~al.}(2024)\citenamefont
   {Karthik}, \citenamefont {Narayanan},\ and\ \citenamefont
-  {Narayanan}}]{Karthik:2023vjv}%
+  {Narayanan}}]{Karthik:2023gud}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {N.}~\bibnamefont
   {Karthik}}, \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Narayanan}},\
-  and\ \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Narayanan}},\
-  }\bibfield  {title} {\bibinfo {title} {Flow to {WZW} in two-dimensional {QCD}
-  with overlap fermions},\ }\href@noop {} {\  (\bibinfo {year} {2023})},\
-  \Eprint {https://arxiv.org/abs/2312.13929} {arXiv:2312.13929} \BibitemShut
+  and\ \bibinfo {author} {\bibfnamefont {S.~A.}\ \bibnamefont {Narayanan}},\
+  }\bibfield  {title} {\bibinfo {title} {{Approaching the conformal WZW
+  behavior in the infrared limit of two-dimensional massless QCD: A lattice
+  study}},\ }\href {https://doi.org/10.1103/PhysRevD.109.054502} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume}
+  {109}},\ \bibinfo {pages} {054502} (\bibinfo {year} {2024})},\ \Eprint
+  {https://arxiv.org/abs/2312.13929} {arXiv:2312.13929 [hep-lat]} \BibitemShut
   {NoStop}%
 \bibitem [{\citenamefont {Silvi}\ \emph {et~al.}(2017)\citenamefont {Silvi},
   \citenamefont {Rico}, \citenamefont {Dalmonte}, \citenamefont {Tschirsich},\
@@ -142,10 +464,12 @@
   \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Dalmonte}}, \bibinfo
   {author} {\bibfnamefont {F.}~\bibnamefont {Tschirsich}},\ and\ \bibinfo
   {author} {\bibfnamefont {S.}~\bibnamefont {Montangero}},\ }\bibfield  {title}
-  {\bibinfo {title} {Finite-density phase diagram of a (1+1)-d non-abelian
-  lattice gauge theory with tensor networks},\ }\href@noop {} {\bibfield
-  {journal} {\bibinfo  {journal} {Quantum}\ }\textbf {\bibinfo {volume} {1}},\
-  \bibinfo {pages} {9} (\bibinfo {year} {2017})}\BibitemShut {NoStop}%
+  {\bibinfo {title} {{Finite-density phase diagram of a $(1+1)-d$ non-abelian
+  lattice gauge theory with tensor networks}},\ }\href
+  {https://doi.org/10.22331/q-2017-04-25-9} {\bibfield  {journal} {\bibinfo
+  {journal} {Quantum}\ }\textbf {\bibinfo {volume} {1}},\ \bibinfo {pages} {9}
+  (\bibinfo {year} {2017})},\ \Eprint {https://arxiv.org/abs/1606.05510}
+  {arXiv:1606.05510 [quant-ph]} \BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Ba{\~n}uls}\ \emph {et~al.}(2017)\citenamefont
   {Ba{\~n}uls}, \citenamefont {Cichy}, \citenamefont {Cirac}, \citenamefont
   {Jansen},\ and\ \citenamefont {K{\"u}hn}}]{Banuls:2017ena}%
@@ -155,11 +479,13 @@
   \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}}, \bibinfo
   {author} {\bibfnamefont {K.}~\bibnamefont {Jansen}},\ and\ \bibinfo {author}
   {\bibfnamefont {S.}~\bibnamefont {K{\"u}hn}},\ }\bibfield  {title} {\bibinfo
-  {title} {Density induced phase transitions in the {Schwinger} model: a study
-  with matrix product states},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
+  {title} {{Efficient basis formulation for 1+1 dimensional SU(2) lattice gauge
+  theory: Spectral calculations with matrix product states}},\ }\href
+  {https://doi.org/10.1103/PhysRevX.7.041046} {\bibfield  {journal} {\bibinfo
   {journal} {Phys. Rev. X}\ }\textbf {\bibinfo {volume} {7}},\ \bibinfo {pages}
-  {041046} (\bibinfo {year} {2017})},\ \bibinfo {note} {chiral exponent $\nu =
-  0.700(29)(11)$ over $m/g \in [0.1, 0.4]$}\BibitemShut {NoStop}%
+  {041046} (\bibinfo {year} {2017})},\ \Eprint
+  {https://arxiv.org/abs/1707.06434} {arXiv:1707.06434 [hep-lat]} \BibitemShut
+  {NoStop}%
 \bibitem [{\citenamefont {Silvi}\ \emph {et~al.}(2019)\citenamefont {Silvi},
   \citenamefont {Sauer}, \citenamefont {Tschirsich},\ and\ \citenamefont
   {Montangero}}]{Silvi:2019wnf}%
@@ -168,20 +494,23 @@
   {Silvi}}, \bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont {Sauer}},
   \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Tschirsich}},\ and\
   \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Montangero}},\ }\bibfield
-   {title} {\bibinfo {title} {Tensor network simulation of an {SU(3)} lattice
-  gauge theory in 1d},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
-  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {100}},\ \bibinfo
-  {pages} {074512} (\bibinfo {year} {2019})},\ \Eprint
-  {https://arxiv.org/abs/1901.04403} {arXiv:1901.04403} \BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Hayata}\ \emph {et~al.}(2023)\citenamefont {Hayata},
-  \citenamefont {Hidaka},\ and\ \citenamefont {Nishimura}}]{Hayata:2023bgh}%
+   {title} {\bibinfo {title} {{Tensor network simulation of an SU(3) lattice
+  gauge theory in 1D}},\ }\href {https://doi.org/10.1103/PhysRevD.100.074512}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo
+  {volume} {100}},\ \bibinfo {pages} {074512} (\bibinfo {year} {2019})},\
+  \Eprint {https://arxiv.org/abs/1901.04403} {arXiv:1901.04403 [quant-ph]}
+  \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Hayata}\ \emph {et~al.}(2024)\citenamefont {Hayata},
+  \citenamefont {Hidaka},\ and\ \citenamefont {Nishimura}}]{Hayata:2023pkw}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
   {Hayata}}, \bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont {Hidaka}},\
   and\ \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Nishimura}},\
-  }\bibfield  {title} {\bibinfo {title} {Dense {QCD}$_2$ with matrix product
-  states},\ }\href@noop {} {\  (\bibinfo {year} {2023})},\ \Eprint
-  {https://arxiv.org/abs/2311.11643} {arXiv:2311.11643} \BibitemShut {NoStop}%
+  }\bibfield  {title} {\bibinfo {title} {{Dense QCD$_{2}$ with matrix product
+  states}},\ }\href {https://doi.org/10.1007/JHEP07(2024)106} {\bibfield
+  {journal} {\bibinfo  {journal} {JHEP}\ }\textbf {\bibinfo {volume} {07}},\
+  \bibinfo {pages} {106}},\ \Eprint {https://arxiv.org/abs/2311.11643}
+  {arXiv:2311.11643 [hep-lat]} \BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Atas}\ \emph {et~al.}(2021)\citenamefont {Atas},
   \citenamefont {Zhang}, \citenamefont {Lewis}, \citenamefont {Jahanpour},
   \citenamefont {Haase},\ and\ \citenamefont {Muschik}}]{Atas:2021ext}%
@@ -192,10 +521,12 @@
   {author} {\bibfnamefont {A.}~\bibnamefont {Jahanpour}}, \bibinfo {author}
   {\bibfnamefont {J.~F.}\ \bibnamefont {Haase}},\ and\ \bibinfo {author}
   {\bibfnamefont {C.~A.}\ \bibnamefont {Muschik}},\ }\bibfield  {title}
-  {\bibinfo {title} {{SU(2)} hadrons on a quantum computer via a variational
-  approach},\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal} {Nature
-  Commun.}\ }\textbf {\bibinfo {volume} {12}},\ \bibinfo {pages} {6499}
-  (\bibinfo {year} {2021})}\BibitemShut {NoStop}%
+  {\bibinfo {title} {{SU(2) hadrons on a quantum computer via a variational
+  approach}},\ }\href {https://doi.org/10.1038/s41467-021-26825-4} {\bibfield
+  {journal} {\bibinfo  {journal} {Nature Commun.}\ }\textbf {\bibinfo {volume}
+  {12}},\ \bibinfo {pages} {6499} (\bibinfo {year} {2021})},\ \Eprint
+  {https://arxiv.org/abs/2102.08920} {arXiv:2102.08920 [quant-ph]} \BibitemShut
+  {NoStop}%
 \bibitem [{\citenamefont {Farrell}\ \emph {et~al.}(2023)\citenamefont
   {Farrell}, \citenamefont {Chernyshev}, \citenamefont {Powell}, \citenamefont
   {Zemlevskiy}, \citenamefont {Illa},\ and\ \citenamefont
@@ -207,25 +538,27 @@
   {Powell}}, \bibinfo {author} {\bibfnamefont {N.~A.}\ \bibnamefont
   {Zemlevskiy}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Illa}},\
   and\ \bibinfo {author} {\bibfnamefont {M.~J.}\ \bibnamefont {Savage}},\
-  }\bibfield  {title} {\bibinfo {title} {Preparations for quantum simulation of
-  quantum chromodynamics in 1+1 dimensions: (i) axial gauge},\ }\href@noop {}
-  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo
-  {volume} {107}},\ \bibinfo {pages} {054512} (\bibinfo {year} {2023})},\
-  \Eprint {https://arxiv.org/abs/2207.01731} {arXiv:2207.01731} \BibitemShut
+  }\bibfield  {title} {\bibinfo {title} {{Preparations for quantum simulations
+  of quantum chromodynamics in 1+1 dimensions. I. Axial gauge}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.107.054512} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {107}},\ \bibinfo
+  {pages} {054512} (\bibinfo {year} {2023})},\ \Eprint
+  {https://arxiv.org/abs/2207.01731} {arXiv:2207.01731 [quant-ph]} \BibitemShut
   {NoStop}%
 \bibitem [{\citenamefont {Ba{\~n}uls}\ \emph {et~al.}(2013)\citenamefont
-  {Ba{\~n}uls}, \citenamefont {Cichy}, \citenamefont {Cirac},\ and\
-  \citenamefont {Jansen}}]{Banuls:2013jaa}%
+  {Ba{\~n}uls}, \citenamefont {Cichy}, \citenamefont {Jansen},\ and\
+  \citenamefont {Cirac}}]{Banuls:2013jaa}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.~C.}\ \bibnamefont
   {Ba{\~n}uls}}, \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Cichy}},
-  \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\ and\
-  \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Jansen}},\ }\bibfield
-  {title} {\bibinfo {title} {The mass spectrum of the {Schwinger} model with
-  matrix product states},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
-  {journal} {JHEP}\ }\textbf {\bibinfo {volume} {11}},\ \bibinfo {pages}
-  {158}},\ \Eprint {https://arxiv.org/abs/1305.3765} {arXiv:1305.3765}
-  \BibitemShut {NoStop}%
+  \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Jansen}},\ and\ \bibinfo
+  {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\ }\bibfield  {title}
+  {\bibinfo {title} {{The mass spectrum of the Schwinger model with Matrix
+  Product States}},\ }\href {https://doi.org/10.1007/JHEP11(2013)158}
+  {\bibfield  {journal} {\bibinfo  {journal} {JHEP}\ }\textbf {\bibinfo
+  {volume} {11}},\ \bibinfo {pages} {158}},\ \Eprint
+  {https://arxiv.org/abs/1305.3765} {arXiv:1305.3765 [hep-lat]} \BibitemShut
+  {NoStop}%
 \bibitem [{\citenamefont {Dempsey}\ \emph {et~al.}(2022)\citenamefont
   {Dempsey}, \citenamefont {Klebanov}, \citenamefont {Pufu},\ and\
   \citenamefont {Zan}}]{Dempsey:2022nys}%
@@ -234,13 +567,14 @@
   {Dempsey}}, \bibinfo {author} {\bibfnamefont {I.~R.}\ \bibnamefont
   {Klebanov}}, \bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont {Pufu}},\
   and\ \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont {Zan}},\ }\bibfield
-  {title} {\bibinfo {title} {Discrete chiral symmetry and mass shift in the
-  lattice {Hamiltonian} approach to the {Schwinger} model},\ }\href@noop {}
-  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. Res.}\ }\textbf
-  {\bibinfo {volume} {4}},\ \bibinfo {pages} {043133} (\bibinfo {year}
-  {2022})},\ \Eprint {https://arxiv.org/abs/2206.05308} {arXiv:2206.05308}
-  \BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Anand}\ \emph {et~al.}(2021)\citenamefont {Anand},
+  {title} {\bibinfo {title} {{Discrete chiral symmetry and mass shift in the
+  lattice Hamiltonian approach to the Schwinger model}},\ }\href
+  {https://doi.org/10.1103/PhysRevResearch.4.043133} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Res.}\ }\textbf {\bibinfo {volume} {4}},\
+  \bibinfo {pages} {043133} (\bibinfo {year} {2022})},\ \Eprint
+  {https://arxiv.org/abs/2206.05308} {arXiv:2206.05308 [hep-th]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Anand}\ \emph {et~al.}(2024)\citenamefont {Anand},
   \citenamefont {Fitzpatrick}, \citenamefont {Katz},\ and\ \citenamefont
   {Xin}}]{Anand:2021qnd}%
   \BibitemOpen
@@ -248,35 +582,84 @@
   {Anand}}, \bibinfo {author} {\bibfnamefont {A.~L.}\ \bibnamefont
   {Fitzpatrick}}, \bibinfo {author} {\bibfnamefont {E.}~\bibnamefont {Katz}},\
   and\ \bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont {Xin}},\ }\bibfield
-  {title} {\bibinfo {title} {Chiral limit of 2d {QCD} revisited with lightcone
-  conformal truncation},\ }\href@noop {} {\  (\bibinfo {year} {2021})},\
-  \Eprint {https://arxiv.org/abs/2111.00021} {arXiv:2111.00021} \BibitemShut
+  {title} {\bibinfo {title} {{Chiral limit of 2d QCD revisited with lightcone
+  conformal truncation}},\ }\href {https://doi.org/10.1007/JHEP01(2024)189}
+  {\bibfield  {journal} {\bibinfo  {journal} {JHEP}\ }\textbf {\bibinfo
+  {volume} {01}},\ \bibinfo {pages} {189}},\ \Eprint
+  {https://arxiv.org/abs/2111.00021} {arXiv:2111.00021 [hep-th]} \BibitemShut
   {NoStop}%
-\bibitem [{\citenamefont {Kochergin}(2024)}]{Kochergin:2024aa}%
+\bibitem [{\citenamefont {Kochergin}(2025)}]{Kochergin:2024quv}%
   \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {I.}~\bibnamefont
-  {Kochergin}},\ }\bibfield  {title} {\bibinfo {title} {$1/n$ corrections in
-  {QCD}$_2$: small mass limit and threshold states},\ }\href@noop {} {\
-  (\bibinfo {year} {2024})},\ \Eprint {https://arxiv.org/abs/2405.04031}
-  {arXiv:2405.04031} \BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Hornbostel}(1988)}]{Hornbostel:thesis}%
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {I.~V.}\ \bibnamefont
+  {Kochergin}},\ }\bibfield  {title} {\bibinfo {title} {{1/N corrections in
+  QCD$_{2}$: small mass limit and threshold states}},\ }\href
+  {https://doi.org/10.1007/JHEP02(2025)073} {\bibfield  {journal} {\bibinfo
+  {journal} {JHEP}\ }\textbf {\bibinfo {volume} {02}},\ \bibinfo {pages}
+  {073}},\ \Eprint {https://arxiv.org/abs/2405.04031} {arXiv:2405.04031
+  [hep-th]} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Hornbostel}(1992)}]{Hornbostel:1991qj}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {K.}~\bibnamefont
-  {Hornbostel}},\ }\emph {\bibinfo {title} {The application of light-cone
-  quantization to quantum chromodynamics in one-plus-one dimensions}},\
-  \href@noop {} {Ph.D. thesis},\ \bibinfo  {school} {Stanford University}
-  (\bibinfo {year} {1988}),\ \bibinfo {note} {sLAC Report 333}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {M{\"u}ller}\ \emph {et~al.}(1998)\citenamefont
-  {M{\"u}ller}, \citenamefont {Kalloniatis},\ and\ \citenamefont
-  {Pauli}}]{Muller:1998mk}%
+  {Hornbostel}},\ }\bibfield  {title} {\bibinfo {title} {{Nontrivial vacua from
+  equal time to the light cone}},\ }\href
+  {https://doi.org/10.1103/PhysRevD.45.3781} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. D}\ }\textbf {\bibinfo {volume} {45}},\ \bibinfo
+  {pages} {3781} (\bibinfo {year} {1992})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Hornbostel}(1988)}]{Hornbostel:1988ne}%
   \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {U.}~\bibnamefont
-  {M{\"u}ller}}, \bibinfo {author} {\bibfnamefont {A.~C.}\ \bibnamefont
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {K.}~\bibnamefont
+  {Hornbostel}},\ }\emph {\bibinfo {title} {{The Application of Light-Cone
+  Quantization to Quantum Chromodynamics in One-Plus-One Dimensions}}},\ \href
+  {https://inspirehep.net/literature/267213} {Ph.D. thesis},\ \bibinfo
+  {school} {Stanford University} (\bibinfo {year} {1988})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Mueller}\ \emph {et~al.}(1998)\citenamefont
+  {Mueller}, \citenamefont {Kalloniatis},\ and\ \citenamefont
+  {Pauli}}]{Mueller:1998tf}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.~S.}\ \bibnamefont
+  {Mueller}}, \bibinfo {author} {\bibfnamefont {A.~C.}\ \bibnamefont
   {Kalloniatis}},\ and\ \bibinfo {author} {\bibfnamefont {H.-C.}\ \bibnamefont
-  {Pauli}},\ }\bibfield  {title} {\bibinfo {title} {Zero modes and the vacuum
-  problem: {DLCQ} of two-dimensional {SU(2)} {Yang--Mills} with adjoint
-  scalars},\ }\href@noop {} {\  (\bibinfo {year} {1998})},\ \Eprint
+  {Pauli}},\ }\bibfield  {title} {\bibinfo {title} {{Effect of zero modes on
+  the bound state spectrum in light cone quantization}},\ }\href
+  {https://doi.org/10.1016/S0370-2693(98)00759-X} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Lett. B}\ }\textbf {\bibinfo {volume} {435}},\
+  \bibinfo {pages} {189} (\bibinfo {year} {1998})},\ \Eprint
   {https://arxiv.org/abs/hep-th/9803204} {arXiv:hep-th/9803204} \BibitemShut
   {NoStop}%
+\bibitem [{\citenamefont {Gustafson}\ \emph {et~al.}(2026)\citenamefont
+  {Gustafson}, \citenamefont {Hernandez}, \citenamefont {Herren}, \citenamefont
+  {Jeeninga}, \citenamefont {Kharchenko}, \citenamefont {Lamm}, \citenamefont
+  {Steeno}, \citenamefont {Van~de Water},\ and\ \citenamefont
+  {Wagman}}]{Gustafson:2026ht}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.~J.}\ \bibnamefont
+  {Gustafson}}, \bibinfo {author} {\bibfnamefont {I.~B.}\ \bibnamefont
+  {Hernandez}}, \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Herren}},
+  \bibinfo {author} {\bibfnamefont {E.~M.}\ \bibnamefont {Jeeninga}}, \bibinfo
+  {author} {\bibfnamefont {M.}~\bibnamefont {Kharchenko}}, \bibinfo {author}
+  {\bibfnamefont {H.}~\bibnamefont {Lamm}}, \bibinfo {author} {\bibfnamefont
+  {E.~J.}\ \bibnamefont {Steeno}}, \bibinfo {author} {\bibfnamefont {R.~S.}\
+  \bibnamefont {Van~de Water}},\ and\ \bibinfo {author} {\bibfnamefont {M.~L.}\
+  \bibnamefont {Wagman}},\ }\bibfield  {title} {\bibinfo {title} {{Hadronic
+  tensors in $\mathbb{Z}_2$ lattice gauge theory on 101 qubits}}} (\bibinfo
+  {year} {2026}),\ \bibinfo {note} {fermilab report
+  FERMILAB-PUB-26-0459-STUDENT-T, in preparation}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Lepage}\ \emph {et~al.}(2002)\citenamefont {Lepage},
+  \citenamefont {Clark}, \citenamefont {Davies}, \citenamefont {Hornbostel},
+  \citenamefont {Mackenzie}, \citenamefont {Morningstar},\ and\ \citenamefont
+  {Trottier}}]{Lepage:2001ym}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.~P.}\ \bibnamefont
+  {Lepage}}, \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont {Clark}},
+  \bibinfo {author} {\bibfnamefont {C.~T.~H.}\ \bibnamefont {Davies}}, \bibinfo
+  {author} {\bibfnamefont {K.}~\bibnamefont {Hornbostel}}, \bibinfo {author}
+  {\bibfnamefont {P.~B.}\ \bibnamefont {Mackenzie}}, \bibinfo {author}
+  {\bibfnamefont {C.}~\bibnamefont {Morningstar}},\ and\ \bibinfo {author}
+  {\bibfnamefont {H.}~\bibnamefont {Trottier}} (\bibinfo {collaboration}
+  {HPQCD}),\ }\bibfield  {title} {\bibinfo {title} {{Constrained curve
+  fitting}},\ }\href {https://doi.org/10.1016/S0920-5632(01)01638-3} {\bibfield
+   {journal} {\bibinfo  {journal} {Nucl. Phys. B Proc. Suppl.}\ }\textbf
+  {\bibinfo {volume} {106}},\ \bibinfo {pages} {12} (\bibinfo {year} {2002})},\
+  \Eprint {https://arxiv.org/abs/hep-lat/0110175} {arXiv:hep-lat/0110175}
+  \BibitemShut {NoStop}%
 \end{thebibliography}%

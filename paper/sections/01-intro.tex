@@ -2,53 +2,91 @@
 \section{Introduction}
 \label{sec:intro}
 
-In 1990, Hornbostel, Brodsky and Pauli diagonalized the light-cone Hamiltonian
-of SU($N$) gauge theory in one space and one time dimension in a discrete
-momentum basis, and computed the hadronic spectrum and wavefunctions across
-couplings, numbers of colours, and baryon number~\cite{Hornbostel:1988fb}.
-The calculation ran at resolutions $2K = 16$--$24$, in minutes on the
-mainframes of the day, with convergence controlled by a single extrapolation
-formula.  It became a standard reference for discretized light-cone
-quantization (DLCQ), and its figures are still the picture most physicists
-carry of what QCD in two dimensions looks like at finite $N$: which states
-exist, how their wavefunctions deform with coupling, how quickly large-$N$
-becomes a good approximation.
+In 1990, Hornbostel, Brodsky and Pauli diagonalized the light-cone
+Hamiltonian of SU($N$) gauge theory in one space and one time
+dimension~\cite{Hornbostel:1988fb}.  They computed the hadronic spectrum and
+wavefunctions across couplings, colors, and baryon number at resolutions
+$2K = 16$--$24$, in minutes on the mainframes of the day.  Convergence was
+controlled by a single extrapolation formula.  The paper became the standard
+reference for discretized light-cone quantization (DLCQ), and its figures
+are still the picture most physicists carry of QCD in two dimensions at
+finite $N$.
 
-The reasons to study the model have, if anything, strengthened since.
-Tractability remains: the theory confines, has a meaningful chiral limit, and
-carries one dimensionless parameter, while being solvable to high precision.
-The role of test bed has changed hands --- where the 1990 paper looked ahead
-to DLCQ in four dimensions, today the same model is the standard benchmark
-for Hamiltonian lattice methods, tensor networks, and quantum simulation,
-which makes controlled finite-$N$ spectra directly useful to communities that
-did not exist then.  And the model has open questions of its own: the
-chiral-limit behaviour at finite $N$ is measured differently by light-front
-and equal-time methods (Sec.~\ref{sec:modern}), and the existence of compact
-multiquark states near threshold is an active large-$N$ prediction awaiting a
-finite-$N$ test~\cite{Sazdjian:2025aa,Lucha:2017gqq}.
+The method has a long lineage.  DLCQ was introduced by Pauli and
+Brodsky~\cite{Pauli:1985pv,Pauli:1985ps} and first applied to the Schwinger
+model~\cite{Eller:1986nt}; reviews are
+Refs.~\cite{Brodsky:1992mp,Brodsky:1997de}.  The same framework later
+reached finite temperature in QED$_{1+1}$, including thermodynamics and the
+analogue of the $R$ ratio~\cite{Strauss:2008zx,Strauss:2009zza}.  Light-cone
+wavefunctions feed a much wider class of observables than spectra.
 
-This paper re-does the 1990 calculation with thirty-six years of hardware and
---- more importantly --- of error analysis.  We reproduce every figure and the
-table of that paper, at the original parameters and again at resolutions up
-to $2K \simeq 100$, from two independent implementations of the same
-Hamiltonian: the preserved Fortran of the original program, and a validated
-open-source port.  Where the original controlled its errors with one
-extrapolation series and a parenthesis convention, we carry a four-component
-error budget with held-out validation (Sec.~\ref{sec:budget}); where its
-weak-coupling entries were limited by the momentum grid in a way no
-resolution can repair, we identify the mechanism, quantify it without free
-parameters, and reach the chiral region instead with van de Sande's improved
-Hamiltonian~\cite{vandeSande:1996mc} (Sec.~\ref{sec:chiral}).  Two sections
-have no 1990 counterpart: a search for states dominated by four- and
-six-parton Fock sectors --- tetraquark and hexaquark candidates ---
-(Sec.~\ref{sec:exotics}), and a comparison against the modern record:
-integrability results at large $N$, tensor-network and quantum-hardware
-spectra at $N = 2, 3$, and precision Schwinger-model benchmarks
-(Sec.~\ref{sec:modern}).
+Nor did the program stop in two dimensions.  Positronium and quarkonium
+served as 3+1 DLCQ test cases early~\cite{Krautgartner:1991xz}, front-form
+QED resolved the positronium spin
+multiplets~\cite{Trittmann:1997up,Trittmann:1997tt}, and parallel
+light-front solvers later delivered precision true-muonium
+spectra~\cite{Lamm:2013oga,Lamm:2016ong}.  Higher-dimensional QCD advanced
+through transverse-lattice methods~\cite{Burkardt:2001jg}, supersymmetric
+DLCQ and its relatives~\cite{Hiller:2016itl}, and basis light-front
+quantization~\cite{Vary:2009gt}, which now produces quarkonium spectra in
+full 3+1 dimensions~\cite{Li:2015zda}.  Two-dimensional adjoint QCD remains
+under active light-front study with basis-function
+methods~\cite{Trittmann:2023dar}.  Ref.~\cite{Bakker:2013cea} maps the
+community program.  Each branch of this tree validates, at some point in its
+development, against the two-dimensional calculation revisited here.
 
-We have kept the structure of Ref.~\cite{Hornbostel:1988fb} deliberately,
-section for section where possible, so that each figure here can be laid
-beside its 1990 counterpart.  Sections~\ref{sec:lcq} and \ref{sec:sun} fix
-notation and recall the Hamiltonian; Sec.~\ref{sec:method} describes what
-changed computationally; Secs.~\ref{sec:wavefunctions}--\ref{sec:massless}
-reproduce and extend the 1990 results; the remainder is new.
+The audience for that calculation has changed.  Today the model is the
+standard benchmark for Hamiltonian lattice methods, tensor networks, and
+quantum simulation, and light-front quantization is itself being developed
+as a basis for quantum
+computation~\cite{Kreshchuk:2020dla,Kreshchuk:2020aiq,Li:2021kcs}.  Claims
+of quantum advantage on 1+1d gauge theories are structurally weak, because
+classical methods handle these theories so well~\cite{Lamm:2026vqz}.  This
+paper sharpens that point with a ledger.  A direct qubit encoding of the
+Fock space diagonalized here occupies $2N_c$ fermionic modes per momentum:
+roughly 70 logical qubits to re-run the 1990 calculation, and 300--800 for
+the resolutions and color groups in this paper.  The classical calculation
+completes in seconds to minutes on one workstation.
+
+The value of the old code to quantum simulation is therefore not as a
+target but as a reference standard.  It supplies controlled,
+error-budgeted continuum numbers against which equal-time hardware results
+can be scored.  A reference is only as good as its validation, and DLCQ and
+the equal-time formulations hardware uses are inequivalent quantizations.
+Confirming the limits in which they agree is part of this paper's job.  The
+one regime where they currently disagree is mapped in
+Sec.~\ref{sec:modern}.
+
+The model also has open questions of its own.  Light-front and equal-time
+methods measure different chiral-limit behavior at finite $N$
+(Sec.~\ref{sec:modern}).  Large-$N$ analyses predict a tetraquark bound
+state near the two-meson threshold, and the prediction awaits a finite-$N$
+test~\cite{Sazdjian:2025mqg,Lucha:2017gqq}.
+
+This paper re-does the 1990 calculation with thirty-six years of hardware
+and of error analysis.  The error analysis matters more.  We reproduce every figure and
+the table of that paper, at the original parameters and again at
+resolutions up to $2K \simeq 100$.  Two independent implementations of the
+same Hamiltonian run against each other: the preserved Fortran of the
+original program, and a validated open-source port.  The original
+controlled its errors with one extrapolation series and a parenthesis
+convention; we carry a four-component error budget with held-out validation
+(Sec.~\ref{sec:budget}).  Its weak-coupling entries were limited by the
+momentum grid in a way no resolution can repair.  We identify the
+mechanism, quantify it without free parameters, and reach the chiral region
+instead with van de Sande's improved
+Hamiltonian~\cite{vandeSande:1996mc} (Sec.~\ref{sec:chiral}).
+
+Two sections have no 1990 counterpart.  Section~\ref{sec:exotics} searches
+for states dominated by four- and six-parton Fock sectors: tetraquark and
+hexaquark candidates.  Section~\ref{sec:modern} compares against the modern
+record: integrability at large $N$, tensor-network and quantum-hardware
+spectra at $N = 2, 3$, and precision Schwinger-model benchmarks.
+
+We keep the structure of Ref.~\cite{Hornbostel:1988fb} deliberately,
+section for section where possible, so each figure can be laid beside its
+1990 counterpart.  Sections~\ref{sec:lcq} and \ref{sec:sun} fix notation
+and recall the Hamiltonian.  Section~\ref{sec:method} describes what
+changed computationally.
+Sections~\ref{sec:wavefunctions}--\ref{sec:massless} reproduce and extend
+the 1990 results.  The remainder is new.

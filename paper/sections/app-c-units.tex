@@ -2,37 +2,37 @@
 \section{Units and conventions}
 \label{app:units}
 
-Masses are quoted as $M/g$ unless stated otherwise; $m/g$ is the quark mass in
-units of the coupling.  The natural combination in this paper's normalization
-is $g^2 N/2\pi$, whereas 't~Hooft's classic solution uses $g^2 N/\pi$; the
-large-$N$ comparison in Sec.~\ref{sec:modern} therefore plots
-$(2\pi/N)^{1/2}\,M/g$ against $(2\pi/N)^{1/2}\,m/g$, exactly as Fig.~8(b) of
-Ref.~\cite{Hornbostel:1988fb} did.  Spectra shown as functions of the coupling
-use the compactified variable $\lambda = [1 + \pi m^2/g^2]^{-1/2}$, which maps
-the free limit to $\lambda \to 0$ and the chiral limit to $\lambda = 1$, and
-the dimensionless mass $M^2/(m^2 + g^2/\pi)$, both directly comparable to the
-1990 figures.  In code units the resolution is $2K$ (integer, matching the
-parity of the parton number) and single-parton momenta are odd integers
-$k = 1, 3, \ldots$, so a structure function lives on $x = k/2K$ with measure
-$dx = 1/K$.
+Masses are quoted as $M/g$ unless stated otherwise, and $m/g$ is the quark
+mass in units of the coupling.  Our natural combination is $g^2 N/2\pi$;
+'t~Hooft's classic solution uses $g^2 N/\pi$.  The large-$N$ comparison in
+Sec.~\ref{sec:modern} therefore plots $(2\pi/N)^{1/2}\,M/g$ against
+$(2\pi/N)^{1/2}\,m/g$, as Fig.~8(b) of Ref.~\cite{Hornbostel:1988fb} did.
+Spectra shown against the coupling use
+$\lambda = [1 + \pi m^2/g^2]^{-1/2}$, which sends the free limit to
+$\lambda \to 0$ and the chiral limit to $\lambda = 1$, and the
+dimensionless mass $M^2/(m^2 + g^2/\pi)$.  Both axes match the 1990
+figures.  In code units the resolution is the integer $2K$, whose parity
+matches the parton number.  Single-parton momenta are odd integers, so a
+structure function lives on $x = k/2K$ with measure $dx = 1/K$.
 
-Two conventions of Ref.~\cite{Hornbostel:1988fb} are traps for anyone
-comparing against it, and we state them explicitly since both bit us.
-First, \emph{the numbers printed in its Table~I are $M^2/(m^2+g^2/\pi)$,
-although the column headers read $M/g$}.  The two agree at no coupling; the
-identification was established by recomputing both quantities at the 1990
-parameters and matching digit patterns, and our transcription of the table
-carries the correction with full provenance.  Every comparison in this paper
-converts to genuine $M/g$, and the cross-check that our conversion is right
---- recomputing the comparison in the table's native $M^2$ units --- is part
-of the build (Appendix~\ref{app:data}).  Second, the parenthesized digits in
-that table are \emph{not} error bars: they record the magnitude of the last
-term retained in the extrapolation series, a convergence diagnostic the
-authors themselves trusted only for $m/g \gtrsim 0.2$.  Where this paper
-quotes an uncertainty, it is the full budget of Sec.~\ref{sec:budget}; where
-it quotes the 1990 numbers, the parenthesis keeps its original meaning.
+Two conventions of Ref.~\cite{Hornbostel:1988fb} are traps.  Both bit us,
+so we state them plainly.  First, the numbers printed in its Table~I are
+$M^2/(m^2+g^2/\pi)$, although the column headers read $M/g$.  The two agree
+at no coupling.  We established the identification by recomputing both
+quantities at the 1990 parameters and matching digit patterns; our
+transcription carries the correction with full provenance.  Every
+comparison in this paper converts to genuine $M/g$, and the build
+recomputes the comparison in the table's native $M^2$ units as a
+cross-check (Appendix~\ref{app:data}).
 
-Captions in this paper state $N$, $B$, $2K$ (or the fit window), $m/g$, the
-Fock-space truncation, and the Hamiltonian, for every panel; where the
-original figure left a parameter unstated, the value we recovered and the
-evidence for it are cited inline.
+Second, the parenthesized digits in that table are not error bars.  They
+record the magnitude of the last term retained in the extrapolation series,
+a convergence diagnostic the authors themselves trusted only for
+$m/g \gtrsim 0.2$.  Where this paper quotes an uncertainty, it is the full
+budget of Sec.~\ref{sec:budget}.  Where it quotes the 1990 numbers, the
+parenthesis keeps its original meaning.
+
+Captions in this paper state $N$, $B$, $2K$ or the fit window, $m/g$, the
+Fock-space truncation, and the Hamiltonian for every panel.  Where the
+original figure left a parameter unstated, we cite the recovered value and
+the evidence for it inline.

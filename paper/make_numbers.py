@@ -44,6 +44,29 @@ def _git(*args) -> str:
 
 
 BUDGET_TXT = ROOT / "figures" / "table1_budget_2K25-71_python.txt"
+IMPROVED_CSV = ROOT / "data" / "improved_table1_msq.csv"
+
+
+def improved_fits() -> dict:
+    """Improved-Hamiltonian Table I extrapolates, plain-1/K ensemble.
+
+    Reuses the exact fit machinery of tools/plot_improved_fits.py (orders
+    2--4 x contiguous sub-windows; median and 68% half-width), so the frozen
+    numbers and the figure can never disagree.  Basis is plain 1/K per van
+    de Sande Eq. (14) — enforced by the G3 pair on every entry.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "tools"))
+    from plot_improved_fits import _read, _spread_1k
+
+    data = _read(IMPROVED_CSV)
+    out = {}
+    for (N, B, mg), series in sorted(data.items()):
+        ks = sorted(series)
+        ys = [series[k] for k in ks]
+        med, err, _ = _spread_1k(ks, ys)
+        out[("mes" if B == 0 else "bar", N, mg)] = (med, err)
+    return out
 
 
 def parse_budget(path: Path = BUDGET_TXT) -> list[dict]:
@@ -109,13 +132,29 @@ def gather() -> dict:
         "inputs": [budget_rel],
         "note": "entries with |paper-ours| > paper's own last-term magnitude"}
 
-    # TODO(next passes): improved Table I (plain-1/K fits from
-    # data/improved_table1_msq.csv), ratio table (converged 0.4% statement),
-    # GMOR intercept, alpha exponents, captured fractions, timing table.
+    # Improved Table I, plain-1/K ensemble (G3: improved <-> 1/K).
+    imp = improved_fits()
+    imp_rel = str(IMPROVED_CSV.relative_to(ROOT))
+    for r in rows:
+        key = (r["channel"], r["N"], r["mg"])
+        if key in imp:
+            r["imp"], r["imp_err"] = imp[key]
+    n_disagree = sum(
+        1 for r in rows if "imp" in r
+        and abs(r["imp"] - r["ours"]) > 3 * (r["tot"] ** 2 + r["imp_err"] ** 2) ** 0.5)
+    numbers["tableone_improved_n_beyond_3sigma"] = {
+        "value": n_disagree, "hamiltonian": "improved", "fit_basis": "1/K",
+        "inputs": [budget_rel, imp_rel],
+        "note": "entries where improved and standard disagree past 3 sigma "
+                "of the combined bar (the weak-coupling divergence)"}
+
+    # TODO(next passes): ratio table (converged 0.4% statement), GMOR
+    # intercept, alpha exponents, captured fractions, timing table.
     numbers["_table1_rows"] = {
         "value": rows, "hamiltonian": "standard", "fit_basis": "eq27",
-        "inputs": [budget_rel],
-        "note": "full rows; emitted as frozen/table1_body.tex, not macros"}
+        "inputs": [budget_rel, imp_rel],
+        "note": "full rows incl. improved columns; emitted as "
+                "frozen/table1_body.tex, not macros"}
     return numbers
 
 
@@ -128,9 +167,11 @@ def emit_table1_body(rows: list[dict]) -> None:
         chan = f"{label[r['channel']]} $N={r['N']}$"
         lead = chan if chan != prev else ""
         prev = chan
+        imp = (f"${r['imp']:.4f} \\pm {r['imp_err']:.4f}$"
+               if "imp" in r else "---")
         lines.append(
             f"{lead} & {r['mg']:.2f} & ${r['ours']:.4f} \\pm {r['tot']:.4f}$"
-            f" & ${r['paper']:.3f}({r['pterm']:g})$ \\\\")
+            f" & {imp} & ${r['paper']:.3f}({r['pterm']:g})$ \\\\")
     (FROZEN / "table1_body.tex").write_text("\n".join(lines) + "\n")
 
 

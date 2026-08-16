@@ -24,6 +24,16 @@
     ],
     "note": "entries with |paper-ours| > paper's own last-term magnitude"
   },
+  "tableone_improved_n_beyond_3sigma": {
+    "value": 0,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt",
+      "data/improved_table1_msq.csv"
+    ],
+    "note": "entries where improved and standard disagree past 3 sigma of the combined bar (the weak-coupling divergence)"
+  },
   "_table1_rows": {
     "value": [
       {
@@ -39,7 +49,9 @@
         "pterm": 0.004,
         "d_pt": 0.02,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 4.313930720286939,
+        "imp_err": 5.239437740334196e-05
       },
       {
         "channel": "mes",
@@ -54,7 +66,9 @@
         "pterm": 0.004,
         "d_pt": 0.05,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 3.9127392765714224,
+        "imp_err": 0.0004797422488509451
       },
       {
         "channel": "mes",
@@ -69,7 +83,9 @@
         "pterm": 0.05,
         "d_pt": 0.05,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 2.622318553252797,
+        "imp_err": 0.0017033282506790925
       },
       {
         "channel": "mes",
@@ -84,7 +100,9 @@
         "pterm": 0.07,
         "d_pt": 0.31,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 1.2917462570660423,
+        "imp_err": 0.0033041615796434165
       },
       {
         "channel": "mes",
@@ -99,7 +117,9 @@
         "pterm": 0.05,
         "d_pt": 0.29,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 0.5725126339445478,
+        "imp_err": 0.0036609143166546065
       },
       {
         "channel": "mes",
@@ -114,7 +134,9 @@
         "pterm": 0.01,
         "d_pt": 0.91,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 0.2595435734197431,
+        "imp_err": 0.0022780145042073374
       },
       {
         "channel": "mes",
@@ -129,7 +151,9 @@
         "pterm": 0.006,
         "d_pt": 0.35,
         "d_ours": 0.6,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 4.615893356540049,
+        "imp_err": 7.414334720401428e-05
       },
       {
         "channel": "mes",
@@ -144,7 +168,9 @@
         "pterm": 0.05,
         "d_pt": 0.22,
         "d_ours": 0.4,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 4.389288516864516,
+        "imp_err": 0.000500996353963501
       },
       {
         "channel": "mes",
@@ -159,7 +185,9 @@
         "pterm": 0.5,
         "d_pt": 0.06,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 3.1192414404133415,
+        "imp_err": 0.0009265524524804114
       },
       {
         "channel": "mes",
@@ -174,7 +202,9 @@
         "pterm": 0.5,
         "d_pt": 0.22,
         "d_ours": 0.3,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 1.6471638853979058,
+        "imp_err": 0.002931258397586345
       },
       {
         "channel": "mes",
@@ -189,7 +219,9 @@
         "pterm": 0.2,
         "d_pt": 0.28,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 0.783904939523688,
+        "imp_err": 0.0027465708242377374
       },
       {
         "channel": "mes",
@@ -204,7 +236,9 @@
         "pterm": 0.2,
         "d_pt": 0.39,
         "d_ours": 0.3,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 0.37617818307246975,
+        "imp_err": 0.0015001843211943366
       },
       {
         "channel": "mes",
@@ -219,7 +253,9 @@
         "pterm": 0.002,
         "d_pt": 0.12,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 4.845203358337949,
+        "imp_err": 9.963546105318244e-05
       },
       {
         "channel": "mes",
@@ -234,7 +270,9 @@
         "pterm": 0.002,
         "d_pt": 1.26,
         "d_ours": 0.0,
-        "flag": "OUT"
+        "flag": "OUT",
+        "imp": 4.747519563428404,
+        "imp_err": 0.0004907798661495377
       },
       {
         "channel": "mes",
@@ -249,7 +287,9 @@
         "pterm": 0.2,
         "d_pt": 0.1,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 3.4892717792280354,
+        "imp_err": 0.0012031633014664145
       },
       {
         "channel": "mes",
@@ -264,7 +304,9 @@
         "pterm": 0.1,
         "d_pt": 0.84,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 1.903927945168535,
+        "imp_err": 0.003005545209604721
       },
       {
         "channel": "mes",
@@ -279,7 +321,9 @@
         "pterm": 0.05,
         "d_pt": 0.57,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 0.9279477124551393,
+        "imp_err": 0.00243583915425416
       },
       {
         "channel": "mes",
@@ -294,7 +338,9 @@
         "pterm": 0.01,
         "d_pt": 0.26,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 0.45022713498186095,
+        "imp_err": 0.0012750333929597846
       },
       {
         "channel": "bar",
@@ -309,7 +355,9 @@
         "pterm": 0.02,
         "d_pt": 0.71,
         "d_ours": 1.8,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 10.72433684853922,
+        "imp_err": 0.0005211568916276832
       },
       {
         "channel": "bar",
@@ -324,7 +372,9 @@
         "pterm": 0.1,
         "d_pt": 0.86,
         "d_ours": 1.2,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 10.484155131032121,
+        "imp_err": 0.004693548678119441
       },
       {
         "channel": "bar",
@@ -339,7 +389,9 @@
         "pterm": 0.6,
         "d_pt": 0.41,
         "d_ours": 0.5,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 7.6992212115494425,
+        "imp_err": 0.011802651617720539
       },
       {
         "channel": "bar",
@@ -354,7 +406,9 @@
         "pterm": 0.2,
         "d_pt": 1.53,
         "d_ours": 0.3,
-        "flag": "OUT"
+        "flag": "OUT",
+        "imp": 4.182948614122415,
+        "imp_err": 0.012799330845226109
       },
       {
         "channel": "bar",
@@ -369,7 +423,9 @@
         "pterm": 0.3,
         "d_pt": 0.11,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 2.0201429793189867,
+        "imp_err": 0.009131336656397204
       },
       {
         "channel": "bar",
@@ -384,7 +440,9 @@
         "pterm": 0.09,
         "d_pt": 0.27,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 0.9693635392674702,
+        "imp_err": 0.004490081865074325
       },
       {
         "channel": "bar",
@@ -399,7 +457,9 @@
         "pterm": 0.3,
         "d_pt": 2.43,
         "d_ours": 29.7,
-        "flag": "OUT"
+        "flag": "OUT",
+        "imp": 20.47125564213817,
+        "imp_err": 0.003085860160611631
       },
       {
         "channel": "bar",
@@ -414,7 +474,9 @@
         "pterm": 0.5,
         "d_pt": 0.08,
         "d_ours": 0.1,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 20.947309827269315,
+        "imp_err": 0.009008574930845725
       },
       {
         "channel": "bar",
@@ -429,7 +491,9 @@
         "pterm": 1.0,
         "d_pt": 0.4,
         "d_ours": 0.2,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 16.176129299120987,
+        "imp_err": 0.009243559244310973
       },
       {
         "channel": "bar",
@@ -444,7 +508,9 @@
         "pterm": 0.8,
         "d_pt": 0.83,
         "d_ours": 0.2,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 9.203837473181794,
+        "imp_err": 0.01879592335209246
       },
       {
         "channel": "bar",
@@ -459,7 +525,9 @@
         "pterm": 0.3,
         "d_pt": 0.39,
         "d_ours": 0.0,
-        "flag": "ok"
+        "flag": "ok",
+        "imp": 4.596952741009946,
+        "imp_err": 0.013359735470742873
       },
       {
         "channel": "bar",
@@ -474,14 +542,17 @@
         "pterm": 0.06,
         "d_pt": 1.89,
         "d_ours": 0.1,
-        "flag": "OUT"
+        "flag": "OUT",
+        "imp": 2.248153326390709,
+        "imp_err": 0.006311977785080414
       }
     ],
     "hamiltonian": "standard",
     "fit_basis": "eq27",
     "inputs": [
-      "figures/table1_budget_2K25-71_python.txt"
+      "figures/table1_budget_2K25-71_python.txt",
+      "data/improved_table1_msq.csv"
     ],
-    "note": "full rows; emitted as frozen/table1_body.tex, not macros"
+    "note": "full rows incl. improved columns; emitted as frozen/table1_body.tex, not macros"
   }
 }

@@ -3,39 +3,31 @@
 \label{sec:lcq}
 
 We follow the conventions of Ref.~\cite{Hornbostel:1988fb} throughout.
-Light-cone coordinates are $x^\pm = x^0 \pm x^1$, with $x^+$ playing the role
-of time; the conjugate momenta are $p^\mp$, and the mass-shell condition
-$p^+ p^- = m^2$ makes $p^-$ the light-cone energy of a quantum carrying
-longitudinal momentum $p^+ > 0$.  Positivity of $p^+$ is the structural
-advantage of the scheme: no combination of quanta with strictly positive
-longitudinal momenta can add up to the vacuum's $p^+ = 0$, so the Fock vacuum
-is an exact eigenstate of the full Hamiltonian and every basis state is built
-from quanta that belong to the hadron, not to vacuum fluctuations.  The
-familiar equal-time picture, in which even a two-particle state mixes with
-arbitrarily complicated vacuum structure, is replaced by one in which the
-partition of a single conserved quantity organizes the entire basis.
+Light-cone coordinates are $x^\pm = x^0 \pm x^1$, with $x^+$ the time.  The
+mass-shell condition $p^+p^- = m^2$ makes $p^-$ the energy of a quantum
+carrying longitudinal momentum $p^+ > 0$.  Positivity of $p^+$ is the
+structural advantage of the scheme.  No combination of quanta with positive
+momenta can add up to the vacuum's $p^+ = 0$, so the Fock vacuum is an
+exact eigenstate of the full Hamiltonian.  Every basis state is built from
+quanta that belong to the hadron, not to vacuum fluctuations.
 
-Discretization proceeds by placing the theory in a box of length $2L$ in
-$x^-$ with antiperiodic boundary conditions for the fermions, so that
-momenta come in half-odd-integer units $k^+_n = 2\pi n/L$,
-$n = \tfrac12, \tfrac32, \ldots$.  The dimensionless resolution
+Discretization places the theory in a box of length $2L$ in $x^-$ with
+antiperiodic fermions, so momenta come in half-odd-integer units
+$k^+_n = 2\pi n/L$.  The dimensionless resolution
 \begin{equation}
   K \;=\; \frac{L}{2\pi}\,P^+
   \label{eq:Kdef}
 \end{equation}
-is a positive integer (in code units we track $2K$, which is odd or even as
-the parton number is), and a basis state is nothing but a colour-singlet
-partition of $K$ among quanta.  At $K = 3$, for example, the available
-momentum fractions are the partitions $(3)$, $(2,1)$ and $(1,1,1)$ --- to be
-contrasted with the unbounded sets of positive and negative momenta an
-equal-time discretization admits at the same volume.  Because the smallest
-available momentum fraction is $x = k/K \sim 1/K$, the resolution doubles as
-an infrared regulator of the $x \to 0$ endpoint, and the continuum limit
-$L \to \infty$ at fixed $P^+$ is the single limit $K \to \infty$.  How
-observables approach that limit --- and when the $1/K$ endpoint cutoff is the
-dominant error --- is the subject of Secs.~\ref{sec:budget} and
-\ref{sec:chiral}.
+is a positive integer, and a basis state is a color-singlet partition of
+$K$ among quanta.  (In code units we track $2K$, whose parity matches the
+parton number.)  At $K = 3$ the available momentum fractions are the
+partitions $(3)$, $(2,1)$ and $(1,1,1)$.  An equal-time discretization at
+the same volume admits unbounded sets of positive and negative momenta.
 
-Everything else --- the mode expansions, the elimination of the constrained
-degrees of freedom, and the construction of $P^-$ --- is unchanged from
+The resolution is also the infrared regulator: the smallest momentum
+fraction is $x = k/K \sim 1/K$.  The continuum limit $L \to \infty$ at
+fixed $P^+$ is the single limit $K \to \infty$.  When the $1/K$ endpoint
+cutoff dominates the error is the subject of Secs.~\ref{sec:budget} and
+\ref{sec:chiral}.  Everything else --- mode expansions, constrained fields,
+the construction of $P^-$ --- is unchanged from
 Ref.~\cite{Hornbostel:1988fb}, and we do not repeat it.

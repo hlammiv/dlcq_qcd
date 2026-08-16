@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.8.21)  15 AUG 2026 19:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.8.21)  15 AUG 2026 19:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1049,18 +1049,18 @@ LaTeX Font Info:    Font shape `U/lasy/b/n' in size <8> not available
 (./sections/01-intro.tex) (./sections/02-lc-quantization.tex
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\leavevmode@ifvmode' on input line 38.
+(hyperref)                removing `\leavevmode@ifvmode' on input line 13.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                \kern 1.66702pt
-(hyperref)                removed on input line 38.
+(hyperref)                removed on input line 13.
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/en
 c/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/s
 hare/texmf/fonts/enc/dvips/lm/lm-mathit.enc}]) (./sections/03-sun-improved.tex)
-(./sections/04-method-2026.tex) (./sections/05-wavefunctions.tex)
-(./sections/06-massless-limit.tex
+(./sections/04-method-2026.tex [2{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex
+.enc}]) (./sections/05-wavefunctions.tex) (./sections/06-massless-limit.tex
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 2.
@@ -1074,50 +1074,62 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 2.
 
 
-LaTeX Warning: Reference `tab:tableone' on page 2 undefined on input line 25.
+LaTeX Warning: Reference `tab:tableone' on page 3 undefined on input line 24.
 
-) (./sections/07-error-budget.tex [2{/usr/share/texmf/fonts/enc/dvips/lm/lm-mat
-hex.enc}]) (./sections/08-chiral-region.tex) (./sections/09-exotics.tex)
-(./sections/10-modern-methods.tex
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 12.
-
+) (./sections/07-error-budget.tex) (./sections/08-chiral-region.tex)
+(./sections/09-exotics.tex) (./sections/10-modern-methods.tex
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 12.
 
-) (./sections/11-prospects.tex [3]) (./sections/app-a-budget.tex)
-(./sections/app-b-do-not-retry.tex
 
-LaTeX Warning: Reference `tab:tableone' on page 4 undefined on input line 11.
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 12.
+
+[3]) (./sections/11-prospects.tex) (./sections/app-a-budget.tex [4]
+
+LaTeX Warning: Reference `tab:tableone' on page 5 undefined on input line 41.
+
+) (./sections/app-b-do-not-retry.tex
+
+LaTeX Warning: Reference `tab:tableone' on page 5 undefined on input line 11.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 22--29
+Underfull \hbox (badness 10000) in paragraph at lines 22--31
  []\OT1/lmr/m/n/10 (+20) Fixing the
  []
 
 
-Underfull \hbox (badness 3029) in paragraph at lines 22--29
- \OT1/lmr/m/n/10 (+20) Two de-fen-si-ble se-lec-tion cri-te-ria --- held-out
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 29--33
+Underfull \hbox (badness 10000) in paragraph at lines 31--35
  []\OT1/lmr/m/n/10 (+20) Raising the
  []
 
-) (./sections/app-c-units.tex [4]) (./sections/app-d-data.tex) (./main.bbl
-Underfull \hbox (badness 10000) in paragraph at lines 67--72
- []\OT1/lmr/m/n/9 (+20) H. Sazd-jian, Me-son scat-ter-ing and tetraquarks
+[5]) (./sections/app-c-units.tex) (./sections/app-d-data.tex) (./main.bbl
+[6]
+Underfull \hbox (badness 2261) in paragraph at lines 214--225
+ \OT1/lmr/m/n/9 (+20) meth-ods, [][]Prog. Part. Nucl. Phys. \OT1/lmr/bx/n/9 (+2
+0) 90\OT1/lmr/m/n/9 (+20) , 75 (2016)[][],
  []
 
 
-Underfull \hbox (badness 2443) in paragraph at lines 67--72
- \OT1/lmr/m/n/9 (+20) in two-dimensional QCD, Phys. Rev. D  (2025),
+Underfull \hbox (badness 1565) in paragraph at lines 416--422
+ []\OT1/lmr/m/n/9 (+20) C. J. Hamer, SU(2) Yang-Mills The-ory in (1+1)-
  []
 
-[5]) [6] (./main.aux)
+
+Underfull \hbox (badness 1577) in paragraph at lines 509--516
+ []\OT1/lmr/m/n/9 (+20) T. Hay-ata, Y. Hi-daka, and K. Nishimura, Dense
+ []
+
+
+Underfull \hbox (badness 2856) in paragraph at lines 594--600
+ \OT1/lmr/m/n/9 (+20) mass limit and thresh-old states, [][]JHEP \OT1/lmr/bx/n/
+9 (+20) 02\OT1/lmr/m/n/9 (+20) , 073[][],
+ []
+
+LaTeX Font Info:    Trying to load font information for U+bbold on input line 6
+44.
+(/usr/share/texlive/texmf-dist/tex/latex/bbold/Ubbold.fd)) [7] (./main.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1130,31 +1142,31 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: BD430F671684E882A90264155F18D05E;4521.
  ) 
 Here is how much of TeX's memory you used:
- 28997 strings out of 474222
- 532622 string characters out of 5748733
- 1957975 words of memory out of 5000000
- 50470 multiletter control sequences out of 15000+600000
- 626578 words of font info for 182 fonts, out of 8000000 for 9000
+ 29161 strings out of 474222
+ 535834 string characters out of 5748733
+ 1980975 words of memory out of 5000000
+ 50575 multiletter control sequences out of 15000+600000
+ 628076 words of font info for 197 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  99i,9n,101p,1001b,800s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx9.pfb></us
-r/share/texmf/fonts/type1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/pu
-blic/lm/lmmi10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/shar
-e/texmf/fonts/type1/public/lm/lmmi7.pfb></usr/share/texmf/fonts/type1/public/lm
-/lmmi9.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/
-fonts/type1/public/lm/lmr5.pfb></usr/share/texmf/fonts/type1/public/lm/lmr6.pfb
-></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1
-/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr9.pfb></usr/shar
-e/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/l
-m/lmri9.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texm
-f/fonts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy7
-.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy9.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (6 pages, 388730 bytes).
+</usr/share/texlive/texmf-dist/fonts/type1/public/bbold-type1/bbold10.pfb></u
+sr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/p
+ublic/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx9.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/
+lm/lmmi10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi7.pfb></usr/share/tex
+mf/fonts/type1/public/lm/lmmi9.pfb></usr/share/texmf/fonts/type1/public/lm/lmr1
+0.pfb></usr/share/texmf/fonts/type1/public/lm/lmr5.pfb></usr/share/texmf/fonts/
+type1/public/lm/lmr6.pfb></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb></usr
+/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/publi
+c/lm/lmr9.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/te
+xmf/fonts/type1/public/lm/lmri9.pfb></usr/share/texmf/fonts/type1/public/lm/lms
+y10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fon
+ts/type1/public/lm/lmsy7.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy9.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
+Output written on main.pdf (7 pages, 412468 bytes).
 PDF statistics:
- 361 PDF objects out of 1000 (max. 8388607)
- 306 compressed objects within 4 object streams
- 55 named destinations out of 1000 (max. 500000)
+ 530 PDF objects out of 1000 (max. 8388607)
+ 473 compressed objects within 5 object streams
+ 84 named destinations out of 1000 (max. 500000)
  32957 words of extra memory for PDF output out of 35830 (max. 10000000)
 

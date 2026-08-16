@@ -6,76 +6,80 @@
 
 The 1990 paper compared against the two external results then available:
 't~Hooft's large-$N$ solution and Hamer's finite-lattice SU(2)
-spectrum~\cite{Hamer:1982nc}.  The modern record is far richer, and this
+spectrum~\cite{Hamer:1981yq}.  The modern record is far richer.  This
 section is organized by what each method can check.
 
 \subsection{Large $N$ and integrability}
 \label{sec:modern-largeN}
 
-The 't~Hooft equation is now solved to essentially arbitrary precision: its
-equivalence to a TQ-Baxter system~\cite{Ambrosino:2023dik,Litvinov:2024aa}
-turns the large-$N$ meson spectrum into a benchmark exact for our purposes.
-Our finite-$N$ masses, rescaled to 't~Hooft's normalization
-(Appendix~\ref{app:units}), approach these values with the expected $1/N^2$
-systematics, updating Fig.~8(b) of Ref.~\cite{Hornbostel:1988fb} with error
-bars on both axes' inputs.  The same rescaled comparison exposes what
-large $N$ misses at strong coupling --- light baryons, and the U(1)
-distinction of Sec.~\ref{sec:massless} --- exactly as the original argued,
-now with the residuals quantified.
+The 't~Hooft equation is now solved to arbitrary precision: it is
+equivalent to a TQ-Baxter
+system~\cite{Ambrosino:2023dik,Litvinov:2024riz}, which makes the
+large-$N$ meson spectrum exact for our purposes.  We rescale our finite-$N$
+masses to 't~Hooft's normalization (Appendix~\ref{app:units}) and find the
+expected $1/N^2$ approach, updating Fig.~8(b) of
+Ref.~\cite{Hornbostel:1988fb} with error bars.  The same comparison shows
+what large $N$ misses at strong coupling: light baryons, and the U(1)
+distinction of Sec.~\ref{sec:massless}.  The original argued both points;
+here the residuals are quantified.
 
 \subsection{Lattice}
 \label{sec:modern-lattice}
 
-Hamer's SU(2) finite-lattice masses remain the only equal-time spectrum
-across the full coupling range at $N = 2$.  We compare against his published
-Table~1, whose stated uncertainties at weak coupling are of order the values
-themselves; a digitization of his figure would suggest a precision his own
-table disclaims, and we deliberately do not use one.  Within those bars,
-agreement is complete, including the $N = 2$ identity $M_{\rm bar} = M_{\rm
-mes}$ that his data was the first to exhibit.  Modern overlap-fermion
-lattice work confirms the expected infrared behaviour at
-$(N_c, N_f) = (2,1)$ and $(3,1)$~\cite{Karthik:2023vjv}, though without
-spectrum tables to compare digit-for-digit.
+Hamer's finite-lattice masses remain the only equal-time spectrum across
+the full coupling range at $N = 2$.  We compare against his published
+Table~1.  Its stated weak-coupling uncertainties are of order the values
+themselves; digitizing his figure would suggest a precision his own table
+disclaims, so we do not.  Within those bars, agreement is complete.  That
+includes the $N = 2$ identity $M_{\rm bar} = M_{\rm mes}$, which his data
+was the first to exhibit.  Modern overlap-fermion work confirms the
+expected infrared behavior at $(N_c, N_f) = (2,1)$ and
+$(3,1)$~\cite{Karthik:2023gud}, though without spectrum tables to compare
+digit for digit.
 
 \subsection{Tensor networks and quantum hardware}
 \label{sec:modern-tn}
 
-Hamiltonian-lattice calculations with matrix product states now reach
+Matrix-product-state calculations now reach
 SU(2)~\cite{Silvi:2016cas,Banuls:2017ena} and
-SU(3)~\cite{Silvi:2019wnf,Hayata:2023bgh} in one dimension, and variational
+SU(3)~\cite{Silvi:2019wnf,Hayata:2023pkw} in one dimension.  Variational
 quantum hardware has produced SU(2) meson and baryon
-masses~\cite{Atas:2021ext} with SU(3) preparations
-following~\cite{Farrell:2022wyt}.  These are staggered-fermion,
-finite-lattice-spacing computations, so the honest comparison is at matched
-continuum extrapolations rather than raw numbers; where the published works
-quote continuum values, we tabulate them beside ours.  Precision benchmarks
-in the Schwinger model~\cite{Banuls:2013jaa,Dempsey:2022nys} calibrate what
-tensor-network methods achieve at U(1), and our equal-time
-exact-diagonalization cross-checks (Appendix~\ref{app:data}) reproduce them
-in our own conventions.  No public code exists for any of the SU($N$)
-tensor-network calculations above; the open pipeline released with this
-paper is, to our knowledge, the first reproducible finite-$N$ spectrum code
-in either quantization.
+masses~\cite{Atas:2021ext}, with SU(3) preparations
+following~\cite{Farrell:2022wyt}.  These are staggered-fermion computations
+at finite lattice spacing, so the honest comparison is between matched
+continuum extrapolations, not raw numbers.  Where the published works quote
+continuum values, we tabulate them beside ours.  Precision Schwinger-model
+benchmarks~\cite{Banuls:2013jaa,Dempsey:2022nys} calibrate what tensor
+networks achieve at U(1); our own equal-time exact-diagonalization
+cross-checks reproduce them in our conventions
+(Appendix~\ref{app:data}).  No public code exists for any of the SU($N$)
+tensor-network calculations above.  The pipeline released with this paper
+is, to our knowledge, the first reproducible finite-$N$ spectrum code in
+either quantization.
 
 \subsection{The chiral-exponent tension}
 \label{sec:modern-tension}
 
-One discrepancy in this landscape is structural, and we state it as the open
+One discrepancy in this landscape is structural.  We state it as the open
 question it is.  Every light-front determination of the finite-$N$ chiral
-exponent --- this work, lightcone conformal truncation~\cite{Anand:2021qnd},
-and $1/N$-corrected 't~Hooft perturbation theory~\cite{Kochergin:2024aa} ---
-finds $M^2 \propto (m/g)^\alpha$ with $\alpha \to 1$, while the one
-equal-time measurement, an MPS study of SU(2) over $m/g \in
+exponent finds $M^2 \propto (m/g)^\alpha$ with $\alpha \to 1$: this work,
+lightcone conformal truncation~\cite{Anand:2021qnd}, and $1/N$-corrected
+'t~Hooft perturbation theory~\cite{Kochergin:2024quv}.  The one equal-time
+measurement, an MPS study of SU(2) over $m/g \in
 [0.1, 0.4]$~\cite{Banuls:2017ena}, reports $\nu = 0.700(29)(11)$ for
-$M \propto (m/g)^{\nu}$, i.e.\ $\alpha \simeq 1.4$: consistent with the
-bosonization prediction and several standard deviations from the light-front
-value.  The methods share no assumption more specific than quantization
-itself --- but they differ in precisely the one all light-front schemes
-share, the trivial vacuum, which is what an anomalous chiral exponent is
-about.  The equal-time side of the ledger is not yet decisive either: the
-measured window spans a factor of four in $m/g$, not a decade, and no
-SU($N$) analogue of the additive staggered mass shift~\cite{Dempsey:2022nys}
---- the same order in the lattice spacing as the mass being fitted --- has
-been published or applied.  Resolving the tension requires an equal-time
-computation in the same chiral window with that renormalization under
-control; it is beyond the published record, and beyond this paper.
+$M \propto (m/g)^{\nu}$.  That is $\alpha \simeq 1.4$: consistent with
+bosonization, and several standard deviations from the light-front value.
+
+The methods differ in exactly the assumption all light-front schemes share.
+The light-front vacuum is trivial, and the vacuum is what an anomalous
+chiral exponent is about.  How equal-time vacuum structure re-emerges as
+the light cone is approached was analyzed by Hornbostel
+himself~\cite{Hornbostel:1991qj}; the question this tension raises is that
+analysis made quantitative.  The equal-time side is not yet decisive either.
+Its measured window spans a factor of four in $m/g$, not a decade.  And no
+SU($N$) analogue of the additive staggered mass
+shift~\cite{Dempsey:2022nys} has been published or applied, though the
+shift is the same order in the lattice spacing as the mass being fitted.
+Resolving the tension requires an equal-time computation in the same chiral
+window with that renormalization under control.  It is beyond the published
+record, and beyond this paper.

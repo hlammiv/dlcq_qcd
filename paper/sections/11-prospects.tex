@@ -2,43 +2,56 @@
 \section{Prospects}
 \label{sec:prospects}
 
-Four extensions are within reach of the machinery described here, in rough
-order of readiness.
+Five extensions are within reach of this machinery, in rough order of
+readiness.
 
-\emph{QCD coupled to QED with physical charges.}  The colour-contraction
+\emph{QCD coupled to QED with physical charges.}  The color-contraction
 tables already compute both Fierz structures, and the U(1) exchange reuses
-the $-1/N$ index structure with different weights, so
-$H = H_{\rm QCD} + (e^2/g^2) H_{\rm QED}$ is available as a reweighting of
-matrix elements already built, with one build serving every charge ratio.
-The validation ladder is clean --- bit-identity at $e = 0$, the exact
-Schwinger mass at the U(1) point, isospin restoration --- but Gauss' law on
-a circle admits only neutral states without a zero-mode subtraction: the
-neutron and $\pi^0$ come free, the proton does not.
+the $-1/N$ index structure with different weights.
+$H = H_{\rm QCD} + (e^2/g^2)\,H_{\rm QED}$ is therefore a reweighting of
+matrix elements already built, and one build serves every charge ratio.
+The validation ladder is clean: bit-identity at $e = 0$, the exact
+Schwinger mass at the U(1) point, isospin restoration.  One obstruction is
+physical.  Gauss' law on a circle admits only neutral states without a
+zero-mode subtraction, so the neutron and $\pi^0$ come free and the proton
+does not.
 
-\emph{The U($N$) switch.}  The same reweighting at $e^2/g^2 \to$ pure U(1)
-limit exposes the SU($N$)/U($N$) split of Sec.~\ref{sec:massless}
-numerically; the thesis~\cite{Hornbostel:thesis} plots the SU(2)--U(2)
-comparison that the 1990 article never showed, and reproducing it would
-close the last unreproduced published figure of this program.
+\emph{The U($N$) switch.}  The same reweighting in the pure-U(1) limit
+exposes the SU($N$)/U($N$) split of Sec.~\ref{sec:massless} numerically.
+The thesis~\cite{Hornbostel:1988ne} plots the SU(2)--U(2) comparison the
+1990 article never showed.  Reproducing it would close the last
+unreproduced published figure of this program.
 
-\emph{Zero modes.}  Our antiperiodic quantization removes the $k^+ = 0$ mode
-by fiat.  In two-dimensional models where zero modes have been included
-dynamically, low-lying masses shift by as much as
-$\sim 20\%$~\cite{Muller:1998mk}, so their absence is a genuine systematic
-of unknown size for this paper's absolute masses --- though not the cause of
-the weak-coupling failure, which a continuum solver with no zero-mode
-truncation reproduces exactly (Sec.~\ref{sec:budget}).  Collective-variable
-treatments that tensor a zero-mode sector onto the Fock basis exist and are
-compatible with our solver architecture.
+\emph{Zero modes.}  Our antiperiodic quantization removes the $k^+ = 0$
+mode by fiat.  Where zero modes have been included dynamically in
+two-dimensional models, low-lying masses shift by up to
+$\sim 20\%$~\cite{Mueller:1998tf}.  Their absence is a genuine systematic
+of unknown size for our absolute masses.  It is not the cause of the
+weak-coupling failure: a continuum solver with no zero-mode truncation
+reproduces that failure exactly (Sec.~\ref{sec:budget}).
+Collective-variable treatments that tensor a zero-mode sector onto the Fock
+basis exist and fit our solver architecture.
+
+\emph{Hadronic tensors and finite temperature.}  Light-cone wavefunctions
+are raw material for more than spectra.  Structure functions are already in
+hand (Sec.~\ref{sec:wavefunctions}), and DLCQ has historically reached
+finite-temperature QED$_{1+1}$, including the analogue of the $R$
+ratio~\cite{Strauss:2008zx,Strauss:2009zza}.  Two-current correlators and
+hadronic tensors are the quantities recent quantum simulations target at
+the hundred-qubit scale~\cite{Gustafson:2026ht}.  They are natural DLCQ
+observables, computable here with controlled errors at a classical cost of
+seconds.  A DLCQ pipeline for $W^{\mu\nu}$ would hand the
+quantum-simulation program the reference standard argued for in
+Sec.~\ref{sec:intro}.
 
 \emph{An equal-time computation in the same chiral window.}  The sharpest
-open discrepancy this paper documents --- light-front methods finding
-$M^2 \propto (m/g)^{\alpha}$ with $\alpha \to 1$ where the one equal-time
-measurement suggests $\alpha \approx 1.4$ (Sec.~\ref{sec:modern}) --- will
-not be settled by more $K$.  It needs an equal-time calculation with a
-controlled additive mass renormalization at finite $N$, over a decade in
-$m/g$ rather than a factor of four.  The missing theoretical ingredient is
-the SU($N$) analogue of the staggered-fermion mass shift known for the
-Schwinger model~\cite{Dempsey:2022nys}; deriving it is, in our view, the
-single most valuable piece of new work available in this corner of field
-theory, and the natural subject of a companion study.
+open discrepancy this paper documents will not be settled by more $K$:
+light-front methods find $\alpha \to 1$ where the one equal-time
+measurement suggests $\alpha \approx 1.4$ (Sec.~\ref{sec:modern}).  Settling
+it needs an equal-time calculation with a controlled additive mass
+renormalization at finite $N$, over a decade in $m/g$ rather than a factor
+of four.  The missing ingredient is the SU($N$) analogue of the
+staggered-fermion mass shift known for the Schwinger
+model~\cite{Dempsey:2022nys}.  Deriving it is, in our view, the single most
+valuable piece of new work available in this corner of field theory, and
+the natural subject of a companion study.
