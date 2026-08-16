@@ -495,6 +495,150 @@ def fig4():
     finish(fig, "fig4_higher_fock")
 
 
+@register("fig7")
+def fig7():
+    """Extrapolated masses vs m/g, both sectors, with budget bands.
+
+    Units: the fits run in the table's native M^2/(m^2+g^2/pi) and convert
+    to M/g at the end (Appendix C).  Errors are the full richardson_budget
+    total, converted with the same Jacobian.  The m/g=0 points are exact.
+    """
+    from dlcq.figures import _K_grid, _mass_series, sweep_lpn
+    from dlcq.observables import richardson_budget
+    from dlcq.providers import PythonProvider
+    from dlcq.units import mg_to_lambda
+
+    prov = PythonProvider(ncpus=1, assembly="exact", policy="blockwise",
+                          solver="sparse")
+    MGS = [1.6, 0.8, 0.4, 0.2, 0.1, 0.05]
+    chans = {0: [(2, "-"), (3, "--"), (4, ":")],
+             1: [(3, "--"), (4, ":")]}
+    fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.2))
+    for (B, series), ax in zip(chans.items(), axes):
+        for N, ls in series:
+            xs, ys, es = [0.0], [0.0], [0.0]
+            for mg in MGS:
+                Ks = _K_grid(B, N, 25, 71)
+                # the sweep cached lambdas at mg_to_lambda precision
+                Kseq, ms = [], []
+                for K in Ks:
+                    r = require_cached(prov, N, 1, B, K,
+                                       float(mg_to_lambda(mg)),
+                                       LPN=sweep_lpn(N, B))
+                    if r is None:
+                        continue
+                    from dlcq.observables import physical_indices as _pi
+                    idx = _pi(r)
+                    if idx.size:
+                        Kseq.append(K)
+                        ms.append(float(r.eigenvalues[idx[0]]))
+                if len(ms) < 8:
+                    continue
+                bud = richardson_budget(Kseq, ms, mg, N)
+                jac = mg ** 2 + 1.0 / np.pi
+                M = float(np.sqrt(max(bud["M0"], 1e-30) * jac))
+                dM = float(bud["total"] * jac / (2 * M)) if M > 0 else 0.0
+                xs.append(mg); ys.append(M); es.append(dM)
+            ax.errorbar(xs, ys, yerr=es, fmt="o" + ls, color=C_PRIMARY,
+                        markersize=3.5, linewidth=1.1, capsize=2,
+                        label=f"SU({N})")
+        ax.set_title(f"({'ab'[B]}) {'meson' if B == 0 else 'baryon'}",
+                     fontsize=10)
+        ax.set_xlabel("$m/g$")
+        ax.set_ylabel("$M/g$")
+        ax.legend(fontsize=8, frameon=False)
+        style(ax)
+    fig.suptitle("FIG. 7: extrapolated masses, standard Hamiltonian, "
+                 "Eq.~(27) fits over $2K=25$--$71$, full budget bars",
+                 fontsize=10)
+    fig.tight_layout()
+    finish(fig, "fig7_masses")
+
+
+# Hamer, Nucl. Phys. B195 (1982) 503, Table 1, transcribed with his stated
+# errors in docs/weak-coupling-limit.md (pinned blob b2a49a2).  Use the
+# table, never a digitization of his figure: his real bars at weak coupling
+# are of order the values themselves.
+HAMER = {  # m/g: (M_bar/g, err, M_mes/g, err)
+    0.05: (0.25, 0.2, 0.30, 0.2), 0.10: (0.40, 0.2, 0.45, 0.2),
+    0.20: (0.65, 0.15, 0.65, 0.15), 0.40: (1.05, 0.10, 1.08, 0.07),
+    0.80: (1.90, 0.05, 1.92, 0.03), 1.60: (3.50, 0.05, 3.51, 0.02),
+}
+
+
+@register("fig8")
+def fig8():
+    """Meson masses against large N and Hamer's SU(2) lattice."""
+    from dlcq.figures import _K_grid, sweep_lpn
+    from dlcq.observables import physical_indices as _pi
+    from dlcq.observables import richardson_budget
+    from dlcq.providers import PythonProvider
+    from dlcq.thooft import thooft_mass
+    from dlcq.units import mg_to_lambda
+
+    prov = PythonProvider(ncpus=1, assembly="exact", policy="blockwise",
+                          solver="sparse")
+    MGS = [1.6, 0.8, 0.4, 0.2, 0.1, 0.05]
+    curves = {}
+    for N, ls in ((2, "-"), (3, "--"), (4, ":")):
+        xs, ys = [0.0], [0.0]
+        for mg in MGS:
+            Kseq, ms = [], []
+            for K in _K_grid(0, N, 25, 71):
+                r = require_cached(prov, N, 1, 0, K,
+                                   float(mg_to_lambda(mg)),
+                                   LPN=sweep_lpn(N, 0))
+                if r is None:
+                    continue
+                idx = _pi(r)
+                if idx.size:
+                    Kseq.append(K); ms.append(float(r.eigenvalues[idx[0]]))
+            if len(ms) < 8:
+                continue
+            bud = richardson_budget(Kseq, ms, mg, N)
+            jac = mg ** 2 + 1.0 / np.pi
+            xs.append(mg)
+            ys.append(float(np.sqrt(max(bud["M0"], 1e-30) * jac)))
+        curves[N] = (np.array(xs), np.array(ys), ls)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.5, 4.2))
+    for N, (xs, ys, ls) in curves.items():
+        ax1.plot(xs, ys, "o" + ls, color=C_PRIMARY, markersize=3.5,
+                 linewidth=1.1, label=f"SU({N})")
+    hx = sorted(HAMER)
+    ax1.errorbar(hx, [HAMER[m][2] for m in hx],
+                 yerr=[HAMER[m][3] for m in hx], fmt="s", color=C_SECONDARY,
+                 mfc="none", markersize=5, capsize=3, linewidth=1.0,
+                 label="Hamer SU(2) lattice")
+    ax1.set_title("(a) meson mass vs SU(2) lattice", fontsize=10)
+    ax1.set_xlabel("$m/g$"); ax1.set_ylabel("$M/g$")
+    ax1.legend(fontsize=8, frameon=False)
+
+    # (b): both axes rescaled by (2 pi / N)^(1/2); the 't Hooft limit is a
+    # single curve in these variables.
+    for N, (xs, ys, ls) in curves.items():
+        s = np.sqrt(2 * np.pi / N)
+        ax2.plot(s * xs, s * ys, "o" + ls, color=C_PRIMARY, markersize=3.5,
+                 linewidth=1.1, label=f"SU({N})")
+    NREF = 3
+    s = np.sqrt(2 * np.pi / NREF)
+    tx = np.array([0.0] + MGS)
+    ty = np.array([0.0] + [thooft_mass(mg, NREF, large_n=True)
+                           for mg in MGS])
+    ax2.plot(s * tx, s * ty, "-", color=C_1990, linewidth=1.6,
+             label="'t Hooft limit")
+    ax2.set_title("(b) rescaled to the large-$N$ frame", fontsize=10)
+    ax2.set_xlabel(r"$(2\pi/N)^{1/2}\, m/g$")
+    ax2.set_ylabel(r"$(2\pi/N)^{1/2}\, M/g$")
+    ax2.legend(fontsize=8, frameon=False)
+    for ax in (ax1, ax2):
+        style(ax)
+    fig.suptitle("FIG. 8: comparison with the large-$N$ limit and the "
+                 "equal-time lattice", fontsize=10)
+    fig.tight_layout()
+    finish(fig, "fig8_comparison")
+
+
 # ── main ───────────────────────────────────────────────────────────────────
 
 def main(argv=None):
