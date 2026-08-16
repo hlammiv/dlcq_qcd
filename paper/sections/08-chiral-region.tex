@@ -56,11 +56,37 @@ close at any reachable resolution (Sec.~\ref{sec:improved}).
 \subsection{The chiral exponent}
 \label{sec:chiral-exponent}
 
-% \itodo{Draft against v1 macros: standard alpha ~ 1.95 stable in K (the
-% grid artifact); improved alpha ~ 1.07, stable in K across 2K=30-60; the
-% non-circularity argument (exponent stability in K is a property of the
-% masses, not the fit basis); GMOR as a law with frozen intercept; caveat
-% that the improved-baryon exponent partly inherits the Eq. (26) input.}
+The chiral limit sharpens the comparison into one number.  We fit
+$M^2 \propto (m/g)^{\alpha}$ to the $N = 3$ meson over $m/g \le 0.1$ at
+fixed resolution, with no extrapolation in $K$ at all.  The physical
+exponent is $\alpha = 1$: the mass-squared is linear in the quark mass, by
+GMOR and by 't~Hooft's own small-mass expansion.
+
+The standard Hamiltonian gives $\alpha = \numAlphaStandard$, and the value
+moves by only \numAlphaStandardDrift{} as $2K$ runs from 30 to 60.  It has
+converged, in $K$, to the wrong answer.  The mechanism is
+Sec.~\ref{sec:improved}: the grid replaces the endpoint integral by
+$\ln K$, which turns $M^2 \sim mg$ into $M^2 \sim m^2 \ln K$, and an
+$m^2$ law fits as $\alpha = 2$.  The improved Hamiltonian on the same
+couplings gives $\alpha = \numAlphaImproved$, moving by
+\numAlphaImprovedDrift{} over the same resolutions.  Stability in $K$ is
+what makes this a measurement rather than an artifact of fit choices: no
+extrapolation basis enters, and the exponent is a property of the computed
+masses alone.
+
+The two-body sector supplies the anchor where an exact answer exists.  At
+van de Sande's benchmark coupling the exact ground state is
+$M^2/g^2 = \numTwoBodyExact$.  The improved series extrapolates in $1/K$
+to \numTwoBodyImproved, a relative agreement of \numTwoBodyImprovedRel;
+the same fit on the standard series returns \numTwoBodyStandard.  One
+caveat transfers from the meson to the baryon channel.  The improved
+self-energy takes the Eq.~\eqref{eq:endpoint-exponent} exponent as input,
+and at reachable $K$ the baryon's fitted $\alpha \approx 1$ partly reflects
+that input rather than an independent measurement.  We state it here once
+and let the baryon numbers carry it.
+
+% \itodo{v1 freeze: GMOR-law macro (M^2/GMOR = 1 + 0.71 m/g, intercept
+% -0.0005(8)) once gmor_chiral_limit.py output is frozen.}
 
 \subsection{Toward the chiral limit: $m/g$ to $2\times10^{-4}$}
 \label{sec:tiny-mg}

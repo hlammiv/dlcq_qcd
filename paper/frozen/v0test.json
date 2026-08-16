@@ -32,7 +32,7 @@
       "figures/table1_budget_2K25-71_python.txt",
       "data/improved_table1_msq.csv"
     ],
-    "note": "entries where improved and standard disagree past 3 sigma of the combined TOTAL bar (endpoint included): the honesty check on the endpoint systematic"
+    "note": "entries where improved and standard disagree past 3 sigma of the combined TOTAL bar (endpoint included): the coverage check on the endpoint systematic"
   },
   "tableone_improved_worst_fitonly_sigma": {
     "value": 37,
@@ -43,6 +43,80 @@
       "data/improved_table1_msq.csv"
     ],
     "note": "largest improved-vs-standard divergence in fit-only sigmas (form+wind+trunc quadrature, no endpoint)"
+  },
+  "two_body_exact": {
+    "value": 0.779141,
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "van de Sande's exact M^2/g^2 at beta=0.1"
+  },
+  "two_body_improved": {
+    "value": 0.779315,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "improved-series 1/K extrapolate"
+  },
+  "two_body_improved_rel": {
+    "value": "2.2e-04",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "relative agreement of improved extrapolate with exact"
+  },
+  "two_body_standard": {
+    "value": 0.4536,
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "the same fit on the standard series; not close at any reachable K"
+  },
+  "alpha_standard": {
+    "value": "1.96",
+    "hamiltonian": "standard",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "M^2 ~ (m/g)^alpha at 2K=60; per-K values [1.969, 1.966, 1.962]"
+  },
+  "alpha_standard_drift": {
+    "value": "0.008",
+    "hamiltonian": "standard",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "spread of alpha over 2K = 30, 40, 60"
+  },
+  "alpha_improved": {
+    "value": "1.03",
+    "hamiltonian": "improved",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "M^2 ~ (m/g)^alpha at 2K=60; per-K values [1.038, 1.036, 1.034]"
+  },
+  "alpha_improved_drift": {
+    "value": "0.004",
+    "hamiltonian": "improved",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "spread of alpha over 2K = 30, 40, 60"
   },
   "_table1_rows": {
     "value": [

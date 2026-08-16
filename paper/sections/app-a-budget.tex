@@ -36,9 +36,10 @@ combined in quadrature.  All four are measured.  None is fit.
   a correction: the model is too crude to shift central values, and too
   well verified to ignore.  The same expression accounts for ninety-five
   percent of the measured standard-versus-improved gap across a factor of
-  thirty in coupling (Sec.~\ref{sec:chiral}).  At $m/g \le 0.2$ it
-  dominates every other component and sets the size of the weak-coupling
-  bars in Table~\ref{tab:tableone}.
+  thirty in coupling, with a residual stable at four to five percent
+  (Sec.~\ref{sec:chiral}).  At $m/g \le 0.2$ it dominates every other
+  component and sets the size of the weak-coupling bars in
+  Table~\ref{tab:tableone}.
 \end{description}
 
 The solver's own floor, at relative $10^{-13}$ from the eigensolver
@@ -46,6 +47,13 @@ tolerance, is carried through and never visible at quoted precision.  The
 improved Hamiltonian runs the same machinery with the plain-$1/K$ series in
 place of the Eq.~(27) ladder.  Its budget has no endpoint component;
 removing that error is what the improvement is (Sec.~\ref{sec:improved}).
+
+The scope of the total bar is worth stating in both directions.  It covers
+fit-form spread, window spread, Fock truncation, and the endpoint capture
+deficit.  It does not cover the choice of the Eq.~(27) basis itself, nor
+any statement about the Hamiltonian being the right one; those are checked
+by the improved-Hamiltonian column and the external anchors of
+Sec.~\ref{sec:modern}, not by the bar.
 
 Two validation habits back the budget rather than extend it.  Held-out
 extrapolation fits the low-resolution points and predicts the highest two,

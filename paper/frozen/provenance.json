@@ -1,9 +1,12 @@
 {
   "freeze": "v0test",
-  "git_head": "3095273ccd1a6552b8baaa78e30fbb98db3f8f97",
+  "git_head": "b8382a57d7e02118c3f53c51b5594ab531cc1f62",
   "weak_coupling_doc_blob": "b2a49a204c86d9174c8b3f4627571939825fb64a",
   "inputs": {
-    "figures/table1_budget_2K25-71_python.txt": "8e664ce8fa00d18a",
-    "data/improved_table1_msq.csv": "5fe6e18777a1cd67"
+    "figures/table1_budget_2K25-71_python.txt": "bd246401f78c869a",
+    "data/improved_table1_msq.csv": "5fe6e18777a1cd67",
+    "dlcq/endpoint.py": "c6ddb187332bed08",
+    "data/chiral_grid_msq.csv": "b8c1fb8a2f5b3a8f",
+    "data/gmor_scan/improved_N3.csv": "70c17c7fd9e1d948"
   }
 }

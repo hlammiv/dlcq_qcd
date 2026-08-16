@@ -30,7 +30,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FROZEN = Path(__file__).resolve().parent / "frozen"
 
-VALID_PAIRS = {("improved", "1/K"), ("standard", "eq27")}
+VALID_PAIRS = {("improved", "1/K"), ("standard", "eq27"),
+               ("improved", "alpha(mg)"), ("standard", "alpha(mg)")}
 
 
 def _sha256(path: Path) -> str:
@@ -104,6 +105,81 @@ def parse_budget(path: Path = BUDGET_TXT) -> list[dict]:
     return rows
 
 
+def two_body_anchor() -> dict:
+    """Parse the recorded van de Sande two-body validation numbers.
+
+    The values live in dlcq/endpoint.py's Validation docstring and are held
+    there by tests/test_endpoint.py; parsing rather than retyping means an
+    edit to the recorded values breaks this freeze loudly.  Provenance
+    carries the file hash.
+    """
+    import re
+    text = (ROOT / "dlcq" / "endpoint.py").read_text()
+    exact = re.search(r"exact ground state is ``M\^2/g\^2 = ([\d.]+)``", text)
+    imp = re.search(r"returns ([\d.]+), i\.e\. the exact\s+answer", text)
+    std = re.search(r"the same fit on the standard series\s+returns "
+                    r"(\d+\.\d+)", text)
+    if not (exact and imp and std):
+        raise SystemExit("two_body_anchor: recorded values not found in "
+                         "dlcq/endpoint.py — docstring changed?")
+    return {"exact": float(exact.group(1)), "improved": float(imp.group(1)),
+            "standard": float(std.group(1))}
+
+
+def _read_house_csv(path: Path, want_hamiltonian: str | None = None) -> dict:
+    """House-format CSV -> {(N, B, mg): {K_code: msq}}."""
+    import csv
+    out: dict = {}
+    with open(path) as fh:
+        rows = csv.DictReader(l for l in fh if not l.lstrip().startswith("#"))
+        for r in rows:
+            if want_hamiltonian and r.get("hamiltonian") != want_hamiltonian:
+                continue
+            key = (int(r["N"]), int(r["B"]), float(r["mg"]))
+            out.setdefault(key, {})[int(r["K_code"])] = float(r["msq"])
+    return out
+
+
+def chiral_exponents() -> dict:
+    """Power-law fits M^2 ~ (m/g)^alpha at fixed K, meson N=3.
+
+    Standard from data/chiral_grid_msq.csv, improved from
+    data/gmor_scan/improved_N3.csv (read-only), over the weak couplings
+    m/g <= 0.1 present in each file, at 2K = 30, 40, 60.  The exponent's
+    stability in K is the point: a fit-basis artifact would move with the
+    grid, a property of the masses does not.
+    """
+    import math
+    out = {}
+    # chiral_grid_msq.csv predates the hamiltonian column and is standard
+    # throughout (its header says so); gmor_scan files carry the column.
+    for ham, path, want in (
+            ("standard", ROOT / "data" / "chiral_grid_msq.csv", None),
+            ("improved", ROOT / "data" / "gmor_scan" / "improved_N3.csv",
+             "improved")):
+        data = _read_house_csv(path, want)
+        alphas = []
+        for K in (30, 40, 60):
+            pts = [(mg, series[K])
+                   for (N, B, mg), series in data.items()
+                   if N == 3 and B == 0 and mg <= 0.1 and K in series]
+            if len(pts) < 3:
+                continue
+            xs = [math.log(mg) for mg, _ in pts]
+            ys = [math.log(m) for _, m in pts]
+            n = len(xs)
+            sx, sy = sum(xs), sum(ys)
+            sxx = sum(x * x for x in xs)
+            sxy = sum(x * y for x, y in zip(xs, ys))
+            alphas.append((n * sxy - sx * sy) / (n * sxx - sx * sx))
+        if len(alphas) < 2:
+            raise SystemExit(f"chiral_exponents: too few K values for {ham}")
+        out[ham] = {"alphas": alphas,
+                    "value": alphas[-1],
+                    "drift": max(alphas) - min(alphas)}
+    return out
+
+
 def gather() -> dict:
     """Compute every frozen number from data/ + regenerated artifacts.
 
@@ -161,8 +237,42 @@ def gather() -> dict:
         "note": "largest improved-vs-standard divergence in fit-only sigmas "
                 "(form+wind+trunc quadrature, no endpoint)"}
 
+    # Van de Sande two-body anchor (values recorded in dlcq/endpoint.py,
+    # held by tests/test_endpoint.py).
+    tb = two_body_anchor()
+    ep_rel = "dlcq/endpoint.py"
+    numbers["two_body_exact"] = {
+        "value": tb["exact"], "inputs": [ep_rel],
+        "note": "van de Sande's exact M^2/g^2 at beta=0.1"}
+    numbers["two_body_improved"] = {
+        "value": tb["improved"], "hamiltonian": "improved", "fit_basis": "1/K",
+        "inputs": [ep_rel], "note": "improved-series 1/K extrapolate"}
+    numbers["two_body_improved_rel"] = {
+        "value": f"{abs(tb['improved'] - tb['exact']) / tb['exact']:.1e}",
+        "hamiltonian": "improved", "fit_basis": "1/K", "inputs": [ep_rel],
+        "note": "relative agreement of improved extrapolate with exact"}
+    numbers["two_body_standard"] = {
+        "value": tb["standard"], "hamiltonian": "standard",
+        "fit_basis": "eq27", "inputs": [ep_rel],
+        "note": "the same fit on the standard series; not close at any "
+                "reachable K"}
+
+    # Chiral exponents at fixed K (meson N=3): the artifact vs the physics.
+    ce = chiral_exponents()
+    ce_inputs = ["data/chiral_grid_msq.csv", "data/gmor_scan/improved_N3.csv"]
+    for ham in ("standard", "improved"):
+        numbers[f"alpha_{ham}"] = {
+            "value": f"{ce[ham]['value']:.2f}", "hamiltonian": ham,
+            "fit_basis": "alpha(mg)", "inputs": ce_inputs,
+            "note": f"M^2 ~ (m/g)^alpha at 2K=60; per-K values "
+                    f"{[round(a, 3) for a in ce[ham]['alphas']]}"}
+        numbers[f"alpha_{ham}_drift"] = {
+            "value": f"{ce[ham]['drift']:.3f}", "hamiltonian": ham,
+            "fit_basis": "alpha(mg)", "inputs": ce_inputs,
+            "note": "spread of alpha over 2K = 30, 40, 60"}
+
     # TODO(next passes): ratio table (converged 0.4% statement), GMOR
-    # intercept, alpha exponents, captured fractions, timing table.
+    # intercept, captured fractions, timing table.
     numbers["_table1_rows"] = {
         "value": rows, "hamiltonian": "standard", "fit_basis": "eq27",
         "inputs": [budget_rel, imp_rel],
