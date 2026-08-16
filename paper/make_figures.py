@@ -410,6 +410,91 @@ def fig22():
     finish(fig, "fig22_p4_vs_K")
 
 
+@register("fig4")
+def fig4():
+    """Higher-Fock structure functions: meson 4q and baryon q/qbar.
+
+    The 1990 Fig. 4(b) is the "pion content of the baryon": the five-parton
+    sector's quark and antiquark distributions, both couplings.  Multipliers
+    are the 1990 panel values, applied identically in both rows.  The
+    seven-parton panel (c) waits on an affordable LPN=7 run.  Digitized
+    markers are overlaid without per-series labels: the original
+    distinguishes four series by marker shape, and our curves pair with
+    them visually rather than by an asserted mapping.
+    """
+    from dlcq.figures import paper_lambda
+    from dlcq.observables import structure_function
+    from phase4a_config import MG_STRONG, MG_WEAK
+
+    rows = [("a", provider_1990(), {0: (14, 0), 1: (15, 0)}, True),
+            ("b", None, {0: (100, 6), 1: (99, 5)}, False)]
+    mults = {0: {MG_WEAK: 1e4, MG_STRONG: 1e3},
+             1: {MG_WEAK: 1e3, MG_STRONG: 1e2}}
+    digs = {0: "fig4a", 1: "fig4b"}
+    fig, axes = plt.subplots(2, 2, figsize=(9.5, 7.5))
+    for (row, prov, cfg, overlay), axrow in zip(rows, axes):
+        for B, ax in zip((0, 1), axrow):
+            K, LPN = cfg[B]
+            p2 = prov or provider_2026(40 if B == 0 else 12)
+            npart = 4 if B == 0 else 5
+            for mg, ls, mfc in ((MG_WEAK, "-", None), (MG_STRONG, "--", "none")):
+                r = require_cached(p2, 3, 1, B, K, float(paper_lambda(mg)),
+                                   LPN=LPN)
+                if r is None:
+                    continue
+                mult = mults[B][mg]
+                from dlcq.observables import physical_indices as _pi
+                gs = int(_pi(r)[0])
+                x, q, qbar = structure_function(r, gs, nparton=npart)
+                if B == 0:
+                    # q alone, as the validated dlcq.figures.figure4 plots it
+                    # (and as the 1990 panel labels it) -- not a q/qbar mix.
+                    ax.plot(x, mult * q, "o" + ls,
+                            color=C_PRIMARY, mfc=mfc or C_PRIMARY,
+                            markersize=3, linewidth=1.1,
+                            label=rf"$m/g={mg}$ ($\times{mult:g}$)")
+                else:
+                    ax.plot(x, mult * q, "o" + ls, color=C_PRIMARY,
+                            mfc=mfc or C_PRIMARY, markersize=3,
+                            linewidth=1.1,
+                            label=rf"$q$, $m/g={mg}$ ($\times{mult:g}$)")
+                    ax.plot(x, mult * qbar, "v" + ls, color=C_SECONDARY,
+                            mfc=mfc or C_SECONDARY, markersize=3,
+                            linewidth=1.1,
+                            label=rf"$\bar q$, $m/g={mg}$")
+            if overlay:
+                # Overlay the hand-measured article values (refs/
+                # article_fig4.csv), the set the repo's 0.6-2.5% agreement
+                # was validated against.  They cover the m/g=1.6 series
+                # only; the digitized full traces of the 0.1 series await
+                # per-series calibration (same bucket as fig5d).
+                import csv as _csv
+                panel = digs[B]
+                with open(ROOT / "refs" / "article_fig4.csv") as fh:
+                    rows_ = [r_ for r_ in _csv.reader(
+                        l for l in fh if not l.startswith("#"))
+                        if r_ and r_[0] == panel]
+                if rows_:
+                    twoK = float(rows_[0][2])
+                    xs = [float(r_[3]) / twoK for r_ in rows_]
+                    ys = [float(r_[5]) for r_ in rows_]
+                    ax.plot(xs, ys, "o", mfc="none", mec=C_1990,
+                            markersize=7.5, markeredgewidth=1.1, zorder=5,
+                            label="HBP (measured)")
+            ax.set_title(f"({row}) {'meson 4q' if B == 0 else 'baryon 5q'}, "
+                         f"$2K={K}$"
+                         + ("" if LPN == 0 else f", LPN$={LPN}$"),
+                         fontsize=9)
+            ax.set_xlabel("$x$")
+            ax.legend(fontsize=6.5, frameon=False)
+            style(ax)
+        axrow[0].set_ylabel("$q(x)$")
+    fig.suptitle("FIG. 4: higher-Fock structure functions, $N=3$ — 1990 "
+                 "(top) and 2026 (bottom)", fontsize=11)
+    fig.tight_layout()
+    finish(fig, "fig4_higher_fock")
+
+
 # ── main ───────────────────────────────────────────────────────────────────
 
 def main(argv=None):
