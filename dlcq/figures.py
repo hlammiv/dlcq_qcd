@@ -813,7 +813,7 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
                  "'tot' as an error,\n"
                  "         never applied as a correction.  DOMINATES form at "
                  "m/g <= 0.2, where it\n"
-                 "         is what makes the weak-coupling entries honest.  "
+                 "         sets the size of the weak-coupling bars.  "
                  "See dlcq/endpoint.py.\n")
         fh.write("  (the solver floor, 6e-13 relative, is carried but never "
                  "visible at this precision)\n\n")
