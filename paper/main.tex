@@ -1,0 +1,63 @@
+% Light-cone-quantized QCD in 1+1 dimensions, revisited
+%
+% Structural mirror of Hornbostel, Brodsky & Pauli, PRD 41, 3814 (1990):
+% every figure reproduced at much larger K with a full error budget, the
+% chiral region reached with the improved Hamiltonian, a tetraquark/hexaquark
+% search, and comparison against the 2013-2026 literature.
+%
+% House rules (enforced by `make check`, see ../docs and the plan):
+%  - No numeric literal in prose: every number is a macro from frozen/numbers.tex.
+%  - Every caption states N, B, 2K, m/g, LPN, fit window (or "no fit"),
+%    and the Hamiltonian.
+%  - Improved-Hamiltonian numbers extrapolate in plain 1/K; standard in the
+%    Eq. (27) ladder; the two never share a fit.
+%  - Section X.E (equal-time cross-check) must be deletable with zero
+%    dangling references.
+\documentclass[aps,prd,twocolumn,superscriptaddress,nofootinbib]{revtex4-2}
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\graphicspath{{figs/}}
+\input{frozen/numbers}
+
+\begin{document}
+
+\title{Light-cone-quantized QCD in 1+1 dimensions, revisited}
+
+\author{H.~Lamm}
+\affiliation{}
+
+\date{\today}
+
+\begin{abstract}
+% Three sentences, mirroring the 1990 abstract's economy: what is
+% diagonalized, what is computed, what is new (K reach, error budget,
+% chiral region, exotics, modern comparisons).
+\end{abstract}
+
+\maketitle
+
+\input{sections/01-intro}
+\input{sections/02-lc-quantization}
+\input{sections/03-sun-improved}
+\input{sections/04-method-2026}
+\input{sections/05-wavefunctions}
+\input{sections/06-massless-limit}
+\input{sections/07-error-budget}
+\input{sections/08-chiral-region}
+\input{sections/09-exotics}
+\input{sections/10-modern-methods}
+\input{sections/11-prospects}
+
+\appendix
+\input{sections/app-a-budget}
+\input{sections/app-b-do-not-retry}
+\input{sections/app-c-units}
+\input{sections/app-d-data}
+
+\bibliography{refs}
+
+\end{document}

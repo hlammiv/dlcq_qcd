@@ -1,0 +1,55 @@
+% app-b-do-not-retry — negative results, kept so they are not re-tried.
+% Source: docs/weak-coupling-limit.md at blob b2a49a2 (pinned; gate G5).
+\section{Approaches measured not to work}
+\label{app:donotretry}
+
+Every extrapolation strategy below was implemented and measured against the
+standard-Hamiltonian weak-coupling problem of Sec.~\ref{sec:budget} before
+being rejected.  We record them because each is the obvious next idea, and
+each fails in a way that is invisible from inside the fit --- the same
+property that makes the underlying problem dangerous.  Numbers refer to the
+Table~\ref{tab:tableone} channels at $m/g \le 0.2$ unless stated.
+
+\begin{description}
+\item[More resolution.]  The remainder falls only as $K^{-a}$ with
+  $a \to 0$; halving the uncertainty bracket at $m/g = 0.1$ requires
+  increasing $K$ by a factor of order $10^{4.9}$, and at the smallest
+  couplings we probe, by factors that exceed any conceivable computation.
+  Resolution buys nothing below the validity boundary; that is the point.
+\item[A confluent fit basis.]  Replacing the near-degenerate
+  $\{K^{-1}, K^{-(1+a)}\}$ pair by a confluent basis spans the same space:
+  the extrapolated mass is identical to one part in $10^{14}$.
+\item[Committing to a single series order.]  Fixing the number of terms
+  (say four) hides, not removes, the order dependence: the next admissible
+  term still moves the extrapolated mass by several percent.  Two defensible
+  selection criteria --- held-out resolution and consistency with the known
+  chiral behaviour --- prefer opposite ends of the admissible range, which
+  is what an undetermined model order looks like; the budget therefore
+  spans the whole ladder rather than choosing.
+\item[A validity floor on the fit windows.]  Raising the smallest
+  resolution admitted to the window set shrinks the quoted spread severalfold
+  while walking the central value monotonically by many times the shrunken
+  bar --- variance traded for bias, silently.
+\item[Fitting the endpoint exponent freely.]  $M_0 - C\,K^{-p}$ is
+  unidentifiable when the true $p$ is small: $K^{-p}$ is nearly constant,
+  $M_0$ and $C$ degenerate, and the fit lands an order of magnitude from the
+  true value with a residual of $10^{-7}$ --- a perfect fit to the wrong
+  answer.
+\item[Summing the tail analytically.]  A Hurwitz-$\zeta$ resummation of the
+  increment series validates at strong coupling and diverges exactly where
+  it is needed.
+\item[Adding an explicit $K^{-a}$ column.]  With $a$ fixed from
+  Eq.~\eqref{eq:endpoint-exponent}, the extrapolated masses land several
+  times above the published values while the fitted chiral exponent stays
+  pinned to the grid artifact; inside a joint $(m/g, K)$ fit the same column
+  produces variant spreads of hundreds of percent and negative masses.
+\end{description}
+
+The common failure mode deserves the emphasis: every rejected strategy
+\emph{improved} some internal fit diagnostic while degrading the answer.
+Residuals, held-out predictions, and spread statistics all reward
+flexibility inside the reachable window, and the reachable window does not
+contain the physics (Sec.~\ref{sec:budget}).  Where we quote weak-coupling
+numbers from the standard Hamiltonian, the error bar carries the endpoint
+systematic in full; where we need the chiral region, we change the
+Hamiltonian, not the fit.

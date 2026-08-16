@@ -1,0 +1,16 @@
+% app-d-data — reproducibility statement
+\section{Data and code availability}
+\label{app:data}
+
+Both solvers --- the preserved 1988-era Fortran, unmodified, and the Python
+port --- are public, together with every analysis script, the digitized
+markers of all 1990 figure panels with their axis-calibration provenance,
+and the per-figure data files, each carrying in its header the exact command
+that regenerates it.  Every number quoted in this paper's prose is a macro
+generated from those data files by a single extractor, with the repository
+revision and input hashes recorded alongside; every figure is built by a
+single driver that reads cached solver output and refuses to solve, so that
+a missing input surfaces as an explicit run command rather than a silent
+recomputation.  The equal-time exact-diagonalization used for the
+Schwinger-model cross-checks of Sec.~\ref{sec:modern} is included.
+% Repository URL + archived version DOI at v2 freeze.

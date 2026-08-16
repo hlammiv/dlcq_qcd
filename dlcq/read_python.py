@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import os
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -522,7 +523,8 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
                rmq=None, iflv=None, ncpus=1, policy="fortran",
                assembly="exact", prefer_opt=True, backend=None,
                solver="dense", nev=None, keep_norm=True,
-               hamiltonian="standard") -> DLCQResult:
+               hamiltonian="standard",
+               allow_beyond_ceiling=False) -> DLCQResult:
     """Run the Python DLCQ solver and return a :class:`DLCQResult`.
 
     Parameters
@@ -583,6 +585,14 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
     against a Fortran run: the input files use 0.3325 while
     ``mg_to_lambda(1.6)`` is 0.3325495, and that 1.5e-5 difference moves
     eigenvalues well above a 1e-8 comparison tolerance.
+
+    allow_beyond_ceiling : bool
+        Past ``2K = 100`` the solver returns spurious *negative* eigenvalues
+        below an otherwise intact spectrum, with no error raised (measured at
+        2K = 102 and 120; 2K = 100 itself reproduces its recorded reference
+        values).  Requests beyond the ceiling therefore raise unless this is
+        set, and with it set the post-solve negative-eigenvalue check warns
+        instead of raising, so the failure mode itself can be probed.
     """
     # Validate before importing the solver or generating states: an unknown
     # policy used to surface only after the norm build, which at large K is
@@ -608,6 +618,22 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
             f"(docs/basis-dependence.md), and a global Z is dense by "
             f"construction, so neither can reach the sizes this path exists "
             f"for.")
+    if K_code > 100 and not allow_beyond_ceiling:
+        raise ValueError(
+            f"2K={K_code} is past the validated ceiling of 100: beyond it the "
+            f"colour path returns spurious negative eigenvalues below an "
+            f"otherwise intact spectrum, with no error raised (measured at "
+            f"2K=102 and 120). Pass allow_beyond_ceiling=True only to probe "
+            f"that failure mode deliberately.")
+    # Every parton carries an odd momentum in code units, so a basis state
+    # exists only when K_code % 2 == (parton count) % 2 == (N*|B|) % 2.  A
+    # wrong-parity request used to return zero states in ~0.1 s, which reads
+    # exactly like a fast successful run.
+    if K_code % 2 != (N * abs(B)) % 2:
+        raise ValueError(
+            f"2K={K_code} has the wrong parity for N={N}, B={B}: the basis is "
+            f"empty unless K_code % 2 == (N*|B|) % 2 (mesons: even K_code; "
+            f"baryons: K_code odd iff N*|B| is odd). See figures._K_grid.")
     opt, base, use_opt = _import_solver(prefer_opt)
     os.environ["QCDF_NCPUS"] = str(ncpus)
 
@@ -867,6 +893,23 @@ def run_python(N, NF, B, K_code, rlamb, cutoff=-1.0, LPN=0,
     n_orth = hnu.shape[0]
     w_eig, z_eig = _solve_eigen(hnu, solver=solver, nev=nev)
     eigenvalues = K_code * w_eig / 2.0
+    # M^2 >= 0 for every physical state; decoupled *zero* modes are a known,
+    # filtered artifact (observables.spurious_zero_modes), but a genuinely
+    # negative eigenvalue is corruption -- the signature of the past-the-
+    # ceiling colour failure.  The threshold sits far above the 6e-13
+    # relative solver floor and far below any observed corruption.
+    if eigenvalues.size:
+        floor = -1e-8 * max(1.0, float(np.abs(eigenvalues).max()))
+        if float(eigenvalues.min()) < floor:
+            msg = (f"2K={K_code}, N={N}, B={B}: {int((eigenvalues < floor).sum())} "
+                   f"negative eigenvalue(s), most negative "
+                   f"{float(eigenvalues.min()):.6g}. Physical M^2 is "
+                   f"non-negative; this is the past-the-ceiling corruption "
+                   f"signature (commit 9487675).")
+            if allow_beyond_ceiling:
+                warnings.warn(msg)
+            else:
+                raise RuntimeError(msg)
     c_orig = np.asarray(Z @ z_eig)
     # DLCQResult's contract is ndarray, and every consumer -- structure_function,
     # the figures, dataset.save -- assumes that.  Densifying Z here confines the

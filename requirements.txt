@@ -16,3 +16,7 @@ pillow>=10.0
 
 # Test suite
 pytest>=7.4
+
+# Equal-time (Hamiltonian lattice) calculations -- equaltime/, see
+# docs/equal-time-plan.md.  Carries both the DMRG and VUMPS engines.
+physics-tenpy>=1.1

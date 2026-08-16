@@ -98,3 +98,20 @@ def test_mpo_reproduces_ed(L, x, mg):
     ed = float(spectrum(L, x, mg, k=1)[0])
     dmrg, _, _ = ground_state(L, x, mg, chi=256)
     assert dmrg == pytest.approx(ed, abs=1e-9)
+
+
+@pytest.mark.parametrize("L,x", [(10, 4.0), (12, 4.0), (12, 9.0)])
+def test_excited_state_dmrg_matches_ed(L, x):
+    """The gap from orthogonality-constrained DMRG must equal ED's.
+
+    Guards a silent failure: ``orthogonal_to`` is a keyword-only constructor
+    argument, and passing it in the options dict is ignored -- the second solve
+    re-converges to the ground state and the gap is exactly 0.  A blanket
+    ``warnings.filterwarnings("ignore")`` also hides the unused-option warning
+    that would otherwise flag it.
+    """
+    from equaltime.schwinger_mps import mass_gap
+    from equaltime.schwinger_ed import gap_to_M_over_g
+    ed = spectrum(L, x, 0.0, k=2)
+    want = gap_to_M_over_g(float(ed[1] - ed[0]), x)
+    assert mass_gap(L, x, 0.0, chi=200) == pytest.approx(want, abs=1e-8)

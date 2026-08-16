@@ -1,0 +1,54 @@
+% 01-intro — the 1990→2026 mission statement
+\section{Introduction}
+\label{sec:intro}
+
+In 1990, Hornbostel, Brodsky and Pauli diagonalized the light-cone Hamiltonian
+of SU($N$) gauge theory in one space and one time dimension in a discrete
+momentum basis, and computed the hadronic spectrum and wavefunctions across
+couplings, numbers of colours, and baryon number~\cite{Hornbostel:1988fb}.
+The calculation ran at resolutions $2K = 16$--$24$, in minutes on the
+mainframes of the day, with convergence controlled by a single extrapolation
+formula.  It became a standard reference for discretized light-cone
+quantization (DLCQ), and its figures are still the picture most physicists
+carry of what QCD in two dimensions looks like at finite $N$: which states
+exist, how their wavefunctions deform with coupling, how quickly large-$N$
+becomes a good approximation.
+
+The reasons to study the model have, if anything, strengthened since.
+Tractability remains: the theory confines, has a meaningful chiral limit, and
+carries one dimensionless parameter, while being solvable to high precision.
+The role of test bed has changed hands --- where the 1990 paper looked ahead
+to DLCQ in four dimensions, today the same model is the standard benchmark
+for Hamiltonian lattice methods, tensor networks, and quantum simulation,
+which makes controlled finite-$N$ spectra directly useful to communities that
+did not exist then.  And the model has open questions of its own: the
+chiral-limit behaviour at finite $N$ is measured differently by light-front
+and equal-time methods (Sec.~\ref{sec:modern}), and the existence of compact
+multiquark states near threshold is an active large-$N$ prediction awaiting a
+finite-$N$ test~\cite{Sazdjian:2025aa,Lucha:2017gqq}.
+
+This paper re-does the 1990 calculation with thirty-six years of hardware and
+--- more importantly --- of error analysis.  We reproduce every figure and the
+table of that paper, at the original parameters and again at resolutions up
+to $2K \simeq 100$, from two independent implementations of the same
+Hamiltonian: the preserved Fortran of the original program, and a validated
+open-source port.  Where the original controlled its errors with one
+extrapolation series and a parenthesis convention, we carry a four-component
+error budget with held-out validation (Sec.~\ref{sec:budget}); where its
+weak-coupling entries were limited by the momentum grid in a way no
+resolution can repair, we identify the mechanism, quantify it without free
+parameters, and reach the chiral region instead with van de Sande's improved
+Hamiltonian~\cite{vandeSande:1996mc} (Sec.~\ref{sec:chiral}).  Two sections
+have no 1990 counterpart: a search for states dominated by four- and
+six-parton Fock sectors --- tetraquark and hexaquark candidates ---
+(Sec.~\ref{sec:exotics}), and a comparison against the modern record:
+integrability results at large $N$, tensor-network and quantum-hardware
+spectra at $N = 2, 3$, and precision Schwinger-model benchmarks
+(Sec.~\ref{sec:modern}).
+
+We have kept the structure of Ref.~\cite{Hornbostel:1988fb} deliberately,
+section for section where possible, so that each figure here can be laid
+beside its 1990 counterpart.  Sections~\ref{sec:lcq} and \ref{sec:sun} fix
+notation and recall the Hamiltonian; Sec.~\ref{sec:method} describes what
+changed computationally; Secs.~\ref{sec:wavefunctions}--\ref{sec:massless}
+reproduce and extend the 1990 results; the remainder is new.

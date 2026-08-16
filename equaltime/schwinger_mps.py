@@ -84,6 +84,39 @@ class SchwingerChain(CouplingModel, MPOModel):
         return self._const
 
 
+def _dmrg_opts(chi: int):
+    return {"trunc_params": {"chi_max": chi, "svd_min": 1e-12},
+            "max_sweeps": 60, "mixer": True, "combine": True}
+
+
+def _staggered(model, L):
+    """The x=0 exact ground state, which is also the physical charge sector."""
+    from tenpy.networks.mps import MPS
+    prod = ["down" if i % 2 == 0 else "up" for i in range(L)]
+    return MPS.from_product_state(model.lat.mps_sites(), prod,
+                                  bc=model.lat.bc_MPS, unit_cell_width=L)
+
+
+def mass_gap(L: int, x: float, mg: float, chi: int = 200):
+    """``M/g`` from the first excitation, via orthogonality-constrained DMRG.
+
+    **``orthogonal_to`` is a keyword-only argument of the engine constructor,
+    not an options key.**  Passing it in the options dict is silently ignored:
+    the second solve re-converges to the ground state and the gap comes out
+    exactly 0.  Worse, the "unused option" warning that would have caught it is
+    the same warning suppressed by a blanket ``warnings.filterwarnings`` --
+    which is how this survived a run at L = 64 before the ED comparison caught
+    it.  Verified against ``schwinger_ed`` to 1e-13.
+    """
+    from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
+    model = SchwingerChain(L, x, mg)
+    opts = _dmrg_opts(chi)
+    E0, psi0 = TwoSiteDMRGEngine(_staggered(model, L), model, opts).run()
+    E1, _ = TwoSiteDMRGEngine(_staggered(model, L), model, dict(opts),
+                              orthogonal_to=[psi0]).run()
+    return gap_to_M_over_g(float(E1 - E0), x)
+
+
 def ground_state(L: int, x: float, mg: float, chi: int = 128,
                  bc_MPS: str = "finite", verbose: bool = False):
     """DMRG ground state.  Returns ``(W0, psi, model)`` with ``W0`` including
@@ -95,7 +128,10 @@ def ground_state(L: int, x: float, mg: float, chi: int = 128,
     # start from the staggered vacuum: the exact x=0 ground state, and the
     # physical charge sector (total Sz = 0) in one choice
     prod = ["down" if i % 2 == 0 else "up" for i in range(L)]
-    psi = MPS.from_product_state(model.lat.mps_sites(), prod, bc=model.lat.bc_MPS)
+    # pass unit_cell_width explicitly: tenpy warns that it becomes mandatory in
+    # a future release, and an unsilenced deprecation warning masks real ones
+    psi = MPS.from_product_state(model.lat.mps_sites(), prod, bc=model.lat.bc_MPS,
+                                 unit_cell_width=L)
     eng = TwoSiteDMRGEngine(psi, model, {
         "trunc_params": {"chi_max": chi, "svd_min": 1e-12},
         "max_sweeps": 60, "mixer": True,

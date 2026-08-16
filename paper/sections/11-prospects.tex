@@ -1,0 +1,44 @@
+% 11-prospects — what this machinery can reach next
+\section{Prospects}
+\label{sec:prospects}
+
+Four extensions are within reach of the machinery described here, in rough
+order of readiness.
+
+\emph{QCD coupled to QED with physical charges.}  The colour-contraction
+tables already compute both Fierz structures, and the U(1) exchange reuses
+the $-1/N$ index structure with different weights, so
+$H = H_{\rm QCD} + (e^2/g^2) H_{\rm QED}$ is available as a reweighting of
+matrix elements already built, with one build serving every charge ratio.
+The validation ladder is clean --- bit-identity at $e = 0$, the exact
+Schwinger mass at the U(1) point, isospin restoration --- but Gauss' law on
+a circle admits only neutral states without a zero-mode subtraction: the
+neutron and $\pi^0$ come free, the proton does not.
+
+\emph{The U($N$) switch.}  The same reweighting at $e^2/g^2 \to$ pure U(1)
+limit exposes the SU($N$)/U($N$) split of Sec.~\ref{sec:massless}
+numerically; the thesis~\cite{Hornbostel:thesis} plots the SU(2)--U(2)
+comparison that the 1990 article never showed, and reproducing it would
+close the last unreproduced published figure of this program.
+
+\emph{Zero modes.}  Our antiperiodic quantization removes the $k^+ = 0$ mode
+by fiat.  In two-dimensional models where zero modes have been included
+dynamically, low-lying masses shift by as much as
+$\sim 20\%$~\cite{Muller:1998mk}, so their absence is a genuine systematic
+of unknown size for this paper's absolute masses --- though not the cause of
+the weak-coupling failure, which a continuum solver with no zero-mode
+truncation reproduces exactly (Sec.~\ref{sec:budget}).  Collective-variable
+treatments that tensor a zero-mode sector onto the Fock basis exist and are
+compatible with our solver architecture.
+
+\emph{An equal-time computation in the same chiral window.}  The sharpest
+open discrepancy this paper documents --- light-front methods finding
+$M^2 \propto (m/g)^{\alpha}$ with $\alpha \to 1$ where the one equal-time
+measurement suggests $\alpha \approx 1.4$ (Sec.~\ref{sec:modern}) --- will
+not be settled by more $K$.  It needs an equal-time calculation with a
+controlled additive mass renormalization at finite $N$, over a decade in
+$m/g$ rather than a factor of four.  The missing theoretical ingredient is
+the SU($N$) analogue of the staggered-fermion mass shift known for the
+Schwinger model~\cite{Dempsey:2022nys}; deriving it is, in our view, the
+single most valuable piece of new work available in this corner of field
+theory, and the natural subject of a companion study.
