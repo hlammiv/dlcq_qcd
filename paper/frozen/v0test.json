@@ -24,7 +24,7 @@
     ],
     "note": "entries with |paper-ours| > paper's own last-term magnitude"
   },
-  "tableone_improved_n_beyond_3sigma": {
+  "tableone_improved_n_beyond_three_sigma": {
     "value": 0,
     "hamiltonian": "improved",
     "fit_basis": "1/K",
@@ -32,7 +32,17 @@
       "figures/table1_budget_2K25-71_python.txt",
       "data/improved_table1_msq.csv"
     ],
-    "note": "entries where improved and standard disagree past 3 sigma of the combined bar (the weak-coupling divergence)"
+    "note": "entries where improved and standard disagree past 3 sigma of the combined TOTAL bar (endpoint included): the honesty check on the endpoint systematic"
+  },
+  "tableone_improved_worst_fitonly_sigma": {
+    "value": 37,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt",
+      "data/improved_table1_msq.csv"
+    ],
+    "note": "largest improved-vs-standard divergence in fit-only sigmas (form+wind+trunc quadrature, no endpoint)"
   },
   "_table1_rows": {
     "value": [

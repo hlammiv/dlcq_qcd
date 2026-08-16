@@ -1,5 +1,83 @@
-% 08-chiral-region
+% 08-chiral-region — Table I redone, and the road to m/g = 2e-4.
+% Numbers: frozen macros only (G1).  Table body: frozen/table1_body.tex.
 \section{The chiral region}
 \label{sec:chiral}
-% TODO: draft against v1 freeze; mandatory caveats in plan
-% Table I lives here: \label{tab:tableone} on the table environment.
+
+Table~\ref{tab:tableone} is the 1990 paper's Table~I, redone.  Each of the
+\numTableoneNEntries{} entries carries our standard-Hamiltonian value with
+the full four-component budget of Sec.~\ref{sec:budget}, our
+improved-Hamiltonian value with its ensemble spread, and the published
+number with its parenthesis.  The fits use $2K = 25$--$71$, three times the
+original resolution range.  Only \numTableoneNOutsidePaperTerm{} of
+\numTableoneNEntries{} published entries differ from ours by more than
+their own last-term magnitude, which is how the 1990 authors asked to be
+scored.  The reproduction, in that sense, is complete.
+
+\begin{table*}
+\caption{The original Table~I, in its own layout and its own units,
+$M^2/(m^2+g^2/\pi)$ (Appendix~\ref{app:units}).  Each $m/g$ block gives the
+published value (``HBP,'' whose parenthesis is the last fit term, not an
+error bar), our standard-Hamiltonian value with the four-component budget of
+Sec.~\ref{sec:budget}, and our improved-Hamiltonian value with its ensemble
+spread.  Fits use $2K = 25$--$71$ at Fock truncation valence$+2$; standard
+extrapolates in the Eq.~(27) ladder, improved in a plain $1/K$ series.  The
+$m/g = 0$ row is exact and $K$-independent (Sec.~\ref{sec:massless}).}
+\label{tab:tableone}
+\begin{ruledtabular}
+\begin{tabular}{lllllll}
+$m/g$ & & meson $N{=}2$ & meson $N{=}3$ & meson $N{=}4$
+      & baryon $N{=}3$ & baryon $N{=}4$ \\
+\hline
+\input{frozen/table1_body}
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
+The two Hamiltonians tell one story in two regimes.  At strong coupling
+they agree to a fraction of a percent, and the improved uncertainty is an
+order of magnitude smaller.  Below the validity boundary
+$m/g \approx 0.15$ they separate.  Measured against fit-only uncertainties,
+the worst disagreement reaches
+$\numTableoneImprovedWorstFitonlySigma\sigma$.  Measured against the full
+budget, endpoint systematic included, no entry disagrees beyond three
+standard deviations: \numTableoneImprovedNBeyondThreeSigma{} of
+\numTableoneNEntries.  The endpoint term is doing exactly its job.  The
+standard weak-coupling numbers are not wrong so much as unreachable, their
+bars now say so, and the largest relative bar in the table is
+\numTableoneWorstWeakBarPct\% of its central value.
+
+Which of the two columns to believe at weak coupling is not a matter of
+taste.  The improved Hamiltonian reproduces van de Sande's exact two-body
+value where the exact answer exists, and the standard one does not come
+close at any reachable resolution (Sec.~\ref{sec:improved}).
+% \itodo{v1 freeze: macro for the 5.5e-4 two-body agreement and the
+% standard-path 0.413-at-K=100 contrast.}
+
+\subsection{The chiral exponent}
+\label{sec:chiral-exponent}
+
+% \itodo{Draft against v1 macros: standard alpha ~ 1.95 stable in K (the
+% grid artifact); improved alpha ~ 1.07, stable in K across 2K=30-60; the
+% non-circularity argument (exponent stability in K is a property of the
+% masses, not the fit basis); GMOR as a law with frozen intercept; caveat
+% that the improved-baryon exponent partly inherits the Eq. (26) input.}
+
+\subsection{Toward the chiral limit: $m/g$ to $2\times10^{-4}$}
+\label{sec:tiny-mg}
+
+% \itodo{Draft against v1 macros: tiny_scan results N=5-7 (N=8 pending the
+% production extension), the parameter-free endpoint model accounting for
+% 95% of the standard/improved gap over a factor 32 in coupling, and the
+% "fits give no warning" demonstration figure.}
+
+\subsection{The meson--baryon ratio and bosonization}
+\label{sec:ratio}
+
+% \itodo{Draft against v1 macros, with the mandatory caveats from the plan:
+% quote the ratio at its converged statement (within 0.4% of 2 sin(pi nu/2),
+% nu = 1/(2N-1), at N=5-8, valence+4 checked); the valence+4 residuals
+% (-0.41, -0.16, +0.04, +0.31%) drift systematically through zero near N=7
+% and are not scatter; N=8's baryon rests on 6 momentum points; baryons
+% overall have passed one external check and carry the largest corrections.
+% Standard Hamiltonian sits on 2/N and never departs. N=2 returns 1.0000 by
+% pseudo-reality as a free pipeline check.}

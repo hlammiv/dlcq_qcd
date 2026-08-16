@@ -201,7 +201,12 @@ def test_run_python_agrees_across_backends(B):
     """
     from dlcq.read_python import run_python
 
-    kw = dict(N=3, NF=1, B=B, K_code=15, rlamb=0.3325, ncpus=4)
+    # K parity must match the sector: mesons live at even K_code, N=3
+    # baryons at odd.  This test used K_code=15 for both, so its B=0 half
+    # compared two EMPTY spectra and passed vacuously -- caught the day the
+    # parity guard landed in run_python.
+    kw = dict(N=3, NF=1, B=B, K_code=14 if B == 0 else 15,
+              rlamb=0.3325, ncpus=4)
     a = run_python(backend="process", **kw)
     b = run_python(backend="thread", **kw)
     assert a.numsta_post == b.numsta_post
