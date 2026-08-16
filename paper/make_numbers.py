@@ -289,8 +289,77 @@ def gather() -> dict:
         "note": "log10 of the K factor needed to halve the K^-a remainder "
                 "at m/g=1.953e-4, N=5"}
 
-    # TODO(next passes): ratio table (converged 0.4% statement), GMOR
-    # intercept, timing table.
+    # Meson/baryon ratio vs bosonization, improved Hamiltonian, plain 1/K.
+    # Mesons from data/gmor_scan (peer's, read-only), baryons from the
+    # Phase 4c extensions in data/paper.  Quoted at the smallest coupling
+    # with baryon coverage, m/g = 0.0125.  The N=8 column joins when its
+    # MXTRM-raised rerun lands.
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools"))
+    from plot_improved_fits import _spread_1k
+    mg_ratio = 0.0125
+    bar_ext = _read_house_csv(ROOT / "data" / "paper" /
+                              "bar_ext_improved_N567.csv", "improved")
+    devs = {}
+    for Nc in (5, 6, 7):
+        mes = _read_house_csv(
+            ROOT / "data" / "gmor_scan" / f"improved_N{Nc}.csv", "improved")
+        mser = mes.get((Nc, 0, mg_ratio), {})
+        bser = bar_ext.get((Nc, 1, mg_ratio), {})
+        if len(mser) < 8 or len(bser) < 8:
+            continue
+        mk = sorted(mser); bk = sorted(bser)
+        m_med, m_err, _ = _spread_1k(mk, [mser[k] for k in mk])
+        b_med, b_err, _ = _spread_1k(bk, [bser[k] for k in bk])
+        R = math.sqrt(m_med / b_med)          # M ratio from M^2 ratio
+        nu = 1.0 / (2 * Nc - 1)
+        target = 2 * math.sin(math.pi * nu / 2)
+        devs[Nc] = 100 * (R / target - 1)
+    if devs:
+        worst = max(abs(v) for v in devs.values())
+        numbers["ratio_worst_dev_pct"] = {
+            "value": f"{worst:.1f}", "hamiltonian": "improved",
+            "fit_basis": "1/K",
+            "inputs": ["data/paper/bar_ext_improved_N567.csv"]
+            + [f"data/gmor_scan/improved_N{n}.csv" for n in devs],
+            "note": f"largest |deviation| of M_mes/M_bar from 2sin(pi nu/2) "
+                    f"at m/g={mg_ratio}, per-N percents "
+                    f"{ {k: round(v, 2) for k, v in devs.items()} }"}
+
+    # The N=8 standard/improved gap at the smallest coupling probed --
+    # the tiny_scan gap, now measured at the eighth color too.
+    for ham in ("standard", "improved"):
+        d = _read_house_csv(ROOT / "data" / "paper" /
+                            f"tiny_mes_{ham}_N8.csv", ham)
+        ser = d.get((8, 0, 0.0001953125), {})
+        if len(ser) >= 8:
+            ks = sorted(ser)
+            med, err, _ = _spread_1k(ks, [ser[k] for k in ks])
+            numbers[f"tiny_neight_{ham}_msq"] = {
+                "value": f"{med:.3e}", "hamiltonian": ham,
+                "fit_basis": "1/K" if ham == "improved" else "eq27",
+                "inputs": [f"data/paper/tiny_mes_{ham}_N8.csv"],
+                "note": "M^2 extrapolate at m/g=1.953e-4, N=8 meson "
+                        "(standard quoted from the same 1/K fit ONLY as a "
+                        "gap denominator; its budgeted value uses eq27)"}
+    a = numbers.get("tiny_neight_improved_msq")
+    b = numbers.get("tiny_neight_standard_msq")
+    if a and b:
+        numbers["tiny_neight_gap"] = {
+            "value": round(float(a["value"]) / float(b["value"])),
+            "hamiltonian": "improved", "fit_basis": "1/K",
+            "inputs": a["inputs"] + b["inputs"],
+            "note": "improved/standard M^2 ratio at m/g=1.953e-4, N=8"}
+
+    # GMOR law, quoted from the pinned weak-coupling doc (G5 blob pin in
+    # provenance): M^2/GMOR = 1 + 0.71 (m/g), intercept -0.0005 +- 0.0008.
+    numbers["gmor_intercept"] = {
+        "value": "-0.0005 \\pm 0.0008", "hamiltonian": "improved",
+        "fit_basis": "1/K", "inputs": [],
+        "note": "doc-quoted at the pinned blob; regenerate from "
+                "tools/gmor_chiral_limit.py at v2"}
+
+    # TODO(v2): timing table; N=8 ratio column; GMOR from a fresh run.
     numbers["_table1_rows"] = {
         "value": rows, "hamiltonian": "standard", "fit_basis": "eq27",
         "inputs": [budget_rel, imp_rel],

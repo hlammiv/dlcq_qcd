@@ -132,6 +132,52 @@
     ],
     "note": "log10 of the K factor needed to halve the K^-a remainder at m/g=1.953e-4, N=5"
   },
+  "ratio_worst_dev_pct": {
+    "value": "0.4",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/paper/bar_ext_improved_N567.csv",
+      "data/gmor_scan/improved_N5.csv",
+      "data/gmor_scan/improved_N6.csv"
+    ],
+    "note": "largest |deviation| of M_mes/M_bar from 2sin(pi nu/2) at m/g=0.0125, per-N percents {5: 0.43, 6: 0.04}"
+  },
+  "tiny_neight_standard_msq": {
+    "value": "1.647e-06",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/tiny_mes_standard_N8.csv"
+    ],
+    "note": "M^2 extrapolate at m/g=1.953e-4, N=8 meson (standard quoted from the same 1/K fit ONLY as a gap denominator; its budgeted value uses eq27)"
+  },
+  "tiny_neight_improved_msq": {
+    "value": "2.492e-03",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/paper/tiny_mes_improved_N8.csv"
+    ],
+    "note": "M^2 extrapolate at m/g=1.953e-4, N=8 meson (standard quoted from the same 1/K fit ONLY as a gap denominator; its budgeted value uses eq27)"
+  },
+  "tiny_neight_gap": {
+    "value": 1513,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/paper/tiny_mes_improved_N8.csv",
+      "data/paper/tiny_mes_standard_N8.csv"
+    ],
+    "note": "improved/standard M^2 ratio at m/g=1.953e-4, N=8"
+  },
+  "gmor_intercept": {
+    "value": "-0.0005 \\pm 0.0008",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [],
+    "note": "doc-quoted at the pinned blob; regenerate from tools/gmor_chiral_limit.py at v2"
+  },
   "_table1_rows": {
     "value": [
       {

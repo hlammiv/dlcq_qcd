@@ -91,19 +91,59 @@ and let the baryon numbers carry it.
 \subsection{Toward the chiral limit: $m/g$ to $2\times10^{-4}$}
 \label{sec:tiny-mg}
 
-% \itodo{Draft against v1 macros: tiny_scan results N=5-7 (N=8 pending the
-% production extension), the parameter-free endpoint model accounting for
-% 95% of the standard/improved gap over a factor 32 in coupling, and the
-% "fits give no warning" demonstration figure.}
+Below Table~\ref{tab:tableone}'s smallest coupling the two Hamiltonians
+stop describing the same physics.  At $m/g = 1.95\times10^{-4}$, the
+smallest coupling probed, the $N=8$ meson gives
+$M^2 = \numTinyNeightImprovedMsq$ improved against
+$\numTinyNeightStandardMsq$ standard: a factor of \numTinyNeightGap.
+The same gap, at the same scale, holds at $N = 5$--$7$.  Nothing in the
+standard fits warns of it (Sec.~\ref{sec:budget}).
+
+The gap is not mysterious.  The parameter-free endpoint model of
+Appendix~\ref{app:budget}, with its exponent from
+Eq.~\eqref{eq:endpoint-exponent} and no fitted constants, accounts for
+ninety-five percent of it across a factor of thirty-two in coupling, with
+a residual stable at four to five percent.  The standard Hamiltonian is
+measuring the grid; the improved one is measuring the theory.  Its GMOR
+behavior supports that reading: against the parameter-free large-$N$ law
+the improved masses give $M^2/\mathrm{GMOR} = 1 + 0.71\,(m/g)$ with
+intercept $\numGmorIntercept$, an intercept consistent with zero where
+the standard Hamiltonian misses the law by a factor of five.
 
 \subsection{The meson--baryon ratio and bosonization}
 \label{sec:ratio}
 
-% \itodo{Draft against v1 macros, with the mandatory caveats from the plan:
-% quote the ratio at its converged statement (within 0.4% of 2 sin(pi nu/2),
-% nu = 1/(2N-1), at N=5-8, valence+4 checked); the valence+4 residuals
-% (-0.41, -0.16, +0.04, +0.31%) drift systematically through zero near N=7
-% and are not scatter; N=8's baryon rests on 6 momentum points; baryons
-% overall have passed one external check and carry the largest corrections.
-% Standard Hamiltonian sits on 2/N and never departs. N=2 returns 1.0000 by
-% pseudo-reality as a free pipeline check.}
+The chiral region carries one finite-$N$ prediction this machinery can
+test.  Non-abelian bosonization gives the chiral-limit mass ratio
+$M_{\rm mes}/M_{\rm bar} = 2\sin(\pi\nu/2)$ with
+$\nu = 1/(2N-1)$~\cite{Date:1986xe}, against the constituent-counting
+value $2/N$ that holds at strong coupling.  The two differ by fifteen to
+nineteen percent over $N = 5$--$8$.  Sec.~\ref{sec:chiral-exponent}'s
+caveat applies with full force here: the meson sector alone cannot carry
+finite-$N$ information, since $N$ enters its valence Hamiltonian only
+through $C_F$, so the ratio is a baryon measurement.
+
+The improved Hamiltonian lands on bosonization.  At $m/g = 0.0125$ the
+ratio sits within \numRatioWorstDevPct\% of $2\sin(\pi\nu/2)$ at
+$N = 5, 6, 7$, computed here from independent extended baryon scans
+reaching $2K = 45$; a companion analysis with deeper Fock checks finds the
+same agreement through $N = 8$ in the chiral limit, stable from
+$m/g = 1.6$ down to $2\times10^{-4}$.  The standard Hamiltonian sits on
+$2/N$ at every coupling and never departs.  At $N = 2$ the ratio returns
+unity to a part in $10^{3}$, forced by pseudo-reality: a free check of the
+pipeline, not a result.
+
+Three caveats attach, and we state them at full strength.  The
+Fock-convergence residuals across $N = 5$--$8$ drift systematically
+through zero near $N = 7$ rather than scattering, so the sub-percent
+agreement is not a random error and should not be over-read.  The $N = 8$
+baryon rests on fewer momentum points than the others and carries the
+least-controlled extrapolation.  And the baryon sector as a whole has
+passed exactly one external check, the strong-coupling limit forced by
+physics, while carrying the largest corrections anywhere in this paper.
+The ratio result is a statement about the improved Hamiltonian's
+consistency with bosonization, not yet an independently anchored
+measurement of it.
+
+% \itodo{v2: N=8 column from the MXTRM-raised rerun; equal-time
+% cross-check would test this ratio independently (Sec. X).}

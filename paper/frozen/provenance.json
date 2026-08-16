@@ -1,6 +1,6 @@
 {
   "freeze": "v0test",
-  "git_head": "f9496a9d79be6c32db681713f91d7dfadbebb8e1",
+  "git_head": "a0aabc83ad4a66ba76211bca7049ba277be94e2b",
   "weak_coupling_doc_blob": "b2a49a204c86d9174c8b3f4627571939825fb64a",
   "inputs": {
     "figures/table1_budget_2K25-71_python.txt": "bd246401f78c869a",
@@ -8,6 +8,11 @@
     "dlcq/endpoint.py": "c6ddb187332bed08",
     "data/chiral_grid_msq.csv": "b8c1fb8a2f5b3a8f",
     "data/gmor_scan/improved_N3.csv": "70c17c7fd9e1d948",
-    "dlcq/units.py": "7cdac451f6e09462"
+    "dlcq/units.py": "7cdac451f6e09462",
+    "data/paper/bar_ext_improved_N567.csv": "6fcc78bd441ae8d2",
+    "data/gmor_scan/improved_N5.csv": "e261427b508b3b4c",
+    "data/gmor_scan/improved_N6.csv": "6d609f6d520cfdba",
+    "data/paper/tiny_mes_standard_N8.csv": "b9dbbc62ab918269",
+    "data/paper/tiny_mes_improved_N8.csv": "8d01424098f7e90f"
   }
 }
