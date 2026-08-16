@@ -1,6 +1,6 @@
 {
   "freeze": "gatecheck",
-  "git_head": "4c0d17933b9bab991ed0d7adcf2a44642de143cf",
+  "git_head": "37022758764120816278675bba0055776188ffd7",
   "weak_coupling_doc_blob": "b2a49a204c86d9174c8b3f4627571939825fb64a",
   "inputs": {
     "figures/table1_budget_2K25-71_python.txt": "bd246401f78c869a",
@@ -20,6 +20,6 @@
     "data/gmor_scan/improved_N2.csv": "895f63c6aafcb5dd",
     "data/gmor_scan/improved_N4.csv": "42233448a6557ce2",
     "data/gmor_scan/improved_N7.csv": "1735f28c7aea1d4e",
-    "data/paper/exotics_levels.csv": "e1f3ef6072ab71d5"
+    "data/paper/exotics_levels.csv": "12151055106f88b2"
   }
 }

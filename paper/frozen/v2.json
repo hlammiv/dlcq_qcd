@@ -204,6 +204,42 @@
     ],
     "note": "slope A of the same law"
   },
+  "exo_hexathree_mg1p6": {
+    "value": "-0.0326 \\pm 0.1184",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "N=3 B=2 correlated Delta_inf at m/g=1.6; threshold interpolated from the odd-K baryon grid (parity mismatch), spread is fit-ensemble"
+  },
+  "exo_hexathree_mg0p8": {
+    "value": "-0.0203 \\pm 0.0208",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "N=3 B=2 correlated Delta_inf at m/g=0.8; threshold interpolated from the odd-K baryon grid (parity mismatch), spread is fit-ensemble"
+  },
+  "exo_hexathree_mg0p4": {
+    "value": "-0.0689 \\pm 0.0103",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "N=3 B=2 correlated Delta_inf at m/g=0.4; threshold interpolated from the odd-K baryon grid (parity mismatch), spread is fit-ensemble"
+  },
+  "exo_hexathree_mg0p1": {
+    "value": "-0.0592 \\pm 0.0029",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "N=3 B=2 correlated Delta_inf at m/g=0.1; threshold interpolated from the odd-K baryon grid (parity mismatch), spread is fit-ensemble"
+  },
   "exo_tetra_n2_mg1p6": {
     "value": "-0.0006 \\pm 0.0021",
     "hamiltonian": "standard",

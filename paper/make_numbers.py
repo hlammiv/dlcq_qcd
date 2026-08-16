@@ -479,6 +479,41 @@ def gather() -> dict:
                                        hamiltonian_thresh="standard")
             ex_out[("hexa", mg)] = _extrap_delta(Kc, delta)
 
+    # N=3 hexaquark: B=2 on even K against 2x baryon INTERPOLATED from the
+    # odd-K grid (the N=3 parity mismatch; linear between bracketing odd
+    # points, labeled in the note).  The K=20 point at m/g=1.6 sits on the
+    # wrong side of the same coarse-K identity switch seen at N=4 and is
+    # excluded.
+    for mg in (1.6, 0.8, 0.4, 0.1):
+        odd = sorted(K for (l, m, K) in gnd if l == "hexa3_B1" and m == mg)
+        Ks, Ms, Mt = [], [], []
+        for K in KS:
+            if mg == 1.6 and K <= 20:
+                continue
+            b2 = gnd.get(("hexa3_B2", mg, K))
+            los = [k for k in odd if k < K]
+            his = [k for k in odd if k > K]
+            if not b2 or not los or not his:
+                continue
+            k1, k2 = los[-1], his[0]
+            m1 = _mg_units(gnd[("hexa3_B1", mg, k1)]["msq"], mg)
+            m2 = _mg_units(gnd[("hexa3_B1", mg, k2)]["msq"], mg)
+            Ks.append(K)
+            Ms.append(_mg_units(b2["msq"], mg))
+            Mt.append(m1 + (m2 - m1) * (K - k1) / (k2 - k1))
+        if len(Ks) >= 4:
+            Kc, delta = binding_series(Ks, Ms, Ks, Mt, n_thresh=2,
+                                       hamiltonian_state="standard",
+                                       hamiltonian_thresh="standard")
+            v, e = _extrap_delta(Kc, delta)
+            numbers[f"exo_hexathree_mg{str(mg).replace('.', 'p')}"] = {
+                "value": f"{v:+.4f} \\pm {e:.4f}",
+                "hamiltonian": "standard", "fit_basis": "eq27",
+                "inputs": ["data/paper/exotics_levels.csv"],
+                "note": f"N=3 B=2 correlated Delta_inf at m/g={mg}; "
+                        f"threshold interpolated from the odd-K baryon "
+                        f"grid (parity mismatch), spread is fit-ensemble"}
+
     def _fmt_pm(v, e):
         return f"{v:+.4f} \\pm {e:.4f}"
     for (tag, mg), (v, e) in ex_out.items():

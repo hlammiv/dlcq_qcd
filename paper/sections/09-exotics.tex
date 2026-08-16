@@ -23,9 +23,10 @@ differencing two separate extrapolations double-counts every shared
 systematic.  And the drift of $\Delta$ with resolution separates the two
 hypotheses: a discretization artifact runs with the grid, a bound state
 does not.  At $N=4$ the meson, baryon, and $B=2$ sectors share even
-$K_{\rm code}$, so exact same-$K$ differences exist for every threshold;
-at $N=3$ the baryon grid is odd, and the two-baryon study runs at $N=4$
-for exactly that reason.
+$K_{\rm code}$, so exact same-$K$ differences exist for every threshold.
+At $N=3$ the baryon grid is odd; its two-baryon study interpolates the
+threshold linearly across bracketing odd-$K$ points, and every quantity
+built that way is labeled.
 
 \begin{figure*}
 \includegraphics[width=\textwidth]{figs/fig9_exotics.pdf}
@@ -69,7 +70,11 @@ $B=2$ ground state is structurally a hexaquark --- its eight-parton Fock
 weight is \numHexaEightqWeight{} at $2K=48$, $m/g=0.1$ --- and it sits
 below twice the baryon mass at every resolution reached, with
 $\Delta/g = \numExoHexaMgZeropOne$ at $m/g = 0.1$ and
-$\numExoHexaMgZeropFour$ at $0.4$.  At $m/g = 1.6$ the channel changes
+$\numExoHexaMgZeropFour$ at $0.4$.  The $N=3$ channel repeats the
+pattern at the physical color count: a $B=2$ ground state that is
+six-parton at the 97--99.9\% level and bound, with
+$\Delta/g = \numExoHexathreeMgZeropOne$ at $m/g = 0.1$ against its
+interpolated threshold.  At $m/g = 1.6$ the channel changes
 character between $2K = 28$ and $32$, and the level table locates the
 crossing exactly: the threshold baryon runs smoothly across it, while the
 $B=2$ ground state switches identity between two eight-parton
@@ -84,14 +89,14 @@ continuity, stays smooth.
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/fig10_exotic_wf.pdf}
-\caption{Inside the two candidates --- the $N=2$ tetraquark level and
-the $N=4$ $B=2$ ground state --- at $m/g = 0.1$, $2K = 48$, standard
-Hamiltonian, dominant Fock sectors ($\mathrm{LPN}$ as in
-Fig.~\ref{fig:exotics}).  Left: single-particle structure functions.
-Right: the two-parton momentum correlation $C(x_1, x_2)$.  The
-tetraquark candidate's pairs concentrate along a ridge of fixed pair sum
-near one half --- the momentum of a single meson --- while the $B=2$
-state shows no two-cluster ridge.}
+\caption{Inside the four candidates --- the tetraquark levels at
+$N = 2, 3$ and the $B=2$ ground states at $N = 3, 4$ --- at $m/g = 0.1$,
+$2K = 48$, standard Hamiltonian, dominant Fock sectors ($\mathrm{LPN}$
+as in Fig.~\ref{fig:exotics}).  Top: single-particle structure
+functions.  Bottom: the two-parton momentum correlation $C(x_1, x_2)$.
+Both tetraquark candidates concentrate along a ridge of fixed pair sum
+near one half --- the momentum of a single meson --- while neither $B=2$
+state shows a two-cluster ridge.}
 \label{fig:exoticwf}
 \end{figure}
 
@@ -101,12 +106,12 @@ same place.  The two-parton momentum correlation can
 (Fig.~\ref{fig:exoticwf}).  A molecule clusters its partons into subsets
 that share each constituent hadron's momentum, so $C(x_1, x_2)$ develops
 a ridge at fixed pair sum; a compact state shares democratically.  The
-verdict splits the two channels.  The tetraquark candidate's correlation
-ridges at a pair sum near one half, the momentum of one meson: it is a
-bound two-meson molecule, not a compact four-quark state.  The $B=2$
-ground state shows no such ridge; its pairs pack democratically at small
-$x$, consistent with a compact six- or eight-parton object rather than a
-deuteron-like molecule --- though a sharper statement needs color-singlet
+verdict splits the two channels.  Both tetraquark candidates' correlations
+ridge at a pair sum near one half, the momentum of one meson: they are
+bound two-meson molecules, not compact four-quark states.  Neither $B=2$
+ground state shows such a ridge; their pairs pack democratically at small
+$x$, consistent with compact six- and eight-parton objects rather than
+deuteron-like molecules --- though a sharper statement needs color-singlet
 cluster projection, which the contracted basis does not make easy, and we
 leave that as the natural refinement.
 

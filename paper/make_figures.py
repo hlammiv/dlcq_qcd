@@ -648,12 +648,11 @@ def fig8():
 
 @register("fig9")
 def fig9():
-    """Exotics: correlated binding vs resolution, both channels.
+    """Exotics: correlated binding vs resolution, all four channels.
 
-    Reads only the Phase 4d reduction (data/paper/exotics_levels.csv).
-    Every point is a same-K difference; the drift toward or away from zero
-    IS the diagnostic, so the x axis is 1/K and the continuum sits at the
-    left edge.
+    Reads only the Phase 4d/4e reduction.  Every point is a same-K
+    difference; at N=3 the two-baryon threshold is interpolated from the
+    odd-K baryon grid (the parity mismatch), and the panel says so.
     """
     import csv as _csv
     import math
@@ -676,8 +675,8 @@ def fig9():
     MGS = [1.6, 0.8, 0.4, 0.1]
     shades = {1.6: 0.85, 0.8: 0.65, 0.4: 0.45, 0.1: 0.0}
 
-    fig, axes = plt.subplots(1, 3, figsize=(12.5, 4.0), sharey=False)
-    for Nc, ax in zip((2, 3), axes[:2]):
+    fig, axes = plt.subplots(2, 2, figsize=(9.5, 7.5))
+    for Nc, ax in zip((2, 3), axes[0]):
         for mg in MGS:
             xs, ys = [], []
             for K in KS:
@@ -693,8 +692,6 @@ def fig9():
                 ys.append(mg_units(best["msq"], mg)
                           - 2 * mg_units(g["msq"], mg))
             f = shades[mg]
-            col = (f * 0.87 + (1 - f) * 0.13, f * 0.92 + (1 - f) * 0.40,
-                   f * 0.95 + (1 - f) * 0.67)
             ax.plot(xs, ys, "o-", color=C_PRIMARY, alpha=1 - 0.65 * f,
                     markersize=3.5, linewidth=1.1, label=f"$m/g={mg}$")
         ax.axhline(0, color="0.6", linewidth=0.7)
@@ -702,45 +699,62 @@ def fig9():
                      f"$N={Nc}$", fontsize=10)
         ax.set_xlabel("$1/K$")
         ax.set_xlim(0, 0.11)
-    axes[0].set_ylabel(r"$\Delta/g = (M - 2M_{\rm mes})/g$")
-    axes[0].legend(fontsize=7.5, frameon=False)
-    ax = axes[2]
-    for mg in MGS:
-        xs, ys = [], []
-        for K in KS:
-            b2 = gnd.get(("hexa_B2", mg, K))
-            b1 = gnd.get(("hexa_B1", mg, K))
-            if not b2 or not b1:
-                continue
-            xs.append(2.0 / K)
-            ys.append(mg_units(b2["msq"], mg) - 2 * mg_units(b1["msq"], mg))
-        f = shades[mg]
-        ax.plot(xs, ys, "s-", color=C_SECONDARY, alpha=1 - 0.65 * f,
-                markersize=3.5, linewidth=1.1, label=f"$m/g={mg}$")
-    ax.axhline(0, color="0.6", linewidth=0.7)
-    ax.set_title("(c) two-baryon channel, $N=4$", fontsize=10)
-    ax.set_xlabel("$1/K$")
-    ax.set_ylabel(r"$\Delta/g = (M_{B=2} - 2M_{\rm bar})/g$")
-    ax.set_xlim(0, 0.11)
-    ax.legend(fontsize=7.5, frameon=False)
-    for a in axes:
-        style(a)
-    fig.suptitle("FIG. 9: correlated binding energies of the lowest "
-                 "4q-dominant and 8q-dominant states, standard Hamiltonian, "
-                 "same-$K$ differences", fontsize=10)
+        ax.set_ylabel(r"$\Delta/g = (M - 2M_{\rm mes})/g$")
+    axes[0][0].legend(fontsize=7.5, frameon=False)
+    for (panel, label, interp), ax in zip(
+            [("hexa", "(c) two-baryon channel, $N=4$", False),
+             ("hexa3", "(d) two-baryon channel, $N=3$ "
+              "(interpolated threshold)", True)], axes[1]):
+        for mg in MGS:
+            xs, ys = [], []
+            odd = sorted(K for (l, m, K) in gnd
+                         if l == f"{panel}_B1" and m == mg)
+            for K in KS:
+                b2 = gnd.get((f"{panel}_B2", mg, K))
+                if not b2:
+                    continue
+                if interp:
+                    los = [k for k in odd if k < K]
+                    his = [k for k in odd if k > K]
+                    if not los or not his:
+                        continue
+                    k1, k2 = los[-1], his[0]
+                    m1 = mg_units(gnd[(f"{panel}_B1", mg, k1)]["msq"], mg)
+                    m2 = mg_units(gnd[(f"{panel}_B1", mg, k2)]["msq"], mg)
+                    mb = m1 + (m2 - m1) * (K - k1) / (k2 - k1)
+                else:
+                    b1 = gnd.get((f"{panel}_B1", mg, K))
+                    if not b1:
+                        continue
+                    mb = mg_units(b1["msq"], mg)
+                xs.append(2.0 / K)
+                ys.append(mg_units(b2["msq"], mg) - 2 * mb)
+            f = shades[mg]
+            ax.plot(xs, ys, "s-", color=C_SECONDARY, alpha=1 - 0.65 * f,
+                    markersize=3.5, linewidth=1.1, label=f"$m/g={mg}$")
+        ax.axhline(0, color="0.6", linewidth=0.7)
+        ax.set_title(label, fontsize=10)
+        ax.set_xlabel("$1/K$")
+        ax.set_xlim(0, 0.11)
+        ax.set_ylabel(r"$\Delta/g = (M_{B=2} - 2M_{\rm bar})/g$")
+    axes[1][0].legend(fontsize=7.5, frameon=False)
+    for row in axes:
+        for a in row:
+            style(a)
+    fig.suptitle("FIG. 9: correlated binding of the lowest 4q-dominant "
+                 "and $B=2$ states, standard Hamiltonian, same-$K$ "
+                 "differences", fontsize=10)
     fig.tight_layout()
     finish(fig, "fig9_exotics")
 
 
 @register("fig10")
 def fig10():
-    """Exotic candidates: structure functions and pair correlations.
+    """Exotic candidates inside and out: q(x) and pair correlations.
 
-    The single-particle q(x) of a molecule and a compact state can peak in
-    the same place, so the right panels show the two-parton momentum
-    correlation C(k1,k2) — a molecule clusters its partons into subsets
-    sharing each hadron's half of the momentum (anticorrelation ridge), a
-    compact state shares democratically.  Sequential single-hue colormap.
+    Four candidates; top row structure functions, bottom row the
+    two-parton momentum correlation C(x1,x2) (the molecule-vs-compact
+    discriminator).  Sequential single-hue colormap.
     """
     from dlcq.figures import paper_lambda
     from dlcq.fock_weights import fock_weights, pair_correlation
@@ -748,12 +762,14 @@ def fig10():
                                   structure_function)
 
     specs = [
-        ("tetraquark candidate, $N=2$", "tetra", 2, 0, 48, 6, 32, 4),
-        ("two-baryon state, $N=4$", "hexa", 4, 2, 48, 10, 12, 8),
+        ("tetra, $N=2$", "tetra", 2, 0, 48, 6, 32, 4),
+        ("tetra, $N=3$", "tetra", 3, 0, 48, 6, 32, 4),
+        ("$B=2$, $N=3$", "hexa3", 3, 2, 48, 8, 12, 6),
+        ("$B=2$, $N=4$", "hexa", 4, 2, 48, 10, 12, 8),
     ]
     lam = float(paper_lambda(0.1))
-    fig, axes = plt.subplots(2, 2, figsize=(9.5, 8))
-    for (title, kind, N, B, K, LPN, nev, npart), axrow in zip(specs, axes):
+    fig, axes = plt.subplots(2, 4, figsize=(14.5, 7))
+    for col, (title, kind, N, B, K, LPN, nev, npart) in enumerate(specs):
         prov = provider_2026(nev)
         r = require_cached(prov, N, 1, B, K, lam, LPN=LPN)
         if r is None:
@@ -772,28 +788,31 @@ def fig10():
             idx = int(physical_indices(r)[0])
         if idx is None:
             continue
-        ax = axrow[0]
+        ax = axes[0][col]
         x, q, qbar = structure_function(r, idx, nparton=npart)
         ax.plot(x, q, "o-", color=C_PRIMARY, markersize=3, linewidth=1.1,
                 label="$q(x)$")
         if qbar.max() > 1e-12:
             ax.plot(x, qbar, "v--", color=C_SECONDARY, markersize=3,
                     linewidth=1.1, label=r"$\bar q(x)$")
-        ax.set_title(f"{title}: structure function", fontsize=9)
-        ax.set_xlabel("$x$"); ax.set_ylabel("$q(x)$")
-        ax.legend(fontsize=8, frameon=False)
+        ax.set_title(title, fontsize=9)
+        ax.set_xlabel("$x$")
+        if col == 0:
+            ax.set_ylabel("$q(x)$")
+            ax.legend(fontsize=7.5, frameon=False)
         style(ax)
-        ax = axrow[1]
+        ax = axes[1][col]
         ks, C = pair_correlation(r, idx, nparton=npart)
         xs = ks / float(K)
-        im = ax.pcolormesh(xs, xs, C, cmap="Blues", shading="nearest")
-        fig.colorbar(im, ax=ax, shrink=0.85)
-        ax.set_title(f"{title}: pair correlation $C(x_1,x_2)$", fontsize=9)
-        ax.set_xlabel("$x_1$"); ax.set_ylabel("$x_2$")
-        ax.set_xlim(0, 0.6); ax.set_ylim(0, 0.6)
-    fig.suptitle("FIG. 10: what the exotic candidates are made of — "
-                 "$m/g=0.1$, $2K=48$, standard Hamiltonian, dominant "
-                 "sectors, LPN as in Fig. 9", fontsize=10)
+        ax.pcolormesh(xs, xs, C, cmap="Blues", shading="nearest")
+        ax.set_xlabel("$x_1$")
+        if col == 0:
+            ax.set_ylabel("$x_2$")
+        ax.set_xlim(0, 0.6)
+        ax.set_ylim(0, 0.6)
+    fig.suptitle("FIG. 10: the exotic candidates at $m/g=0.1$, $2K=48$, "
+                 "standard Hamiltonian, dominant Fock sectors; top q(x), "
+                 "bottom the pair correlation $C(x_1,x_2)$", fontsize=10)
     fig.tight_layout()
     finish(fig, "fig10_exotic_wf")
 
