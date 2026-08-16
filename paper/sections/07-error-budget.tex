@@ -1,4 +1,62 @@
-% 07-error-budget
+% 07-error-budget — the flagship section: what the 1990 paper did in one
+% equation and a parenthesis, done as a measured budget.
 \section{Convergence and the error budget}
 \label{sec:budget}
-% TODO: draft after Phase 1 regeneration (post-450d724 numbers only)
+
+The 1990 paper controlled its errors with one tool: the extrapolation
+series of its Eq.~(27), with the magnitude of the last retained term
+printed in parentheses as a convergence diagnostic.  The authors trusted
+that diagnostic only for $m/g \gtrsim 0.2$, and said so.  This section
+replaces it with a budget of four measured components: fit-form spread,
+window spread, Fock-truncation shift, and the endpoint capture deficit.
+Definitions and correlations are in Appendix~\ref{app:budget}; every
+strategy we measured and rejected is in Appendix~\ref{app:donotretry}.
+
+The first result of doing this is negative, and it shapes the rest.  The
+extrapolated mass does not converge as terms are added to the Eq.~(27)
+series.  Worse, the two defensible ways to choose the order disagree.
+Held-out validation, which fits the low resolutions and predicts the two
+highest, picks the largest order offered, every time; it is
+near-interpolation, so flexibility always wins.  Consistency with the
+known chiral behavior prefers the shortest series.  Two sound criteria
+pointing at opposite ends of the range is what an undetermined model order
+looks like.  The budget therefore spans the whole ladder rather than
+choosing, and that spread is the dominant fit component in every
+weak-coupling entry of Table~\ref{tab:tableone}.
+
+Each quoted mass also prints the fraction supplied by extrapolation rather
+than data.  At strong coupling the fit interpolates: the extrapolated
+fraction is near one percent.  At $m/g = 0.1$ the standard-Hamiltonian
+fit supplies over half the answer.  A reader can see, entry by entry,
+where the series asserts.
+
+There is a boundary below which no fit on this grid can be trusted, and
+two independent criteria put it in the same place.  The endpoint capture
+condition $2a \ln K \gtrsim 1$, with $a$ from
+Eq.~\eqref{eq:endpoint-exponent}, fails below $m/g \approx 0.15$ at
+$2K = 70$.  A joint fit in $(m/g, K)$ anchored at the chiral point, an
+independent method with different systematics, agrees with the
+per-coupling fits above that coupling and separates from them below it.
+Table~\ref{tab:tableone}'s entries at $m/g = 0.1$ and $0.05$ are
+grid-limited in every channel, and $0.2$ is marginal.
+
+The most dangerous property of this failure deserves its own paragraph:
+the fits give no warning.  At the smallest coupling we probe, the
+standard-Hamiltonian mass series is smooth in $K$, the extrapolation is
+well determined, and the fitted curves are identical in shape across a
+factor of thirty in coupling.  Nothing visible inside the $K$ convergence
+reveals that the answer is three orders of magnitude low.  The arithmetic
+says why.  At $m/g = 1.95\times10^{-4}$ a $2K = 70$ grid captures
+\numCapturePctTiny\% of the endpoint integral, and halving the remainder,
+which falls only as $K^{-a}$, requires a resolution
+$10^{\numHalvingLogTen}$ times larger.  No diagnostic that lives inside
+the reachable window can see what the window excludes.  That is why the
+endpoint deficit enters the budget as a computed systematic
+(Appendix~\ref{app:budget}) rather than as something fitted, and why the
+chiral region is reached in Sec.~\ref{sec:chiral} by changing the
+Hamiltonian rather than the fit.
+
+None of this is a defect of light-cone quantization.  A continuum
+'t~Hooft solver on a uniform momentum mesh, sharing no code with the DLCQ
+path, fails identically (Sec.~\ref{sec:improved}).  The disease is the
+uniform grid against a shrinking endpoint region; DLCQ merely inherits it.

@@ -271,8 +271,26 @@ def gather() -> dict:
             "fit_basis": "alpha(mg)", "inputs": ce_inputs,
             "note": "spread of alpha over 2K = 30, 40, 60"}
 
+    # Endpoint arithmetic at the smallest coupling probed (N=5 meson,
+    # m/g = 1.953e-4, the tiny_scan floor), straight from Eq. (26).
+    import math
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from dlcq.units import endpoint_exponent
+    a_tiny = float(endpoint_exponent(1.953e-4, 5))
+    numbers["capture_pct_tiny"] = {
+        "value": f"{100 * (1 - 70.0 ** (-2 * a_tiny)):.3f}",
+        "inputs": ["dlcq/units.py"],
+        "note": "percent of the endpoint integral a 2K=70 grid captures at "
+                "m/g=1.953e-4, N=5 (exponent a from Eq. 26)"}
+    numbers["halving_log_ten"] = {
+        "value": round(math.log10(2.0) / a_tiny),
+        "inputs": ["dlcq/units.py"],
+        "note": "log10 of the K factor needed to halve the K^-a remainder "
+                "at m/g=1.953e-4, N=5"}
+
     # TODO(next passes): ratio table (converged 0.4% statement), GMOR
-    # intercept, captured fractions, timing table.
+    # intercept, timing table.
     numbers["_table1_rows"] = {
         "value": rows, "hamiltonian": "standard", "fit_basis": "eq27",
         "inputs": [budget_rel, imp_rel],

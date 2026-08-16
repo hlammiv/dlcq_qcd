@@ -118,6 +118,20 @@
     ],
     "note": "spread of alpha over 2K = 30, 40, 60"
   },
+  "capture_pct_tiny": {
+    "value": "0.105",
+    "inputs": [
+      "dlcq/units.py"
+    ],
+    "note": "percent of the endpoint integral a 2K=70 grid captures at m/g=1.953e-4, N=5 (exponent a from Eq. 26)"
+  },
+  "halving_log_ten": {
+    "value": 2444,
+    "inputs": [
+      "dlcq/units.py"
+    ],
+    "note": "log10 of the K factor needed to halve the K^-a remainder at m/g=1.953e-4, N=5"
+  },
   "_table1_rows": {
     "value": [
       {
