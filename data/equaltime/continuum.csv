@@ -1,0 +1,20 @@
+# Lattice Schwinger boson mass at m=0, FIXED physical volume Lg = L/sqrt(x).
+# Holding Lg fixed separates the two limits: Lg -> inf at fixed x is infinite
+# volume at fixed spacing, then x -> inf is the continuum.  An earlier scan
+# varied L and x independently, which put the largest finite-volume error on
+# the finest lattice and made the extrapolations disagree by 9%.
+# Units: M/g, with M/g = dW/(2 sqrt(x)); target at m=0 is 1/sqrt(pi) = 0.5641896.
+# regenerate: python tools/equaltime_continuum.py --lg 30 45 60 --x 16 36 64 100
+Lg,x,L,mg,chi,M_over_g,seconds
+30.0,16.0,120,0.0,100,0.6277604984086906,47.3
+30.0,36.0,180,0.0,100,0.6099191790177277,111.7
+30.0,64.0,240,0.0,100,0.6009459173271807,416.5
+30.0,100.0,300,0.0,100,0.5955466556668398,531.5
+45.0,16.0,180,0.0,100,0.6230730203377561,71.4
+45.0,36.0,270,0.0,100,0.6050196500909806,204.2
+45.0,64.0,360,0.0,100,0.595939627955886,300.5
+45.0,100.0,450,0.0,100,0.5904770774421195,794.8
+60.0,16.0,240,0.0,100,0.621410163970495,89.8
+60.0,36.0,360,0.0,100,0.6032857476529898,297.1
+60.0,64.0,480,0.0,100,0.5941702030236229,972.9
+60.0,100.0,600,0.0,100,0.588687410701823,1211.4
