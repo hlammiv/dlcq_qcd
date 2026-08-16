@@ -25,13 +25,20 @@ MG_STRONG, MG_WEAK = 0.1, 1.6          # strong/weak COUPLING (small/large m/g)
 # through figures.paper_lambda.
 RUNS = []
 
-# Fig. 2, 2026 panels: spectra vs coupling at 2K ~ 50, all three sectors.
+# Fig. 2, 2026 panels: spectra vs coupling.  Resolution is traded for Fock
+# depth here on purpose: at small lambda a state of L partons sits at
+# M^2/(m^2+g^2/pi) ~ L^2, and the 1990 panels are untruncated, so matching
+# their y-range (50/60/100) needs LPN >= 8/9/10 — a starved LPN at larger K
+# cannot contain the upper half of the original panel at all (first drawn
+# that way at 2K=50, LPN=6, and misread immediately).  nev=250 covers the
+# full range: the 250th level clears the panel top (probed: 52.5 at
+# 2K=34, LPN=8, lambda=0.5).
 for lam in LAMBDAS:
-    RUNS.append(("fig2_B0", dict(N=3, NF=1, B=0, K_code=50, LPN=6, nev=40),
+    RUNS.append(("fig2_B0", dict(N=3, NF=1, B=0, K_code=34, LPN=8, nev=250),
                  ("lambda", lam)))
-    RUNS.append(("fig2_B1", dict(N=3, NF=1, B=1, K_code=51, LPN=5, nev=40),
+    RUNS.append(("fig2_B1", dict(N=3, NF=1, B=1, K_code=35, LPN=9, nev=400),
                  ("lambda", lam)))
-    RUNS.append(("fig2_B2", dict(N=3, NF=1, B=2, K_code=50, LPN=8, nev=40),
+    RUNS.append(("fig2_B2", dict(N=3, NF=1, B=2, K_code=34, LPN=10, nev=350),
                  ("lambda", lam)))
 
 # Fig. 3, 2026 panels: valence structure functions at 2K = 70/71.
