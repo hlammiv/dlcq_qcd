@@ -1,6 +1,6 @@
 {
-  "freeze": "v1",
-  "git_head": "b24d2206bc10af17e1839ade60355947ea4a2a43",
+  "freeze": "gatecheck",
+  "git_head": "4c0d17933b9bab991ed0d7adcf2a44642de143cf",
   "weak_coupling_doc_blob": "b2a49a204c86d9174c8b3f4627571939825fb64a",
   "inputs": {
     "figures/table1_budget_2K25-71_python.txt": "bd246401f78c869a",
@@ -10,10 +10,16 @@
     "data/gmor_scan/improved_N3.csv": "70c17c7fd9e1d948",
     "dlcq/units.py": "7cdac451f6e09462",
     "data/paper/bar_ext_improved_N567.csv": "6fcc78bd441ae8d2",
+    "data/paper/bar_ext_improved_N8.csv": "9a5ba1bc896a0210",
+    "data/bar_scan/bar_improved_N8.csv": "0d02b46cd33ca358",
     "data/gmor_scan/improved_N5.csv": "e261427b508b3b4c",
     "data/gmor_scan/improved_N6.csv": "6d609f6d520cfdba",
+    "data/gmor_scan/improved_N8.csv": "75ba3f744c62141f",
     "data/paper/tiny_mes_standard_N8.csv": "b9dbbc62ab918269",
     "data/paper/tiny_mes_improved_N8.csv": "8d01424098f7e90f",
+    "data/gmor_scan/improved_N2.csv": "895f63c6aafcb5dd",
+    "data/gmor_scan/improved_N4.csv": "42233448a6557ce2",
+    "data/gmor_scan/improved_N7.csv": "1735f28c7aea1d4e",
     "data/paper/exotics_levels.csv": "e1f3ef6072ab71d5"
   }
 }

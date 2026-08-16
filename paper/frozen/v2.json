@@ -1,0 +1,843 @@
+{
+  "tableone_n_entries": {
+    "value": 30,
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt"
+    ],
+    "note": "entries in the reproduced Table I"
+  },
+  "tableone_worst_weak_bar_pct": {
+    "value": 285,
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt"
+    ],
+    "note": "largest relative bar at m/g<=0.1: mes N=4 m/g=0.05"
+  },
+  "tableone_n_outside_paper_term": {
+    "value": 4,
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt"
+    ],
+    "note": "entries with |paper-ours| > paper's own last-term magnitude"
+  },
+  "tableone_improved_n_beyond_three_sigma": {
+    "value": 0,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt",
+      "data/improved_table1_msq.csv"
+    ],
+    "note": "entries where improved and standard disagree past 3 sigma of the combined TOTAL bar (endpoint included): the coverage check on the endpoint systematic"
+  },
+  "tableone_improved_worst_fitonly_sigma": {
+    "value": 37,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt",
+      "data/improved_table1_msq.csv"
+    ],
+    "note": "largest improved-vs-standard divergence in fit-only sigmas (form+wind+trunc quadrature, no endpoint)"
+  },
+  "two_body_exact": {
+    "value": 0.779141,
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "van de Sande's exact M^2/g^2 at beta=0.1"
+  },
+  "two_body_improved": {
+    "value": 0.779315,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "improved-series 1/K extrapolate"
+  },
+  "two_body_improved_rel": {
+    "value": "2.2e-04",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "relative agreement of improved extrapolate with exact"
+  },
+  "two_body_standard": {
+    "value": 0.4536,
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "dlcq/endpoint.py"
+    ],
+    "note": "the same fit on the standard series; not close at any reachable K"
+  },
+  "alpha_standard": {
+    "value": "1.96",
+    "hamiltonian": "standard",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "M^2 ~ (m/g)^alpha at 2K=60; per-K values [1.969, 1.966, 1.962]"
+  },
+  "alpha_standard_drift": {
+    "value": "0.008",
+    "hamiltonian": "standard",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "spread of alpha over 2K = 30, 40, 60"
+  },
+  "alpha_improved": {
+    "value": "1.03",
+    "hamiltonian": "improved",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "M^2 ~ (m/g)^alpha at 2K=60; per-K values [1.038, 1.036, 1.034]"
+  },
+  "alpha_improved_drift": {
+    "value": "0.004",
+    "hamiltonian": "improved",
+    "fit_basis": "alpha(mg)",
+    "inputs": [
+      "data/chiral_grid_msq.csv",
+      "data/gmor_scan/improved_N3.csv"
+    ],
+    "note": "spread of alpha over 2K = 30, 40, 60"
+  },
+  "capture_pct_tiny": {
+    "value": "0.105",
+    "inputs": [
+      "dlcq/units.py"
+    ],
+    "note": "percent of the endpoint integral a 2K=70 grid captures at m/g=1.953e-4, N=5 (exponent a from Eq. 26)"
+  },
+  "halving_log_ten": {
+    "value": 2444,
+    "inputs": [
+      "dlcq/units.py"
+    ],
+    "note": "log10 of the K factor needed to halve the K^-a remainder at m/g=1.953e-4, N=5"
+  },
+  "ratio_worst_dev_pct": {
+    "value": "0.4",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/paper/bar_ext_improved_N567.csv",
+      "data/paper/bar_ext_improved_N8.csv",
+      "data/bar_scan/bar_improved_N8.csv",
+      "data/gmor_scan/improved_N5.csv",
+      "data/gmor_scan/improved_N6.csv",
+      "data/gmor_scan/improved_N8.csv"
+    ],
+    "note": "largest |deviation| of M_mes/M_bar from 2sin(pi nu/2) at m/g=0.0125, per-N percents {5: 0.43, 6: 0.04, 8: -0.26}"
+  },
+  "tiny_neight_standard_msq": {
+    "value": "1.647e-06",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/tiny_mes_standard_N8.csv"
+    ],
+    "note": "M^2 extrapolate at m/g=1.953e-4, N=8 meson (standard quoted from the same 1/K fit ONLY as a gap denominator; its budgeted value uses eq27)"
+  },
+  "tiny_neight_improved_msq": {
+    "value": "2.492e-03",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/paper/tiny_mes_improved_N8.csv"
+    ],
+    "note": "M^2 extrapolate at m/g=1.953e-4, N=8 meson (standard quoted from the same 1/K fit ONLY as a gap denominator; its budgeted value uses eq27)"
+  },
+  "tiny_neight_gap": {
+    "value": 1513,
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/paper/tiny_mes_improved_N8.csv",
+      "data/paper/tiny_mes_standard_N8.csv"
+    ],
+    "note": "improved/standard M^2 ratio at m/g=1.953e-4, N=8"
+  },
+  "gmor_intercept": {
+    "value": "-0.0005 \\pm 0.0008",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/gmor_scan/improved_N2.csv",
+      "data/gmor_scan/improved_N3.csv",
+      "data/gmor_scan/improved_N4.csv",
+      "data/gmor_scan/improved_N5.csv",
+      "data/gmor_scan/improved_N6.csv",
+      "data/gmor_scan/improved_N7.csv",
+      "data/gmor_scan/improved_N8.csv"
+    ],
+    "note": "intercept of (M^2/GMOR - 1) = B + A(m/g), regenerated by tools/gmor_chiral_limit.py"
+  },
+  "gmor_slope": {
+    "value": "0.71",
+    "hamiltonian": "improved",
+    "fit_basis": "1/K",
+    "inputs": [
+      "data/gmor_scan/improved_N2.csv",
+      "data/gmor_scan/improved_N3.csv",
+      "data/gmor_scan/improved_N4.csv",
+      "data/gmor_scan/improved_N5.csv",
+      "data/gmor_scan/improved_N6.csv",
+      "data/gmor_scan/improved_N7.csv",
+      "data/gmor_scan/improved_N8.csv"
+    ],
+    "note": "slope A of the same law"
+  },
+  "exo_tetra_n2_mg1p6": {
+    "value": "-0.0006 \\pm 0.0021",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=1.6; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n2_mg0p8": {
+    "value": "-0.0046 \\pm 0.0056",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=0.8; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n2_mg0p4": {
+    "value": "-0.0095 \\pm 0.0039",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=0.4; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n2_mg0p1": {
+    "value": "-0.1189 \\pm 0.0002",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=0.1; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg1p6": {
+    "value": "-0.0058 \\pm 0.0017",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=1.6; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg0p8": {
+    "value": "-0.0104 \\pm 0.0051",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=0.8; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg0p4": {
+    "value": "-0.0337 \\pm 0.0059",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=0.4; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg0p1": {
+    "value": "-0.0762 \\pm 0.0009",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=0.1; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg1p6": {
+    "value": "-0.2360 \\pm 0.2909",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=1.6; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg0p8": {
+    "value": "-0.0547 \\pm 0.0408",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=0.8; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg0p4": {
+    "value": "-0.1536 \\pm 0.0208",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=0.4; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg0p1": {
+    "value": "-0.0912 \\pm 0.0052",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=0.1; spread is order-x-window, not a full budget"
+  },
+  "hexa_eightq_weight": {
+    "value": "0.962",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "8-parton Fock weight of the N=4 B=2 ground state at 2K=48, m/g=0.1"
+  },
+  "_table1_rows": {
+    "value": [
+      {
+        "channel": "mes",
+        "N": 2,
+        "mg": 1.6,
+        "ours": 4.3139,
+        "tot": 0.0019,
+        "form": 4e-05,
+        "wind": 3e-05,
+        "trunc": 1.6e-06,
+        "paper": 4.314,
+        "pterm": 0.004,
+        "d_pt": 0.02,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 4.313930720286939,
+        "imp_err": 5.239437740334196e-05
+      },
+      {
+        "channel": "mes",
+        "N": 2,
+        "mg": 0.8,
+        "ours": 3.9128,
+        "tot": 0.0097,
+        "form": 0.00024,
+        "wind": 0.00017,
+        "trunc": 7.9e-05,
+        "paper": 3.913,
+        "pterm": 0.004,
+        "d_pt": 0.05,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 3.9127392765714224,
+        "imp_err": 0.0004797422488509451
+      },
+      {
+        "channel": "mes",
+        "N": 2,
+        "mg": 0.4,
+        "ours": 2.6123,
+        "tot": 0.075,
+        "form": 0.0063,
+        "wind": 0.0045,
+        "trunc": 0.00092,
+        "paper": 2.61,
+        "pterm": 0.05,
+        "d_pt": 0.05,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 2.622318553252797,
+        "imp_err": 0.0017033282506790925
+      },
+      {
+        "channel": "mes",
+        "N": 2,
+        "mg": 0.2,
+        "ours": 1.1917,
+        "tot": 0.21,
+        "form": 0.023,
+        "wind": 0.016,
+        "trunc": 0.0015,
+        "paper": 1.17,
+        "pterm": 0.07,
+        "d_pt": 0.31,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 1.2917462570660423,
+        "imp_err": 0.0033041615796434165
+      },
+      {
+        "channel": "mes",
+        "N": 2,
+        "mg": 0.1,
+        "ours": 0.3943,
+        "tot": 0.25,
+        "form": 0.016,
+        "wind": 0.011,
+        "trunc": 0.00073,
+        "paper": 0.38,
+        "pterm": 0.05,
+        "d_pt": 0.29,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 0.5725126339445478,
+        "imp_err": 0.0036609143166546065
+      },
+      {
+        "channel": "mes",
+        "N": 2,
+        "mg": 0.05,
+        "ours": 0.1091,
+        "tot": 0.18,
+        "form": 0.0057,
+        "wind": 0.0041,
+        "trunc": 0.00038,
+        "paper": 0.1,
+        "pterm": 0.01,
+        "d_pt": 0.91,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 0.2595435734197431,
+        "imp_err": 0.0022780145042073374
+      },
+      {
+        "channel": "mes",
+        "N": 3,
+        "mg": 1.6,
+        "ours": 4.6159,
+        "tot": 0.0035,
+        "form": 5.2e-05,
+        "wind": 3.8e-05,
+        "trunc": 5.2e-06,
+        "paper": 4.618,
+        "pterm": 0.006,
+        "d_pt": 0.35,
+        "d_ours": 0.6,
+        "flag": "ok",
+        "imp": 4.615893356540049,
+        "imp_err": 7.414334720401428e-05
+      },
+      {
+        "channel": "mes",
+        "N": 3,
+        "mg": 0.8,
+        "ours": 4.389,
+        "tot": 0.031,
+        "form": 0.0011,
+        "wind": 0.00075,
+        "trunc": 0.00019,
+        "paper": 4.4,
+        "pterm": 0.05,
+        "d_pt": 0.22,
+        "d_ours": 0.4,
+        "flag": "ok",
+        "imp": 4.389288516864516,
+        "imp_err": 0.000500996353963501
+      },
+      {
+        "channel": "mes",
+        "N": 3,
+        "mg": 0.4,
+        "ours": 3.0713,
+        "tot": 0.21,
+        "form": 0.021,
+        "wind": 0.015,
+        "trunc": 0.0019,
+        "paper": 3.1,
+        "pterm": 0.5,
+        "d_pt": 0.06,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 3.1192414404133415,
+        "imp_err": 0.0009265524524804114
+      },
+      {
+        "channel": "mes",
+        "N": 3,
+        "mg": 0.2,
+        "ours": 1.3889,
+        "tot": 0.44,
+        "form": 0.043,
+        "wind": 0.03,
+        "trunc": 0.0063,
+        "paper": 1.5,
+        "pterm": 0.5,
+        "d_pt": 0.22,
+        "d_ours": 0.3,
+        "flag": "ok",
+        "imp": 1.6471638853979058,
+        "imp_err": 0.002931258397586345
+      },
+      {
+        "channel": "mes",
+        "N": 3,
+        "mg": 0.1,
+        "ours": 0.4445,
+        "tot": 0.42,
+        "form": 0.022,
+        "wind": 0.016,
+        "trunc": 0.0072,
+        "paper": 0.5,
+        "pterm": 0.2,
+        "d_pt": 0.28,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 0.783904939523688,
+        "imp_err": 0.0027465708242377374
+      },
+      {
+        "channel": "mes",
+        "N": 3,
+        "mg": 0.05,
+        "ours": 0.1213,
+        "tot": 0.28,
+        "form": 0.0071,
+        "wind": 0.0051,
+        "trunc": 0.0033,
+        "paper": 0.2,
+        "pterm": 0.2,
+        "d_pt": 0.39,
+        "d_ours": 0.3,
+        "flag": "ok",
+        "imp": 0.37617818307246975,
+        "imp_err": 0.0015001843211943366
+      },
+      {
+        "channel": "mes",
+        "N": 4,
+        "mg": 1.6,
+        "ours": 4.8452,
+        "tot": 0.0057,
+        "form": 6.8e-05,
+        "wind": 4.9e-05,
+        "trunc": 7.5e-06,
+        "paper": 4.845,
+        "pterm": 0.002,
+        "d_pt": 0.12,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 4.845203358337949,
+        "imp_err": 9.963546105318244e-05
+      },
+      {
+        "channel": "mes",
+        "N": 4,
+        "mg": 0.8,
+        "ours": 4.7455,
+        "tot": 0.061,
+        "form": 0.0028,
+        "wind": 0.002,
+        "trunc": 0.00022,
+        "paper": 4.743,
+        "pterm": 0.002,
+        "d_pt": 1.26,
+        "d_ours": 0.0,
+        "flag": "OUT",
+        "imp": 4.747519563428404,
+        "imp_err": 0.0004907798661495377
+      },
+      {
+        "channel": "mes",
+        "N": 4,
+        "mg": 0.4,
+        "ours": 3.3794,
+        "tot": 0.36,
+        "form": 0.04,
+        "wind": 0.028,
+        "trunc": 0.0018,
+        "paper": 3.4,
+        "pterm": 0.2,
+        "d_pt": 0.1,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 3.4892717792280354,
+        "imp_err": 0.0012031633014664145
+      },
+      {
+        "channel": "mes",
+        "N": 4,
+        "mg": 0.2,
+        "ours": 1.4837,
+        "tot": 0.64,
+        "form": 0.056,
+        "wind": 0.04,
+        "trunc": 0.0054,
+        "paper": 1.4,
+        "pterm": 0.1,
+        "d_pt": 0.84,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 1.903927945168535,
+        "imp_err": 0.003005545209604721
+      },
+      {
+        "channel": "mes",
+        "N": 4,
+        "mg": 0.1,
+        "ours": 0.4584,
+        "tot": 0.55,
+        "form": 0.025,
+        "wind": 0.018,
+        "trunc": 0.0046,
+        "paper": 0.43,
+        "pterm": 0.05,
+        "d_pt": 0.57,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 0.9279477124551393,
+        "imp_err": 0.00243583915425416
+      },
+      {
+        "channel": "mes",
+        "N": 4,
+        "mg": 0.05,
+        "ours": 0.1226,
+        "tot": 0.35,
+        "form": 0.0073,
+        "wind": 0.0053,
+        "trunc": 0.0018,
+        "paper": 0.12,
+        "pterm": 0.01,
+        "d_pt": 0.26,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 0.45022713498186095,
+        "imp_err": 0.0012750333929597846
+      },
+      {
+        "channel": "bar",
+        "N": 3,
+        "mg": 1.6,
+        "ours": 10.7243,
+        "tot": 0.008,
+        "form": 0.00063,
+        "wind": 0.00048,
+        "trunc": 9e-06,
+        "paper": 10.71,
+        "pterm": 0.02,
+        "d_pt": 0.71,
+        "d_ours": 1.8,
+        "flag": "ok",
+        "imp": 10.72433684853922,
+        "imp_err": 0.0005211568916276832
+      },
+      {
+        "channel": "bar",
+        "N": 3,
+        "mg": 0.8,
+        "ours": 10.4861,
+        "tot": 0.072,
+        "form": 0.0047,
+        "wind": 0.0033,
+        "trunc": 0.00036,
+        "paper": 10.4,
+        "pterm": 0.1,
+        "d_pt": 0.86,
+        "d_ours": 1.2,
+        "flag": "ok",
+        "imp": 10.484155131032121,
+        "imp_err": 0.004693548678119441
+      },
+      {
+        "channel": "bar",
+        "N": 3,
+        "mg": 0.4,
+        "ours": 7.5446,
+        "tot": 0.51,
+        "form": 0.073,
+        "wind": 0.051,
+        "trunc": 0.0029,
+        "paper": 7.3,
+        "pterm": 0.6,
+        "d_pt": 0.41,
+        "d_ours": 0.5,
+        "flag": "ok",
+        "imp": 7.6992212115494425,
+        "imp_err": 0.011802651617720539
+      },
+      {
+        "channel": "bar",
+        "N": 3,
+        "mg": 0.2,
+        "ours": 3.4054,
+        "tot": 1.1,
+        "form": 0.13,
+        "wind": 0.091,
+        "trunc": 0.0039,
+        "paper": 3.1,
+        "pterm": 0.2,
+        "d_pt": 1.53,
+        "d_ours": 0.3,
+        "flag": "OUT",
+        "imp": 4.182948614122415,
+        "imp_err": 0.012799330845226109
+      },
+      {
+        "channel": "bar",
+        "N": 3,
+        "mg": 0.1,
+        "ours": 1.0668,
+        "tot": 1.0,
+        "form": 0.06,
+        "wind": 0.043,
+        "trunc": 0.002,
+        "paper": 1.1,
+        "pterm": 0.3,
+        "d_pt": 0.11,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 2.0201429793189867,
+        "imp_err": 0.009131336656397204
+      },
+      {
+        "channel": "bar",
+        "N": 3,
+        "mg": 0.05,
+        "ours": 0.2861,
+        "tot": 0.66,
+        "form": 0.018,
+        "wind": 0.013,
+        "trunc": 0.00071,
+        "paper": 0.31,
+        "pterm": 0.09,
+        "d_pt": 0.27,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 0.9693635392674702,
+        "imp_err": 0.004490081865074325
+      },
+      {
+        "channel": "bar",
+        "N": 4,
+        "mg": 1.6,
+        "ours": 20.4706,
+        "tot": 0.025,
+        "form": 0.0034,
+        "wind": 0.0029,
+        "trunc": 3.2e-05,
+        "paper": 21.2,
+        "pterm": 0.3,
+        "d_pt": 2.43,
+        "d_ours": 29.7,
+        "flag": "OUT",
+        "imp": 20.47125564213817,
+        "imp_err": 0.003085860160611631
+      },
+      {
+        "channel": "bar",
+        "N": 4,
+        "mg": 0.8,
+        "ours": 20.9392,
+        "tot": 0.27,
+        "form": 0.03,
+        "wind": 0.021,
+        "trunc": 0.0011,
+        "paper": 20.9,
+        "pterm": 0.5,
+        "d_pt": 0.08,
+        "d_ours": 0.1,
+        "flag": "ok",
+        "imp": 20.947309827269315,
+        "imp_err": 0.009008574930845725
+      },
+      {
+        "channel": "bar",
+        "N": 4,
+        "mg": 0.4,
+        "ours": 15.3975,
+        "tot": 1.6,
+        "form": 0.29,
+        "wind": 0.21,
+        "trunc": 0.0073,
+        "paper": 15.0,
+        "pterm": 1.0,
+        "d_pt": 0.4,
+        "d_ours": 0.2,
+        "flag": "ok",
+        "imp": 16.176129299120987,
+        "imp_err": 0.009243559244310973
+      },
+      {
+        "channel": "bar",
+        "N": 4,
+        "mg": 0.2,
+        "ours": 6.6666,
+        "tot": 2.9,
+        "form": 0.33,
+        "wind": 0.24,
+        "trunc": 0.0083,
+        "paper": 6.0,
+        "pterm": 0.8,
+        "d_pt": 0.83,
+        "d_ours": 0.2,
+        "flag": "ok",
+        "imp": 9.203837473181794,
+        "imp_err": 0.01879592335209246
+      },
+      {
+        "channel": "bar",
+        "N": 4,
+        "mg": 0.1,
+        "ours": 2.0164,
+        "tot": 2.4,
+        "form": 0.13,
+        "wind": 0.093,
+        "trunc": 0.0033,
+        "paper": 1.9,
+        "pterm": 0.3,
+        "d_pt": 0.39,
+        "d_ours": 0.0,
+        "flag": "ok",
+        "imp": 4.596952741009946,
+        "imp_err": 0.013359735470742873
+      },
+      {
+        "channel": "bar",
+        "N": 4,
+        "mg": 0.05,
+        "ours": 0.5332,
+        "tot": 1.5,
+        "form": 0.037,
+        "wind": 0.027,
+        "trunc": 0.00099,
+        "paper": 0.42,
+        "pterm": 0.06,
+        "d_pt": 1.89,
+        "d_ours": 0.1,
+        "flag": "OUT",
+        "imp": 2.248153326390709,
+        "imp_err": 0.006311977785080414
+      }
+    ],
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "figures/table1_budget_2K25-71_python.txt",
+      "data/improved_table1_msq.csv"
+    ],
+    "note": "full rows incl. improved columns; emitted as frozen/table1_body.tex, not macros"
+  }
+}
