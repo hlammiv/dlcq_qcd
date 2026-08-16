@@ -488,7 +488,7 @@ def gather() -> dict:
         odd = sorted(K for (l, m, K) in gnd if l == "hexa3_B1" and m == mg)
         Ks, Ms, Mt = [], [], []
         for K in KS:
-            if mg == 1.6 and K <= 20:
+            if mg >= 0.8 and K < 28:
                 continue
             b2 = gnd.get(("hexa3_B2", mg, K))
             los = [k for k in odd if k < K]

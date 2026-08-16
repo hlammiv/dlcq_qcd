@@ -205,7 +205,7 @@
     "note": "slope A of the same law"
   },
   "exo_hexathree_mg1p6": {
-    "value": "-0.0326 \\pm 0.1184",
+    "value": "-0.0326 \\pm 0.0590",
     "hamiltonian": "standard",
     "fit_basis": "eq27",
     "inputs": [
@@ -214,7 +214,7 @@
     "note": "N=3 B=2 correlated Delta_inf at m/g=1.6; threshold interpolated from the odd-K baryon grid (parity mismatch), spread is fit-ensemble"
   },
   "exo_hexathree_mg0p8": {
-    "value": "-0.0203 \\pm 0.0208",
+    "value": "-0.0203 \\pm 0.0145",
     "hamiltonian": "standard",
     "fit_basis": "eq27",
     "inputs": [

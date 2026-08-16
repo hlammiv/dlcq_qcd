@@ -710,6 +710,13 @@ def fig9():
             odd = sorted(K for (l, m, K) in gnd
                          if l == f"{panel}_B1" and m == mg)
             for K in KS:
+                # At weak coupling the two-baryon configuration is not yet
+                # representable on the coarse grid: the B=2 ground drops
+                # discontinuously (with no partner level to track) when the
+                # basis first contains it.  Points below that threshold are
+                # excluded, matching the fits.
+                if (panel == "hexa" and mg == 1.6 and K < 32) or (panel == "hexa3" and mg >= 0.8 and K < 28):
+                    continue
                 b2 = gnd.get((f"{panel}_B2", mg, K))
                 if not b2:
                     continue
