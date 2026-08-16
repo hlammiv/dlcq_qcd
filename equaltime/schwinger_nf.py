@@ -61,10 +61,22 @@ def electric_weights_nf(n_sites: int, n_flavour: int):
 class SchwingerNf(MPOModel):
     """``W`` for ``n_flavour`` degenerate flavours, hand-built MPO."""
 
-    def __init__(self, L: int, x: float, mg: float, n_flavour: int = 2):
+    def __init__(self, L: int, x: float, mg: float, n_flavour: int = 2,
+                 charges: str = "same"):
+        """``charges="independent"`` conserves each flavour's number separately.
+
+        The Hamiltonian conserves them anyway -- the hop and the mass are
+        flavour diagonal, and the electric term sees only the total -- so this
+        costs nothing and buys the thing that matters: the isotriplet pion then
+        lives in a **different symmetry sector** from the vacuum and DMRG finds
+        it directly.  With ``"same"`` only the total is conserved, the pion
+        shares a sector with the vacuum, and an orthogonality-constrained sweep
+        lands on the heavier flavour-singlet eta instead (measured: M/g -> 0.970
+        as m -> 0, against the pion's required M/g -> 0).
+        """
         nf = n_flavour
         site = GroupedSite([SpinHalfSite(conserve="Sz", sort_charge=True)
-                            for _ in range(nf)], charges="same")
+                            for _ in range(nf)], charges=charges)
         lat = Chain(L, site, bc="open", bc_MPS="finite")
         mu = mu_from(mg, x)
         w, C, E0 = electric_weights_nf(L, nf)
@@ -100,6 +112,7 @@ class SchwingerNf(MPOModel):
 
         Hmpo = MPO.from_grids(lat.mps_sites(), grids, bc="finite",
                               IdL=ID, IdR=H, mps_unit_cell_width=L)
+        self._charges = charges
         # Sz_f Sz_f = 1/4 each, and the same-site cross terms Sz_f Sz_f' (f != f')
         # both come from the diagonal of w; plus the c_n^2 constant
         self._const = E0 + 0.25 * nf * float(np.trace(w))
@@ -128,8 +141,45 @@ def _staggered(model, L, nf):
                                   bc=model.lat.bc_MPS, unit_cell_width=L)
 
 
+def _pion_state(model, L, nf):
+    """Staggered vacuum with one unit of flavour moved 0 -> 1.
+
+    Total charge is unchanged, so the state is physical, but the individual
+    flavour numbers differ from the vacuum by (+1, -1): the ``I_3 = +-1`` member
+    of the isotriplet, degenerate with the neutral pion.  With
+    ``charges="independent"`` this is a *different sector*, so plain DMRG in it
+    returns the pion without any orthogonality constraint or penalty term.
+    """
+    from tenpy.networks.mps import MPS
+    lo = [f"down_{f}" for f in range(nf)]
+    hi = [f"up_{f}" for f in range(nf)]
+    prod = []
+    for i in range(L):
+        st = list(lo if i % 2 == 0 else hi)
+        if i == L // 2:                       # flavour 0: down -> up
+            st[0] = f"up_0"
+        if i == L // 2 + 1:                   # flavour 1: up -> down
+            st[1] = f"down_1"
+        prod.append(" ".join(st))
+    return MPS.from_product_state(model.lat.mps_sites(), prod,
+                                  bc=model.lat.bc_MPS, unit_cell_width=L)
+
+
+def pion_gap(L: int, x: float, mg: float, n_flavour: int = 2, chi: int = 120):
+    """``M/g`` of the isotriplet pion, by targeting its flavour sector."""
+    from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
+    m = SchwingerNf(L, x, mg, n_flavour, charges="independent")
+    o = _opts(chi)
+    E0, _ = TwoSiteDMRGEngine(_staggered(m, L, n_flavour), m, o).run()
+    E1, _ = TwoSiteDMRGEngine(_pion_state(m, L, n_flavour), m, dict(o)).run()
+    return gap_to_M_over_g(float(E1 - E0), x)
+
+
 def mass_gap(L: int, x: float, mg: float, n_flavour: int = 2, chi: int = 120):
-    """``M/g`` from the first excitation, orthogonality-constrained DMRG."""
+    """``M/g`` from the first excitation, orthogonality-constrained DMRG.
+
+    **This finds the flavour SINGLET**, not the pion -- see ``pion_gap``.
+    """
     from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
     m = SchwingerNf(L, x, mg, n_flavour)
     o = _opts(chi)
