@@ -732,6 +732,72 @@ def fig9():
     finish(fig, "fig9_exotics")
 
 
+@register("fig10")
+def fig10():
+    """Exotic candidates: structure functions and pair correlations.
+
+    The single-particle q(x) of a molecule and a compact state can peak in
+    the same place, so the right panels show the two-parton momentum
+    correlation C(k1,k2) — a molecule clusters its partons into subsets
+    sharing each hadron's half of the momentum (anticorrelation ridge), a
+    compact state shares democratically.  Sequential single-hue colormap.
+    """
+    from dlcq.figures import paper_lambda
+    from dlcq.fock_weights import fock_weights, pair_correlation
+    from dlcq.observables import (physical_indices, require_physical_index,
+                                  structure_function)
+
+    specs = [
+        ("tetraquark candidate, $N=2$", "tetra", 2, 0, 48, 6, 32, 4),
+        ("two-baryon state, $N=4$", "hexa", 4, 2, 48, 10, 12, 8),
+    ]
+    lam = float(paper_lambda(0.1))
+    fig, axes = plt.subplots(2, 2, figsize=(9.5, 8))
+    for (title, kind, N, B, K, LPN, nev, npart), axrow in zip(specs, axes):
+        prov = provider_2026(nev)
+        r = require_cached(prov, N, 1, B, K, lam, LPN=LPN)
+        if r is None:
+            continue
+        if kind == "tetra":
+            idx = None
+            for lev in range(r.n_eigenvectors):
+                try:
+                    i = require_physical_index(r, lev)
+                except IndexError:
+                    break
+                if fock_weights(r, i).get(4, 0.0) > 0.5:
+                    idx = i
+                    break
+        else:
+            idx = int(physical_indices(r)[0])
+        if idx is None:
+            continue
+        ax = axrow[0]
+        x, q, qbar = structure_function(r, idx, nparton=npart)
+        ax.plot(x, q, "o-", color=C_PRIMARY, markersize=3, linewidth=1.1,
+                label="$q(x)$")
+        if qbar.max() > 1e-12:
+            ax.plot(x, qbar, "v--", color=C_SECONDARY, markersize=3,
+                    linewidth=1.1, label=r"$\bar q(x)$")
+        ax.set_title(f"{title}: structure function", fontsize=9)
+        ax.set_xlabel("$x$"); ax.set_ylabel("$q(x)$")
+        ax.legend(fontsize=8, frameon=False)
+        style(ax)
+        ax = axrow[1]
+        ks, C = pair_correlation(r, idx, nparton=npart)
+        xs = ks / float(K)
+        im = ax.pcolormesh(xs, xs, C, cmap="Blues", shading="nearest")
+        fig.colorbar(im, ax=ax, shrink=0.85)
+        ax.set_title(f"{title}: pair correlation $C(x_1,x_2)$", fontsize=9)
+        ax.set_xlabel("$x_1$"); ax.set_ylabel("$x_2$")
+        ax.set_xlim(0, 0.6); ax.set_ylim(0, 0.6)
+    fig.suptitle("FIG. 10: what the exotic candidates are made of — "
+                 "$m/g=0.1$, $2K=48$, standard Hamiltonian, dominant "
+                 "sectors, LPN as in Fig. 9", fontsize=10)
+    fig.tight_layout()
+    finish(fig, "fig10_exotic_wf")
+
+
 # ── main ───────────────────────────────────────────────────────────────────
 
 def main(argv=None):

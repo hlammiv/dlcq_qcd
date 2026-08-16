@@ -56,3 +56,27 @@ def test_binding_series_rejects_hamiltonian_mix():
         binding_series([10, 12], [5.0, 4.8], [10, 12], [2.0, 1.9],
                        hamiltonian_state="improved",
                        hamiltonian_thresh="standard")
+
+
+def test_pair_correlation_counts_pairs(python_K21):
+    # Total correlation mass equals the mean pair count 2 * <L(L-1)/2>.
+    import numpy as np
+    from dlcq.fock_weights import fock_weights, pair_correlation
+
+    ks, C = pair_correlation(python_K21, 0)
+    w = fock_weights(python_K21, 0)
+    expected = sum(v * L * (L - 1) for L, v in w.items())
+    assert np.isclose(C.sum(), expected, rtol=1e-10)
+
+
+def test_pair_correlation_momentum_constraint(python_K21):
+    # No pair can exceed the total momentum: C[k1,k2]=0 for k1+k2 > K_code.
+    import numpy as np
+    from dlcq.fock_weights import pair_correlation
+
+    ks, C = pair_correlation(python_K21, 0)
+    K = python_K21.K_code
+    for i, k1 in enumerate(ks):
+        for j, k2 in enumerate(ks):
+            if k1 + k2 > K:
+                assert C[i, j] == 0.0

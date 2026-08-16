@@ -98,3 +98,41 @@ def binding_series(K_state, M_state, K_thresh, M_thresh, n_thresh: int = 2,
     M_state = np.asarray(M_state, dtype=float)
     M_thresh = np.asarray(M_thresh, dtype=float)
     return K_state.copy(), M_state - n_thresh * M_thresh
+
+
+def pair_correlation(result: DLCQResult, state_idx: int = 0,
+                     nparton: int | None = None):
+    """Two-parton momentum correlation ``C[k1, k2]`` for one eigenstate.
+
+    The same ``c * (N c)`` weight that :func:`fock_weights` uses, accumulated
+    over unordered parton PAIRS within each basis state, optionally
+    restricted to one Fock sector.  This is the molecule-vs-compact
+    discriminator the single-particle structure function cannot provide: a
+    two-hadron molecule clusters its partons into subsets that share each
+    hadron's half of the momentum, so two large momenta never coexist and
+    ``C`` shows an anticorrelation ridge; a compact state shares
+    democratically.  ``C`` is symmetric and normalized so its total equals
+    the mean number of pairs.
+
+    Returns ``(ks, C)`` with ``ks`` the odd momentum grid.
+    """
+    if result.c_orig is None or result.norm is None:
+        raise ValueError("result lacks c_orig/norm; parse with with_matrices=True")
+    c = result.require_eigenvector(state_idx)
+    w = c * (result.norm @ c)
+    K = result.K_code
+    C = np.zeros((K + 1, K + 1))
+    for s in range(result.numsta_post):
+        ws = w[s]
+        if ws == 0.0:
+            continue
+        L = int(result.state_len[s])
+        if nparton is not None and L != nparton:
+            continue
+        moms = result.state_moms[s, :L]
+        for i in range(L):
+            for j in range(i + 1, L):
+                C[moms[i], moms[j]] += ws
+                C[moms[j], moms[i]] += ws
+    ks = np.arange(1, K, 2)
+    return ks, C[np.ix_(ks, ks)]

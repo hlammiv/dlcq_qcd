@@ -37,3 +37,17 @@ for K in KS_EVEN:
                                      nev=8), ("mg", mg)))
         RUNS.append(("hexa_B0", dict(N=4, NF=1, B=0, K_code=K, LPN=6,
                                      nev=8), ("mg", mg)))
+
+
+# N=3 companion study (user request): the B=2 channel at the physical color
+# count. B=2 lives on even K but the N=3 baryon on odd K, so thresholds are
+# BRACKETED by adjacent odd-K baryon masses — labeled as such wherever used.
+KS_ODD = [19, 23, 27, 31, 35, 39, 43, 47, 49]
+for K in KS_EVEN:
+    for mg in MGS:
+        RUNS.append(("hexa3_B2", dict(N=3, NF=1, B=2, K_code=K, LPN=8,
+                                      nev=12), ("mg", mg)))
+for K in KS_ODD:
+    for mg in MGS:
+        RUNS.append(("hexa3_B1", dict(N=3, NF=1, B=1, K_code=K, LPN=5,
+                                      nev=8), ("mg", mg)))
