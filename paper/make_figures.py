@@ -639,6 +639,92 @@ def fig8():
     finish(fig, "fig8_comparison")
 
 
+@register("fig9")
+def fig9():
+    """Exotics: correlated binding vs resolution, both channels.
+
+    Reads only the Phase 4d reduction (data/paper/exotics_levels.csv).
+    Every point is a same-K difference; the drift toward or away from zero
+    IS the diagnostic, so the x axis is 1/K and the continuum sits at the
+    left edge.
+    """
+    import csv as _csv
+    import math
+
+    rows = list(_csv.DictReader(
+        open(ROOT / "data" / "paper" / "exotics_levels.csv")))
+    for r in rows:
+        for k in ("N", "B", "K_code", "level"):
+            r[k] = int(r[k])
+        for k in ("mg", "msq", "w_dom"):
+            r[k] = float(r[k])
+        r["dominant"] = int(r["dominant"])
+    gnd = {(r["label"], r["mg"], r["K_code"]): r
+           for r in rows if r["level"] == 0}
+
+    def mg_units(msq, mg):
+        return math.sqrt(max(msq, 0.0) * (mg * mg + 1.0 / math.pi))
+
+    KS = [20, 24, 28, 32, 36, 40, 44, 48]
+    MGS = [1.6, 0.8, 0.4, 0.1]
+    shades = {1.6: 0.85, 0.8: 0.65, 0.4: 0.45, 0.1: 0.0}
+
+    fig, axes = plt.subplots(1, 3, figsize=(12.5, 4.0), sharey=False)
+    for Nc, ax in zip((2, 3), axes[:2]):
+        for mg in MGS:
+            xs, ys = [], []
+            for K in KS:
+                cands = [r for r in rows
+                         if r["label"] == f"tetra_N{Nc}" and r["mg"] == mg
+                         and r["K_code"] == K and r["dominant"] == 4
+                         and r["w_dom"] > 0.5]
+                g = gnd.get((f"tetra_N{Nc}", mg, K))
+                if not cands or not g:
+                    continue
+                best = min(cands, key=lambda r: r["msq"])
+                xs.append(2.0 / K)
+                ys.append(mg_units(best["msq"], mg)
+                          - 2 * mg_units(g["msq"], mg))
+            f = shades[mg]
+            col = (f * 0.87 + (1 - f) * 0.13, f * 0.92 + (1 - f) * 0.40,
+                   f * 0.95 + (1 - f) * 0.67)
+            ax.plot(xs, ys, "o-", color=C_PRIMARY, alpha=1 - 0.65 * f,
+                    markersize=3.5, linewidth=1.1, label=f"$m/g={mg}$")
+        ax.axhline(0, color="0.6", linewidth=0.7)
+        ax.set_title(f"({'a' if Nc == 2 else 'b'}) tetraquark channel, "
+                     f"$N={Nc}$", fontsize=10)
+        ax.set_xlabel("$1/K$")
+        ax.set_xlim(0, 0.11)
+    axes[0].set_ylabel(r"$\Delta/g = (M - 2M_{\rm mes})/g$")
+    axes[0].legend(fontsize=7.5, frameon=False)
+    ax = axes[2]
+    for mg in MGS:
+        xs, ys = [], []
+        for K in KS:
+            b2 = gnd.get(("hexa_B2", mg, K))
+            b1 = gnd.get(("hexa_B1", mg, K))
+            if not b2 or not b1:
+                continue
+            xs.append(2.0 / K)
+            ys.append(mg_units(b2["msq"], mg) - 2 * mg_units(b1["msq"], mg))
+        f = shades[mg]
+        ax.plot(xs, ys, "s-", color=C_SECONDARY, alpha=1 - 0.65 * f,
+                markersize=3.5, linewidth=1.1, label=f"$m/g={mg}$")
+    ax.axhline(0, color="0.6", linewidth=0.7)
+    ax.set_title("(c) two-baryon channel, $N=4$", fontsize=10)
+    ax.set_xlabel("$1/K$")
+    ax.set_ylabel(r"$\Delta/g = (M_{B=2} - 2M_{\rm bar})/g$")
+    ax.set_xlim(0, 0.11)
+    ax.legend(fontsize=7.5, frameon=False)
+    for a in axes:
+        style(a)
+    fig.suptitle("FIG. 9: correlated binding energies of the lowest "
+                 "4q-dominant and 8q-dominant states, standard Hamiltonian, "
+                 "same-$K$ differences", fontsize=10)
+    fig.tight_layout()
+    finish(fig, "fig9_exotics")
+
+
 # ── main ───────────────────────────────────────────────────────────────────
 
 def main(argv=None):

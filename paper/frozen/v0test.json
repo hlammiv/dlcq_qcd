@@ -178,6 +178,121 @@
     "inputs": [],
     "note": "doc-quoted at the pinned blob; regenerate from tools/gmor_chiral_limit.py at v2"
   },
+  "exo_tetra_n2_mg1p6": {
+    "value": "-0.0006 \\pm 0.0021",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=1.6; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n2_mg0p8": {
+    "value": "-0.0046 \\pm 0.0056",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=0.8; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n2_mg0p4": {
+    "value": "-0.0095 \\pm 0.0039",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=0.4; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n2_mg0p1": {
+    "value": "-0.1189 \\pm 0.0002",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n2 at m/g=0.1; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg1p6": {
+    "value": "-0.0058 \\pm 0.0017",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=1.6; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg0p8": {
+    "value": "-0.0104 \\pm 0.0051",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=0.8; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg0p4": {
+    "value": "-0.0337 \\pm 0.0059",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=0.4; spread is order-x-window, not a full budget"
+  },
+  "exo_tetra_n3_mg0p1": {
+    "value": "-0.0762 \\pm 0.0009",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for tetra_n3 at m/g=0.1; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg1p6": {
+    "value": "-0.2360 \\pm 0.2909",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=1.6; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg0p8": {
+    "value": "-0.0547 \\pm 0.0408",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=0.8; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg0p4": {
+    "value": "-0.1536 \\pm 0.0208",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=0.4; spread is order-x-window, not a full budget"
+  },
+  "exo_hexa_mg0p1": {
+    "value": "-0.0912 \\pm 0.0052",
+    "hamiltonian": "standard",
+    "fit_basis": "eq27",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "correlated Delta_inf (M/g units) for hexa at m/g=0.1; spread is order-x-window, not a full budget"
+  },
+  "hexa_eightq_weight": {
+    "value": "0.962",
+    "inputs": [
+      "data/paper/exotics_levels.csv"
+    ],
+    "note": "8-parton Fock weight of the N=4 B=2 ground state at 2K=48, m/g=0.1"
+  },
   "_table1_rows": {
     "value": [
       {

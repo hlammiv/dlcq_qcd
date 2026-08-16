@@ -359,6 +359,102 @@ def gather() -> dict:
         "note": "doc-quoted at the pinned blob; regenerate from "
                 "tools/gmor_chiral_limit.py at v2"}
 
+    # Exotics: correlated binding energies from the Phase 4d reduction.
+    # Same-K differences only, enforced by binding_series (G11); plain-1/K
+    # extrapolation with an order-x-window spread.
+    import csv as _csv
+    _s.path.insert(0, str(ROOT))
+    from dlcq.fock_weights import binding_series
+    ex_path = ROOT / "data" / "paper" / "exotics_levels.csv"
+    exrows = list(_csv.DictReader(open(ex_path)))
+    for r in exrows:
+        for k in ("N", "B", "K_code", "level"):
+            r[k] = int(r[k])
+        for k in ("mg", "msq", "w_dom"):
+            r[k] = float(r[k])
+        r["dominant"] = int(r["dominant"])
+
+    def _mg_units(msq, mg):
+        return math.sqrt(max(msq, 0.0) * (mg * mg + 1.0 / math.pi))
+
+    def _extrap_delta(Ks, ds):
+        import numpy as _np
+        Ks = _np.array(Ks, float) / 2.0
+        ds = _np.array(ds, float)
+        vals = []
+        for order in (1, 2):
+            for lo in range(0, max(1, len(Ks) - 4)):
+                x, y = Ks[lo:], ds[lo:]
+                if len(x) < order + 2:
+                    continue
+                A = _np.vstack([_np.ones_like(x)]
+                               + [x ** -(i + 1) for i in range(order)]).T
+                c, *_ = _np.linalg.lstsq(A, y, rcond=None)
+                vals.append(c[0])
+        v = _np.array(vals)
+        return (float(_np.median(v)),
+                float(0.5 * (_np.percentile(v, 84) - _np.percentile(v, 16))))
+
+    gnd = {(r["label"], r["mg"], r["K_code"]): r
+           for r in exrows if r["level"] == 0}
+    KS = [20, 24, 28, 32, 36, 40, 44, 48]
+    ex_out = {}
+    for Nc in (2, 3):
+        for mg in (1.6, 0.8, 0.4, 0.1):
+            Ks, Ms, Mt = [], [], []
+            for K in KS:
+                cands = [r for r in exrows
+                         if r["label"] == f"tetra_N{Nc}" and r["mg"] == mg
+                         and r["K_code"] == K and r["dominant"] == 4
+                         and r["w_dom"] > 0.5]
+                g = gnd.get((f"tetra_N{Nc}", mg, K))
+                if not cands or not g:
+                    continue
+                best = min(cands, key=lambda r: r["msq"])
+                Ks.append(K)
+                Ms.append(_mg_units(best["msq"], mg))
+                Mt.append(_mg_units(g["msq"], mg))
+            if len(Ks) >= 6:
+                Kc, delta = binding_series(Ks, Ms, Ks, Mt, n_thresh=2,
+                                           hamiltonian_state="standard",
+                                           hamiltonian_thresh="standard")
+                ex_out[(f"tetra_n{Nc}", mg)] = _extrap_delta(Kc, delta)
+    for mg in (1.6, 0.8, 0.4, 0.1):
+        Ks, Ms, Mt = [], [], []
+        for K in KS:
+            b2 = gnd.get(("hexa_B2", mg, K))
+            b1 = gnd.get(("hexa_B1", mg, K))
+            if not b2 or not b1:
+                continue
+            if mg == 1.6 and K < 32:
+                continue          # pre-crossing points; flagged in Sec. IX
+            Ks.append(K)
+            Ms.append(_mg_units(b2["msq"], mg))
+            Mt.append(_mg_units(b1["msq"], mg))
+        if len(Ks) >= 4:
+            Kc, delta = binding_series(Ks, Ms, Ks, Mt, n_thresh=2,
+                                       hamiltonian_state="standard",
+                                       hamiltonian_thresh="standard")
+            ex_out[("hexa", mg)] = _extrap_delta(Kc, delta)
+
+    def _fmt_pm(v, e):
+        return f"{v:+.4f} \\pm {e:.4f}"
+    for (tag, mg), (v, e) in ex_out.items():
+        key = f"exo_{tag}_mg{str(mg).replace('.', 'p')}"
+        numbers[key] = {
+            "value": _fmt_pm(v, e), "hamiltonian": "standard",
+            "fit_basis": "eq27", "inputs": [
+                "data/paper/exotics_levels.csv"],
+            "note": f"correlated Delta_inf (M/g units) for {tag} at "
+                    f"m/g={mg}; spread is order-x-window, not a full budget"}
+    b2w = gnd.get(("hexa_B2", 0.1, 48))
+    if b2w:
+        numbers["hexa_eightq_weight"] = {
+            "value": f"{b2w['w_dom']:.3f}",
+            "inputs": ["data/paper/exotics_levels.csv"],
+            "note": "8-parton Fock weight of the N=4 B=2 ground state at "
+                    "2K=48, m/g=0.1"}
+
     # TODO(v2): timing table; N=8 ratio column; GMOR from a fresh run.
     numbers["_table1_rows"] = {
         "value": rows, "hamiltonian": "standard", "fit_basis": "eq27",
@@ -441,6 +537,12 @@ def emit(numbers: dict, tag: str) -> None:
         if name.startswith("_"):
             continue                       # emitted as a body file instead
         macro = "".join(w.capitalize() for w in name.split("_"))
+        # LaTeX control sequences cannot contain digits (bitten three times
+        # now), so spell them out.
+        digits = {"0": "Zero", "1": "One", "2": "Two", "3": "Three",
+                  "4": "Four", "5": "Five", "6": "Six", "7": "Seven",
+                  "8": "Eight", "9": "Nine"}
+        macro = "".join(digits.get(ch, ch) for ch in macro)
         lines.append(f"\\newcommand{{\\num{macro}}}{{{entry['value']}}}")
     (FROZEN / "numbers.tex").write_text("\n".join(lines) + "\n")
     if "_table1_rows" in numbers:

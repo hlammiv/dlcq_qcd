@@ -1,6 +1,6 @@
 {
   "freeze": "v0test",
-  "git_head": "a0aabc83ad4a66ba76211bca7049ba277be94e2b",
+  "git_head": "676fb78f25812ba87e12653cfcfcd010f552ee3d",
   "weak_coupling_doc_blob": "b2a49a204c86d9174c8b3f4627571939825fb64a",
   "inputs": {
     "figures/table1_budget_2K25-71_python.txt": "bd246401f78c869a",
@@ -13,6 +13,7 @@
     "data/gmor_scan/improved_N5.csv": "e261427b508b3b4c",
     "data/gmor_scan/improved_N6.csv": "6d609f6d520cfdba",
     "data/paper/tiny_mes_standard_N8.csv": "b9dbbc62ab918269",
-    "data/paper/tiny_mes_improved_N8.csv": "8d01424098f7e90f"
+    "data/paper/tiny_mes_improved_N8.csv": "8d01424098f7e90f",
+    "data/paper/exotics_levels.csv": "e1f3ef6072ab71d5"
   }
 }
