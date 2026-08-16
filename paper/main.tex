@@ -13,22 +13,31 @@
 %    Eq. (27) ladder; the two never share a fit.
 %  - Section X.E (equal-time cross-check) must be deletable with zero
 %    dangling references.
-\documentclass[aps,prd,twocolumn,superscriptaddress,nofootinbib]{revtex4-2}
+\documentclass[twocolumn,superscriptaddress,nofootinbib,notitlepage,preprintnumbers,secnumarabic,amssymb,aps,prd]{revtex4-2}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx,latexsym,amsmath,amsthm,lmodern,float,url,bm}
+\usepackage{natbib,color,microtype,bbold,slashed,multirow}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{physics,mathtools,nccmath}
+\usepackage[pdfusetitle]{hyperref}
+\hypersetup{pdflang={English},colorlinks=true,linkcolor=RoyalBlue,citecolor=RoyalBlue,urlcolor=RoyalBlue}
+\usepackage[capitalise]{cleveref}
+\usepackage{orcidlink,todonotes}
+\newcommand{\itodo}[1]{\todo[inline]{#1}}
 
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx}
-\usepackage{xcolor}
-\usepackage{hyperref}
+\let\Re\undefined\let\Im\undefined
+\DeclareMathOperator{\Re}{Re}\DeclareMathOperator{\Im}{Im}
+\newcommand{\fnal}{\affiliation{Fermi National Accelerator Laboratory, Batavia, IL 60510, USA}}
 
 \graphicspath{{figs/}}
 \input{frozen/numbers}
 
 \begin{document}
+\preprint{FERMILAB-PUB-26-XXXX-T}
 
 \title{Light-cone-quantized QCD in 1+1 dimensions, revisited}
 
-\author{H.~Lamm}
-\affiliation{}
+\author{Henry Lamm\,\orcidlink{0000-0003-3033-0791}}\email{hlamm@fnal.gov}\fnal
 
 \date{\today}
 
@@ -58,6 +67,6 @@
 \input{sections/app-c-units}
 \input{sections/app-d-data}
 
-\bibliography{refs}
+\bibliography{refs.bib}
 
 \end{document}

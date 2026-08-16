@@ -17,13 +17,14 @@ the thing that would settle it.
 
 1. **Bañuls' window is a factor of 4** (`m/g ∈ [0.1, 0.4]`), not a decade.
    Separating 0.700 from 0.667 from 0.500 on that lever arm is what limits them.
-2. **No additive mass renormalisation appears to be applied.** For the Schwinger
-   model, Hamiltonian staggered has `m_r/g = m_lat/g + 1/(8√x)`
-   (arXiv:2206.05308, confirmed with MPS in arXiv:2303.11016). **No published
-   SU(N) analogue was found.** The shift is `O(g²a)` — the same order as the `m`
-   whose exponent is being fitted — so leaving it out biases `nu` systematically,
-   and plausibly explains 0.700 against 2/3. Deriving or measuring it is the
-   single most valuable new piece of work available here.
+2. ~~No additive mass renormalisation appears to be applied... plausibly
+   explains 0.700 against 2/3.~~ **Retracted — see "Corrections" below.** The
+   SU(N) additive shift is *zero*; the sign of such a bias runs the wrong way
+   in any case (a positive shift pushes the measured exponent **down**, and
+   faking 0.700 from a true 2/3 would need `δ < 0`, i.e. `ag < 0`); and Bañuls
+   extrapolate `ag → 0` at fixed bare `m/g` anyway, which removes an `O(g²a)`
+   shift by construction. **Their 0.700 needs a different explanation, and this
+   was not it.**
 
 And it measures **both** observables with one machinery, so it tests this repo's
 meson/baryon ratio result (`2 sin(pi nu / 2)` to 0.4%) as well as the exponent —
@@ -57,14 +58,14 @@ Checked directly rather than inferred from citations:
 | `tenpy/tenpy` | healthy and active (493 stars). General library, no gauge-theory model. |
 
 **A better basis than the one above: loop-string-hadron (LSH).** Raychowdhury &
-Stryker, PRD **101**, 114502 (arXiv:1812.07554) — a *local*, manifestly
+Stryker, **arXiv:1912.06133**, PRD **101**, 114502 — a *local*, manifestly
 gauge-invariant description in terms of loop, string and hadron degrees of
 freedom. It applies to **SU(2) and SU(3)**, to **open and periodic** boundaries,
 and in 1+1d and higher, and it has been built into an MPS ansatz already:
 Mathew, Gupta, Kadam, Bapat, Stryker, Davoudi & Raychowdhury, arXiv:2501.18301
 ("Tensor-network toolbox for probing dynamics of non-Abelian gauge theories"),
-plus arXiv:2603.24698 for (1+1)d SU(2) string breaking and arXiv:2407.19181
-extending LSH to SU(3).
+plus arXiv:2603.24698 for (1+1)d SU(2) string breaking and **arXiv:2212.04490** (PRD 107, 094513)
+giving (1+1)d SU(3) LSH with dynamical quarks.
 
 This matters because LSH is **local**: it removes the non-local recoupling that
 makes the Gauss-constrained irrep basis a week of hand algebra, and it gives a
@@ -120,6 +121,92 @@ exactly this model for exactly this reason. Alternatives if needed:
   numpy/scipy/numba/matplotlib/h5py/pillow/pytest. It carries both the DMRG and
   the VUMPS engines, so one dependency covers finite and infinite volume.
 
+
+## Corrections from the derivation pass
+
+Six errors were found by an adversarially-checked derivation round, four of them
+in material a coder would have typed. The three load-bearing ones were
+re-verified independently here.
+
+### 1. An OBC chain needs boundary Gauss constraints, not just the internal one
+
+A finite open chain has no link off either end, so beyond the internal Abelian
+Gauss law it needs
+
+```
+N_R(r=1) = 0        and        N_L(r=N) = 0
+```
+
+Without them the sector contains states with a unit of dangling colour flux at
+each open end — unphysical static sources charged **zero** electric energy,
+because `H_E` sums only internal links. An AGL penalty does not catch them:
+their internal defect is exactly zero.
+
+Measured against a truncation-free gauge-fixed reference at N=4, x=μ=1: the
+AGL-only sector has dimension 206 against the correct 20, and its first excited
+state is −3.767 against the true −2.856 — **a gap 69% of the right one**. At
+N=6, `x=4, μ=0.2` (i.e. `m/g = 0.05`, this project's target corner) the gap is
+2.745 against 3.490.
+
+**The ground state is unaffected**, since it satisfies the boundary condition
+anyway — which is exactly why this is dangerous: every `E_0` validation passes.
+
+**Mitigating:** the production path is VUMPS in infinite volume, where there is
+no boundary and none of this arises. It bites only the ED/finite-DMRG validation
+ladder — which is where the plan already puts the gate, so it would have been
+caught there.
+
+### 2. The electric term is easy to write twice too large
+
+`H_E = (g²a/2) Σ N̂_L(N̂_L/2 + 1)` glossed as "= C₂(j) = j(j+1)" is false:
+with `j = N_L/2`, `N_L(N_L/2+1) = 2j(j+1)` — verified exactly for
+`N_L = 1..5`, ratio 2.000 throughout. The correct form (arXiv:1912.06133 Eq. 41;
+arXiv:2501.18301 Eq. 1) carries **¼** per site-end, giving `(g²a/2) Σ j(j+1)` on
+the AGL surface.
+
+**Why it matters:** doubling `H_E` alone is identical to running at
+`g'² = 2g²`, so every `(ag, m/g)` label is wrong by `√2` — a run intended at
+`(0.10, 0.010)` is physically at `(0.1414, 0.00707)`. The *exponent* survives a
+pure rescaling of the x-axis, so it would not fake `α`; the amplitude, the
+reproduction of Bañuls' window, the `(ag)²` extrapolation, and the U(N)-vs-SU(N)
+null test all break silently.
+
+### 3. The additive mass shift is zero for SU(N), and the sign argument was backwards
+
+Three independent reasons the original framing was wrong:
+
+1. **There is no shift to subtract.**
+2. **The sign runs the wrong way.** With `M = A(m+δ)^ν` the local slope is
+   `ν·m/(m+δ)`, so a *positive* shift pushes the measured exponent **down**.
+   Faking 0.700 from a true 2/3 needs `δ < 0`, i.e. `ag < 0`. Verified:
+   at `m = 0.02`, `δ = +0.005` gives slope 0.533, not 0.700.
+3. **Bañuls remove it anyway**, extrapolating `ag → 0` at fixed bare `m/g` (their
+   App. E, "a polynomial in `1/√x` up to second order").
+
+So **Bañuls' 0.700 needs a different explanation.** Live candidates, none
+examined: the short lever arm (a factor of 4 in `m/g`), residual `j_max`
+truncation, contamination of the vector by the near-degenerate diquark — or it
+is simply right and 2/3 is not the answer.
+
+### 4. The `−2/π` free-fermion check, right number, wrong reasoning
+
+Setting `U → 1` gives two *decoupled* tight-binding chains with hopping
+coefficient 1, so each half-filled chain gives `−2/π` and a colour **pair**
+gives `−4/π`. Bañuls' published `ω₀ = E₀/(2Nx) → −2/π` is nonetheless right,
+because the factor 2 is already in their denominator. Stated as "two colours
+give `−2/π`", a correct implementation fails this check by exactly 2 — on the
+test billed as the factor-2 audit.
+
+### 5. Provenance, and it was my error
+
+`arXiv:1812.07554` is *"Solving Gauss's Law on Digital Quantum Computers with
+LSH Digitization"* — circuits, no Hamiltonian. The LSH Hamiltonian and operator
+algebra is **arXiv:1912.06133** (PRD 101, 114502). Both appeared as separate
+hits in the search that produced this plan, and I merged them. Likewise the
+(1+1)d SU(3) LSH with dynamical quarks is **arXiv:2212.04490** (PRD 107,
+094513); `arXiv:2407.19181` is the trivalent-vertex `d>1` paper and carries an
+unsolved outer-multiplicity problem that does *not* affect 1+1d.
+
 ## The physics being discretised
 
 Kogut–Susskind, one spatial dimension, staggered fermions, open boundaries:
@@ -174,7 +261,7 @@ Validation targets, all published:
 * Local Hilbert space: staggered site holds 0, 1 (two colours), or 2 quarks →
   4 states/site, times the incoming irrep label.
 * Two routes, and the first is preferred:
-  * **loop-string-hadron** (arXiv:1812.07554, MPS version arXiv:2501.18301) —
+  * **loop-string-hadron** (**arXiv:1912.06133**, MPS version arXiv:2501.18301) —
     *preferred*: local, manifestly gauge invariant, extends to SU(3), and has a
     published MPS implementation to follow.  Costs a bosonic cutoff to
     extrapolate in;
@@ -249,13 +336,15 @@ coefficient, only after comparing exponents.
   Lenore (32 cores, 125 GB) absorbs it overnight.
 * **Effort:** Phase 1 ~3–5 days including validation. Phase 2 ~1 week, dominated
   by the recoupling algebra. Phase 3 ~2 days plus run time.
-* **The killer risk is the mass shift.** It is `O(g²a)`, the same order as the
-  quantity whose exponent is being fitted, no SU(N) value is published, and
-  getting it wrong biases `nu` in exactly the direction that would fake or hide
-  the effect. Mitigations: work at several `ag` and extrapolate; locate the shift
-  numerically via symmetry restoration; and lead with the condensate, whose
-  leading `m^{1/3}` is less sensitive to an `O(g²a)` shift in `m` than a log-log
-  slope fit is.
+* **The mass shift is no longer the killer risk** — it is zero for SU(N), and
+  the bias would run the wrong way regardless. Keep the numerical symmetry-
+  restoration check as a cheap null test, not as a mitigation.
+* **What replaces it as the leading risk is the boundary Gauss law** in the
+  finite-volume validation ladder (see Corrections §1). It is two lines to fix
+  and it is *invisible in the ground state*, so every `E_0` check passes while
+  the gap is wrong by ~30%.
+* **And the truncation `n_l,max`**, which is now the only extrapolation the
+  method carries.
 * **Secondary risk:** contamination of the meson by the near-degenerate
   diquark/baryon, which Bañuls handled with an explicit penalty term. Budget for
   needing one.

@@ -798,15 +798,23 @@ def table1_budget(provider, source, K_lo=25, K_hi=35, lpn=None,
         fh.write("Components, added in quadrature:\n")
         fh.write("  form   spread over the number of correction terms (2..5, "
                  "the whole Eq. (27)\n"
-                 "         ladder) -- DOMINANT, and irreducible at weak "
-                 "coupling: M(0) does not\n"
-                 "         converge in the order, and held-out K and the "
+                 "         ladder) -- dominant among the FIT components, and "
+                 "irreducible: M(0) does\n"
+                 "         not converge in the order, and held-out K and the "
                  "chiral limit pick\n"
                  "         opposite ends of the range.  See "
                  "observables.richardson_budget.\n")
         fh.write("  wind   spread over sub-windows at fixed order\n")
         fh.write("  trunc  change when the particle-number cut is raised by "
                  "one qqbar pair\n")
+        fh.write("  endpt  the captured-fraction endpoint systematic "
+                 "M(0)*(1/(1-K^-2a) - 1),\n"
+                 "         parameter-free and one-sided upward; folded into "
+                 "'tot' as an error,\n"
+                 "         never applied as a correction.  DOMINATES form at "
+                 "m/g <= 0.2, where it\n"
+                 "         is what makes the weak-coupling entries honest.  "
+                 "See dlcq/endpoint.py.\n")
         fh.write("  (the solver floor, 6e-13 relative, is carried but never "
                  "visible at this precision)\n\n")
         fh.write("'paper' is the printed value and 'pterm' its own quoted "

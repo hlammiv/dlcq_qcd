@@ -1,4 +1,58 @@
-% app-a-budget
+% app-a-budget — precise definitions of the four error components
 \section{Error-budget definitions}
 \label{app:budget}
-% TODO: component definitions + correlations after Phase 1
+
+Every extrapolated mass in this paper carries an uncertainty built from four
+components, combined in quadrature.  All four are measured, none is fit.
+
+\begin{description}
+\item[\textnormal{\emph{form}}] The spread of the extrapolated mass over the
+  order of the fit series --- for the standard Hamiltonian, two through five
+  terms of the Eq.~(27) ladder of Ref.~\cite{Hornbostel:1988fb}.  It is the
+  dominant \emph{fit} component and is irreducible at weak coupling: the
+  extrapolate does not converge in the order, and the two defensible
+  order-selection criteria (held-out resolution; consistency with the known
+  chiral behaviour) prefer opposite ends of the admissible range, so the
+  budget spans the range rather than choosing an order
+  (Appendix~\ref{app:donotretry}).
+\item[\textnormal{\emph{window}}] The spread over contiguous sub-windows of
+  the resolution range at fixed order.  Correlated with \emph{form} (the
+  ratio of the two runs near one half across the weak-coupling entries), but
+  the quadrature sum reproduces the joint order-times-window ensemble spread
+  to a few percent at $m/g \le 0.2$, so the budget does not double count
+  there; at strong coupling it mildly over-covers, which we accept.
+\item[\textnormal{\emph{trunc}}] The change in the extrapolate when the
+  Fock-space truncation is raised by one $q\bar q$ pair.  This component is
+  \emph{not} resolution-independent --- it grows with $K$ at weak coupling
+  --- so it is measured on the analysis window actually used, never quoted
+  from a smaller probe.
+\item[\textnormal{\emph{endpoint}}] The captured-fraction systematic of the
+  momentum grid: with wavefunction endpoint exponent $a$ from
+  Eq.~\eqref{eq:endpoint-exponent}, a grid of resolution $K$ captures a
+  fraction $1 - K^{-2a}$ of the endpoint mass integral, so the one-sided
+  upward systematic on $M(0)$ is
+  \begin{equation}
+    \delta_{\rm ep} \;=\; M(0)\left[\frac{1}{1-K^{-2a}} - 1\right],
+    \label{eq:endpoint-budget}
+  \end{equation}
+  with no free parameters.  It is folded into the total as an
+  \emph{uncertainty}, never applied as a correction --- the model is too
+  crude to shift central values, but too well-verified to ignore: the same
+  expression accounts for ninety-five percent of the measured
+  standard-versus-improved gap across a factor of thirty in coupling
+  (Sec.~\ref{sec:chiral}).  At $m/g \le 0.2$ it dominates every other
+  component and is what makes the weak-coupling error bars of
+  Table~\ref{tab:tableone} honest.
+\end{description}
+
+The solver's own floor (relative $10^{-13}$-level, from the eigensolver
+tolerance) is carried through and never visible at quoted precision.  For
+the improved Hamiltonian the same machinery runs with the plain-$1/K$ series
+in place of the Eq.~(27) ladder, and the endpoint component does not apply
+--- removing it is what the improvement \emph{is} (Sec.~\ref{sec:improved}).
+
+Two validation habits back the budget rather than extend it: held-out
+extrapolation (fit the low-resolution points, predict the highest two) as a
+basis-independent check of the fit form, and the explicit fraction of each
+quoted mass supplied by extrapolation rather than data, printed per entry so
+a reader can see where the fit is interpolating and where it is asserting.

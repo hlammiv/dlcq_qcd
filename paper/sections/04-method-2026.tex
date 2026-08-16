@@ -1,4 +1,50 @@
-% 04-method-2026
+% 04-method-2026 — what changed computationally since 1990
 \section{The numerical method}
 \label{sec:method}
-% TODO: draft per plan (blocked: none — Phase 0 guards landed)
+
+The 1990 program generated all colour-singlet partitions of $K$, removed the
+overcomplete directions by diagonalizing the inner-product matrix, and
+diagonalized the Hamiltonian in the surviving basis --- storing the free and
+interacting parts separately so that a change of coupling is a rescaling
+rather than a rebuild~\cite{Hornbostel:1988fb}.  Nothing in that architecture
+needed changing; what changed is what it is built on.  We run two
+implementations against each other: the original Fortran, kept deliberately
+unmodified as a historical reference, and an open-source Python port whose
+matrix builds are verified \emph{bit-identical} to their own independent
+reference path, with physics agreement between the two solvers at the level
+of the arithmetic rather than the plot (Appendix~\ref{app:data}).  One
+genuine defect of the original era was found and matters at scale: the
+colour-contraction tables in both codebases were silently capped, which
+above certain basis sizes corrupted matrix elements without warning; both
+paths now raise instead.
+
+Three structural observations take the reachable resolution from the
+original $2K = 16$--$24$ to $2K \simeq 100$ on a laptop-class machine.
+First, the inner-product (norm) matrix is \emph{exactly} block diagonal in
+parton configuration --- verified by brute-force colour enumeration, not
+assumed --- so orthonormalization never needs the dense $n^2$ object that
+was the binding memory constraint.  Second, the Hamiltonian in the weeded
+basis is sparse and gets sparser with $K$, so an iterative eigensolver pays
+off once the norm is blocked.  Third, with a blockwise basis the free part
+projects to an exact diagonal, eliminating the last dense intermediate.
+None of these approximations the physics: the sparse path is gated to
+reproduce the dense reference to solver precision, and the standard
+Hamiltonian path remains bit-identical to what the code has always
+produced.
+
+Resolution is bounded above deliberately.  At $2K = 100$ the solver
+reproduces its recorded reference values in seconds; past it, the colour
+path returns spurious negative eigenvalues below an otherwise intact
+spectrum, a failure mode that raises rather than returns in the released
+code.  Requests with the wrong momentum parity --- mesons need even $2K$,
+baryons $2K \equiv N \bmod 2$ --- likewise raise instead of silently
+returning an empty spectrum, a trap that in our experience produces
+convincing-looking ``fast runs'' otherwise.  Where the 1990 paper noted its
+largest runs took ``one to three minutes of CPU on an IBM 3081,'' the
+corresponding statement here is that the full table of extrapolated masses,
+some eight hundred solves, rebuilds from nothing in about six minutes on
+one idle workstation --- and that the binding constraint is no longer time
+or memory but the endpoint physics of Sec.~\ref{sec:budget}.
+
+% \itodo{Frozen-macro pass: replace the timing/reach statements with
+% \textbackslash num macros at the v1 freeze (G1).}
