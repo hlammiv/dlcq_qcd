@@ -143,20 +143,28 @@ def fig2():
     for (row, prov, panels, grid), axrow in zip(rows, axes):
         for (B, K, LPN, ymax, dig, nev), ax in zip(panels, axrow):
             p = prov or provider_2026(nev)
-            short = 0
+            # Near the chiral point the number of states below any fixed
+            # M^2 grows toward the whole basis, so "compute everything in
+            # the window" stops being a meaningful target for the 2026 row.
+            # Instead the panel shows its own coverage: the region above
+            # the highest computed level is shaded, so truncation can
+            # never read as emptiness (it did, twice, before this).
+            ceil_x, ceil_y = [], []
             for lam in grid:
                 r = require_cached(p, 3, 1, B, K, lam, LPN=LPN)
                 if r is None:
                     continue
                 ev = r.eigenvalues[physical_indices(r)]
-                if row == "b" and float(ev.max()) < ymax:
-                    short += 1
+                if row == "b":
+                    ceil_x.append(lam)
+                    ceil_y.append(min(float(ev.max()), ymax))
                 ax.plot([lam] * len(ev[ev <= ymax]), ev[ev <= ymax], ".",
                         color=C_PRIMARY, markersize=2.0 if row == "b" else 2.5,
                         alpha=0.7 if row == "b" else 0.8)
-            if short:
-                print(f"  WARNING fig2({row}) B={B}: computed spectrum tops "
-                      f"out below ymax at {short} coupling(s); raise nev")
+            if row == "b" and ceil_x and min(ceil_y) < ymax:
+                ax.fill_between(ceil_x, ceil_y, ymax, color="0.85",
+                                alpha=0.55, linewidth=0, zorder=0)
+                ax.plot(ceil_x, ceil_y, "-", color="0.6", linewidth=0.7)
             if dig:
                 x, y, _ = digitized(dig)
                 ax.plot(x, y, "o", mfc="none", mec=C_1990, markersize=4.5,
