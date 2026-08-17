@@ -357,6 +357,33 @@ against the target 0.4326 — not there, but no longer inert.
 corrections go as `exp(-M Lg)`, and `M Lg ~ 31` here makes them `~1e-14`. It was
 evidence the calculation was working, and it was read as evidence of a defect.
 
+**Resolved: the sector is right, the state is a taste partner.** Two probes,
+both conclusive.
+
+*Continuum limit at fixed `m/g = 0.1`* (target 0.4326 if this were the pion):
+
+| x | 16 | 36 | 64 | 100 | extrapolated |
+|---|---|---|---|---|---|
+| M/g | 1.25452 | 1.09327 | 0.99256 | 0.92936 | **0.722** (`1/sqrt(x)`) / 0.896 (`1/x`) |
+
+*Mass dependence at `x = 36`*: local exponents **0.425, 0.308, 0.205** as `m/g`
+falls 0.4 → 0.05 — decreasing, so `M/g` tends to a constant near 0.85 rather
+than to zero.
+
+A state with non-zero mass in the chiral limit is not the pion, and no
+extrapolation in `a` or `a²` brings it to 0.4326. **The cause is taste
+breaking.** Staggered fermions in 1+1d preserve exactly *one* chiral (shift)
+symmetry; only its partner pion is protected and goes massless at `m = 0`. The
+other taste partners acquire a lattice mass that survives the chiral limit and
+vanishes only as `a -> 0`. A generic flavour rotation of the vacuum — which is
+what `(Sz0, Sz1) = (+1,-1)` is — lands on a taste partner, and that is precisely
+what these numbers describe.
+
+So the measurement machinery works and the sector bookkeeping is correct; the
+**operator** is wrong. Recovering `m^{2/3}` requires the state associated with
+the exact staggered shift symmetry, not an arbitrary flavour sector. That is a
+different construction, not a parameter change.
+
 **Consequences for Phase 2, which are larger than for Phase 1.** The SU(2)
 measurement wants the vector meson, sitting near a diquark of similar mass, in a
 theory with more sectors than this one. Nothing about "take the first excited
