@@ -80,3 +80,27 @@ def test_pair_correlation_momentum_constraint(python_K21):
         for j, k2 in enumerate(ks):
             if k1 + k2 > K:
                 assert C[i, j] == 0.0
+
+
+def test_diquark_valence_baryon_is_pure_antitriplet(python_K21):
+    # Every quark pair inside one epsilon cluster is exactly antisymmetric:
+    # the valence (3q) sector of the baryon must give P_A = 1 on every bin.
+    import numpy as np
+    from dlcq.color_pairs import diquark_fraction
+
+    ks, P, mean = diquark_fraction(python_K21, 0, nparton=3)
+    assert np.isclose(mean, 1.0, atol=1e-10)
+    assert np.all(np.isclose(P[~np.isnan(P)], 1.0, atol=1e-10))
+
+
+def test_diquark_singlet_sum_rule(python_K21):
+    # All-quark singlet of n quarks: sum_pairs <T.T> = -n C_F/2 x weight.
+    import numpy as np
+    from dlcq.color_pairs import diquark_map
+    from dlcq.fock_weights import fock_weights
+
+    N = python_K21.N
+    CF = (N * N - 1) / (2.0 * N)
+    ks, C, TT = diquark_map(python_K21, 0, nparton=3)
+    w3 = fock_weights(python_K21, 0)[3]
+    assert np.isclose(TT.sum() / 2.0, -3 * CF / 2.0 * w3, rtol=1e-10)

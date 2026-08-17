@@ -824,6 +824,51 @@ def fig10():
     finish(fig, "fig10_exotic_wf")
 
 
+@register("fig11")
+def fig11():
+    """Color-resolved pair maps: the diquark question, answered by degree.
+
+    P_A(x1,x2) is the antitriplet (diquark-channel) probability of a quark
+    pair.  Its pair average is an invariant fixed by the singlet sum rule,
+    so the panels show deviations from it: a molecule would be bimodal
+    (1 intra-cluster, 1/(N... exactly (0 - t_S)/(t_A - t_S) cross), a
+    diquark crystal would ridge at 1 on its pair momenta.  Diverging map
+    centered on the invariant.
+    """
+    from dlcq.color_pairs import diquark_fraction
+    from dlcq.figures import paper_lambda
+    from dlcq.observables import physical_indices
+
+    lam = float(paper_lambda(0.1))
+    fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.1))
+    for (N, LPN, nev, npart, title), ax in zip(
+            ((3, 8, 12, 6, "$B=2$ ground, $N=3$ (6q)"),
+             (4, 10, 12, 8, "$B=2$ ground, $N=4$ (8q)")), axes):
+        prov = provider_2026(nev)
+        r = require_cached(prov, N, 1, 2, 48, lam, LPN=LPN)
+        if r is None:
+            continue
+        gs = int(physical_indices(r)[0])
+        ks, P, mean = diquark_fraction(r, gs, nparton=npart)
+        xs = ks / 48.0
+        im = ax.pcolormesh(xs, xs, P - mean, cmap="RdBu_r",
+                           vmin=-0.4, vmax=0.4, shading="nearest")
+        fig.colorbar(im, ax=ax, shrink=0.85,
+                     label=r"$P_A - \langle P_A\rangle$")
+        ax.set_title(f"{title}, $\\langle P_A\\rangle = {mean:.3f}$",
+                     fontsize=9)
+        ax.set_xlabel("$x_1$")
+        ax.set_ylabel("$x_2$")
+        ax.set_xlim(0, 0.5)
+        ax.set_ylim(0, 0.5)
+        del r
+    fig.suptitle("FIG. 11: antitriplet (diquark-channel) probability of "
+                 "quark pairs, $m/g=0.1$, $2K=48$, standard Hamiltonian, "
+                 "valence sectors", fontsize=10)
+    fig.tight_layout()
+    finish(fig, "fig11_diquark")
+
+
 # ── main ───────────────────────────────────────────────────────────────────
 
 def main(argv=None):
