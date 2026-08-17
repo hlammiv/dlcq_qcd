@@ -411,6 +411,22 @@ lattice, which is the expensive corner, and the opposite of where these runs are
 cheap. At `x = 16` the window runs from marginal signal straight into numerical
 noise.
 
+**Route 3 tested on fine lattices, and it fails too.** `A = (M/g)/(m/g)^{2/3}`
+should be flat at ~2.008:
+
+| x | m/g=0.2 | 0.1 | 0.05 |
+|---|---|---|---|
+| 64 | 6.58 | 8.41 | 11.51 |
+| 144 | 5.92 | 7.49 | 10.16 |
+
+It climbs at both spacings, so the state stays massive in the chiral limit. And
+the correlator reads *heavier* than the variational search (1.61 against 1.09 at
+comparable spacing) — which is the diagnostic that matters: **a correlator cannot
+be heavier than a state a variational method already found unless its operator
+barely couples to that state.** So resolution was not the whole story, and the
+`(-1)^n` isovector density is not the protected pion's interpolating operator
+here.
+
 **So the remaining work is not a parameter tweak.** It needs the taste-exact
 interpolating operator (the one tied to the exact staggered shift symmetry, not a
 generic flavour rotation) *and* a lattice fine enough for its correlator to
