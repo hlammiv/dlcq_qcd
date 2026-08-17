@@ -213,3 +213,66 @@ if __name__ == "__main__":
         ed = float(spectrum(L, x, mg, k=1)[0])
         print(f"  {L:>3} {x:>5} {mg:>5} {a:14.9f} {b:14.9f} {abs(a-b):10.2e}"
               f"   (ED {ed:.9f})")
+
+
+def pion_mass_correlator(L: int, x: float, mg: float, n_flavour: int = 2,
+                         chi: int = 120, fit_lo: float = 0.06,
+                         fit_hi: float = 0.30):
+    """``M/g`` of the lightest isovector state, from a correlator decay.
+
+    Why not an excited-state search.  Three attempts to reach the pion by
+    targeting a state failed for three different reasons, the last of them
+    physical: orthogonality lands on the flavour singlet; a flavour-sector
+    constraint lands on a staggered **taste partner**, which keeps a lattice mass
+    in the chiral limit.  A correlator does not have to choose -- it couples to
+    every state its operator creates and the longest-range exponential is
+    automatically the lightest of them.
+
+    The operator is the staggered isovector density,
+
+        O_n = (-1)^n [ Sz_{n,0} - Sz_{n,1} ],
+
+    whose ``(-1)^n`` is the staggered phase that ties it to the exact shift
+    symmetry, and whose flavour difference makes it isovector.  The connected
+    correlator ``<O_i O_j> - <O_i><O_j>`` then decays as ``exp(-M r)`` in the
+    bulk, with ``M`` in lattice units and ``M/g = M sqrt(x)``.
+
+    The fit window is a range of *distances from the source*, as a fraction of
+    ``L``.  It must not straddle the source: doing so swallows the contact point
+    and the fit returns it instead of the mass.
+    """
+    import numpy as _np
+    from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
+    m = SchwingerNf(L, x, mg, n_flavour, charges="same")
+    E0, psi = TwoSiteDMRGEngine(_staggered(m, L, n_flavour), m, _opts(chi)).run()
+
+    # Only the row from the source is needed.  correlation_function() builds the
+    # whole L x L matrix, and four of those at L=100 does not finish in ten
+    # minutes; sites1=[i0] keeps it to one row.
+    i0 = L // 2                                  # source in the bulk
+    sz0 = _np.asarray(psi.expectation_value("Sz0"))
+    sz1 = _np.asarray(psi.expectation_value("Sz1"))
+    row = _np.zeros(L)
+    for a, b, sgn in (("Sz0", "Sz0", 1.0), ("Sz1", "Sz1", 1.0),
+                      ("Sz0", "Sz1", -1.0), ("Sz1", "Sz0", -1.0)):
+        row += sgn * _np.asarray(
+            psi.correlation_function(a, b, sites1=[i0])).reshape(-1)
+    conn_row = row - (sz0[i0] - sz1[i0]) * (sz0 - sz1)
+
+    sign = _np.array([(-1.0) ** n for n in range(L)])
+    prof = sign[i0] * sign * conn_row            # staggered phase on both ends
+
+    # Fit at DISTANCES from the source, on one side only.  Spanning
+    # [fit_lo*L, fit_hi*L] straddles the source at L//2 and swallows the contact
+    # point, which then dominates: that gave M/g = 11.3 where ~1.09 was expected,
+    # a decay length of a third of a lattice site.
+    rmin, rmax = max(4, int(fit_lo * L)), int(fit_hi * L)
+    idx = _np.arange(i0 + rmin, min(i0 + rmax, L))
+    r = idx - i0
+    y = prof[idx]
+    good = y > 0
+    if good.sum() < 4:
+        return float("nan")
+    A = _np.vstack([_np.ones(good.sum()), _np.abs(r[good])]).T
+    coef, *_ = _np.linalg.lstsq(A, _np.log(y[good]), rcond=None)
+    return float(-coef[1] * _np.sqrt(x))         # lattice mass -> M/g

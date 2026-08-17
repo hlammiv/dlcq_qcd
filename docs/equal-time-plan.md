@@ -384,6 +384,45 @@ So the measurement machinery works and the sector bookkeeping is correct; the
 the exact staggered shift symmetry, not an arbitrary flavour sector. That is a
 different construction, not a parameter change.
 
+### Status: the two-flavour exponent is unresolved, and needs a fine lattice
+
+Three routes tried, each failing for a different and now-understood reason:
+
+1. **Orthogonality-constrained DMRG** → the flavour singlet (eta), `M/g -> 0.970`.
+   Orthogonality does not select a flavour sector.
+2. **Flavour-sector targeting** (`charges="independent"`, `Q = [2,-2]`) → a
+   staggered **taste partner**, which keeps a lattice mass in the chiral limit.
+   The sector is right; the operator is not.
+3. **Isovector correlator** → reads *higher* still (3.77 at `m/g = 0.4`, `x = 16`,
+   against 1.94 from route 2), because the fit window cannot reach the
+   asymptotic regime at a coarse lattice.
+
+Route 3's failure is quantitative and worth keeping, because it says where the
+calculation has to live:
+
+| x | M·a | decay length | signal at r=4 | at r=24 |
+|---|---|---|---|---|
+| 16 | 0.485 | 2.1 sites | 1.4e-1 | 9e-6 |
+| 36 | 0.182 | 5.5 sites | 4.8e-1 | 1e-2 |
+| 100 | 0.060 | 16.7 sites | 7.9e-1 | 2e-1 |
+
+A correlator needs `M·a << 1` to have an exponential to fit at all — a **fine**
+lattice, which is the expensive corner, and the opposite of where these runs are
+cheap. At `x = 16` the window runs from marginal signal straight into numerical
+noise.
+
+**So the remaining work is not a parameter tweak.** It needs the taste-exact
+interpolating operator (the one tied to the exact staggered shift symmetry, not a
+generic flavour rotation) *and* a lattice fine enough for its correlator to
+decay over many sites *and* the volume to hold `M·Lg >> 1` at the same time.
+Those pull in opposite directions on cost, which is why this is a piece of work
+rather than a fix.
+
+**What is established regardless:** the Hamiltonian is verified four ways, the
+continuum mass check passes at +0.06%, and the machinery reaches the states it
+targets. The open item is narrow and well-posed: *which operator creates the
+protected pion*, answered before more compute is spent.
+
 **Consequences for Phase 2, which are larger than for Phase 1.** The SU(2)
 measurement wants the vector meson, sitting near a diquark of similar mass, in a
 theory with more sectors than this one. Nothing about "take the first excited
