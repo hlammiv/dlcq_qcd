@@ -142,9 +142,10 @@
       "data/bar_scan/bar_improved_N8.csv",
       "data/gmor_scan/improved_N5.csv",
       "data/gmor_scan/improved_N6.csv",
+      "data/gmor_scan/improved_N7.csv",
       "data/gmor_scan/improved_N8.csv"
     ],
-    "note": "largest |deviation| of M_mes/M_bar from 2sin(pi nu/2) at m/g=0.0125, per-N percents {5: 0.43, 6: 0.04, 8: -0.26}"
+    "note": "largest |deviation| of M_mes/M_bar from 2sin(pi nu/2) at m/g=0.0125, per-N percents {5: 0.43, 6: 0.04, 7: 0.33, 8: -0.26}"
   },
   "tiny_neight_standard_msq": {
     "value": "1.647e-06",
