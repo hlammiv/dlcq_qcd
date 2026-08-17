@@ -153,13 +153,21 @@ def _pion_state(model, L, nf):
     from tenpy.networks.mps import MPS
     lo = [f"down_{f}" for f in range(nf)]
     hi = [f"up_{f}" for f in range(nf)]
+    # Anchor the flips to site PARITY, not to L//2.  Even sites are empty
+    # ("down") and odd sites filled ("up") in the staggered vacuum, so the flips
+    # must land on an even and an odd site respectively.  Keying off L//2 works
+    # only when L//2 happens to be even: at L=100 it is (site 50), at L=150 it is
+    # not (site 75, already "up"), and BOTH flips silently become no-ops -- the
+    # "pion" state is then literally the vacuum and the gap comes out exactly
+    # 0.00000, which is what x=36 produced.
+    c = 2 * (L // 4)                          # an even site near the middle
     prod = []
     for i in range(L):
         st = list(lo if i % 2 == 0 else hi)
-        if i == L // 2:                       # flavour 0: down -> up
-            st[0] = f"up_0"
-        if i == L // 2 + 1:                   # flavour 1: up -> down
-            st[1] = f"down_1"
+        if i == c:                            # even site: add a flavour-0 particle
+            st[0] = "up_0"
+        if i == c + 1:                        # odd site: remove a flavour-1 one
+            st[1] = "down_1"
         prod.append(" ".join(st))
     return MPS.from_product_state(model.lat.mps_sites(), prod,
                                   bc=model.lat.bc_MPS, unit_cell_width=L)

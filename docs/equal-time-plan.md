@@ -308,7 +308,7 @@ Hamiltonian, the initial product state and the conserved charge are all flavour
 symmetric. This is exactly the contamination Bañuls needed an explicit penalty
 term for, and it is why their vector-mass extraction required one.
 
-**Diagnosed: the sector targeting never engaged.** Four controlled tests at
+**Diagnosed, then re-diagnosed — the first diagnosis was wrong.** Four controlled tests at
 `m/g = 0.1` (target `M/g = 0.4326`, baseline 1.25452):
 
 | variable changed | M/g |
@@ -327,15 +327,35 @@ charges="independent" : vacuum Q=[0 0]  pion Q=[0 0]
 per-flavour Sz        : vacuum (0, 0)   pion (+1, -1)
 ```
 
-The states differ physically in flavour content, but **TeNPy places both in the
-same charge sector**, so the second DMRG run is unconstrained. It relaxes to a
-local defect at x=16 (hence volume-independent) and all the way back to the
-vacuum at x=36 (hence zero). `charges="independent"` alone does not enforce the
-sector: the MPS has to be *built* carrying the right total charge, which the
-product-state constructor does not do by default.
+That check was made with the wrong call. `get_total_charge()` returns the
+*gauged* charge, and for finite boundary conditions the total can be gauged away
+into the trivial end legs. With `only_physical_legs=True`:
 
-So the fix is bookkeeping, not physics or numerics — and until it is in place,
-"target the flavour sector" is not implemented, however plausible the code looks.
+```
+charges="same"        : vacuum Q=[0]    pion Q=[0]      same sector
+charges="independent" : vacuum Q=[0 0]  pion Q=[2 -2]   DIFFERENT sectors
+```
+
+So the sector targeting **did** work, and the bookkeeping was never the problem.
+
+**The actual bug was site parity.** `_pion_state` anchored its two flips to
+`L//2`. Even sites are empty in the staggered vacuum and odd sites filled, so the
+flips must land on an even and an odd site respectively — which holds only when
+`L//2` is even. At `L = 100` it is (site 50); at `L = 150` it is not (site 75,
+already filled), so **both flips silently became no-ops and the "pion" state was
+literally the vacuum**, giving a gap of exactly 0.00000. Anchoring to parity
+instead (`c = 2*(L//4)`) gives `Q = [2, -2]` at every `L`, and `x = 36` returns
+1.09327 rather than 0.
+
+With that fixed the state responds to the lattice: `M/g` = 1.25452 at `x = 16`
+and 1.09327 at `x = 36`, decreasing as the spacing falls, which is the right
+direction for a lattice artefact. Two points extrapolate in `1/sqrt(x)` to ~0.77
+against the target 0.4326 — not there, but no longer inert.
+
+**The volume-independence was also misread.** Seven-digit agreement between
+`L = 100` and `L = 200` is exactly what a *converged massive state* should give:
+corrections go as `exp(-M Lg)`, and `M Lg ~ 31` here makes them `~1e-14`. It was
+evidence the calculation was working, and it was read as evidence of a defect.
 
 **Consequences for Phase 2, which are larger than for Phase 1.** The SU(2)
 measurement wants the vector meson, sitting near a diquark of similar mass, in a
