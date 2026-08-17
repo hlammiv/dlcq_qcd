@@ -308,6 +308,35 @@ Hamiltonian, the initial product state and the conserved charge are all flavour
 symmetric. This is exactly the contamination Bañuls needed an explicit penalty
 term for, and it is why their vector-mass extraction required one.
 
+**Diagnosed: the sector targeting never engaged.** Four controlled tests at
+`m/g = 0.1` (target `M/g = 0.4326`, baseline 1.25452):
+
+| variable changed | M/g |
+|---|---|
+| chi 90 → 200 | 1.25450 |
+| volume Lg 25 → 50 (L 100 → 200) | **1.25452** |
+| lattice x 16 → 36 | **0.00000** |
+
+Doubling the volume changes the answer by *nothing* — identical to seven digits,
+which no propagating particle's mass can be — and the finer lattice collapses the
+gap to exactly zero. Both point the same way, and a direct check confirms it:
+
+```
+charges="same"        : vacuum Q=[0]    pion Q=[0]
+charges="independent" : vacuum Q=[0 0]  pion Q=[0 0]
+per-flavour Sz        : vacuum (0, 0)   pion (+1, -1)
+```
+
+The states differ physically in flavour content, but **TeNPy places both in the
+same charge sector**, so the second DMRG run is unconstrained. It relaxes to a
+local defect at x=16 (hence volume-independent) and all the way back to the
+vacuum at x=36 (hence zero). `charges="independent"` alone does not enforce the
+sector: the MPS has to be *built* carrying the right total charge, which the
+product-state constructor does not do by default.
+
+So the fix is bookkeeping, not physics or numerics — and until it is in place,
+"target the flavour sector" is not implemented, however plausible the code looks.
+
 **Consequences for Phase 2, which are larger than for Phase 1.** The SU(2)
 measurement wants the vector meson, sitting near a diquark of similar mass, in a
 theory with more sectors than this one. Nothing about "take the first excited
